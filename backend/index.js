@@ -2,6 +2,8 @@ const app = require('./server');
 
 const PORT = process.env.PORT || 3000;
 
+fetch("http://localhost:XXXX/api/score")
+
 app.listen(PORT, () => {
   console.log(`
 ╔══════════════════════════════════════════╗
@@ -16,3 +18,20 @@ app.listen(PORT, () => {
 ╚══════════════════════════════════════════╝
   `);
 });
+const input = document.getElementById("ipInput");
+const button = document.getElementById("searchBtn");
+
+button.addEventListener("click", () => {
+  searchIP(input.value);
+});
+
+input.addEventListener("keyup", (e) => {
+  if (e.key === "Enter") {
+    searchIP(input.value);
+  }
+});
+
+function searchIP(ip) {
+  console.log("Searching IP:", ip);
+  // your API call here
+}
