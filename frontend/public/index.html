@@ -1,0 +1,645 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IPShield — Real-Time Risk Scoring</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:         #080c0f;
+    --bg1:        #0d1117;
+    --bg2:        #111820;
+    --bg3:        #162030;
+    --border:     #1e2d3d;
+    --border2:    #243447;
+    --accent:     #00d9ff;
+    --accent2:    #0099cc;
+    --text:       #c9d8e8;
+    --text2:      #6a8fa8;
+    --text3:      #3d5a72;
+    --critical:   #ff3355;
+    --high:       #ff7700;
+    --medium:     #ffcc00;
+    --low:        #00e87c;
+    --info:       #00d9ff;
+    --glow-c:     0 0 20px rgba(255,51,85,0.4);
+    --glow-h:     0 0 20px rgba(255,119,0,0.4);
+    --glow-m:     0 0 20px rgba(255,204,0,0.3);
+    --glow-l:     0 0 20px rgba(0,232,124,0.3);
+    --glow-a:     0 0 20px rgba(0,217,255,0.25);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; background: var(--bg); color: var(--text); font-family: 'JetBrains Mono', monospace; overflow-x: hidden; }
+
+  /* Scanline overlay */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.06) 2px, rgba(0,0,0,0.06) 4px);
+    pointer-events: none; z-index: 9999;
+  }
+
+  /* Grid noise texture */
+  body::after {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none; z-index: 9998; opacity: 0.4;
+  }
+
+  /* ── Layout ─────────────────────────────────────────────── */
+  .app { min-height: 100vh; display: flex; flex-direction: column; }
+
+  header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 32px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg1);
+    position: sticky; top: 0; z-index: 100;
+  }
+  .logo { display: flex; align-items: center; gap: 12px; }
+  .logo-icon {
+    width: 36px; height: 36px;
+    border: 2px solid var(--accent); border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--accent); font-size: 18px; font-weight: 700;
+    box-shadow: var(--glow-a);
+    animation: pulse-border 3s ease-in-out infinite;
+  }
+  @keyframes pulse-border {
+    0%, 100% { box-shadow: 0 0 8px rgba(0,217,255,0.3); }
+    50% { box-shadow: 0 0 24px rgba(0,217,255,0.7); }
+  }
+  .logo-text { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 22px; letter-spacing: -0.5px; }
+  .logo-text span { color: var(--accent); }
+  .logo-sub { font-size: 10px; color: var(--text3); letter-spacing: 3px; text-transform: uppercase; margin-top: 1px; }
+
+  .header-right { display: flex; align-items: center; gap: 20px; }
+  .status-dot {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 11px; color: var(--text2); letter-spacing: 1px;
+  }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--low); animation: blink 2s ease-in-out infinite; }
+  @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+  .version { font-size: 10px; color: var(--text3); padding: 4px 8px; border: 1px solid var(--border); border-radius: 4px; }
+
+  main { flex: 1; padding: 32px; display: flex; flex-direction: column; gap: 24px; max-width: 1400px; margin: 0 auto; width: 100%; }
+
+  /* ── Search bar ─────────────────────────────────────────── */
+  .search-section { display: flex; flex-direction: column; gap: 12px; }
+  .search-label { font-size: 10px; color: var(--text3); letter-spacing: 3px; text-transform: uppercase; }
+  .search-row { display: flex; gap: 12px; }
+  .search-input-wrap {
+    flex: 1; position: relative;
+    border: 1px solid var(--border2); border-radius: 8px;
+    background: var(--bg1); overflow: hidden;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .search-input-wrap:focus-within {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px rgba(0,217,255,0.1);
+  }
+  .search-prefix { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--text3); font-size: 13px; }
+  .search-input {
+    width: 100%; padding: 14px 16px 14px 80px;
+    background: transparent; border: none; outline: none;
+    color: var(--text); font-family: 'JetBrains Mono', monospace; font-size: 15px;
+  }
+  .search-input::placeholder { color: var(--text3); }
+  .btn {
+    padding: 14px 28px; border-radius: 8px; border: none; cursor: pointer;
+    font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 600;
+    letter-spacing: 1px; text-transform: uppercase; transition: all 0.15s;
+  }
+  .btn-primary {
+    background: var(--accent); color: #000;
+    box-shadow: 0 0 20px rgba(0,217,255,0.3);
+  }
+  .btn-primary:hover { background: #33e5ff; box-shadow: 0 0 30px rgba(0,217,255,0.5); transform: translateY(-1px); }
+  .btn-primary:active { transform: translateY(0); }
+  .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+  .btn-ghost { background: transparent; color: var(--text2); border: 1px solid var(--border2); }
+  .btn-ghost:hover { border-color: var(--text2); color: var(--text); }
+
+  .quick-tests { display: flex; gap: 8px; flex-wrap: wrap; }
+  .quick-chip {
+    padding: 6px 12px; border-radius: 4px; font-size: 11px; cursor: pointer;
+    border: 1px solid var(--border); color: var(--text2); background: var(--bg1);
+    transition: all 0.15s; letter-spacing: 0.5px;
+  }
+  .quick-chip:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* ── Stats row ──────────────────────────────────────────── */
+  .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+  .stat-card {
+    background: var(--bg1); border: 1px solid var(--border); border-radius: 10px;
+    padding: 20px; position: relative; overflow: hidden;
+    transition: border-color 0.2s;
+  }
+  .stat-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--accent-color, var(--accent)), transparent);
+  }
+  .stat-card.critical { --accent-color: var(--critical); }
+  .stat-card.high     { --accent-color: var(--high); }
+  .stat-card.medium   { --accent-color: var(--medium); }
+  .stat-card.low      { --accent-color: var(--low); }
+  .stat-label { font-size: 10px; color: var(--text3); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px; }
+  .stat-value { font-family: 'Syne', sans-serif; font-size: 32px; font-weight: 800; color: var(--accent-color, var(--text)); }
+  .stat-sub { font-size: 11px; color: var(--text3); margin-top: 4px; }
+
+  /* ── Main grid ──────────────────────────────────────────── */
+  .main-grid { display: grid; grid-template-columns: 1fr 380px; gap: 24px; }
+
+  /* ── Result panel ───────────────────────────────────────── */
+  .result-panel {
+    background: var(--bg1); border: 1px solid var(--border); border-radius: 12px;
+    min-height: 480px; display: flex; flex-direction: column;
+  }
+  .panel-header {
+    padding: 18px 24px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .panel-title { font-size: 11px; color: var(--text3); letter-spacing: 3px; text-transform: uppercase; }
+  .panel-body { padding: 24px; flex: 1; }
+
+  /* Score ring */
+  .score-header { display: flex; align-items: center; gap: 32px; margin-bottom: 28px; }
+  .score-ring-wrap { position: relative; width: 120px; height: 120px; flex-shrink: 0; }
+  .score-ring-wrap svg { transform: rotate(-90deg); }
+  .score-bg { fill: none; stroke: var(--bg3); stroke-width: 8; }
+  .score-fill {
+    fill: none; stroke-width: 8; stroke-linecap: round;
+    transition: stroke-dashoffset 0.8s cubic-bezier(0.4, 0, 0.2, 1), stroke 0.4s;
+  }
+  .score-center {
+    position: absolute; inset: 0; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+  }
+  .score-num { font-family: 'Syne', sans-serif; font-size: 32px; font-weight: 800; line-height: 1; }
+  .score-max { font-size: 11px; color: var(--text3); }
+
+  .score-meta { flex: 1; }
+  .score-ip { font-family: 'Syne', sans-serif; font-size: 24px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+  .risk-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 6px 14px; border-radius: 6px; font-size: 13px; font-weight: 600;
+    letter-spacing: 2px; text-transform: uppercase; margin-bottom: 12px;
+  }
+  .risk-badge.CRITICAL { background: rgba(255,51,85,0.15); color: var(--critical); border: 1px solid rgba(255,51,85,0.4); box-shadow: var(--glow-c); }
+  .risk-badge.HIGH     { background: rgba(255,119,0,0.15); color: var(--high);     border: 1px solid rgba(255,119,0,0.4); box-shadow: var(--glow-h); }
+  .risk-badge.MEDIUM   { background: rgba(255,204,0,0.12); color: var(--medium);   border: 1px solid rgba(255,204,0,0.4); box-shadow: var(--glow-m); }
+  .risk-badge.LOW      { background: rgba(0,232,124,0.12); color: var(--low);      border: 1px solid rgba(0,232,124,0.4); box-shadow: var(--glow-l); }
+  .action-badge {
+    font-size: 11px; color: var(--text2); letter-spacing: 1.5px;
+  }
+  .action-badge .action-val { font-weight: 700; }
+  .action-badge.BLOCK   .action-val { color: var(--critical); }
+  .action-badge.CHALLENGE .action-val { color: var(--high); }
+  .action-badge.MONITOR .action-val { color: var(--medium); }
+  .action-badge.ALLOW   .action-val { color: var(--low); }
+
+  /* Signal list */
+  .signals-title { font-size: 10px; color: var(--text3); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 12px; }
+  .signal-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 24px; }
+  .signal-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 14px; background: var(--bg2); border-radius: 6px;
+    border-left: 3px solid var(--s-color, var(--border));
+    animation: slide-in 0.3s ease forwards;
+  }
+  @keyframes slide-in { from { opacity: 0; transform: translateX(-8px); } to { opacity: 1; transform: translateX(0); } }
+  .signal-item.critical { --s-color: var(--critical); }
+  .signal-item.high     { --s-color: var(--high); }
+  .signal-item.medium   { --s-color: var(--medium); }
+  .signal-item.low      { --s-color: var(--low); }
+  .signal-item.info     { --s-color: var(--info); }
+  .sig-cat { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 1px; width: 80px; flex-shrink: 0; }
+  .sig-detail { font-size: 12px; color: var(--text); flex: 1; }
+  .sig-sev { font-size: 10px; font-weight: 700; text-transform: uppercase; color: var(--s-color); }
+
+  /* Detail grid */
+  .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .detail-card { background: var(--bg2); border-radius: 8px; padding: 16px; }
+  .detail-card-title { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px; }
+  .kv { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; gap: 8px; }
+  .kv-key { font-size: 11px; color: var(--text3); }
+  .kv-val { font-size: 11px; color: var(--text); text-align: right; max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  /* Placeholder */
+  .placeholder {
+    flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 16px; color: var(--text3); text-align: center;
+  }
+  .placeholder-icon { font-size: 48px; opacity: 0.3; }
+  .placeholder-text { font-size: 12px; line-height: 1.8; }
+
+  /* Loading */
+  .loading {
+    flex: 1; display: flex; align-items: center; justify-content: center; gap: 12px;
+    color: var(--text2); font-size: 13px;
+  }
+  .spinner {
+    width: 24px; height: 24px; border: 2px solid var(--border);
+    border-top-color: var(--accent); border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── Audit log panel ────────────────────────────────────── */
+  .audit-panel {
+    background: var(--bg1); border: 1px solid var(--border); border-radius: 12px;
+    display: flex; flex-direction: column; overflow: hidden;
+  }
+  .audit-list { flex: 1; overflow-y: auto; max-height: 500px; }
+  .audit-list::-webkit-scrollbar { width: 4px; }
+  .audit-list::-webkit-scrollbar-track { background: var(--bg1); }
+  .audit-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+  .audit-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 16px; border-bottom: 1px solid var(--border);
+    font-size: 11px; cursor: pointer; transition: background 0.15s;
+    animation: fade-in 0.3s ease;
+  }
+  @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+  .audit-item:hover { background: var(--bg2); }
+  .audit-ip { font-weight: 600; color: var(--text); flex: 1; font-family: 'JetBrains Mono', monospace; }
+  .audit-score { width: 36px; text-align: right; font-weight: 700; }
+  .audit-score.CRITICAL { color: var(--critical); }
+  .audit-score.HIGH     { color: var(--high); }
+  .audit-score.MEDIUM   { color: var(--medium); }
+  .audit-score.LOW      { color: var(--low); }
+  .audit-ts { color: var(--text3); width: 72px; text-align: right; }
+  .audit-badge {
+    font-size: 9px; font-weight: 700; letter-spacing: 1px;
+    padding: 2px 6px; border-radius: 3px; text-transform: uppercase;
+  }
+  .audit-badge.CRITICAL { background: rgba(255,51,85,0.2); color: var(--critical); }
+  .audit-badge.HIGH     { background: rgba(255,119,0,0.2); color: var(--high); }
+  .audit-badge.MEDIUM   { background: rgba(255,204,0,0.15); color: var(--medium); }
+  .audit-badge.LOW      { background: rgba(0,232,124,0.15); color: var(--low); }
+
+  /* ── API Docs ───────────────────────────────────────────── */
+  .docs-section { background: var(--bg1); border: 1px solid var(--border); border-radius: 12px; padding: 24px; }
+  .docs-title { font-size: 10px; color: var(--text3); letter-spacing: 3px; text-transform: uppercase; margin-bottom: 20px; }
+  .endpoints { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; }
+  .endpoint-card { background: var(--bg2); border-radius: 8px; padding: 16px; border: 1px solid var(--border); }
+  .ep-method { font-size: 10px; font-weight: 700; letter-spacing: 1px; }
+  .ep-method.GET { color: var(--low); }
+  .ep-method.POST { color: var(--medium); }
+  .ep-path { font-size: 13px; color: var(--text); margin: 6px 0 4px; }
+  .ep-desc { font-size: 11px; color: var(--text3); line-height: 1.5; }
+
+  /* Responsive */
+  @media (max-width: 1024px) {
+    .main-grid { grid-template-columns: 1fr; }
+    .stats-row { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 640px) {
+    main { padding: 16px; }
+    header { padding: 12px 16px; }
+    .stats-row { grid-template-columns: 1fr 1fr; }
+    .detail-grid { grid-template-columns: 1fr; }
+    .score-header { flex-direction: column; align-items: flex-start; gap: 16px; }
+  }
+
+  .error-msg { color: var(--critical); font-size: 12px; padding: 12px 16px; background: rgba(255,51,85,0.1); border-radius: 6px; border: 1px solid rgba(255,51,85,0.3); }
+
+  /* Geo map mini */
+  .geo-indicator { display: flex; align-items: center; gap: 6px; }
+  .flag { font-size: 16px; }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="logo">
+      <div class="logo-icon">⬡</div>
+      <div>
+        <div class="logo-text">IP<span>Shield</span></div>
+        <div class="logo-sub">Risk Intelligence</div>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="status-dot">
+        <div class="dot"></div>
+        <span>LIVE</span>
+      </div>
+      <div class="version">v1.0.0</div>
+    </div>
+  </header>
+
+  <main>
+    <!-- Search -->
+    <!-- <div class="search-section">
+  <div class="search-label">// IP Risk Analysis</div>
+
+  <div class="search-row">
+    <div class="search-input-wrap">
+      <span class="search-prefix">SCORE →</span>
+
+      <input
+        id="ipInput"
+        type="text"
+        placeholder="Enter IPv4 or IPv6 address..."
+        autocomplete="off"
+        spellcheck="false"
+      />
+
+      <button id="searchBtn">Search</button>
+    </div>
+
+    <button id="scoreBtn" class="btn btn-primary">ANALYZE</button>
+    <button id="clearBtn" class="btn btn-ghost">CLEAR</button>
+  </div>
+</div> -->
+
+<!-- <script src="/app.js"></script>
+      <div class="quick-tests">
+        <span style="font-size:11px;color:var(--text3);margin-right:4px;">Quick tests:</span>
+        <div class="quick-chip" onclick="setIP('185.220.101.1')">185.220.101.1 <span style="color:var(--critical)">●</span></div>
+        <div class="quick-chip" onclick="setIP('8.8.8.8')">8.8.8.8 <span style="color:var(--low)">●</span></div>
+        <div class="quick-chip" onclick="setIP('45.33.32.156')">45.33.32.156 <span style="color:var(--high)">●</span></div>
+        <div class="quick-chip" onclick="setIP('198.20.69.98')">198.20.69.98 <span style="color:var(--medium)">●</span></div>
+        <div class="quick-chip" onclick="setIP('1.1.1.1')">1.1.1.1 <span style="color:var(--low)">●</span></div>
+      </div>
+    </div> -->
+
+    <!-- Stats -->
+    <!-- <div class="stats-row" id="statsRow">
+      <div class="stat-card critical">
+        <div class="stat-label">Critical</div>
+        <div class="stat-value" id="stat-critical">—</div>
+        <div class="stat-sub">scored today</div>
+      </div>
+      <div class="stat-card high">
+        <div class="stat-label">High Risk</div>
+        <div class="stat-value" id="stat-high">—</div>
+        <div class="stat-sub">scored today</div>
+      </div>
+      <div class="stat-card medium">
+        <div class="stat-label">Medium</div>
+        <div class="stat-value" id="stat-medium">—</div>
+        <div class="stat-sub">scored today</div>
+      </div>
+      <div class="stat-card low">
+        <div class="stat-label">Low Risk</div>
+        <div class="stat-value" id="stat-low">—</div>
+        <div class="stat-sub">scored today</div>
+      </div>
+    </div> -->
+
+    <!-- Main grid -->
+    <!-- <div class="main-grid">
+      <!-- Result panel -->
+      <!-- <div class="result-panel" id="resultPanel">
+        <div class="panel-header">
+          <div class="panel-title">// Score Result</div>
+          <div id="processingTime" style="font-size:11px;color:var(--text3);"></div>
+        </div>
+        <div class="panel-body" id="resultBody">
+          <div class="placeholder">
+            <div class="placeholder-icon">⬡</div>
+            <div class="placeholder-text">
+              Enter an IP address above to begin analysis.<br>
+              Risk scoring includes geo, threat intel,<br>
+              network classification &amp; behavioral signals.
+            </div>
+          </div>
+        </div>
+      </div> --> 
+
+      <!-- Audit log -->
+      <!-- <div class="audit-panel">
+        <div class="panel-header">
+          <div class="panel-title">// Audit Log</div>
+          <div style="font-size:11px;color:var(--text3);" id="auditCount">0 entries</div>
+        </div>
+        <div class="audit-list" id="auditList">
+          <div style="padding:24px;text-align:center;color:var(--text3);font-size:11px;">No queries yet</div>
+        </div>
+      </div>
+    </div> -->
+
+    <!-- API Docs -->
+    <!-- <div class="docs-section">
+      <div class="docs-title">// REST API Endpoints</div>
+      <div class="endpoints">
+        <div class="endpoint-card">
+          <div class="ep-method GET">GET</div>
+          <div class="ep-path">/api/score/:ip</div>
+          <div class="ep-desc">Score a single IPv4 or IPv6 address. Returns full risk report with geo, signals, and recommended action.</div>
+        </div>
+        <div class="endpoint-card">
+          <div class="ep-method POST">POST</div>
+          <div class="ep-path">/api/score/batch</div>
+          <div class="ep-desc">Score up to 50 IPs in one request. Body: <code style="color:var(--accent)">{"ips": ["1.2.3.4", ...]}</code></div>
+        </div>
+        <div class="endpoint-card">
+          <div class="ep-method GET">GET</div>
+          <div class="ep-path">/api/audit</div>
+          <div class="ep-desc">Retrieve recent scoring audit log. Query param: <code style="color:var(--accent)">?limit=50</code></div>
+        </div>
+        <div class="endpoint-card">
+          <div class="ep-method GET">GET</div>
+          <div class="ep-path">/api/stats</div>
+          <div class="ep-desc">Runtime stats: cache size, risk distribution, memory usage, tracked IPs.</div>
+        </div>
+        <div class="endpoint-card">
+          <div class="ep-method GET">GET</div>
+          <div class="ep-path">/api/health</div>
+          <div class="ep-desc">Health check endpoint. Returns <code style="color:var(--low)">{"status":"ok"}</code> when service is running.</div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div> -->
+
+<!-- <script>
+  const API_BASE = '';
+  let auditEntries = [];
+
+  async function scoreIP() {
+    const ip = document.getElementById('ipInput').value.trim();
+    if (!ip) return;
+
+    const btn = document.getElementById('scoreBtn');
+    btn.disabled = true;
+    btn.textContent = '...';
+    document.getElementById('resultBody').innerHTML = '<div class="loading"><div class="spinner"></div><span>Analyzing ' + ip + '...</span></div>';
+    document.getElementById('processingTime').textContent = '';
+
+    try {
+      const res = await fetch(`${API_BASE}/api/score/${encodeURIComponent(ip)}`);
+      const data = await res.json();
+
+      if (!res.ok) {
+        document.getElementById('resultBody').innerHTML = `<div class="error-msg">Error: ${data.error || 'Unknown error'}</div>`;
+        return;
+      }
+
+      renderResult(data);
+      addAuditEntry(data);
+      refreshStats();
+    } catch (e) {
+      document.getElementById('resultBody').innerHTML = `<div class="error-msg">Connection failed. Is the server running?<br><br>Start it with: <code>node index.js</code></div>`;
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'ANALYZE';
+    }
+  }
+
+  function renderResult(d) {
+    const scoreColor = d.riskLevel === 'CRITICAL' ? '#ff3355' : d.riskLevel === 'HIGH' ? '#ff7700' : d.riskLevel === 'MEDIUM' ? '#ffcc00' : '#00e87c';
+    const circumference = 2 * Math.PI * 52;
+    const offset = circumference * (1 - d.score / 100);
+
+    const signalsHTML = d.signals.map((s, i) => `
+      <div class="signal-item ${s.severity}" style="animation-delay:${i*0.05}s">
+        <span class="sig-cat">${s.category}</span>
+        <span class="sig-detail">${s.detail}</span>
+        <span class="sig-sev">${s.severity}</span>
+      </div>
+    `).join('');
+
+    const geoFlag = d.geo.country && d.geo.country !== 'UNKNOWN' ? `<span class="flag">${countryToFlag(d.geo.country)}</span>` : '';
+
+    document.getElementById('processingTime').textContent = `${d.meta.processingMs}ms`;
+    document.getElementById('resultBody').innerHTML = `
+      <div class="score-header">
+        <div class="score-ring-wrap">
+          <svg width="120" height="120" viewBox="0 0 120 120">
+            <circle class="score-bg" cx="60" cy="60" r="52"/>
+            <circle class="score-fill" cx="60" cy="60" r="52"
+              stroke="${scoreColor}"
+              stroke-dasharray="${circumference}"
+              stroke-dashoffset="${circumference}"
+              id="scoreArc"/>
+          </svg>
+          <div class="score-center">
+            <div class="score-num" style="color:${scoreColor}">${d.score}</div>
+            <div class="score-max">/100</div>
+          </div>
+        </div>
+        <div class="score-meta">
+          <div class="score-ip">${d.ip}</div>
+          <div class="risk-badge ${d.riskLevel}">
+            <span>●</span> ${d.riskLevel}
+          </div><br>
+          <div class="action-badge ${d.action}">
+            RECOMMENDED ACTION: <span class="action-val">${d.action}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="signals-title">// Risk Signals (${d.signals.length})</div>
+      <div class="signal-list">${signalsHTML || '<div style="color:var(--text3);font-size:12px;">No significant signals detected</div>'}</div>
+
+      <div class="detail-grid">
+        <div class="detail-card">
+          <div class="detail-card-title">Geolocation</div>
+          <div class="kv"><span class="kv-key">Country</span><span class="kv-val">${geoFlag} ${d.geo.country || '—'}</span></div>
+          <div class="kv"><span class="kv-key">Region</span><span class="kv-val">${d.geo.region || '—'}</span></div>
+          <div class="kv"><span class="kv-key">City</span><span class="kv-val">${d.geo.city || '—'}</span></div>
+          <div class="kv"><span class="kv-key">Timezone</span><span class="kv-val">${d.geo.timezone || '—'}</span></div>
+          <div class="kv"><span class="kv-key">Coordinates</span><span class="kv-val">${d.geo.coordinates?.join(', ') || '—'}</span></div>
+        </div>
+        <div class="detail-card">
+          <div class="detail-card-title">Network</div>
+          <div class="kv"><span class="kv-key">IP Type</span><span class="kv-val">${d.network.type}</span></div>
+          <div class="kv"><span class="kv-key">Datacenter</span><span class="kv-val" style="color:${d.network.isDatacenter?'var(--medium)':'var(--low)'}">${d.network.isDatacenter ? 'YES' : 'NO'}</span></div>
+          <div class="kv"><span class="kv-key">Requests/5min</span><span class="kv-val">${d.behavior.requestsLast5Min}</span></div>
+          <div class="kv"><span class="kv-key">Velocity</span><span class="kv-val">${d.behavior.velocityLabel}</span></div>
+          <div class="kv"><span class="kv-key">First Seen</span><span class="kv-val">${new Date(d.behavior.firstSeen).toLocaleTimeString()}</span></div>
+        </div>
+        ${d.threatIntel ? `
+        <div class="detail-card" style="grid-column: span 2; border: 1px solid rgba(255,51,85,0.3);">
+          <div class="detail-card-title" style="color:var(--critical)">⚠ Threat Intelligence Match</div>
+          <div class="kv"><span class="kv-key">Type</span><span class="kv-val" style="color:var(--critical)">${d.threatIntel.type}</span></div>
+          <div class="kv"><span class="kv-key">Severity</span><span class="kv-val" style="color:var(--critical)">${d.threatIntel.severity.toUpperCase()}</span></div>
+          <div class="kv"><span class="kv-key">Abuse Reports</span><span class="kv-val" style="color:var(--critical)">${d.threatIntel.reports.toLocaleString()}</span></div>
+        </div>` : ''}
+      </div>
+    `;
+
+    // Animate arc
+    requestAnimationFrame(() => {
+      const arc = document.getElementById('scoreArc');
+      if (arc) arc.style.strokeDashoffset = offset;
+    });
+  }
+
+  function addAuditEntry(data) {
+    auditEntries.unshift(data);
+    if (auditEntries.length > 100) auditEntries.pop();
+
+    const list = document.getElementById('auditList');
+    const ts = new Date(data.meta.scoredAt).toLocaleTimeString();
+    const item = document.createElement('div');
+    item.className = 'audit-item';
+    item.innerHTML = `
+      <span class="audit-ip">${data.ip}</span>
+      <span class="audit-badge ${data.riskLevel}">${data.riskLevel}</span>
+      <span class="audit-score ${data.riskLevel}">${data.score}</span>
+      <span class="audit-ts">${ts}</span>
+    `;
+    item.onclick = () => {
+      document.getElementById('ipInput').value = data.ip;
+      renderResult(data);
+    };
+
+    if (list.firstChild?.textContent?.includes('No queries')) list.innerHTML = '';
+    list.insertBefore(item, list.firstChild);
+    document.getElementById('auditCount').textContent = `${auditEntries.length} entries`;
+  }
+
+  async function refreshStats() {
+    try {
+      const res = await fetch(`${API_BASE}/api/stats`);
+      const data = await res.json();
+      const d = data.riskDistribution;
+      document.getElementById('stat-critical').textContent = d.CRITICAL || 0;
+      document.getElementById('stat-high').textContent = d.HIGH || 0;
+      document.getElementById('stat-medium').textContent = d.MEDIUM || 0;
+      document.getElementById('stat-low').textContent = d.LOW || 0;
+    } catch {}
+  }
+
+  function clearResult() {
+    document.getElementById('ipInput').value = '';
+    document.getElementById('resultBody').innerHTML = `
+      <div class="placeholder">
+        <div class="placeholder-icon">⬡</div>
+        <div class="placeholder-text">
+          Enter an IP address above to begin analysis.<br>
+          Risk scoring includes geo, threat intel,<br>
+          network classification &amp; behavioral signals.
+        </div>
+      </div>`;
+    document.getElementById('processingTime').textContent = '';
+  }
+
+  function setIP(ip) {
+    document.getElementById('ipInput').value = ip;
+    scoreIP();
+  }
+
+  function countryToFlag(code) {
+    if (!code || code.length !== 2) return '';
+    const offset = 127397;
+    return String.fromCodePoint(...[...code.toUpperCase()].map(c => c.charCodeAt(0) + offset));
+  }
+
+  // Enter key
+  document.getElementById('ipInput').addEventListener('keydown', e => { if (e.key === 'Enter') scoreIP(); });
+
+  // Init stats
+  refreshStats();
+  setInterval(refreshStats, 10000);
+</script> -->
+<!-- 
+</body>
+</html> --> 
