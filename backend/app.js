@@ -4,10 +4,21 @@ const helmet = require("helmet");
 const morgan = require("morgan");
 const path = require("path");
 
+
 const scoreRoutes = require("./routes/score.routes");
 const statsRoutes = require("./routes/stats.routes");
 const auditRoutes = require("./routes/audit.routes");
 const errorMiddleware = require("./middleware/error.middleware");
+
+// rate limit 
+const rateLimit = require("express-rate-limit");
+
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  message: "Too many requests, slow down."
+});
+
 
 const app = express();
 
@@ -16,6 +27,12 @@ app.use(helmet());
 app.use(cors());
 app.use(express.json());
 app.use(morgan("dev"));
+
+
+
+
+app.use("/api/", limiter); // ✅ NOW SAFE
+
 
 // ✅ CRITICAL: Serve static files FIRST
 app.use(express.static(path.join(__dirname, "../public")));
@@ -27,21 +44,6 @@ console.log("Serving static from:", path.join(__dirname, "../public"));
 app.use("/api/score", scoreRoutes);
 app.use("/api/stats", statsRoutes);
 app.use("/api/audit", auditRoutes);
-
-
-app.get("/api/score/:ip", (req, res) => {
-  res.json({
-    ip: req.params.ip,
-    score: 42,
-    riskLevel: "MEDIUM",
-    action: "MONITOR",
-    signals: [],
-    geo: {},
-    network: { type: "unknown", isDatacenter: false },
-    behavior: { requestsLast5Min: 1, velocityLabel: "LOW", firstSeen: Date.now() },
-    meta: { processingMs: 12, scoredAt: Date.now() }
-  });
-});
 
 // Health check
 app.get("/api/health", (req, res) => {
@@ -57,14 +59,22 @@ app.use((req, res) => {
   res.status(404).json({ message: "Route not found" });
 });
 
-const rateLimit = require("express-rate-limit");
 
-app.use(rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 100
-}));
+// logger
+const logger = require("./utils/logger");
+
+logger.info("Server started");
 
 // Error handler
 app.use(errorMiddleware);
+
+// const compression = require("compression");
+// backend/app.js
+const compression = require("compression");
+
+app.use(compression());
+
+
+// Promise.race([apiCall(), timeout(3000)])
 
 module.exports = app;
