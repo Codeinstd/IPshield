@@ -345,14 +345,29 @@
       <button class="btn btn-primary" id="scoreBtn">ANALYZE</button>
 <button class="btn btn-ghost" id="clearBtn">CLEAR</button>
       </div>
-      <div class="quick-tests">
-        <span style="font-size:11px;color:var(--text3);margin-right:4px;">Quick tests:</span>
-        <div class="quick-chip" onclick="setIP('185.220.101.1')">185.220.101.1 <span style="color:var(--critical)">●</span></div>
-        <div class="quick-chip" onclick="setIP('8.8.8.8')">8.8.8.8 <span style="color:var(--low)">●</span></div>
-        <div class="quick-chip" onclick="setIP('45.33.32.156')">45.33.32.156 <span style="color:var(--high)">●</span></div>
-        <div class="quick-chip" onclick="setIP('198.20.69.98')">198.20.69.98 <span style="color:var(--medium)">●</span></div>
-        <div class="quick-chip" onclick="setIP('1.1.1.1')">1.1.1.1 <span style="color:var(--low)">●</span></div>
-      </div>
+     <div class="quick-tests">
+  <span style="font-size:11px;color:var(--text3);margin-right:4px;">Quick tests:</span>
+
+  <div class="quick-chip" data-ip="185.220.101.1">
+    185.220.101.1 <span style="color:var(--critical)">●</span>
+  </div>
+
+  <div class="quick-chip" data-ip="8.8.8.8">
+    8.8.8.8 <span style="color:var(--low)">●</span>
+  </div>
+
+  <div class="quick-chip" data-ip="45.33.32.156">
+    45.33.32.156 <span style="color:var(--high)">●</span>
+  </div>
+
+  <div class="quick-chip" data-ip="198.20.69.98">
+    198.20.69.98 <span style="color:var(--medium)">●</span>
+  </div>
+
+  <div class="quick-chip" data-ip="1.1.1.1">
+    1.1.1.1 <span style="color:var(--low)">●</span>
+  </div>
+</div>
     </div>
 
     <!-- Stats -->

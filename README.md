@@ -111,16 +111,3 @@ GET /api/health
 | 0–24    | LOW      | ALLOW     |
 
 ---
-
-## Production Enhancements
-
-To take this to production, integrate:
-
-1. **Threat Intel feeds**: [AbuseIPDB](https://www.abuseipdb.com/), [MaxMind GeoIP2](https://www.maxmind.com/), [Shodan](https://www.shodan.io/)
-2. **ASN database**: Real-time ASN/ISP lookup (MaxMind ASN or ip-api.com)
-3. **Tor exit node list**: [dan.me.uk/torlist](https://www.dan.me.uk/torlist/) updated hourly
-4. **VPN/proxy detection**: IPHub, ProxyCheck.io
-5. **Persistent storage**: Redis for behavior tracking across instances
-6. **Authentication**: API key middleware for production use
-7. **Webhooks**: Push alerts when CRITICAL IPs are detected
-8. **Rate limit by client**: Per-API-key rate limiting

@@ -2,16 +2,18 @@ const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
 const morgan = require("morgan");
+const compression = require("compression");
 const path = require("path");
-
+const rateLimit = require("express-rate-limit");
 
 const scoreRoutes = require("./routes/score.routes");
 const statsRoutes = require("./routes/stats.routes");
 const auditRoutes = require("./routes/audit.routes");
+const streamRoutes = require("./routes/stream.routes");
 const errorMiddleware = require("./middleware/error.middleware");
+const logger = require("./utils/logger");
 
-// rate limit 
-const rateLimit = require("express-rate-limit");
+const app = express();
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -19,62 +21,41 @@ const limiter = rateLimit({
   message: "Too many requests, slow down."
 });
 
-
-const app = express();
-
-// Middleware
+// ✅ 1. Core middleware first
 app.use(helmet());
 app.use(cors());
+app.use(compression()); // must be before routes
 app.use(express.json());
 app.use(morgan("dev"));
+app.use("/api/", limiter);
 
-
-
-
-app.use("/api/", limiter); // ✅ NOW SAFE
-
-
-// ✅ CRITICAL: Serve static files FIRST
+// ✅ 2. Static files
 app.use(express.static(path.join(__dirname, "../public")));
 
-// (Optional debug: confirm path)
-console.log("Serving static from:", path.join(__dirname, "../public"));
-
-// API routes
+// ✅ 3. API routes
 app.use("/api/score", scoreRoutes);
 app.use("/api/stats", statsRoutes);
 app.use("/api/audit", auditRoutes);
+app.use("/api/stream", streamRoutes);
 
-// Health check
+// ✅ 4. Health check
 app.get("/api/health", (req, res) => {
   res.json({ status: "ok 🚀" });
 });
 
+// ✅ 5. SPA fallback
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "../public/index.html"));
 });
 
-// ❗ 404 MUST BE LAST
+// ✅ 6. 404 — must be BEFORE error handler, AFTER all routes
 app.use((req, res) => {
   res.status(404).json({ message: "Route not found" });
 });
 
-
-// logger
-const logger = require("./utils/logger");
-
-logger.info("Server started");
-
-// Error handler
+// ✅ 7. Error handler — must be LAST, needs 4 params (err, req, res, next)
 app.use(errorMiddleware);
 
-// const compression = require("compression");
-// backend/app.js
-const compression = require("compression");
-
-app.use(compression());
-
-
-// Promise.race([apiCall(), timeout(3000)])
+logger.info("Server started");
 
 module.exports = app;
