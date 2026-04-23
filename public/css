@@ -1,0 +1,99 @@
+.loading-advanced {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  height: 300px;
+}
+
+.radar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: 2px solid rgba(0,217,255,0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+.radar::before {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: conic-gradient(from 0deg, rgba(0,217,255,0.8), transparent);
+  animation: spinRadar 1.2s linear infinite;
+}
+
+.radar::after {
+  content: '';
+  position: absolute;
+  inset: 6px;
+  border-radius: 50%;
+  background: var(--bg1);
+}
+
+@keyframes spinRadar {
+  to { transform: rotate(360deg); }
+}
+
+.scan-text {
+  font-size: 12px;
+  color: var(--accent);
+  letter-spacing: 2px;
+}
+
+.skeleton .sk-line {
+  height: 12px;
+  background: linear-gradient(90deg, #111 25%, #1a2a3a 50%, #111 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.2s infinite;
+  margin-bottom: 10px;
+  border-radius: 4px;
+}
+
+.spinner {
+  width: 28px;
+  height: 28px;
+  border: 2px solid transparent;
+  border-top: 2px solid var(--accent);
+  border-right: 2px solid var(--accent);
+  border-radius: 50%;
+  animation: spinGlow 0.8s linear infinite;
+  box-shadow: 0 0 10px var(--accent);
+}
+
+@keyframes spinGlow {
+  to { transform: rotate(360deg); }
+}
+
+.sk-line.short { width: 60%; }
+
+@keyframes shimmer {
+  to { background-position: -200% 0; }
+}
+
+.pulse-alert {
+  animation: pulseAlert 1s infinite alternate;
+}
+
+@keyframes pulseAlert {
+  from { box-shadow: 0 0 10px rgba(255,51,85,0.3); }
+  to { box-shadow: 0 0 25px rgba(255,51,85,0.8); }
+}
+
+@keyframes radarSpin {
+  to { transform: rotate(360deg); }
+}
+
+.scan-text {
+  font-size: 12px;
+  color: var(--accent);
+  letter-spacing: 2px;
+  animation: flicker 1.5s infinite;
+}
+
+@keyframes flicker {
+  0%,100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}

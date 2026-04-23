@@ -1,43 +1,26 @@
-exports.scoreIPService = async (ip) => {
-  // 🔥 MOVE your real logic here
+function scoreIPStream(ip) {
+  const source = new EventSource(`/api/stream/${encodeURIComponent(ip)}`);
 
-function setIP(ip) {
-  if (!ip || typeof ip !== "string") {
-    console.warn("Invalid IP passed to setIP:", ip);
-    return;
-  }
+  source.addEventListener("stage", e => {
+    const { step } = JSON.parse(e.data);
+    resultBody.innerHTML = `<div class="loading"><div class="spinner"></div><span>${escHtml(step)}</span></div>`;
+  });
 
-  const input = document.getElementById('ipInput');
-  if (!input) return;
+  source.addEventListener("result", e => {
+    const data = JSON.parse(e.data);
+    renderResult(data);
+    addAuditEntry(data);
+    updateStats(data.riskLevel);
+  });
 
-  input.value = ip;
-  scoreIP();
+  source.addEventListener("error", () => {
+    showError("Stream failed. Please retry.");
+    source.close();
+    setLoading(false);
+  });
+
+  source.addEventListener("done", () => {
+    source.close();
+    setLoading(false);
+  });
 }
-
-//
-async function scoreIP() {
-  const inputEl = document.getElementById('ipInput');
-  if (!inputEl) return;
-
-  const ip = inputEl.value?.trim();
-
-  if (!ip || ip === "undefined") {
-    console.warn("Blocked invalid IP:", ip);
-    return;
-  }
-}
-
-  // continue normal flow...
-
-  // Example placeholder (replace with your real implementation)
-  return {
-    ip,
-    score: Math.floor(Math.random() * 100),
-    riskLevel: "LOW",
-    action: "ALLOW",
-    signals: [],
-    geo: {},
-    network: {},
-    behavior: {}
-  };
-};

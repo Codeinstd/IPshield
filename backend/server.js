@@ -1,11 +1,11 @@
-// backend/server.js (FIRST LINE)
-require("dotenv").config();
+require("dotenv").config(); // MUST be first
 
-const app = require("./app"); // ✅ use existing app
+console.log("Loaded API KEY:", process.env.ABUSE_IPDB_KEY);
+
+const app = require("./app");
 
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
   console.log(`🚀 IPShield API running on port ${PORT}`);
 });
-

@@ -1,5 +1,6 @@
 const { scoreIPService } = require("../services/scoring.service");
 const { addAudit } = require("../store/memory.store");
+const { getFullIntel } = require("../services/ipintel.service");
 
 exports.scoreIP = async (req, res, next) => {
   try {
