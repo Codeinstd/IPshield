@@ -1,9 +1,3 @@
-/**
- * server.js
- * Place in: backend/server.js
- */
-
-// REPLACE the top of server.js with:
 if (process.env.NODE_ENV !== "production") {
   require("dotenv").config();
 }

@@ -4,7 +4,7 @@
  */
 (() => {
   const API = "/api";
-  const API_KEY="e49bbe80201ab5db26c4b13e2b529b39afc2ca80c55fa217ad1cfbff94c3d59e"
+  const IPSHIELD_API_KEY="e49bbe80201ab5db26c4b13e2b529b39afc2ca80c55fa217ad1cfbff94c3d59e"
 
   // ── DOM refs ───────────────────────────────────────────────
   const ipInput    = document.getElementById("ipInput");
