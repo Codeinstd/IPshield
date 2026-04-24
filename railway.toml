@@ -3,5 +3,9 @@ builder = "nixpacks"
 
 [deploy]
 startCommand = "node backend/server.js"
-restartPolicyType = "on_failure"
-restartPolicyMaxRetries = 3
+
+[[services]]
+name = "ipshield"
+
+[services.variables]
+NODE_ENV = "production"
