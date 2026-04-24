@@ -3,8 +3,12 @@
  * Place in: backend/server.js
  */
 
-require("dotenv").config();
-console.log("API_KEY loaded:", JSON.stringify(process.env.API_KEY));
+// REPLACE the top of server.js with:
+if (process.env.NODE_ENV !== "production") {
+  require("dotenv").config();
+}
+require("./utils/validateEnv")();
+
 require("./utils/validateEnv")(); // crash fast on missing env vars
 
 const app    = require("./app");
