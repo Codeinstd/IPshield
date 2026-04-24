@@ -210,7 +210,10 @@ async function scoreIP() {
 
   setLoading(true);
   try {
-   const res = await fetch(`/score/${encodeURIComponent(ip)}`);
+   const res = await fetch(`/score/${encodeURIComponent(ip)}`,
+  {
+  headers: { "x-api-key": API_KEY }
+});
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || "Scoring failed");
 
@@ -230,7 +233,7 @@ async function scoreIP() {
 
     const res = await fetch(`${API}/score/batch`, {
   method:  "POST",
-  headers: { "Content-Type": "application/json", "x-api-key": API_KEY },
+  headers: { "Content-Type": "application/json", "x-api-key": IPSHIELD_API_KEY },
   body:    JSON.stringify({ ips })
 });
 
@@ -452,7 +455,7 @@ async function scoreIP() {
 
   async function loadStats() {
     const res = await fetch(`${API}/stats`, {
-  headers: { "x-api-key": API_KEY }
+  headers: { "x-api-key": IPSHIELD_API_KEY }
 });
     try {
       const res  = await fetch(`${API}/stats`);
