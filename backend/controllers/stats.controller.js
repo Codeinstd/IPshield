@@ -1,8 +1,31 @@
-const { getStatsData } = require("../store/memory.store");
-const { getFullIntel } = require("../services/ipintel.service");
+/**
+ * stats.controller.js
+ * Place in: backend/controllers/stats.controller.js
+ */
 
+const { getStatsData }    = require("../store/memory.store");
+const db                  = require("../store/db");
+const cache               = require("../store/cache");
 
 exports.getStats = (req, res) => {
-  res.json(getStatsData());
-};
+  const memory = getStatsData();
 
+  // Merge memory store with persistent DB stats if available
+  const riskDistribution = db.isAvailable()
+    ? db.getRiskDistribution()
+    : memory.riskDistribution;
+
+  const totalScored = db.isAvailable()
+    ? db.getTotalScored()
+    : memory.total;
+
+  res.json({
+    riskDistribution,
+    totalScored,
+    topThreats:   db.isAvailable() ? db.getTopThreats(5) : [],
+    cacheSize:    cache.size(),
+    dbAvailable:  db.isAvailable(),
+    uptime:       Math.floor(process.uptime()),
+    memoryMB:     Math.round(process.memoryUsage().heapUsed / 1024 / 1024)
+  });
+};
