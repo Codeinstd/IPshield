@@ -3,8 +3,8 @@
  * Place in: public/app.js
  */
 (() => {
-  const API = "/api";
-  const IPSHIELD_API_KEY="e49bbe80201ab5db26c4b13e2b529b39afc2ca80c55fa217ad1cfbff94c3d59e"
+  const API     = "/api";
+  const API_KEY = "e49bbe80201ab5db26c4b13e2b529b39afc2ca80c55fa217ad1cfbff94c3d59e";
 
   // ── DOM refs ───────────────────────────────────────────────
   const ipInput    = document.getElementById("ipInput");
@@ -24,26 +24,23 @@
 
   // ── Init ───────────────────────────────────────────────────
   injectExtraUI();
-  // loadLeaflet();
-  loadStats();
   initMap();
+  loadStats();
   setupEventListeners();
 
   // ── Extra UI injection ─────────────────────────────────────
   function injectExtraUI() {
-    // Dark/light toggle in header
     const headerRight = document.querySelector(".header-right");
     if (headerRight) {
       const toggle = document.createElement("button");
-      toggle.className   = "btn btn-ghost";
-      toggle.id          = "themeToggle";
-      toggle.textContent = "☀ LIGHT";
+      toggle.className     = "btn btn-ghost";
+      toggle.id            = "themeToggle";
+      toggle.textContent   = "☀ LIGHT";
       toggle.style.cssText = "padding:6px 12px;font-size:11px;";
       toggle.addEventListener("click", toggleTheme);
       headerRight.prepend(toggle);
     }
 
-    // Bulk scoring section — inject after search section
     const searchSection = document.querySelector(".search-section");
     if (searchSection) {
       const bulk = document.createElement("div");
@@ -52,13 +49,12 @@
       bulk.innerHTML = `
         <label style="font-size:10px;color:var(--text3);letter-spacing:2px;text-transform:uppercase;">Bulk:</label>
         <input type="file" id="csvUpload" accept=".csv,.txt" style="display:none">
-        <button class="btn btn-ghost" id="csvBtn" style="padding:8px 14px;font-size:11px;">↑ UPLOAD CSV</button>
+        <button class="btn btn-ghost" id="csvBtn"    style="padding:8px 14px;font-size:11px;">↑ UPLOAD CSV</button>
         <button class="btn btn-ghost" id="exportBtn" style="padding:8px 14px;font-size:11px;">↓ EXPORT LOG</button>
         <span id="bulkStatus" style="font-size:11px;color:var(--text2);"></span>`;
       searchSection.appendChild(bulk);
     }
 
-    // Map panel — inject after main-grid
     const mainGrid = document.querySelector(".main-grid");
     if (mainGrid) {
       const mapWrap = document.createElement("div");
@@ -77,40 +73,14 @@
   }
 
   // ── Leaflet map ────────────────────────────────────────────
- // AFTER
-// function loadLeaflet() {
-//   const link  = document.createElement("link");
-//   link.rel    = "stylesheet";
-//   link.href   = "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css";
-//   document.head.appendChild(link);
-
-//   const script  = document.createElement("script");
-//   script.src    = "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js";
-//   script.onload = initMap;
-//   document.head.appendChild(script);
-// }
-function loadLeaflet() {
-  const link  = document.createElement("link");
-  link.rel    = "stylesheet";
-  link.href   = "/leaflet.min.css";
-  document.head.appendChild(link);
-
-  const script  = document.createElement("script");
-  script.src    = "/leaflet.min.js";
-  script.onload = initMap;
-  document.head.appendChild(script);
-}
-
   function initMap() {
     const container = document.getElementById("mapContainer");
-    if (!container) return;
-    container.innerHTML = "";
+    if (!container || typeof L === "undefined") return;
+    container.innerHTML     = "";
     container.style.cssText = "height:280px;";
 
     map = L.map("mapContainer", { zoomControl: true, attributionControl: false });
-    L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
-      maxZoom: 18
-    }).addTo(map);
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 18 }).addTo(map);
     map.setView([20, 0], 2);
   }
 
@@ -119,9 +89,9 @@ function loadLeaflet() {
 
     const color = { CRITICAL: "#ff3355", HIGH: "#ff7700", MEDIUM: "#ffcc00", LOW: "#00e87c" }[riskLevel] || "#00d9ff";
     const icon  = L.divIcon({
-      className: "",
-      html: `<div style="width:14px;height:14px;border-radius:50%;background:${color};border:2px solid #fff;box-shadow:0 0 8px ${color};"></div>`,
-      iconSize: [14, 14],
+      className:  "",
+      html:       `<div style="width:14px;height:14px;border-radius:50%;background:${color};border:2px solid #fff;box-shadow:0 0 8px ${color};"></div>`,
+      iconSize:   [14, 14],
       iconAnchor: [7, 7]
     });
 
@@ -148,7 +118,7 @@ function loadLeaflet() {
     });
 
     document.addEventListener("click", e => {
-      if (e.target.id === "csvBtn") document.getElementById("csvUpload").click();
+      if (e.target.id === "csvBtn")    document.getElementById("csvUpload").click();
       if (e.target.id === "exportBtn") exportLog();
     });
 
@@ -162,16 +132,10 @@ function loadLeaflet() {
     isDark = !isDark;
     const root = document.documentElement;
     const btn  = document.getElementById("themeToggle");
+
     if (isDark) {
-      root.style.removeProperty("--bg");
-      root.style.removeProperty("--bg1");
-      root.style.removeProperty("--bg2");
-      root.style.removeProperty("--bg3");
-      root.style.removeProperty("--text");
-      root.style.removeProperty("--text2");
-      root.style.removeProperty("--text3");
-      root.style.removeProperty("--border");
-      root.style.removeProperty("--border2");
+      ["--bg","--bg1","--bg2","--bg3","--text","--text2","--text3","--border","--border2"]
+        .forEach(v => root.style.removeProperty(v));
       if (btn) btn.textContent = "☀ LIGHT";
     } else {
       root.style.setProperty("--bg",      "#f0f4f8");
@@ -184,87 +148,65 @@ function loadLeaflet() {
       root.style.setProperty("--border",  "#c8d8e4");
       root.style.setProperty("--border2", "#b0c4d4");
       if (btn) btn.textContent = "☾ DARK";
-
-      // Switch map tiles to light
-      if (map) {
-        map.eachLayer(l => { if (l._url) map.removeLayer(l); });
-        L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", { maxZoom: 18 }).addTo(map);
-      }
     }
 
-    if (isDark && map) {
+    if (map) {
       map.eachLayer(l => { if (l._url) map.removeLayer(l); });
-      // In initMap(), replace the tileLayer line:
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 18 }).addTo(map);
-
-// In toggleTheme(), replace both tileLayer lines with the same OSM URL
-// (light/dark switching won't apply but the map will work)
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 18 }).addTo(map);
     }
   }
 
   // ── Score single IP ────────────────────────────────────────
-async function scoreIP() {
-  const ip = ipInput.value.trim();
-  if (!ip) return;
-  if (!isValidIP(ip)) { showError("Invalid IP address format."); return; }
+  async function scoreIP() {
+    const ip = ipInput.value.trim();
+    if (!ip) return;
+    if (!isValidIP(ip)) { showError("Invalid IP address format."); return; }
 
-  setLoading(true);
-  try {
-   const res = await fetch(`/score/${encodeURIComponent(ip)}`,
-  {
-  headers: { "x-api-key": API_KEY }
-});
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || "Scoring failed");
+    setLoading(true);
+    try {
+      const res  = await fetch(`${API}/score/${encodeURIComponent(ip)}`, {
+        headers: { "x-api-key": API_KEY }
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Scoring failed");
 
-    renderResult(data);
-    addAuditEntry(data);
-    updateStats(data.riskLevel);
-    updateMap(data.geo || {}, data.ip, data.riskLevel);
-  } catch (err) {
-    showError(err.message || "Service temporarily unavailable.");
-  } finally {
-    setLoading(false);
+      renderResult(data);
+      addAuditEntry(data);
+      updateStats(data.riskLevel);
+      updateMap(data.geo || {}, data.ip, data.riskLevel);
+    } catch (err) {
+      showError(err.message || "Service temporarily unavailable.");
+    } finally {
+      setLoading(false);
+    }
   }
-}
 
   // ── Bulk CSV upload ────────────────────────────────────────
   async function handleCSVUpload(file) {
-
-    const res = await fetch(`${API}/score/batch`, {
-  method:  "POST",
-  headers: { "Content-Type": "application/json", "x-api-key": IPSHIELD_API_KEY },
-  body:    JSON.stringify({ ips })
-});
-
     if (!file) return;
     const text = await file.text();
     const ips  = text.split(/[\n,]+/).map(s => s.trim()).filter(isValidIP);
 
-    if (!ips.length) { setBulkStatus("No valid IPs found in file."); return; }
+    if (!ips.length)     { setBulkStatus("No valid IPs found in file."); return; }
     if (ips.length > 50) { setBulkStatus("Max 50 IPs per batch. Trimming to 50."); ips.length = 50; }
 
     setBulkStatus(`Scoring ${ips.length} IPs…`);
     try {
       const res  = await fetch(`${API}/score/batch`, {
         method:  "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", "x-api-key": API_KEY },
         body:    JSON.stringify({ ips })
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
 
       data.results.forEach(r => {
-        if (r.score != null) {
-          addAuditEntry(r);
-          updateStats(r.riskLevel);
-        }
+        if (r.score != null) { addAuditEntry(r); updateStats(r.riskLevel); }
       });
 
       const failed = data.results.filter(r => r.error).length;
       setBulkStatus(`✓ ${data.results.length - failed} scored${failed ? `, ${failed} failed` : ""}.`);
 
-      // Show last result
       const last = data.results.find(r => r.score != null);
       if (last) { renderResult(last); updateMap(last.geo || {}, last.ip, last.riskLevel); }
     } catch (err) {
@@ -281,13 +223,13 @@ async function scoreIP() {
   function exportLog() {
     if (!auditEntries.length) { setBulkStatus("No entries to export."); return; }
 
-    const headers = ["IP", "Score", "Risk Level", "Action", "Country", "City", "ISP", "Proxy", "Tor", "Datacenter", "Scored At"];
-    const rows = auditEntries.map(e => [
+    const headers = ["IP","Score","Risk Level","Action","Country","City","ISP","Proxy","Tor","Datacenter","Scored At"];
+    const rows    = auditEntries.map(e => [
       e.ip, e.score, e.riskLevel, e.action,
       e.geo?.country || "—", e.geo?.city || "—",
       e.network?.isp || "—",
-      e.intelligence?.isProxy ? "Yes" : "No",
-      e.intelligence?.isTor   ? "Yes" : "No",
+      e.intelligence?.isProxy      ? "Yes" : "No",
+      e.intelligence?.isTor        ? "Yes" : "No",
       e.intelligence?.isDatacenter ? "Yes" : "No",
       e.meta?.scoredAt ? new Date(e.meta.scoredAt).toISOString() : new Date().toISOString()
     ]);
@@ -303,30 +245,28 @@ async function scoreIP() {
 
   // ── Render result panel ────────────────────────────────────
   function renderResult(d) {
-    const score     = d.score     ?? 0;
-    const riskLevel = d.riskLevel ?? "LOW";
-    const action    = d.action    ?? "ALLOW";
-    const geo       = d.geo       ?? {};
-    const network   = d.network   ?? {};
+    const score     = d.score        ?? 0;
+    const riskLevel = d.riskLevel    ?? "LOW";
+    const action    = d.action       ?? "ALLOW";
+    const geo       = d.geo          ?? {};
+    const network   = d.network      ?? {};
     const intel     = d.intelligence ?? {};
-    const meta      = d.meta      ?? {};
-    const signals   = d.signals   || buildFallbackSignals(d);
+    const meta      = d.meta         ?? {};
+    const signals   = d.signals      || buildFallbackSignals(d);
 
     const circumference = 2 * Math.PI * 52;
-    const offset = circumference - (score / 100) * circumference;
+    const offset      = circumference - (score / 100) * circumference;
     const strokeColor = { CRITICAL: "#ff3355", HIGH: "#ff7700", MEDIUM: "#ffcc00", LOW: "#00e87c" }[riskLevel] || "#00e87c";
 
     procTime.textContent = meta.processingMs
-      ? `${meta.processingMs}ms${meta.cached ? " · cached" : ""}`
-      : "";
+      ? `${meta.processingMs}ms${meta.cached ? " · cached" : ""}` : "";
 
     resultBody.innerHTML = `
       <div class="score-header">
         <div class="score-ring-wrap">
           <svg width="120" height="120" viewBox="0 0 120 120">
             <circle class="score-bg" cx="60" cy="60" r="52"/>
-            <circle class="score-fill"
-              cx="60" cy="60" r="52"
+            <circle class="score-fill" cx="60" cy="60" r="52"
               stroke="${strokeColor}"
               stroke-dasharray="${circumference}"
               stroke-dashoffset="${offset}"/>
@@ -371,14 +311,14 @@ async function scoreIP() {
         </div>
         <div class="detail-card">
           <div class="detail-card-title">// Network</div>
-          ${kv("ISP",       network.isp  || "—")}
-          ${kv("ASN",       network.asn  || "—")}
-          ${kv("Type",      network.type || "—")}
+          ${kv("ISP",        network.isp  || "—")}
+          ${kv("ASN",        network.asn  || "—")}
+          ${kv("Type",       network.type || "—")}
           ${kv("Datacenter", intel.isDatacenter ? "Yes" : "No")}
           ${kv("Proxy",      intel.isProxy ? "⚠ Detected" : "No")}
-          ${kv("Tor",        intel.isTor  ? "⚠ Exit Node" : "No")}
+          ${kv("Tor",        intel.isTor   ? "⚠ Exit Node" : "No")}
           ${intel.openPorts?.length ? kv("Open Ports", intel.openPorts.slice(0,6).join(", ")) : ""}
-          ${intel.vulns?.length     ? kv("CVEs",       `${intel.vulns.length} found`) : ""}
+          ${intel.vulns?.length     ? kv("CVEs",       `${intel.vulns.length} found`)         : ""}
         </div>
       </div>
 
@@ -404,16 +344,15 @@ async function scoreIP() {
     </div>`;
   }
 
-  // Fallback signals if API doesn't return them
   function buildFallbackSignals(d) {
     const score = d.score ?? 0;
     const intel = d.intelligence ?? {};
     const sigs  = [];
-    sigs.push({ category: "ABUSE", detail: `Confidence score: ${score}/100`, severity: score > 80 ? "critical" : score > 60 ? "high" : score > 30 ? "medium" : "low" });
-    if (intel.isProxy)      sigs.push({ category: "PROXY",   detail: "Proxy detected",          severity: "high" });
-    if (intel.isTor)        sigs.push({ category: "TOR",     detail: "Tor exit node",            severity: "critical" });
-    if (intel.isDatacenter) sigs.push({ category: "HOSTING", detail: "Datacenter / cloud IP",   severity: "medium" });
-    sigs.push({ category: "VELOCITY", detail: `Velocity: ${intel.velocity || "LOW"}`, severity: "info" });
+    sigs.push({ category: "ABUSE",    detail: `Confidence score: ${score}/100`, severity: score > 80 ? "critical" : score > 60 ? "high" : score > 30 ? "medium" : "low" });
+    if (intel.isProxy)      sigs.push({ category: "PROXY",   detail: "Proxy detected",        severity: "high" });
+    if (intel.isTor)        sigs.push({ category: "TOR",     detail: "Tor exit node",          severity: "critical" });
+    if (intel.isDatacenter) sigs.push({ category: "HOSTING", detail: "Datacenter / cloud IP", severity: "medium" });
+    sigs.push({ category: "VELOCITY", detail: `Velocity: ${intel.velocity || "LOW"}`,          severity: "info" });
     return sigs;
   }
 
@@ -454,11 +393,10 @@ async function scoreIP() {
   }
 
   async function loadStats() {
-    const res = await fetch(`${API}/stats`, {
-  headers: { "x-api-key": IPSHIELD_API_KEY }
-});
     try {
-      const res  = await fetch(`${API}/stats`);
+      const res  = await fetch(`${API}/stats`, {
+        headers: { "x-api-key": API_KEY }
+      });
       if (!res.ok) return;
       const data = await res.json();
       if (data.riskDistribution) {
@@ -466,7 +404,7 @@ async function scoreIP() {
         Object.entries(map).forEach(([risk, id]) => {
           const el = document.getElementById(id);
           if (el && data.riskDistribution[risk] != null) {
-            el.textContent = data.riskDistribution[risk];
+            el.textContent     = data.riskDistribution[risk];
             sessionStats[risk] = data.riskDistribution[risk];
           }
         });
@@ -520,7 +458,11 @@ async function scoreIP() {
   }
 
   function escHtml(str) {
-    return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+    return String(str)
+      .replace(/&/g, "&amp;")
+      .replace(/</g,  "&lt;")
+      .replace(/>/g,  "&gt;")
+      .replace(/"/g,  "&quot;");
   }
 
   function isValidIP(ip) {
