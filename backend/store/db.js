@@ -12,11 +12,12 @@ try {
   const Database = require("better-sqlite3");
   const dbPath   = process.env.DB_PATH || path.join(__dirname, "../../ipshield.db");
   db = new Database(dbPath, { verbose: null });
-  db.pragma("journal_mode = WAL");   // better concurrent read performance
-  db.pragma("synchronous = NORMAL"); // safe + faster than FULL
+  db.pragma("journal_mode = WAL");
+  db.pragma("synchronous = NORMAL");
   bootstrap();
+  console.log("✓ SQLite connected");
 } catch (err) {
-  console.warn("SQLite unavailable — falling back to memory only:", err.message);
+  // Falls back to memory store — app works fine without it
   db = null;
 }
 
