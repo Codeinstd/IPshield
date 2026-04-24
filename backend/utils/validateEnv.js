@@ -10,18 +10,16 @@ const OPTIONAL = ["VIRUSTOTAL_KEY", "SLACK_WEBHOOK", "DISCORD_WEBHOOK", "SENTRY_
 function validateEnv() {
   const missing = REQUIRED.filter(k => !process.env[k]);
 
+  // Debug — print ALL env keys Railway injected
+  console.log("All env keys:", Object.keys(process.env).join(", "));
+  console.log("ABUSE_IPDB_KEY:", process.env.ABUSE_IPDB_KEY ? "SET" : "MISSING");
+  console.log("IPSHIELD_API_KEY:", process.env.IPSHIELD_API_KEY ? "SET" : "MISSING");
+
   if (missing.length) {
-    console.error("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-    console.error("  FATAL: Missing required environment variables:");
-    missing.forEach(k => console.error(`    ✗ ${k}`));
-    console.error("\n  Add these to your .env file and restart.");
-    console.error("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
+    console.error("Missing:", missing.join(", "));
     process.exit(1);
   }
-
-  const present = OPTIONAL.filter(k => process.env[k]);
   console.log("✓ Environment validated");
-  if (present.length) console.log(`  Optional features active: ${present.join(", ")}`);
 }
 
 module.exports = validateEnv;
