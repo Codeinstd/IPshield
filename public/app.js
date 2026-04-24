@@ -210,9 +210,7 @@ async function scoreIP() {
 
   setLoading(true);
   try {
-    const res  = await fetch(`${API}/score/${encodeURIComponent(ip)}`, {
-      headers: { "x-api-key": API_KEY }
-    });
+   const res = await fetch(`/score/${encodeURIComponent(ip)}`);
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || "Scoring failed");
 
