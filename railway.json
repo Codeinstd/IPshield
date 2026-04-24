@@ -1,0 +1,10 @@
+{
+  "build": {
+    "builder": "NIXPACKS",
+    "buildCommand": "npm install && npm rebuild better-sqlite3"
+  },
+  "deploy": {
+    "startCommand": "node backend/server.js",
+    "restartPolicyType": "ON_FAILURE"
+  }
+}
