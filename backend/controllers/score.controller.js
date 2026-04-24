@@ -3,7 +3,7 @@
  * Place in: backend/controllers/score.controller.js
  */
 
-const { getFullIntel }    = require("../services/ipintel.service");
+const { getFullIntel }    = require("../services/ipIntel.service");
 const { alertIfCritical } = require("../services/alerts.service");
 const { addAudit }        = require("../store/memory.store");
 const db                  = require("../store/db");
