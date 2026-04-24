@@ -1,73 +1,161 @@
-const express = require("express");
-const cors = require("cors");
-const helmet = require("helmet");
-const morgan = require("morgan");
-const compression = require("compression");
-const path = require("path");
-const rateLimit = require("express-rate-limit");
+/**
+ * app.js
+ * Place in: backend/app.js
+ */
 
-const scoreRoutes = require("./routes/score.routes");
-const statsRoutes = require("./routes/stats.routes");
-const auditRoutes = require("./routes/audit.routes");
+const express      = require("express");
+const cors         = require("cors");
+const helmet       = require("helmet");
+const morgan       = require("morgan");
+const compression  = require("compression");
+const path         = require("path");
+const rateLimit    = require("express-rate-limit");
+
+const scoreRoutes  = require("./routes/score.routes");
+const statsRoutes  = require("./routes/stats.routes");
+const auditRoutes  = require("./routes/audit.routes");
 const streamRoutes = require("./routes/stream.routes");
+const authMiddleware  = require("./middleware/auth.middleware");
 const errorMiddleware = require("./middleware/error.middleware");
-const logger = require("./utils/logger");
+const logger       = require("./utils/logger");
 
-const app = express();
+const isProd = process.env.NODE_ENV === "production";
+const app    = express();
 
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 100,
-  message: "Too many requests, slow down."
-});
+// ── Sentry (if configured) ────────────────────────────────────────────────────
+if (process.env.SENTRY_DSN) {
+  try {
+    const Sentry = require("@sentry/node");
+    Sentry.init({ dsn: process.env.SENTRY_DSN, environment: process.env.NODE_ENV || "development" });
+    app.use(Sentry.Handlers.requestHandler());
+    logger.info("Sentry initialized");
+  } catch (_) { logger.warn("Sentry package not installed — skipping"); }
+}
 
-// ✅ 1. Core middleware first
+// ── Security headers ──────────────────────────────────────────────────────────
 app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc:  ["'self'"],
-      scriptSrc:   ["'self'", "https://cdnjs.cloudflare.com"],
-      styleSrc:    ["'self'", "'unsafe-inline'", "https://cdnjs.cloudflare.com", "https://fonts.googleapis.com"],
+      scriptSrc:   ["'self'"],
+      styleSrc:    ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
       fontSrc:     ["'self'", "https://fonts.gstatic.com"],
-      imgSrc:      ["'self'", "data:", "https://*.tile.openstreetmap.org", "https://*.basemaps.cartocdn.com"],
+      imgSrc:      ["'self'", "data:", "https://*.tile.openstreetmap.org", "https://*.basemaps.cartocdn.com", "https://*.openstreetmap.org"],
       connectSrc:  ["'self'"],
       workerSrc:   ["'self'", "blob:"],
+      objectSrc:   ["'none'"],
+      upgradeInsecureRequests: isProd ? [] : null
     }
-  }
+  },
+  hsts: isProd ? { maxAge: 31536000, includeSubDomains: true, preload: true } : false,
+  referrerPolicy: { policy: "strict-origin-when-cross-origin" }
 }));
-app.use(cors());
-app.use(compression()); // must be before routes
-app.use(express.json());
-app.use(morgan("dev"));
-app.use("/api/", limiter);
 
-// ✅ 2. Static files
-app.use(express.static(path.join(__dirname, "../public")));
+// ── CORS ──────────────────────────────────────────────────────────────────────
+const allowedOrigins = (process.env.ALLOWED_ORIGIN || "")
+  .split(",").map(s => s.trim()).filter(Boolean);
 
-// ✅ 3. API routes
-app.use("/api/score", scoreRoutes);
-app.use("/api/stats", statsRoutes);
-app.use("/api/audit", auditRoutes);
-app.use("/api/stream", streamRoutes);
+app.use(cors({
+  origin: (origin, cb) => {
+    // Allow same-origin requests (no origin header) and configured origins
+    if (!origin || !allowedOrigins.length || allowedOrigins.includes(origin)) return cb(null, true);
+    cb(new Error(`CORS: origin ${origin} not allowed`));
+  },
+  methods:     ["GET", "POST"],
+  allowedHeaders: ["Content-Type", "x-api-key"],
+  credentials: false
+}));
 
-// ✅ 4. Health check
-app.get("/api/health", (req, res) => {
-  res.json({ status: "ok 🚀" });
+// ── Core middleware ───────────────────────────────────────────────────────────
+app.use(compression());
+app.use(express.json({ limit: "50kb" }));
+app.use(express.urlencoded({ extended: false, limit: "50kb" }));
+
+// Logging — structured in prod, dev-friendly locally
+if (isProd) {
+  app.use(morgan("combined", {
+    stream: { write: msg => logger.info(msg.trim()) },
+    skip:   (req) => req.path === "/api/health" // don't log health checks
+  }));
+} else {
+  app.use(morgan("dev"));
+}
+
+// ── Rate limiting ─────────────────────────────────────────────────────────────
+const globalLimiter = rateLimit({
+  windowMs:         15 * 60 * 1000,
+  max:              100,
+  standardHeaders:  true,
+  legacyHeaders:    false,
+  message:          { error: "Too many requests", retryAfter: "15 minutes" }
 });
 
-// ✅ 5. SPA fallback
+const scoreLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute window
+  max:      30,        // 30 score requests per minute
+  standardHeaders: true,
+  legacyHeaders:   false,
+  message: { error: "Score rate limit exceeded", retryAfter: "1 minute" }
+});
+
+const batchLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max:      5, // 5 batch requests per minute
+  message:  { error: "Batch rate limit exceeded", retryAfter: "1 minute" }
+});
+
+app.use("/api/", globalLimiter);
+app.use("/api/score/:ip", scoreLimiter);
+app.use("/api/score/batch", batchLimiter);
+
+// ── Static files ──────────────────────────────────────────────────────────────
+app.use(express.static(path.join(__dirname, "../public"), {
+  maxAge: isProd ? "1d" : 0,
+  etag:   true
+}));
+
+// ── Auth — protects all /api/* routes ─────────────────────────────────────────
+app.use("/api/", authMiddleware);
+
+// ── API routes ────────────────────────────────────────────────────────────────
+app.use("/api/score",  scoreRoutes);
+app.use("/api/stats",  statsRoutes);
+app.use("/api/audit",  auditRoutes);
+app.use("/api/stream", streamRoutes);
+
+// ── Health check (no auth required) ──────────────────────────────────────────
+app.get("/api/health", (req, res) => {
+  const db = require("./store/db");
+  res.json({
+    status:      "ok",
+    version:     process.env.npm_package_version || "1.0.0",
+    environment: process.env.NODE_ENV || "development",
+    uptime:      Math.floor(process.uptime()),
+    db:          db.isAvailable() ? "connected" : "memory-only",
+    memoryMB:    Math.round(process.memoryUsage().heapUsed / 1024 / 1024),
+    timestamp:   new Date().toISOString()
+  });
+});
+
+// ── SPA fallback ──────────────────────────────────────────────────────────────
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "../public/index.html"));
 });
 
-// ✅ 6. 404 — must be BEFORE error handler, AFTER all routes
+// ── 404 ───────────────────────────────────────────────────────────────────────
 app.use((req, res) => {
-  res.status(404).json({ message: "Route not found" });
+  res.status(404).json({ error: "Not Found", path: req.path });
 });
 
-// ✅ 7. Error handler — must be LAST, needs 4 params (err, req, res, next)
-app.use(errorMiddleware);
+// ── Sentry error handler (must be before custom error handler) ────────────────
+if (process.env.SENTRY_DSN) {
+  try {
+    const Sentry = require("@sentry/node");
+    app.use(Sentry.Handlers.errorHandler());
+  } catch (_) {}
+}
 
-logger.info("Server started");
+// ── Global error handler ──────────────────────────────────────────────────────
+app.use(errorMiddleware);
 
 module.exports = app;
