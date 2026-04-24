@@ -490,3 +490,4 @@
 {"level":"info","message":"::1 - - [24/Apr/2026:09:39:01 +0000] \"GET /api/score/8.8.8.8 HTTP/1.1\" 200 1019 \"http://localhost:3000/\" \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36\"","timestamp":"2026-04-24T09:39:01.191Z"}
 {"level":"info","message":"Scoring IP: 45.33.32.156","timestamp":"2026-04-24T09:39:05.470Z"}
 {"level":"info","message":"::1 - - [24/Apr/2026:09:39:06 +0000] \"GET /api/score/45.33.32.156 HTTP/1.1\" 200 - \"http://localhost:3000/\" \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36\"","timestamp":"2026-04-24T09:39:06.282Z"}
+{"level":"info","message":"SIGINT received — shutting down gracefully","timestamp":"2026-04-24T10:09:36.905Z"}
