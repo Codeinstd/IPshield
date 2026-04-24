@@ -114,15 +114,6 @@ app.use(express.static(path.join(__dirname, "../public"), {
   etag:   true
 }));
 
-// ── Auth — protects all /api/* routes ─────────────────────────────────────────
-app.use("/api/", authMiddleware);
-
-// ── API routes ────────────────────────────────────────────────────────────────
-app.use("/api/score",  scoreRoutes);
-app.use("/api/stats",  statsRoutes);
-app.use("/api/audit",  auditRoutes);
-app.use("/api/stream", streamRoutes);
-
 // ── Health check (no auth required) ──────────────────────────────────────────
 app.get("/api/health", (req, res) => {
   const db = require("./store/db");
@@ -135,7 +126,19 @@ app.get("/api/health", (req, res) => {
     memoryMB:    Math.round(process.memoryUsage().heapUsed / 1024 / 1024),
     timestamp:   new Date().toISOString()
   });
-});
+}
+);
+
+// ── Auth — protects all /api/* routes ─────────────────────────────────────────
+app.use("/api/", authMiddleware);
+
+// ── API routes ────────────────────────────────────────────────────────────────
+app.use("/api/score",  scoreRoutes);
+app.use("/api/stats",  statsRoutes);
+app.use("/api/audit",  auditRoutes);
+app.use("/api/stream", streamRoutes);
+
+
 
 // ── SPA fallback ──────────────────────────────────────────────────────────────
 app.get("/", (req, res) => {
