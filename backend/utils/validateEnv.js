@@ -4,7 +4,7 @@
  * Called at the very top of server.js before anything else
  */
 
-const REQUIRED = ["ABUSE_IPDB_KEY", "API_KEY"];
+const REQUIRED = ["ABUSE_IPDB_KEY", "IPSHIELD_API_KEY"];
 const OPTIONAL = ["VIRUSTOTAL_KEY", "SLACK_WEBHOOK", "DISCORD_WEBHOOK", "SENTRY_DSN", "ALLOWED_ORIGIN", "DATABASE_URL"];
 
 function validateEnv() {
