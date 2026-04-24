@@ -8,7 +8,7 @@ require("./utils/validateEnv")(); // crash fast on missing env vars
 const app    = require("./app");
 const logger = require("./utils/logger");
 
-const PORT = parseInt(process.env.PORT || "3000", 10);
+const PORT = parseInt(process.env.PORT || "8080", 10);
 
 const server = app.listen(PORT, "0.0.0.0", () => {
   logger.info(`🚀 IPShield running on port ${PORT} [${process.env.NODE_ENV || "development"}]`);
