@@ -4,6 +4,7 @@
  */
 (() => {
   const API = "/api";
+  const API_KEY="e49bbe80201ab5db26c4b13e2b529b39afc2ca80c55fa217ad1cfbff94c3d59e"
 
   // ── DOM refs ───────────────────────────────────────────────
   const ipInput    = document.getElementById("ipInput");
@@ -202,30 +203,39 @@ function loadLeaflet() {
   }
 
   // ── Score single IP ────────────────────────────────────────
-  async function scoreIP() {
-    const ip = ipInput.value.trim();
-    if (!ip) return;
-    if (!isValidIP(ip)) { showError("Invalid IP address format."); return; }
+async function scoreIP() {
+  const ip = ipInput.value.trim();
+  if (!ip) return;
+  if (!isValidIP(ip)) { showError("Invalid IP address format."); return; }
 
-    setLoading(true);
-    try {
-      const res  = await fetch(`${API}/score/${encodeURIComponent(ip)}`);
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Scoring failed");
+  setLoading(true);
+  try {
+    const res  = await fetch(`${API}/score/${encodeURIComponent(ip)}`, {
+      headers: { "x-api-key": API_KEY }
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Scoring failed");
 
-      renderResult(data);
-      addAuditEntry(data);
-      updateStats(data.riskLevel);
-      updateMap(data.geo || {}, data.ip, data.riskLevel);
-    } catch (err) {
-      showError(err.message || "Service temporarily unavailable.");
-    } finally {
-      setLoading(false);
-    }
+    renderResult(data);
+    addAuditEntry(data);
+    updateStats(data.riskLevel);
+    updateMap(data.geo || {}, data.ip, data.riskLevel);
+  } catch (err) {
+    showError(err.message || "Service temporarily unavailable.");
+  } finally {
+    setLoading(false);
   }
+}
 
   // ── Bulk CSV upload ────────────────────────────────────────
   async function handleCSVUpload(file) {
+
+    const res = await fetch(`${API}/score/batch`, {
+  method:  "POST",
+  headers: { "Content-Type": "application/json", "x-api-key": API_KEY },
+  body:    JSON.stringify({ ips })
+});
+
     if (!file) return;
     const text = await file.text();
     const ips  = text.split(/[\n,]+/).map(s => s.trim()).filter(isValidIP);
@@ -443,6 +453,9 @@ function loadLeaflet() {
   }
 
   async function loadStats() {
+    const res = await fetch(`${API}/stats`, {
+  headers: { "x-api-key": API_KEY }
+});
     try {
       const res  = await fetch(`${API}/stats`);
       if (!res.ok) return;

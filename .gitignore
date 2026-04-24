@@ -1,1 +1,32 @@
+# Dependencies
+node_modules/
+
+# Environment
 .env
+.env.local
+.env.*.local
+
+# Database
+*.db
+*.db-shm
+*.db-wal
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# PM2
+.pm2/
+
+# Build
+dist/
+build/

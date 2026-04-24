@@ -1,8 +1,8 @@
 /**
- * db.js — SQLite persistence via better-sqlite3
+ * db.js
  * Place in: backend/store/db.js
  *
- * Install dep: npm install better-sqlite3
+ * Install: npm install better-sqlite3
  */
 
 const path = require("path");
@@ -10,7 +10,10 @@ let db;
 
 try {
   const Database = require("better-sqlite3");
-  db = new Database(path.join(__dirname, "../../ipshield.db"), { verbose: null });
+  const dbPath   = process.env.DB_PATH || path.join(__dirname, "../../ipshield.db");
+  db = new Database(dbPath, { verbose: null });
+  db.pragma("journal_mode = WAL");   // better concurrent read performance
+  db.pragma("synchronous = NORMAL"); // safe + faster than FULL
   bootstrap();
 } catch (err) {
   console.warn("SQLite unavailable — falling back to memory only:", err.message);
@@ -35,36 +38,32 @@ function bootstrap() {
       scored_at   INTEGER NOT NULL
     );
 
-    CREATE INDEX IF NOT EXISTS idx_scores_ip ON scores(ip);
+    CREATE INDEX IF NOT EXISTS idx_scores_ip   ON scores(ip);
     CREATE INDEX IF NOT EXISTS idx_scores_risk ON scores(risk_level);
-    CREATE INDEX IF NOT EXISTS idx_scores_at  ON scores(scored_at);
-
-    CREATE TABLE IF NOT EXISTS meta (
-      key   TEXT PRIMARY KEY,
-      value TEXT
-    );
+    CREATE INDEX IF NOT EXISTS idx_scores_at   ON scores(scored_at);
   `);
 }
 
 function insertScore(result) {
   if (!db) return;
   try {
-    const stmt = db.prepare(`
-      INSERT INTO scores (ip, score, risk_level, action, country, city, isp, is_proxy, is_tor, is_dc, velocity, scored_at)
-      VALUES (@ip, @score, @riskLevel, @action, @country, @city, @isp, @isProxy, @isTor, @isDc, @velocity, @scoredAt)
-    `);
-    stmt.run({
+    db.prepare(`
+      INSERT INTO scores
+        (ip, score, risk_level, action, country, city, isp, is_proxy, is_tor, is_dc, velocity, scored_at)
+      VALUES
+        (@ip, @score, @riskLevel, @action, @country, @city, @isp, @isProxy, @isTor, @isDc, @velocity, @scoredAt)
+    `).run({
       ip:        result.ip,
       score:     result.score,
       riskLevel: result.riskLevel,
       action:    result.action,
-      country:   result.geo?.country   || null,
-      city:      result.geo?.city      || null,
-      isp:       result.network?.isp   || null,
+      country:   result.geo?.country            || null,
+      city:      result.geo?.city               || null,
+      isp:       result.network?.isp            || null,
       isProxy:   result.intelligence?.isProxy    ? 1 : 0,
       isTor:     result.intelligence?.isTor      ? 1 : 0,
       isDc:      result.intelligence?.isDatacenter ? 1 : 0,
-      velocity:  result.intelligence?.velocity   || null,
+      velocity:  result.intelligence?.velocity  || null,
       scoredAt:  Date.now()
     });
   } catch (err) {
@@ -75,18 +74,14 @@ function insertScore(result) {
 function getHistory(limit = 100) {
   if (!db) return [];
   try {
-    return db.prepare(`
-      SELECT * FROM scores ORDER BY scored_at DESC LIMIT ?
-    `).all(limit);
+    return db.prepare("SELECT * FROM scores ORDER BY scored_at DESC LIMIT ?").all(limit);
   } catch { return []; }
 }
 
 function getRiskDistribution() {
   if (!db) return { CRITICAL: 0, HIGH: 0, MEDIUM: 0, LOW: 0 };
   try {
-    const rows = db.prepare(`
-      SELECT risk_level, COUNT(*) as count FROM scores GROUP BY risk_level
-    `).all();
+    const rows = db.prepare("SELECT risk_level, COUNT(*) as count FROM scores GROUP BY risk_level").all();
     const dist = { CRITICAL: 0, HIGH: 0, MEDIUM: 0, LOW: 0 };
     rows.forEach(r => { if (r.risk_level in dist) dist[r.risk_level] = r.count; });
     return dist;
@@ -95,9 +90,8 @@ function getRiskDistribution() {
 
 function getTotalScored() {
   if (!db) return 0;
-  try {
-    return db.prepare("SELECT COUNT(*) as c FROM scores").get().c;
-  } catch { return 0; }
+  try { return db.prepare("SELECT COUNT(*) as c FROM scores").get().c; }
+  catch { return 0; }
 }
 
 function getTopThreats(limit = 10) {
@@ -113,4 +107,6 @@ function getTopThreats(limit = 10) {
 
 function isAvailable() { return !!db; }
 
-module.exports = { insertScore, getHistory, getRiskDistribution, getTotalScored, getTopThreats, isAvailable };
+function close() { if (db) { db.close(); db = null; } }
+
+module.exports = { insertScore, getHistory, getRiskDistribution, getTotalScored, getTopThreats, isAvailable, close };

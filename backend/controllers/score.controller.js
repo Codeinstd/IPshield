@@ -3,20 +3,24 @@
  * Place in: backend/controllers/score.controller.js
  */
 
-const { getFullIntel } = require("../services/ipintel.service");
-const { addAudit }     = require("../store/memory.store");
-const db               = require("../store/db");
+const { getFullIntel }    = require("../services/ipintel.service");
+const { alertIfCritical } = require("../services/alerts.service");
+const { addAudit }        = require("../store/memory.store");
+const db                  = require("../store/db");
+const logger              = require("../utils/logger");
 
 exports.scoreIP = async (req, res, next) => {
   try {
     const { ip } = req.params;
+    logger.info(`Scoring IP: ${ip}`);
+
     const result = await getFullIntel(ip);
 
-    // Persist to memory store (audit log)
     addAudit(result);
-
-    // Persist to SQLite if available
     db.insertScore(result);
+
+    // Fire-and-forget alert — never blocks response
+    alertIfCritical(result).catch(() => {});
 
     res.json(result);
   } catch (err) {
@@ -24,16 +28,10 @@ exports.scoreIP = async (req, res, next) => {
   }
 };
 
-// Batch scoring — up to 50 IPs
 exports.scoreBatch = async (req, res, next) => {
   try {
     const { ips } = req.body;
-
-    if (!Array.isArray(ips) || ips.length === 0)
-      return res.status(400).json({ error: "Provide an array of IPs in body: { ips: [...] }" });
-
-    if (ips.length > 50)
-      return res.status(400).json({ error: "Maximum 50 IPs per batch request" });
+    logger.info(`Batch scoring ${ips.length} IPs`);
 
     const results = await Promise.allSettled(ips.map(ip => getFullIntel(ip)));
 
@@ -41,12 +39,18 @@ exports.scoreBatch = async (req, res, next) => {
       if (r.status === "fulfilled") {
         addAudit(r.value);
         db.insertScore(r.value);
+        alertIfCritical(r.value).catch(() => {});
         return r.value;
       }
       return { ip: ips[i], error: r.reason?.message || "Failed", score: null };
     });
 
-    res.json({ total: output.length, results: output });
+    res.json({
+      total:   output.length,
+      scored:  output.filter(r => r.score != null).length,
+      failed:  output.filter(r => r.error).length,
+      results: output
+    });
   } catch (err) {
     next(err);
   }
