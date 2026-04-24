@@ -158,4 +158,12 @@ if (process.env.SENTRY_DSN) {
 // ── Global error handler ──────────────────────────────────────────────────────
 app.use(errorMiddleware);
 
+// rate limit proxy
+const proxyLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 10, // 10 requests per minute per IP
+  message: { error: "Rate limit exceeded" }
+});
+app.use("/score", proxyLimiter, require("./routes/proxy.routes"));
+
 module.exports = app;
