@@ -22,7 +22,19 @@ const limiter = rateLimit({
 });
 
 // ✅ 1. Core middleware first
-app.use(helmet());
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc:  ["'self'"],
+      scriptSrc:   ["'self'", "https://cdnjs.cloudflare.com"],
+      styleSrc:    ["'self'", "'unsafe-inline'", "https://cdnjs.cloudflare.com", "https://fonts.googleapis.com"],
+      fontSrc:     ["'self'", "https://fonts.gstatic.com"],
+      imgSrc:      ["'self'", "data:", "https://*.tile.openstreetmap.org", "https://*.basemaps.cartocdn.com"],
+      connectSrc:  ["'self'"],
+      workerSrc:   ["'self'", "blob:"],
+    }
+  }
+}));
 app.use(cors());
 app.use(compression()); // must be before routes
 app.use(express.json());

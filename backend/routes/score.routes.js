@@ -1,18 +1,13 @@
-const express = require("express");
-const router = express.Router();
-const { getFullIntel } = require("../services/ipintel.service"); // one import, consistent casing
+/**
+ * score.routes.js
+ * Place in: backend/routes/score.routes.js
+ */
 
-router.get("/:ip", async (req, res) => {
-  try {
-    const data = await getFullIntel(req.params.ip);
-    res.json(data);
-  } catch (err) {
-    console.error("IP scoring failed:", err);
-    res.status(503).json({
-      error: "Service temporarily unavailable",
-      retryable: true
-    });
-  }
-});
+const express = require("express");
+const router  = express.Router();
+const { scoreIP, scoreBatch } = require("../controllers/score.controller");
+
+router.get("/:ip",   scoreIP);
+router.post("/batch", scoreBatch);
 
 module.exports = router;
