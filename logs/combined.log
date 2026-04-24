@@ -474,3 +474,10 @@
 {"level":"info","message":"Scoring IP: 41.217.101.249","timestamp":"2026-04-24T08:37:12.461Z"}
 {"level":"info","message":"::1 - - [24/Apr/2026:08:37:14 +0000] \"GET /api/score/41.217.101.249 HTTP/1.1\" 200 918 \"http://localhost:3000/\" \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36\"","timestamp":"2026-04-24T08:37:14.868Z"}
 {"level":"info","message":"SIGINT received — shutting down gracefully","timestamp":"2026-04-24T08:39:10.214Z"}
+{"level":"info","message":"🚀 IPShield running on port 3000 [production]","timestamp":"2026-04-24T08:54:44.820Z"}
+{"level":"info","message":"::1 - - [24/Apr/2026:08:54:50 +0000] \"GET / HTTP/1.1\" 304 - \"-\" \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36\"","timestamp":"2026-04-24T08:54:50.399Z"}
+{"level":"info","message":"::1 - - [24/Apr/2026:08:54:50 +0000] \"GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1\" 404 80 \"-\" \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36\"","timestamp":"2026-04-24T08:54:50.476Z"}
+{"level":"info","message":"::1 - - [24/Apr/2026:08:54:50 +0000] \"GET /api/stats HTTP/1.1\" 200 785 \"http://localhost:3000/\" \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36\"","timestamp":"2026-04-24T08:54:50.702Z"}
+{"level":"info","message":"::1 - - [24/Apr/2026:08:54:50 +0000] \"GET /api/stats HTTP/1.1\" 304 - \"http://localhost:3000/\" \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36\"","timestamp":"2026-04-24T08:54:50.717Z"}
+{"level":"info","message":"Scoring IP: 41.217.101.249","timestamp":"2026-04-24T08:55:03.074Z"}
+{"level":"info","message":"::1 - - [24/Apr/2026:08:55:04 +0000] \"GET /api/score/41.217.101.249 HTTP/1.1\" 200 918 \"http://localhost:3000/\" \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36\"","timestamp":"2026-04-24T08:55:04.371Z"}
