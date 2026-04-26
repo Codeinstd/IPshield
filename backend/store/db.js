@@ -1,8 +1,7 @@
 /**
  * db.js
  * Place in: backend/store/db.js
- *
- * Install: npm install better-sqlite3
+ * Updated: exposes getDb() for watchlist store
  */
 
 const path = require("path");
@@ -17,7 +16,6 @@ try {
   bootstrap();
   console.log("✓ SQLite connected");
 } catch (err) {
-  // Falls back to memory store — app works fine without it
   db = null;
 }
 
@@ -38,7 +36,6 @@ function bootstrap() {
       velocity    TEXT,
       scored_at   INTEGER NOT NULL
     );
-
     CREATE INDEX IF NOT EXISTS idx_scores_ip   ON scores(ip);
     CREATE INDEX IF NOT EXISTS idx_scores_risk ON scores(risk_level);
     CREATE INDEX IF NOT EXISTS idx_scores_at   ON scores(scored_at);
@@ -74,9 +71,8 @@ function insertScore(result) {
 
 function getHistory(limit = 100) {
   if (!db) return [];
-  try {
-    return db.prepare("SELECT * FROM scores ORDER BY scored_at DESC LIMIT ?").all(limit);
-  } catch { return []; }
+  try { return db.prepare("SELECT * FROM scores ORDER BY scored_at DESC LIMIT ?").all(limit); }
+  catch { return []; }
 }
 
 function getRiskDistribution() {
@@ -106,8 +102,12 @@ function getTopThreats(limit = 10) {
   } catch { return []; }
 }
 
+// Expose raw db instance for other stores (watchlist, etc.)
+function getDb()       { return db; }
 function isAvailable() { return !!db; }
+function close()       { if (db) { db.close(); db = null; } }
 
-function close() { if (db) { db.close(); db = null; } }
-
-module.exports = { insertScore, getHistory, getRiskDistribution, getTotalScored, getTopThreats, isAvailable, close };
+module.exports = {
+  insertScore, getHistory, getRiskDistribution,
+  getTotalScored, getTopThreats, isAvailable, close, getDb
+};
