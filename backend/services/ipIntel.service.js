@@ -1,10 +1,13 @@
 /**
  * ipintel.service.js
  * Place in: backend/services/ipintel.service.js
+ *
+ * Now integrates threat feed aggregation alongside existing sources.
  */
 
-const axios  = require("axios");
-const cache  = require("../store/cache");
+const axios        = require("axios");
+const cache        = require("../store/cache");
+const { checkThreatFeeds } = require("./threatfeeds.service");
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
@@ -24,11 +27,11 @@ async function getAbuseData(ip, retries = 2) {
   }
 }
 
-// ── Shodan InternetDB (free, no key) ──────────────────────────────────────────
+// ── Shodan InternetDB ─────────────────────────────────────────────────────────
 async function getShodanData(ip) {
   try {
     const res = await axios.get(`https://internetdb.shodan.io/${ip}`, { timeout: 5000 });
-    return res.data; // { ip, ports, cpes, hostnames, tags, vulns }
+    return res.data;
   } catch (err) {
     if (err.response?.status === 404) return { ports: [], tags: [], vulns: [], hostnames: [], cpes: [] };
     console.error("Shodan error:", err.message);
@@ -40,10 +43,10 @@ async function getShodanData(ip) {
 async function getVirusTotalData(ip) {
   if (!process.env.VIRUSTOTAL_KEY) return null;
   try {
-    const res = await axios.get(`https://www.virustotal.com/api/v3/ip_addresses/${ip}`, {
-      headers: { "x-apikey": process.env.VIRUSTOTAL_KEY },
-      timeout: 6000
-    });
+    const res = await axios.get(
+      `https://www.virustotal.com/api/v3/ip_addresses/${ip}`,
+      { headers: { "x-apikey": process.env.VIRUSTOTAL_KEY }, timeout: 6000 }
+    );
     const stats = res.data?.data?.attributes?.last_analysis_stats || {};
     return {
       malicious:  stats.malicious  || 0,
@@ -57,7 +60,7 @@ async function getVirusTotalData(ip) {
   }
 }
 
-// ── Geo (ip-api.com) ──────────────────────────────────────────────────────────
+// ── Geo ───────────────────────────────────────────────────────────────────────
 const PRIVATE_IP = /^(10\.|172\.(1[6-9]|2\d|3[01])\.|192\.168\.|127\.|::1$|fc00:|fd)/;
 
 async function getGeoData(ip) {
@@ -78,7 +81,7 @@ async function getGeoData(ip) {
   }
   try {
     const res = await axios.get(`http://ip-api.com/json/${ip}`, {
-      params: { fields: "status,message,country,regionName,city,timezone,lat,lon,isp,org,as,proxy,hosting" },
+      params:  { fields: "status,message,country,regionName,city,timezone,lat,lon,isp,org,as,proxy,hosting" },
       timeout: 5000
     });
     const d = res.data;
@@ -108,22 +111,27 @@ function computeVelocity(abuse) {
   return "LOW";
 }
 
-// ── Threat signals builder ────────────────────────────────────────────────────
-function buildSignals({ abuse, geo, shodan, vt, score }) {
+// ── Build signals ─────────────────────────────────────────────────────────────
+function buildSignals({ abuse, geo, shodan, vt, feeds, score }) {
   const signals = [];
 
-  // Abuse score signal
+  // Abuse score
   signals.push({
     category: "ABUSE",
     detail:   `Confidence score: ${score}/100 · ${abuse.totalReports || 0} reports`,
     severity: score > 80 ? "critical" : score > 60 ? "high" : score > 30 ? "medium" : "low"
   });
 
-  // Shodan tags (c2, botnet, scanner, honeypot, tor, etc.)
+  // Threat feed signals — injected directly from feed service
+  if (feeds?.signals?.length) {
+    signals.push(...feeds.signals);
+  }
+
+  // Shodan tags
   if (shodan.tags?.length) {
     shodan.tags.forEach(tag => {
       const sev = ["c2", "botnet", "malware"].includes(tag) ? "critical"
-                : ["scanner", "tor", "proxy"].includes(tag) ? "high" : "medium";
+                : ["scanner", "tor", "proxy"].includes(tag)  ? "high" : "medium";
       signals.push({ category: "SHODAN", detail: `Tagged: ${tag}`, severity: sev });
     });
   }
@@ -156,9 +164,9 @@ function buildSignals({ abuse, geo, shodan, vt, score }) {
   }
 
   // Proxy / Tor / Datacenter
-  if (geo.proxy) signals.push({ category: "PROXY",      detail: "Proxy detected",          severity: "high" });
-  if (shodan.tags?.includes("tor")) signals.push({ category: "TOR", detail: "Tor exit node", severity: "critical" });
-  if (geo.hosting) signals.push({ category: "HOSTING",   detail: "Datacenter / cloud IP",   severity: "medium" });
+  if (geo.proxy)                         signals.push({ category: "PROXY",   detail: "Proxy detected",         severity: "high" });
+  if (shodan.tags?.includes("tor"))      signals.push({ category: "TOR",     detail: "Tor exit node",          severity: "critical" });
+  if (geo.hosting)                       signals.push({ category: "HOSTING", detail: "Datacenter / cloud IP",  severity: "medium" });
 
   // Velocity
   const velocity = computeVelocity(abuse);
@@ -173,38 +181,43 @@ function buildSignals({ abuse, geo, shodan, vt, score }) {
 
 // ── Main export ───────────────────────────────────────────────────────────────
 async function getFullIntel(ip) {
-  // Cache hit
   const cached = cache.get(ip);
   if (cached) return { ...cached, meta: { ...cached.meta, cached: true } };
 
   const start = Date.now();
 
   // All external calls in parallel
-  const [abuse, geo, shodan, vt] = await Promise.all([
+  const [abuse, geo, shodan, vt, feeds] = await Promise.all([
     getAbuseData(ip),
     getGeoData(ip),
     getShodanData(ip),
-    getVirusTotalData(ip)
+    getVirusTotalData(ip),
+    checkThreatFeeds(ip)
   ]);
 
-  const score = abuse.abuseConfidenceScore || 0;
+  const baseScore = abuse.abuseConfidenceScore || 0;
+
+  // Boost score based on feed hits — capped at 100
+  const score = Math.min(baseScore + (feeds?.scoreBoost || 0), 100);
 
   const riskLevel =
     score > 80 ? "CRITICAL" :
-    score > 60 ? "HIGH" :
-    score > 30 ? "MEDIUM" : "LOW";
+    score > 60 ? "HIGH"     :
+    score > 30 ? "MEDIUM"   : "LOW";
 
   const action =
-    score > 80 ? "BLOCK" :
+    score > 80 ? "BLOCK"     :
     score > 60 ? "CHALLENGE" :
-    score > 30 ? "MONITOR" : "ALLOW";
+    score > 30 ? "MONITOR"   : "ALLOW";
 
-  const signals  = buildSignals({ abuse, geo, shodan, vt, score });
   const velocity = computeVelocity(abuse);
+  const signals  = buildSignals({ abuse, geo, shodan, vt, feeds, score });
 
   const result = {
     ip,
     score,
+    baseScore,           // original AbuseIPDB score before boost
+    scoreBoost: feeds?.scoreBoost || 0,
     riskLevel,
     action,
 
@@ -233,6 +246,14 @@ async function getFullIntel(ip) {
       vulns:        shodan.vulns  || [],
       shodanTags:   shodan.tags   || [],
       virusTotal:   vt            || null
+    },
+
+    // Threat feed results
+    threatFeeds: {
+      feodo:           feeds?.feodo           || false,
+      spamhaus:        feeds?.spamhaus        || false,
+      emergingThreats: feeds?.emergingThreats || false,
+      otx:             feeds?.otx             || null
     },
 
     signals,

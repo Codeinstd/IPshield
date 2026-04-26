@@ -3,14 +3,14 @@
  * Place in: backend/controllers/stats.controller.js
  */
 
-const { getStatsData }    = require("../store/memory.store");
-const db                  = require("../store/db");
-const cache               = require("../store/cache");
+const { getStatsData }  = require("../store/memory.store");
+const db                = require("../store/db");
+const cache             = require("../store/cache");
+const { getFeedStats }  = require("../services/threatfeeds.service");
 
 exports.getStats = (req, res) => {
   const memory = getStatsData();
 
-  // Merge memory store with persistent DB stats if available
   const riskDistribution = db.isAvailable()
     ? db.getRiskDistribution()
     : memory.riskDistribution;
@@ -22,10 +22,11 @@ exports.getStats = (req, res) => {
   res.json({
     riskDistribution,
     totalScored,
-    topThreats:   db.isAvailable() ? db.getTopThreats(5) : [],
-    cacheSize:    cache.size(),
-    dbAvailable:  db.isAvailable(),
-    uptime:       Math.floor(process.uptime()),
-    memoryMB:     Math.round(process.memoryUsage().heapUsed / 1024 / 1024)
+    topThreats:  db.isAvailable() ? db.getTopThreats(5) : [],
+    cacheSize:   cache.size(),
+    dbAvailable: db.isAvailable(),
+    uptime:      Math.floor(process.uptime()),
+    memoryMB:    Math.round(process.memoryUsage().heapUsed / 1024 / 1024),
+    threatFeeds: getFeedStats()   // ← feed status included in stats
   });
 };
