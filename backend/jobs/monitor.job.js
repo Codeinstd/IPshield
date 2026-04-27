@@ -7,7 +7,7 @@
  */
 
 const { getWatchlist, updateWatchlistEntry } = require("../store/watchlist.store");
-const { getFullIntel }   = require("../services/ipintel.service");
+const { getFullIntel } = require("../services/ipIntel.service");
 const { alertIfCritical } = require("../services/alerts.service");
 const logger              = require("../utils/logger");
 
