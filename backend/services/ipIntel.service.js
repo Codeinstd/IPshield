@@ -1,6 +1,13 @@
-const axios        = require("axios");
-const cache        = require("../store/cache");
-const { checkThreatFeeds } = require("./threatfeeds.service");
+/**
+ * ipIntel.service.js
+ * Place in: backend/services/ipIntel.service.js
+ * Updated: integrates WHOIS deep dive
+ */
+
+const axios                    = require("axios");
+const cache                    = require("../store/cache");
+const { checkThreatFeeds }     = require("./threatfeeds.service");
+const { getWhoisIntel }        = require("./whois.service");
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
@@ -59,17 +66,10 @@ const PRIVATE_IP = /^(10\.|172\.(1[6-9]|2\d|3[01])\.|192\.168\.|127\.|::1$|fc00:
 async function getGeoData(ip) {
   if (PRIVATE_IP.test(ip)) {
     return {
-      _private:     true,
-      country_name: "Private Network",
-      region:       "Local",
-      city:         "Local",
-      timezone:     Intl.DateTimeFormat().resolvedOptions().timeZone,
-      latitude:     null,
-      longitude:    null,
-      org:          "Private / RFC1918",
-      asn:          "—",
-      proxy:        false,
-      hosting:      false
+      _private: true, country_name: "Private Network", region: "Local",
+      city: "Local", timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      latitude: null, longitude: null, org: "Private / RFC1918", asn: "—",
+      proxy: false, hosting: false
     };
   }
   try {
@@ -80,16 +80,9 @@ async function getGeoData(ip) {
     const d = res.data;
     if (d.status !== "success") throw new Error(d.message || "geo failed");
     return {
-      country_name: d.country,
-      region:       d.regionName,
-      city:         d.city,
-      timezone:     d.timezone,
-      latitude:     d.lat,
-      longitude:    d.lon,
-      org:          d.isp,
-      asn:          d.as,
-      proxy:        d.proxy,
-      hosting:      d.hosting
+      country_name: d.country, region: d.regionName, city: d.city,
+      timezone: d.timezone, latitude: d.lat, longitude: d.lon,
+      org: d.isp, asn: d.as, proxy: d.proxy, hosting: d.hosting
     };
   } catch (err) {
     console.error("Geo error:", err.message);
@@ -105,49 +98,42 @@ function computeVelocity(abuse) {
 }
 
 // ── Build signals ─────────────────────────────────────────────────────────────
-function buildSignals({ abuse, geo, shodan, vt, feeds, score }) {
+function buildSignals({ abuse, geo, shodan, vt, feeds, whoisData, score }) {
   const signals = [];
 
-  // Abuse score
   signals.push({
     category: "ABUSE",
     detail:   `Confidence score: ${score}/100 · ${abuse.totalReports || 0} reports`,
     severity: score > 80 ? "critical" : score > 60 ? "high" : score > 30 ? "medium" : "low"
   });
 
-  // Threat feed signals — injected directly from feed service
-  if (feeds?.signals?.length) {
-    signals.push(...feeds.signals);
-  }
+  if (feeds?.signals?.length) signals.push(...feeds.signals);
+  if (whoisData?.signals?.length) signals.push(...whoisData.signals);
 
-  // Shodan tags
   if (shodan.tags?.length) {
     shodan.tags.forEach(tag => {
-      const sev = ["c2", "botnet", "malware"].includes(tag) ? "critical"
-                : ["scanner", "tor", "proxy"].includes(tag)  ? "high" : "medium";
+      const sev = ["c2","botnet","malware"].includes(tag) ? "critical"
+                : ["scanner","tor","proxy"].includes(tag)  ? "high" : "medium";
       signals.push({ category: "SHODAN", detail: `Tagged: ${tag}`, severity: sev });
     });
   }
 
-  // Open ports
   if (shodan.ports?.length) {
     signals.push({
       category: "PORTS",
-      detail:   `Open ports: ${shodan.ports.slice(0, 8).join(", ")}${shodan.ports.length > 8 ? "…" : ""}`,
-      severity: shodan.ports.some(p => [22, 23, 3389, 5900].includes(p)) ? "high" : "medium"
+      detail:   `Open ports: ${shodan.ports.slice(0,8).join(", ")}${shodan.ports.length > 8 ? "…" : ""}`,
+      severity: shodan.ports.some(p => [22,23,3389,5900].includes(p)) ? "high" : "medium"
     });
   }
 
-  // Vulnerabilities
   if (shodan.vulns?.length) {
     signals.push({
       category: "VULNS",
-      detail:   `${shodan.vulns.length} CVE(s): ${shodan.vulns.slice(0, 3).join(", ")}`,
+      detail:   `${shodan.vulns.length} CVE(s): ${shodan.vulns.slice(0,3).join(", ")}`,
       severity: "critical"
     });
   }
 
-  // VirusTotal
   if (vt) {
     signals.push({
       category: "VIRUSTOTAL",
@@ -156,12 +142,10 @@ function buildSignals({ abuse, geo, shodan, vt, feeds, score }) {
     });
   }
 
-  // Proxy / Tor / Datacenter
-  if (geo.proxy)                         signals.push({ category: "PROXY",   detail: "Proxy detected",         severity: "high" });
-  if (shodan.tags?.includes("tor"))      signals.push({ category: "TOR",     detail: "Tor exit node",          severity: "critical" });
-  if (geo.hosting)                       signals.push({ category: "HOSTING", detail: "Datacenter / cloud IP",  severity: "medium" });
+  if (geo.proxy)                     signals.push({ category: "PROXY",   detail: "Proxy detected",        severity: "high" });
+  if (shodan.tags?.includes("tor"))  signals.push({ category: "TOR",     detail: "Tor exit node",          severity: "critical" });
+  if (geo.hosting)                   signals.push({ category: "HOSTING", detail: "Datacenter / cloud IP", severity: "medium" });
 
-  // Velocity
   const velocity = computeVelocity(abuse);
   signals.push({
     category: "VELOCITY",
@@ -173,25 +157,26 @@ function buildSignals({ abuse, geo, shodan, vt, feeds, score }) {
 }
 
 // ── Main export ───────────────────────────────────────────────────────────────
-async function getFullIntel(ip) {
-  const cached = cache.get(ip);
-  if (cached) return { ...cached, meta: { ...cached.meta, cached: true } };
+async function getFullIntel(ip, options = {}) {
+  if (!options.bypassCache) {
+    const cached = cache.get(ip);
+    if (cached) return { ...cached, meta: { ...cached.meta, cached: true } };
+  }
 
   const start = Date.now();
 
-  // All external calls in parallel
-  const [abuse, geo, shodan, vt, feeds] = await Promise.all([
+  // All calls in parallel — WHOIS runs alongside everything else
+  const [abuse, geo, shodan, vt, feeds, whoisData] = await Promise.all([
     getAbuseData(ip),
     getGeoData(ip),
     getShodanData(ip),
     getVirusTotalData(ip),
-    checkThreatFeeds(ip)
+    checkThreatFeeds(ip),
+    getWhoisIntel(ip)
   ]);
 
   const baseScore = abuse.abuseConfidenceScore || 0;
-
-  // Boost score based on feed hits — capped at 100
-  const score = Math.min(baseScore + (feeds?.scoreBoost || 0), 100);
+  const score     = Math.min(baseScore + (feeds?.scoreBoost || 0), 100);
 
   const riskLevel =
     score > 80 ? "CRITICAL" :
@@ -204,13 +189,13 @@ async function getFullIntel(ip) {
     score > 30 ? "MONITOR"   : "ALLOW";
 
   const velocity = computeVelocity(abuse);
-  const signals  = buildSignals({ abuse, geo, shodan, vt, feeds, score });
+  const signals  = buildSignals({ abuse, geo, shodan, vt, feeds, whoisData, score });
 
   const result = {
     ip,
     score,
-    baseScore,           // original AbuseIPDB score before boost
-    scoreBoost: feeds?.scoreBoost || 0,
+    baseScore,
+    scoreBoost:  feeds?.scoreBoost || 0,
     riskLevel,
     action,
 
@@ -241,13 +226,15 @@ async function getFullIntel(ip) {
       virusTotal:   vt            || null
     },
 
-    // Threat feed results
     threatFeeds: {
       feodo:           feeds?.feodo           || false,
       spamhaus:        feeds?.spamhaus        || false,
       emergingThreats: feeds?.emergingThreats || false,
       otx:             feeds?.otx             || null
     },
+
+    // WHOIS deep dive
+    whois: whoisData?.whois || null,
 
     signals,
 
