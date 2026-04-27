@@ -13,7 +13,7 @@ const {
 } = require("../store/watchlist.store");
 
 const { pollWatchlist, getMonitorStatus } = require("../jobs/monitor.job");
-const { getFullIntel }        = require("../services/ipintel.service");
+const { getFullIntel } = require("../services/ipIntel.service");
 const { updateWatchlistEntry } = require("../store/watchlist.store");
 const logger                  = require("../utils/logger");
 
