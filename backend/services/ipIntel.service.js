@@ -1,10 +1,3 @@
-/**
- * ipintel.service.js
- * Place in: backend/services/ipintel.service.js
- *
- * Now integrates threat feed aggregation alongside existing sources.
- */
-
 const axios        = require("axios");
 const cache        = require("../store/cache");
 const { checkThreatFeeds } = require("./threatfeeds.service");
