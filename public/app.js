@@ -24,14 +24,30 @@
   loadStats();
   loadWatchlist();
   setupEventListeners();
+  detectAndFillIP();
+
+  // ── Auto-detect visitor IP ─────────────────────────────────────────────────
+  async function detectAndFillIP() {
+    try {
+      const res  = await fetch("https://api.ipify.org?format=json");
+      const data = await res.json();
+      if (data.ip && isValidIP(data.ip)) {
+        ipInput.value = data.ip;
+        ipInput.style.color = "var(--accent)";
+        setTimeout(() => { ipInput.style.color = ""; }, 2000);
+      }
+    } catch (_) {}
+  }
 
   // ── Extra UI ───────────────────────────────────────────────────────────────
   function injectExtraUI() {
     const headerRight = document.querySelector(".header-right");
     if (headerRight) {
       const toggle = document.createElement("button");
-      toggle.className = "btn btn-ghost"; toggle.id = "themeToggle";
-      toggle.textContent = "☀ LIGHT"; toggle.style.cssText = "padding:6px 12px;font-size:11px;";
+      toggle.className = "btn btn-ghost";
+      toggle.id = "themeToggle";
+      toggle.textContent = "☀ LIGHT";
+      toggle.style.cssText = "padding:6px 12px;font-size:11px;";
       toggle.addEventListener("click", toggleTheme);
       headerRight.prepend(toggle);
     }
@@ -87,7 +103,6 @@
       row.appendChild(watchWrap);
       mainGrid.after(row);
 
-      // Responsive
       const style = document.createElement("style");
       style.textContent = "@media(max-width:768px){#mapWatchRow{grid-template-columns:1fr!important}}";
       document.head.appendChild(style);
@@ -98,7 +113,8 @@
   function initMap() {
     const container = document.getElementById("mapContainer");
     if (!container || typeof L === "undefined") return;
-    container.innerHTML = ""; container.style.cssText = "height:320px;";
+    container.innerHTML = "";
+    container.style.cssText = "height:320px;";
     map = L.map("mapContainer", { zoomControl: true, attributionControl: false });
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 18 }).addTo(map);
     map.setView([20, 0], 2);
@@ -107,8 +123,10 @@
   function updateMap(geo, ip, riskLevel) {
     if (!map || geo.lat == null || geo.lon == null) return;
     const color = { CRITICAL:"#ff3355", HIGH:"#ff7700", MEDIUM:"#ffcc00", LOW:"#00e87c" }[riskLevel] || "#00d9ff";
-    const icon  = L.divIcon({ className:"", iconSize:[14,14], iconAnchor:[7,7],
-      html:`<div style="width:14px;height:14px;border-radius:50%;background:${color};border:2px solid #fff;box-shadow:0 0 8px ${color};"></div>` });
+    const icon  = L.divIcon({
+      className: "", iconSize: [14,14], iconAnchor: [7,7],
+      html: `<div style="width:14px;height:14px;border-radius:50%;background:${color};border:2px solid #fff;box-shadow:0 0 8px ${color};"></div>`
+    });
     if (mapMarker) map.removeLayer(mapMarker);
     mapMarker = L.marker([geo.lat, geo.lon], { icon })
       .addTo(map)
@@ -124,45 +142,50 @@
     scoreBtn.addEventListener("click", scoreIP);
     clearBtn.addEventListener("click", clearPanel);
     ipInput.addEventListener("keydown", e => { if (e.key === "Enter") scoreIP(); });
+
     document.querySelectorAll(".quick-chip").forEach(chip => {
       chip.addEventListener("click", () => { ipInput.value = chip.dataset.ip; scoreIP(); });
     });
+
     document.addEventListener("click", e => {
       if (e.target.id === "csvBtn")      document.getElementById("csvUpload").click();
       if (e.target.id === "exportBtn")   exportLog();
       if (e.target.id === "addWatchBtn") addCurrentToWatchlist();
       if (e.target.id === "pollBtn")     triggerPoll();
     });
+
     document.addEventListener("change", e => {
       if (e.target.id === "csvUpload") handleCSVUpload(e.target.files[0]);
     });
-    
-    resultBody.addEventListener("click", e => {
-      if (e.target.id === "watchCurrentBtn") addCurrentToWatchlist();
-    });
 
-    // Tab switching via delegation
-resultBody.addEventListener("click", e => {
-  const tabBtn = e.target.closest(".tab-btn");
-  if (tabBtn) {
-    const tab = tabBtn.dataset.tab;
-    const ip  = tabBtn.dataset.ip;
-    ["Signals","Network","WHOIS"].forEach(t => {
-      const content = document.getElementById(`tabContent-${t}`);
-      const btn     = resultBody.querySelector(`.tab-btn[data-tab="${t}"]`);
-      if (content) content.style.display = t === tab ? "block" : "none";
-      if (btn) {
-        btn.style.borderBottomColor = t === tab ? "var(--accent)" : "transparent";
-        btn.style.color             = t === tab ? "var(--accent)" : "var(--text3)";
+    // Single unified click handler on resultBody — no inline onclick needed
+    resultBody.addEventListener("click", e => {
+      if (e.target.id === "watchCurrentBtn") {
+        addCurrentToWatchlist();
+        return;
+      }
+      const tabBtn = e.target.closest(".tab-btn");
+      if (tabBtn) {
+        const tab = tabBtn.dataset.tab;
+        const ip  = tabBtn.dataset.ip;
+        ["Signals","Network","WHOIS"].forEach(t => {
+          const content = document.getElementById(`tabContent-${t}`);
+          const btn     = resultBody.querySelector(`.tab-btn[data-tab="${t}"]`);
+          if (content) content.style.display = t === tab ? "block" : "none";
+          if (btn) {
+            btn.style.borderBottomColor = t === tab ? "var(--accent)" : "transparent";
+            btn.style.color             = t === tab ? "var(--accent)" : "var(--text3)";
+          }
+        });
+        if (tab === "WHOIS" && ip) {
+          const panel = document.getElementById("whoisPanel");
+          if (panel && panel.dataset.loaded === "false") {
+            panel.dataset.loaded = "true";
+            loadWhois(ip);
+          }
+        }
       }
     });
-    if (tab === "WHOIS" && ip) {
-      const panel = document.getElementById("whoisPanel");
-      if (panel?.querySelector("[style*='Click the WHOIS']")) loadWhois(ip);
-    }
-  }
-  if (e.target.id === "watchCurrentBtn") addCurrentToWatchlist();
-});
   }
 
   // ── Theme ──────────────────────────────────────────────────────────────────
@@ -227,7 +250,8 @@ resultBody.addEventListener("click", e => {
     const threshold = parseInt(prompt("Alert threshold (0-100):", "30") || "30");
     try {
       const res  = await fetch(`${API}/watchlist`, {
-        method: "POST", headers: { "Content-Type": "application/json", "x-api-key": API_KEY },
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-api-key": API_KEY },
         body: JSON.stringify({ ip, label, threshold, alertOnChange: true })
       });
       const data = await res.json();
@@ -239,7 +263,9 @@ resultBody.addEventListener("click", e => {
 
   async function removeFromWatchlist(ip) {
     try {
-      await fetch(`${API}/watchlist/${encodeURIComponent(ip)}`, { method: "DELETE", headers: { "x-api-key": API_KEY } });
+      await fetch(`${API}/watchlist/${encodeURIComponent(ip)}`, {
+        method: "DELETE", headers: { "x-api-key": API_KEY }
+      });
       loadWatchlist();
     } catch (err) { setBulkStatus(`Error: ${err.message}`); }
   }
@@ -256,61 +282,73 @@ resultBody.addEventListener("click", e => {
     }
   }
 
-function renderWatchlist(items, monitor) {
-  // ... existing count/status code ...
-  if (!body) return;
-  body.innerHTML = items.map(item => {
-    const clr = { CRITICAL:"#ff3355", HIGH:"#ff7700", MEDIUM:"#ffcc00", LOW:"#00e87c", UNKNOWN:"#6a8fa8" }[item.last_risk] || "#6a8fa8";
-    const chk = item.last_checked ? new Date(item.last_checked).toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"}) : "never";
-    return `
-      <div class="watchlist-item" data-ip="${escHtml(item.ip)}" style="display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid var(--border);cursor:pointer;">
-        <div style="flex:1;min-width:0;">
-          <div style="font-size:12px;font-weight:600;color:var(--text);font-family:monospace;">${escHtml(item.ip)}</div>
-          <div style="font-size:10px;color:var(--text3);">${item.label !== item.ip ? escHtml(item.label) + " · " : ""}checked ${chk}</div>
-          <div style="height:2px;background:var(--bg3);border-radius:2px;margin-top:4px;">
-            <div style="height:2px;width:${item.last_score}%;background:${clr};border-radius:2px;"></div>
+  function renderWatchlist(items, monitor) {
+    const count = document.getElementById("watchlistCount");
+    const body  = document.getElementById("watchlistBody");
+    const mStat = document.getElementById("monitorStatus");
+
+    if (count) count.textContent = `${items.length} IP${items.length !== 1 ? "s" : ""}`;
+    if (monitor && mStat) mStat.textContent = `Monitor: ${monitor.active ? "● ACTIVE" : "○ INACTIVE"} · every ${monitor.intervalMins}min`;
+
+    if (!items.length) {
+      if (body) body.innerHTML = `<div style="padding:24px;text-align:center;color:var(--text3);font-size:11px;">No IPs being watched.<br>Score an IP then click <strong>+ WATCH</strong>.</div>`;
+      return;
+    }
+
+    if (!body) return;
+
+    body.innerHTML = items.map(item => {
+      const clr = { CRITICAL:"#ff3355", HIGH:"#ff7700", MEDIUM:"#ffcc00", LOW:"#00e87c", UNKNOWN:"#6a8fa8" }[item.last_risk] || "#6a8fa8";
+      const chk = item.last_checked ? new Date(item.last_checked).toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"}) : "never";
+      return `
+        <div class="watchlist-item" data-ip="${escHtml(item.ip)}"
+          style="display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid var(--border);cursor:pointer;">
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:12px;font-weight:600;color:var(--text);font-family:monospace;">${escHtml(item.ip)}</div>
+            <div style="font-size:10px;color:var(--text3);">${item.label !== item.ip ? escHtml(item.label) + " · " : ""}checked ${chk}</div>
+            <div style="height:2px;background:var(--bg3);border-radius:2px;margin-top:4px;">
+              <div style="height:2px;width:${item.last_score}%;background:${clr};border-radius:2px;"></div>
+            </div>
           </div>
-        </div>
-        <div style="text-align:right;flex-shrink:0;">
-          <div style="font-size:16px;font-weight:700;color:${clr};">${item.last_score}</div>
-          <div style="font-size:9px;font-weight:700;color:${clr};letter-spacing:1px;">${item.last_risk}</div>
-        </div>
-        <div style="font-size:10px;color:var(--text3);">⚑${item.threshold}</div>
-        <button class="watchlist-remove" data-ip="${escHtml(item.ip)}"
-          style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px;padding:4px;" title="Remove">✕</button>
-      </div>`;
-  }).join("");
+          <div style="text-align:right;flex-shrink:0;">
+            <div style="font-size:16px;font-weight:700;color:${clr};">${item.last_score}</div>
+            <div style="font-size:9px;font-weight:700;color:${clr};letter-spacing:1px;">${item.last_risk}</div>
+          </div>
+          <div style="font-size:10px;color:var(--text3);">⚑${item.threshold}</div>
+          <button class="watchlist-remove" data-ip="${escHtml(item.ip)}"
+            style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px;padding:4px;" title="Remove">✕</button>
+        </div>`;
+    }).join("");
 
-  // Event delegation — no inline onclick
-  body.querySelectorAll(".watchlist-item").forEach(row => {
-    row.addEventListener("click", () => { ipInput.value = row.dataset.ip; scoreIP(); });
-  });
-  body.querySelectorAll(".watchlist-remove").forEach(btn => {
-    btn.addEventListener("click", e => { e.stopPropagation(); removeFromWatchlist(btn.dataset.ip); });
-  });
-}
-  // window.removeFromWatchlist = removeFromWatchlist;
-  // window.scoreIP             = scoreIP;
-  // window.addCurrentToWatchlist = addCurrentToWatchlist;
+    body.querySelectorAll(".watchlist-item").forEach(row => {
+      row.addEventListener("click", () => { ipInput.value = row.dataset.ip; scoreIP(); });
+    });
+    body.querySelectorAll(".watchlist-remove").forEach(btn => {
+      btn.addEventListener("click", e => { e.stopPropagation(); removeFromWatchlist(btn.dataset.ip); });
+    });
+  }
 
-  // ── WHOIS deep dive ────────────────────────────────────────────────────────
+  // ── WHOIS ──────────────────────────────────────────────────────────────────
   async function loadWhois(ip) {
     const panel = document.getElementById("whoisPanel");
     if (!panel) return;
-    panel.innerHTML = `<div style="padding:16px;color:var(--text2);font-size:12px;">Loading WHOIS data…</div>`;
+    panel.innerHTML = `<div style="padding:24px;text-align:center;color:var(--text2);font-size:12px;">Loading WHOIS data for ${escHtml(ip)}…</div>`;
     try {
       const res  = await fetch(`${API}/whois/${encodeURIComponent(ip)}`, { headers: { "x-api-key": API_KEY } });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
+      if (!res.ok) throw new Error(data.error || "WHOIS lookup failed");
       renderWhois(data.whois, data.signals || [], panel);
     } catch (err) {
-      panel.innerHTML = `<div style="padding:16px;color:var(--critical);font-size:12px;">⚠ WHOIS lookup failed: ${escHtml(err.message)}</div>`;
+      panel.dataset.loaded = "false";
+      panel.innerHTML = `<div style="padding:16px;color:var(--critical);font-size:12px;">⚠ ${escHtml(err.message)}<br><small style="color:var(--text3);">Click WHOIS tab to retry</small></div>`;
     }
   }
 
   function renderWhois(w, signals, panel) {
-    if (!w) { panel.innerHTML = `<div style="padding:16px;color:var(--text3);font-size:12px;">No WHOIS data available</div>`; return; }
-
+    if (!w) {
+      panel.innerHTML = `<div style="padding:16px;color:var(--text3);font-size:12px;">No WHOIS data available for this IP</div>`;
+      return;
+    }
     const ageBadge = w.agedays !== null
       ? `<span style="font-size:10px;padding:2px 8px;border-radius:3px;margin-left:8px;
            background:${w.agedays < 30 ? "rgba(255,51,85,0.15)" : w.agedays < 90 ? "rgba(255,119,0,0.15)" : "rgba(0,232,124,0.1)"};
@@ -328,30 +366,28 @@ function renderWatchlist(items, monitor) {
               <span class="sig-sev">${s.severity.toUpperCase()}</span>
             </div>`).join("")}
         </div>` : ""}
-
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:16px;">
         <div class="detail-card">
           <div class="detail-card-title">// Registration</div>
-          ${kv("Network",    w.network   || "—")}
-          ${kv("Handle",     w.handle    || "—")}
-          ${kv("CIDR",       w.cidr      || "—")}
-          ${kv("Type",       w.type      || "—")}
+          ${kv("Network",  w.network  || "—")}
+          ${kv("Handle",   w.handle   || "—")}
+          ${kv("CIDR",     w.cidr     || "—")}
+          ${kv("Type",     w.type     || "—")}
           <div class="kv">
             <span class="kv-key">Registered</span>
-            <span class="kv-val">${w.registered !== "—" ? new Date(w.registered).toLocaleDateString() : "—"}${ageBadge}</span>
+            <span class="kv-val">${w.registered && w.registered !== "—" ? new Date(w.registered).toLocaleDateString() : "—"}${ageBadge}</span>
           </div>
-          ${kv("Last Changed", w.lastChanged !== "—" ? new Date(w.lastChanged).toLocaleDateString() : "—")}
+          ${kv("Last Changed", w.lastChanged && w.lastChanged !== "—" ? new Date(w.lastChanged).toLocaleDateString() : "—")}
         </div>
         <div class="detail-card">
           <div class="detail-card-title">// Organization</div>
-          ${kv("Org Name",  w.orgName    || "—")}
-          ${kv("Org ID",    w.orgId      || "—")}
-          ${kv("Country",   w.country    || "—")}
+          ${kv("Org Name",    w.orgName    || "—")}
+          ${kv("Org ID",      w.orgId      || "—")}
+          ${kv("Country",     w.country    || "—")}
           ${kv("Abuse Email", w.abuseEmail || "—")}
-          ${kv("Registrar", w.registrar  || "—")}
+          ${kv("Registrar",   w.registrar  || "—")}
         </div>
       </div>
-
       ${w.remarks?.length ? `
         <div style="padding:0 16px 16px;">
           <div class="detail-card">
@@ -361,7 +397,7 @@ function renderWatchlist(items, monitor) {
         </div>` : ""}`;
   }
 
-  // ── Render result with tabs ────────────────────────────────────────────────
+  // ── Render result ──────────────────────────────────────────────────────────
   function renderResult(d) {
     const score     = d.score        ?? 0;
     const riskLevel = d.riskLevel    ?? "LOW";
@@ -383,7 +419,8 @@ function renderWatchlist(items, monitor) {
         <div class="score-ring-wrap">
           <svg width="120" height="120" viewBox="0 0 120 120">
             <circle class="score-bg" cx="60" cy="60" r="52"/>
-            <circle class="score-fill" cx="60" cy="60" r="52" stroke="${stroke}" stroke-dasharray="${circ}" stroke-dashoffset="${offset}"/>
+            <circle class="score-fill" cx="60" cy="60" r="52"
+              stroke="${stroke}" stroke-dasharray="${circ}" stroke-dashoffset="${offset}"/>
           </svg>
           <div class="score-center">
             <div class="score-num" style="color:${stroke}">${score}</div>
@@ -406,17 +443,15 @@ function renderWatchlist(items, monitor) {
 
       ${threatFeedBadges(d.threatFeeds)}
 
-      <!-- Tabs -->
       <div style="display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:16px;">
-${["Signals","Network","WHOIS"].map((tab, i) => `
-  <button class="tab-btn" data-tab="${tab}" data-ip="${escHtml(d.ip)}"
-    style="padding:8px 16px;background:none;border:none;border-bottom:2px solid ${i===0?"var(--accent)":"transparent"};
-           color:${i===0?"var(--accent)":"var(--text3)"};cursor:pointer;font-family:inherit;font-size:11px;letter-spacing:1px;text-transform:uppercase;">
-    ${tab}
-  </button>`).join("")}
+        ${["Signals","Network","WHOIS"].map((tab, i) => `
+          <button class="tab-btn" data-tab="${tab}" data-ip="${escHtml(d.ip)}"
+            style="padding:8px 16px;background:none;border:none;border-bottom:2px solid ${i===0?"var(--accent)":"transparent"};
+                   color:${i===0?"var(--accent)":"var(--text3)"};cursor:pointer;font-family:inherit;font-size:11px;letter-spacing:1px;text-transform:uppercase;">
+            ${tab}
+          </button>`).join("")}
       </div>
 
-      <!-- Signals tab -->
       <div id="tabContent-Signals">
         <div class="signal-list">
           ${signals.map(s => `
@@ -428,7 +463,6 @@ ${["Signals","Network","WHOIS"].map((tab, i) => `
         </div>
       </div>
 
-      <!-- Network tab -->
       <div id="tabContent-Network" style="display:none;">
         <div class="detail-grid">
           <div class="detail-card">
@@ -467,34 +501,14 @@ ${["Signals","Network","WHOIS"].map((tab, i) => `
           </div>` : ""}
       </div>
 
-      <!-- WHOIS tab -->
       <div id="tabContent-WHOIS" style="display:none;">
-        <div id="whoisPanel">
-          <div style="padding:16px;text-align:center;color:var(--text3);font-size:11px;">
-            Click the WHOIS tab to load deep registration data
+        <div id="whoisPanel" data-loaded="false">
+          <div style="padding:24px;text-align:center;color:var(--text3);font-size:11px;">
+            Click the WHOIS tab above to load deep registration data
           </div>
         </div>
       </div>`;
   }
-
-  // window.switchTab = function(tab, ip) {
-  //   ["Signals","Network","WHOIS"].forEach(t => {
-  //     const content = document.getElementById(`tabContent-${t}`);
-  //     const btn     = document.getElementById(`tab-${t}`);
-  //     if (content) content.style.display = t === tab ? "block" : "none";
-  //     if (btn) {
-  //       btn.style.borderBottomColor = t === tab ? "var(--accent)" : "transparent";
-  //       btn.style.color             = t === tab ? "var(--accent)" : "var(--text3)";
-  //     }
-  //   });
-  //   // Lazy-load WHOIS when tab is clicked
-  //   if (tab === "WHOIS" && ip) {
-  //     const panel = document.getElementById("whoisPanel");
-  //     if (panel && panel.querySelector("[style*='Click the WHOIS']")) {
-  //       loadWhois(ip);
-  //     }
-  //   }
-  // };
 
   // ── Helpers ────────────────────────────────────────────────────────────────
   function threatFeedBadges(tf) {
@@ -534,7 +548,6 @@ ${["Signals","Network","WHOIS"].map((tab, i) => `
     return sigs;
   }
 
-  // ── Bulk CSV ───────────────────────────────────────────────────────────────
   async function handleCSVUpload(file) {
     if (!file) return;
     const text = await file.text();
@@ -544,7 +557,8 @@ ${["Signals","Network","WHOIS"].map((tab, i) => `
     setBulkStatus(`Scoring ${ips.length} IPs…`);
     try {
       const res  = await fetch(`${API}/score/batch`, {
-        method:"POST", headers:{"Content-Type":"application/json","x-api-key":API_KEY},
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-api-key": API_KEY },
         body: JSON.stringify({ ips })
       });
       const data = await res.json();
@@ -557,14 +571,14 @@ ${["Signals","Network","WHOIS"].map((tab, i) => `
     } catch (err) { setBulkStatus(`Error: ${err.message}`); }
   }
 
-  // ── Export ─────────────────────────────────────────────────────────────────
   function exportLog() {
     if (!auditEntries.length) { setBulkStatus("No entries to export."); return; }
     const headers = ["IP","Score","Risk","Action","Country","City","ISP","Feodo","Spamhaus","ET","Scored At"];
     const rows    = auditEntries.map(e => [
       e.ip, e.score, e.riskLevel, e.action,
       e.geo?.country||"—", e.geo?.city||"—", e.network?.isp||"—",
-      e.threatFeeds?.feodo?"Yes":"No", e.threatFeeds?.spamhaus?"Yes":"No",
+      e.threatFeeds?.feodo?"Yes":"No",
+      e.threatFeeds?.spamhaus?"Yes":"No",
       e.threatFeeds?.emergingThreats?"Yes":"No",
       e.meta?.scoredAt ? new Date(e.meta.scoredAt).toISOString() : new Date().toISOString()
     ]);
@@ -572,11 +586,11 @@ ${["Signals","Network","WHOIS"].map((tab, i) => `
     const blob = new Blob([csv],{type:"text/csv"});
     const url  = URL.createObjectURL(blob);
     const a    = Object.assign(document.createElement("a"),{href:url,download:`ipshield-${Date.now()}.csv`});
-    a.click(); URL.revokeObjectURL(url);
+    a.click();
+    URL.revokeObjectURL(url);
     setBulkStatus(`✓ Exported ${auditEntries.length} entries.`);
   }
 
-  // ── Audit log ──────────────────────────────────────────────────────────────
   function addAuditEntry(d) {
     auditEntries.unshift(d);
     if (auditEntries.length > 100) auditEntries.pop();
@@ -590,7 +604,12 @@ ${["Signals","Network","WHOIS"].map((tab, i) => `
       return;
     }
     auditList.innerHTML = auditEntries.map(e => {
-      const f = [e.threatFeeds?.feodo&&"F",e.threatFeeds?.spamhaus&&"S",e.threatFeeds?.emergingThreats&&"E",e.threatFeeds?.otx?.pulseCount>0&&"O"].filter(Boolean).join("");
+      const f = [
+        e.threatFeeds?.feodo&&"F",
+        e.threatFeeds?.spamhaus&&"S",
+        e.threatFeeds?.emergingThreats&&"E",
+        e.threatFeeds?.otx?.pulseCount>0&&"O"
+      ].filter(Boolean).join("");
       return `<div class="audit-item" data-ip="${escHtml(e.ip)}">
         <span class="audit-ip">${escHtml(e.ip)}</span>
         ${f?`<span style="font-size:9px;color:#ff3355;font-weight:700;">[${f}]</span>`:""}
@@ -604,7 +623,6 @@ ${["Signals","Network","WHOIS"].map((tab, i) => `
     });
   }
 
-  // ── Stats ──────────────────────────────────────────────────────────────────
   function updateStats(riskLevel) {
     if (riskLevel in sessionStats) {
       sessionStats[riskLevel]++;
@@ -642,7 +660,12 @@ ${["Signals","Network","WHOIS"].map((tab, i) => `
       const header = document.querySelector("header");
       if (header?.nextSibling) header.parentNode.insertBefore(bar, header.nextSibling);
     }
-    const list = [{ label:"FEODO", data:feeds.feodo },{ label:"SPAMHAUS", data:feeds.spamhaus },{ label:"ET INTEL", data:feeds.emergingThreats },{ label:"OTX", data:feeds.otx }];
+    const list = [
+      { label:"FEODO",    data:feeds.feodo },
+      { label:"SPAMHAUS", data:feeds.spamhaus },
+      { label:"ET INTEL", data:feeds.emergingThreats },
+      { label:"OTX",      data:feeds.otx }
+    ];
     bar.innerHTML = `<span style="color:var(--text3);text-transform:uppercase;letter-spacing:2px;">Threat Feeds:</span>
       ${list.map(f => {
         const loaded = f.label==="OTX" ? f.data?.enabled : f.data?.loaded;
@@ -651,21 +674,37 @@ ${["Signals","Network","WHOIS"].map((tab, i) => `
       }).join("")}`;
   }
 
-  // ── UI ─────────────────────────────────────────────────────────────────────
   function setLoading(on) {
     scoreBtn.disabled = on;
-    if (on) { resultBody.innerHTML = `<div class="loading"><div class="spinner"></div><span>Analyzing ${escHtml(ipInput.value.trim())}…</span></div>`; procTime.textContent = ""; }
+    if (on) {
+      resultBody.innerHTML = `<div class="loading"><div class="spinner"></div><span>Analyzing ${escHtml(ipInput.value.trim())}…</span></div>`;
+      procTime.textContent = "";
+    }
   }
 
   function clearPanel() {
     currentIP = null; lastResult = null; ipInput.value = "";
-    resultBody.innerHTML = `<div class="placeholder"><div class="placeholder-icon">⬡</div><div class="placeholder-text">Enter an IP address above to begin analysis.<br>Risk scoring includes geo, threat intel,<br>network classification &amp; behavioral signals.</div></div>`;
+    resultBody.innerHTML = `
+      <div class="placeholder">
+        <div class="placeholder-icon">⬡</div>
+        <div class="placeholder-text">
+          Enter an IP address above to begin analysis.<br>
+          Risk scoring includes geo, threat intel,<br>
+          network classification &amp; behavioral signals.
+        </div>
+      </div>`;
     procTime.textContent = "";
   }
 
-  function showError(msg) { resultBody.innerHTML = `<div class="error-msg">⚠ ${escHtml(msg)}</div>`; procTime.textContent = ""; }
+  function showError(msg) {
+    resultBody.innerHTML = `<div class="error-msg">⚠ ${escHtml(msg)}</div>`;
+    procTime.textContent = "";
+  }
 
-  function setBulkStatus(msg) { const el = document.getElementById("bulkStatus"); if (el) el.textContent = msg; }
+  function setBulkStatus(msg) {
+    const el = document.getElementById("bulkStatus");
+    if (el) el.textContent = msg;
+  }
 
   function kv(key, val) {
     return `<div class="kv"><span class="kv-key">${key}</span><span class="kv-val" title="${escHtml(String(val))}">${escHtml(String(val))}</span></div>`;
@@ -673,11 +712,18 @@ ${["Signals","Network","WHOIS"].map((tab, i) => `
 
   function riskIcon(l) { return { CRITICAL:"■", HIGH:"▲", MEDIUM:"◆", LOW:"●" }[l] || "●"; }
 
-  function fmtTime(d) { return d instanceof Date && !isNaN(d) ? d.toLocaleTimeString([],{hour:"2-digit",minute:"2-digit",second:"2-digit"}) : "—"; }
+  function fmtTime(d) {
+    return d instanceof Date && !isNaN(d)
+      ? d.toLocaleTimeString([],{hour:"2-digit",minute:"2-digit",second:"2-digit"}) : "—";
+  }
 
-  function escHtml(str) { return String(str).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+  function escHtml(str) {
+    return String(str).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+  }
 
-  function isValidIP(ip) { return /^(\d{1,3}\.){3}\d{1,3}$/.test(ip) || /^[0-9a-fA-F:]+$/.test(ip); }
+  function isValidIP(ip) {
+    return /^(\d{1,3}\.){3}\d{1,3}$/.test(ip) || /^[0-9a-fA-F:]+$/.test(ip);
+  }
 
   setInterval(loadWatchlist, 1000 * 60 * 2);
 })();
