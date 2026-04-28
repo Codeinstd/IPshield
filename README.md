@@ -1,4 +1,4 @@
-# IPShield — Real-Time IP Risk Scoring API
+# IPShield — Real-Time IP Risk Scoring Platform
 
 A production-ready MVP for real-time IP risk assessment. Scores IPv4/IPv6 addresses across multiple risk dimensions and returns a structured risk report in milliseconds.
 
