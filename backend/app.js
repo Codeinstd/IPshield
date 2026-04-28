@@ -43,7 +43,8 @@ contentSecurityPolicy: {
     imgSrc:     ["'self'", "data:", "https://*.tile.openstreetmap.org", "https://*.basemaps.cartocdn.com"],
     connectSrc: ["'self'"],
     workerSrc:  ["'self'", "blob:"],
-    objectSrc:  ["'none'"]
+    objectSrc:  ["'none'"],
+    connectSrc: ["'self'", "https://api.ipify.org"],
   }
 },
   hsts: isProd ? { maxAge: 31536000, includeSubDomains: true } : false
