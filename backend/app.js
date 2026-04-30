@@ -20,6 +20,7 @@ const whoisRoutes     = require("./routes/whois.routes");
 const authMiddleware  = require("./middleware/auth.middleware");
 const errorMiddleware = require("./middleware/error.middleware");
 const logger          = require("./utils/logger");
+const docsRoutes = require("./routes/docs.routes");
 
 const isProd = process.env.NODE_ENV === "production";
 const app    = express();
@@ -36,19 +37,22 @@ app.use(helmet({
 contentSecurityPolicy: {
   directives: {
     defaultSrc: ["'self'"],
-    scriptSrc:  ["'self'"],
+    scriptSrc: ["'self'", "https://cdnjs.cloudflare.com", "'sha256-HWYeuO854TnBqC+pc2O1r0NIztXJLBa+KcR5sh0k1EY='"],
     scriptSrcAttr: ["'none'"],
-    styleSrc:   ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+    styleSrc:  ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://cdnjs.cloudflare.com"],
     fontSrc:    ["'self'", "https://fonts.gstatic.com"],
     imgSrc:     ["'self'", "data:", "https://*.tile.openstreetmap.org", "https://*.basemaps.cartocdn.com"],
     connectSrc: ["'self'"],
     workerSrc:  ["'self'", "blob:"],
     objectSrc:  ["'none'"],
     connectSrc: ["'self'", "https://api.ipify.org"],
+    
   }
 },
   hsts: isProd ? { maxAge: 31536000, includeSubDomains: true } : false
 }));
+
+app.use("/api/docs", docsRoutes);
 
 const allowedOrigins = (process.env.ALLOWED_ORIGIN || "").split(",").map(s => s.trim()).filter(Boolean);
 app.use(cors({

@@ -1,9 +1,3 @@
-/**
- * db.js
- * Place in: backend/store/db.js
- * Updated: exposes getDb() for watchlist store
- */
-
 const path = require("path");
 let db;
 
@@ -15,9 +9,7 @@ try {
   db.pragma("synchronous = NORMAL");
   bootstrap();
   console.log("✓ SQLite connected");
-} catch (err) {
-  db = null;
-}
+} catch (err) { db = null; }
 
 function bootstrap() {
   db.exec(`
@@ -36,9 +28,11 @@ function bootstrap() {
       velocity    TEXT,
       scored_at   INTEGER NOT NULL
     );
-    CREATE INDEX IF NOT EXISTS idx_scores_ip   ON scores(ip);
-    CREATE INDEX IF NOT EXISTS idx_scores_risk ON scores(risk_level);
-    CREATE INDEX IF NOT EXISTS idx_scores_at   ON scores(scored_at);
+    CREATE INDEX IF NOT EXISTS idx_scores_ip      ON scores(ip);
+    CREATE INDEX IF NOT EXISTS idx_scores_risk    ON scores(risk_level);
+    CREATE INDEX IF NOT EXISTS idx_scores_at      ON scores(scored_at);
+    CREATE INDEX IF NOT EXISTS idx_scores_score   ON scores(score);
+    CREATE INDEX IF NOT EXISTS idx_scores_country ON scores(country);
   `);
 }
 
@@ -46,68 +40,99 @@ function insertScore(result) {
   if (!db) return;
   try {
     db.prepare(`
-      INSERT INTO scores
-        (ip, score, risk_level, action, country, city, isp, is_proxy, is_tor, is_dc, velocity, scored_at)
-      VALUES
-        (@ip, @score, @riskLevel, @action, @country, @city, @isp, @isProxy, @isTor, @isDc, @velocity, @scoredAt)
+      INSERT INTO scores (ip,score,risk_level,action,country,city,isp,is_proxy,is_tor,is_dc,velocity,scored_at)
+      VALUES (@ip,@score,@riskLevel,@action,@country,@city,@isp,@isProxy,@isTor,@isDc,@velocity,@scoredAt)
     `).run({
-      ip:        result.ip,
-      score:     result.score,
-      riskLevel: result.riskLevel,
-      action:    result.action,
-      country:   result.geo?.country            || null,
-      city:      result.geo?.city               || null,
-      isp:       result.network?.isp            || null,
-      isProxy:   result.intelligence?.isProxy    ? 1 : 0,
-      isTor:     result.intelligence?.isTor      ? 1 : 0,
-      isDc:      result.intelligence?.isDatacenter ? 1 : 0,
-      velocity:  result.intelligence?.velocity  || null,
-      scoredAt:  Date.now()
+      ip: result.ip, score: result.score, riskLevel: result.riskLevel,
+      action: result.action, country: result.geo?.country||null, city: result.geo?.city||null,
+      isp: result.network?.isp||null,
+      isProxy: result.intelligence?.isProxy    ? 1 : 0,
+      isTor:   result.intelligence?.isTor      ? 1 : 0,
+      isDc:    result.intelligence?.isDatacenter ? 1 : 0,
+      velocity: result.intelligence?.velocity||null, scoredAt: Date.now()
     });
-  } catch (err) {
-    console.error("DB insert error:", err.message);
-  }
+  } catch (err) { console.error("DB insert error:", err.message); }
 }
 
-function getHistory(limit = 100) {
+function getHistory(limit = 100, offset = 0) {
   if (!db) return [];
-  try { return db.prepare("SELECT * FROM scores ORDER BY scored_at DESC LIMIT ?").all(limit); }
+  try { return db.prepare("SELECT * FROM scores ORDER BY scored_at DESC LIMIT ? OFFSET ?").all(limit, offset); }
   catch { return []; }
 }
 
+function searchHistory(filters = {}, limit = 50, offset = 0, sort = "date_desc") {
+  if (!db) return { total: 0, entries: [] };
+  const conds = [], params = [];
+
+  if (filters.q) {
+    conds.push("(ip LIKE ? OR country LIKE ? OR isp LIKE ?)");
+    const q = `%${filters.q}%`;
+    params.push(q, q, q);
+  }
+  if (filters.risk)            { conds.push("risk_level = ?");  params.push(filters.risk); }
+  if (filters.action)          { conds.push("action = ?");       params.push(filters.action); }
+  if (filters.country)         { conds.push("country LIKE ?");   params.push(`%${filters.country}%`); }
+  if (filters.minScore != null){ conds.push("score >= ?");        params.push(filters.minScore); }
+  if (filters.maxScore != null){ conds.push("score <= ?");        params.push(filters.maxScore); }
+  if (filters.proxy    != null){ conds.push("is_proxy = ?");     params.push(filters.proxy ? 1 : 0); }
+  if (filters.tor      != null){ conds.push("is_tor = ?");       params.push(filters.tor ? 1 : 0); }
+  if (filters.datacenter!=null){ conds.push("is_dc = ?");        params.push(filters.datacenter ? 1 : 0); }
+  if (filters.from)            { conds.push("scored_at >= ?");    params.push(filters.from); }
+  if (filters.to)              { conds.push("scored_at <= ?");    params.push(filters.to); }
+
+  const where   = conds.length ? `WHERE ${conds.join(" AND ")}` : "";
+  const orderBy = { score_desc:"ORDER BY score DESC, scored_at DESC", score_asc:"ORDER BY score ASC", date_asc:"ORDER BY scored_at ASC", date_desc:"ORDER BY scored_at DESC" }[sort] || "ORDER BY scored_at DESC";
+
+  try {
+    const total   = db.prepare(`SELECT COUNT(*) as c FROM scores ${where}`).get(...params).c;
+    const entries = db.prepare(`SELECT * FROM scores ${where} ${orderBy} LIMIT ? OFFSET ?`).all(...params, limit, offset);
+    return { total, entries };
+  } catch (err) { console.error("DB search error:", err.message); return { total: 0, entries: [] }; }
+}
+
 function getRiskDistribution() {
-  if (!db) return { CRITICAL: 0, HIGH: 0, MEDIUM: 0, LOW: 0 };
+  if (!db) return { CRITICAL:0, HIGH:0, MEDIUM:0, LOW:0 };
   try {
     const rows = db.prepare("SELECT risk_level, COUNT(*) as count FROM scores GROUP BY risk_level").all();
-    const dist = { CRITICAL: 0, HIGH: 0, MEDIUM: 0, LOW: 0 };
+    const dist = { CRITICAL:0, HIGH:0, MEDIUM:0, LOW:0 };
     rows.forEach(r => { if (r.risk_level in dist) dist[r.risk_level] = r.count; });
     return dist;
-  } catch { return { CRITICAL: 0, HIGH: 0, MEDIUM: 0, LOW: 0 }; }
+  } catch { return { CRITICAL:0, HIGH:0, MEDIUM:0, LOW:0 }; }
 }
 
 function getTotalScored() {
   if (!db) return 0;
-  try { return db.prepare("SELECT COUNT(*) as c FROM scores").get().c; }
-  catch { return 0; }
+  try { return db.prepare("SELECT COUNT(*) as c FROM scores").get().c; } catch { return 0; }
 }
 
 function getTopThreats(limit = 10) {
   if (!db) return [];
   try {
-    return db.prepare(`
-      SELECT ip, score, risk_level, country, city, scored_at
-      FROM scores WHERE risk_level IN ('CRITICAL','HIGH')
-      ORDER BY score DESC, scored_at DESC LIMIT ?
-    `).all(limit);
+    return db.prepare(`SELECT ip,score,risk_level,country,city,scored_at FROM scores WHERE risk_level IN ('CRITICAL','HIGH') ORDER BY score DESC, scored_at DESC LIMIT ?`).all(limit);
   } catch { return []; }
 }
 
-// Expose raw db instance for other stores (watchlist, etc.)
+function getTopCountries(limit = 10) {
+  if (!db) return [];
+  try {
+    return db.prepare(`SELECT country, COUNT(*) as count, ROUND(AVG(score),1) as avg_score FROM scores WHERE country IS NOT NULL AND country != '' GROUP BY country ORDER BY count DESC LIMIT ?`).all(limit);
+  } catch { return []; }
+}
+
+function getTopISPs(limit = 10) {
+  if (!db) return [];
+  try {
+    return db.prepare(`SELECT isp, COUNT(*) as count, ROUND(AVG(score),1) as avg_score FROM scores WHERE isp IS NOT NULL AND isp != '' GROUP BY isp ORDER BY count DESC LIMIT ?`).all(limit);
+  } catch { return []; }
+}
+
 function getDb()       { return db; }
 function isAvailable() { return !!db; }
 function close()       { if (db) { db.close(); db = null; } }
 
 module.exports = {
-  insertScore, getHistory, getRiskDistribution,
-  getTotalScored, getTopThreats, isAvailable, close, getDb
+  insertScore, getHistory, searchHistory,
+  getRiskDistribution, getTotalScored,
+  getTopThreats, getTopCountries, getTopISPs,
+  isAvailable, close, getDb
 };
