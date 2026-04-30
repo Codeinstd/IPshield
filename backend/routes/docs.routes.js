@@ -25,7 +25,7 @@ router.get("/", (req, res) => {
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.11.0/swagger-ui.min.css">
   <style>
     * { box-sizing: border-box; }
-    body { margin: 0; background: #0d1117; font-family: 'JetBrains Mono', monospace; }
+    body { margin: 0; background: #0d1117; font-family: 'Inter', 'JetBrains Mono', monospace; }
 
     /* Header bar */
     .docs-header {

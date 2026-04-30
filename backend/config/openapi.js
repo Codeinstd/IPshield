@@ -24,13 +24,13 @@ All endpoints except \`/api/health\` require the \`x-api-key\` header.
     version:     "2.2.0",
     contact: {
       name:  "IPShield",
-      url:   "https://ipshield-nk0w.onrender.com"
+      url:   "https://ipshield.live/"
     }
   },
 
   servers: [
     { url: "/api", description: "Current server" },
-    { url: "https://ipshield-nk0w.onrender.com/api", description: "Production (Render)" }
+    { url: "https://ipshield.live/", description: "Production (Render)" }
   ],
 
   components: {

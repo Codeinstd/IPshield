@@ -3,24 +3,19 @@
   "version": "1.0.0",
   "description": "A production-ready MVP for real-time IP risk assessment. Scores IPv4/IPv6 addresses across multiple risk dimensions and returns a structured risk report in milliseconds.",
   "main": "index.js",
-
   "scripts": {
-  "start": "node backend/server.js",
-  "build": "npm rebuild better-sqlite3"
-},
-
+    "start": "node backend/server.js",
+    "build": "npm rebuild better-sqlite3"
+  },
   "engines": {
     "node": ">=18.0.0"
   },
-
-
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
     "axios": "^1.15.1",
-    "better-sqlite3": "^12.9.0",
     "body-parser": "^2.2.2",
     "compression": "^1.8.1",
     "cors": "^2.8.6",
