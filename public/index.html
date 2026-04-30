@@ -429,35 +429,60 @@
 
     <!-- API Docs -->
     <div class="docs-section">
-      <div class="docs-title">// REST API Endpoints</div>
-      <div class="endpoints">
-        <div class="endpoint-card">
-          <div class="ep-method GET">GET</div>
-          <div class="ep-path">/api/score/:ip</div>
-          <div class="ep-desc">Score a single IPv4 or IPv6 address. Returns full risk report with geo, signals, and recommended action.</div>
-        </div>
-        <div class="endpoint-card">
-          <div class="ep-method POST">POST</div>
-          <div class="ep-path">/api/score/batch</div>
-          <div class="ep-desc">Score up to 50 IPs in one request. Body: <code style="color:var(--accent)">{"ips": ["1.2.3.4", ...]}</code></div>
-        </div>
-        <div class="endpoint-card">
-          <div class="ep-method GET">GET</div>
-          <div class="ep-path">/api/audit</div>
-          <div class="ep-desc">Retrieve recent scoring audit log. Query param: <code style="color:var(--accent)">?limit=50</code></div>
-        </div>
-        <div class="endpoint-card">
-          <div class="ep-method GET">GET</div>
-          <div class="ep-path">/api/stats</div>
-          <div class="ep-desc">Runtime stats: cache size, risk distribution, memory usage, tracked IPs.</div>
-        </div>
-        <div class="endpoint-card">
-          <div class="ep-method GET">GET</div>
-          <div class="ep-path">/api/health</div>
-          <div class="ep-desc">Health check endpoint. Returns <code style="color:var(--low)">{"status":"ok"}</code> when service is running.</div>
-        </div>
-      </div>
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+    <div class="docs-title" style="margin-bottom:0;">// REST API</div>
+    <a href="/api/docs" target="_blank"
+      style="display:inline-flex;align-items:center;gap:8px;padding:10px 20px;
+             background:var(--accent);color:#000;border-radius:8px;text-decoration:none;
+             font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;
+             letter-spacing:1px;box-shadow:0 0 20px rgba(0,217,255,0.3);
+             transition:all 0.15s;">
+      OPEN INTERACTIVE DOCS →
+    </a>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;">
+    <div class="endpoint-card">
+      <div class="ep-method GET">GET</div>
+      <div class="ep-path">/api/score/:ip</div>
+      <div class="ep-desc">Full risk score — geo, threat intel, Shodan, VirusTotal, feeds, WHOIS signals.</div>
     </div>
+    <div class="endpoint-card">
+      <div class="ep-method POST">POST</div>
+      <div class="ep-path">/api/score/batch</div>
+      <div class="ep-desc">Score up to 50 IPs in one request. Body: <code style="color:var(--accent)">{"ips":[...]}</code></div>
+    </div>
+    <div class="endpoint-card">
+      <div class="ep-method GET">GET</div>
+      <div class="ep-path">/api/whois/:ip</div>
+      <div class="ep-desc">RDAP deep dive — registration, org, abuse contact, age signals.</div>
+    </div>
+    <div class="endpoint-card">
+      <div class="ep-method GET">GET</div>
+      <div class="ep-path">/api/watchlist</div>
+      <div class="ep-desc">List watched IPs with scores and monitor status.</div>
+    </div>
+    <div class="endpoint-card">
+      <div class="ep-method GET">GET</div>
+      <div class="ep-path">/api/audit/search</div>
+      <div class="ep-desc">Search history by IP, risk, score range, country, proxy, tor, date.</div>
+    </div>
+    <div class="endpoint-card">
+      <div class="ep-method GET">GET</div>
+      <div class="ep-path">/api/stats</div>
+      <div class="ep-desc">Risk distribution, cache size, feed status, memory usage.</div>
+    </div>
+    <div class="endpoint-card">
+      <div class="ep-method GET">GET</div>
+      <div class="ep-path">/api/health</div>
+      <div class="ep-desc">Health check — no auth required. Returns DB and monitor status.</div>
+    </div>
+    <div class="endpoint-card" style="border-color:rgba(0,217,255,0.3);background:rgba(0,217,255,0.03);">
+      <div class="ep-method GET" style="color:var(--accent);">DOCS</div>
+      <div class="ep-path">/api/docs</div>
+      <div class="ep-desc">Live Swagger UI — try every endpoint interactively with your API key.</div>
+    </div>
+  </div>
+</div>
     
   </main>
 </div>
