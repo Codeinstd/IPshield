@@ -1,8 +1,3 @@
-/**
- * app.js — backend
- * Place in: backend/app.js
- */
-
 const express      = require("express");
 const cors         = require("cors");
 const helmet       = require("helmet");
@@ -20,7 +15,7 @@ const whoisRoutes     = require("./routes/whois.routes");
 const authMiddleware  = require("./middleware/auth.middleware");
 const errorMiddleware = require("./middleware/error.middleware");
 const logger          = require("./utils/logger");
-const docsRoutes = require("./routes/docs.routes");
+const docsRoutes      = require("./routes/docs.routes");
 
 const isProd = process.env.NODE_ENV === "production";
 const app    = express();
