@@ -337,14 +337,17 @@
   <main>
     <!-- Search -->
     <div class="search-section">
-      <div class="search-label">// IP Risk Analysis {By default the system detect your IP}</div>
+      <div class="search-label">// IP Risk Analysis {Detect IP by default}</div>
       <div class="search-row">
         <div class="search-input-wrap">
-          <span class="search-prefix">SCORE →</span>
-          <input class="search-input" id="ipInput" type="text" placeholder="Enter IPv4 or IPv6 address..." autocomplete="off" spellcheck="false" maxlength="45">
+          <span class="search-prefix">SCORE:</span>
+          <input class="search-input" id="ipInput" type="text" placeholder=" Enter IPv4 or IPv6 address..." autocomplete="off" spellcheck="false" maxlength="45">
         </div>
-      <button class="btn btn-primary" id="scoreBtn">ANALYZE</button>
-<button class="btn btn-ghost" id="clearBtn">CLEAR</button>
+        <div class="search-button">
+                <button class="btn btn-primary" id="scoreBtn">ANALYZE</button>
+                <button class="btn btn-ghost" id="clearBtn">CLEAR</button>
+        </div>
+
       </div>
      <div class="quick-tests">
   <span style="font-size:11px;color:var(--text3);margin-right:4px;">Quick tests:</span>
@@ -496,5 +499,244 @@
   @media (max-width: 768px) {
     #mapWatchRow { grid-template-columns: 1fr !important; }
   }
+
+  /* ── 768px — Tablet  */
+  @media (max-width: 768px) {
+  /* Header */
+   header { padding: 12px 16px; }
+  .logo-text { font-size: 18px; }
+  .header-right { gap: 10px; }
+  .header-right .btn { padding: 4px 8px; font-size: 10px; }
+  .version { display: none; }
+
+  /* Main padding */
+  main { padding: 16px; gap: 16px; }
+ 
+  /* Stats row — 2 columns  */
+  .stats-row { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .stat-value { font-size: 26px; }
+ 
+  /* Main grid — single column  */
+  .main-grid { grid-template-columns: 1fr; gap: 16px; }
+ 
+  /* Map + watchlist row — single column */
+  #mapWatchRow { grid-template-columns: 1fr !important; gap: 16px; }
+ 
+  /* Result panel */
+  .result-panel { min-height: 360px; }
+  .score-header { gap: 20px; }
+ 
+  /* Detail grid — single column */
+  .detail-grid { grid-template-columns: 1fr; }
+ 
+  /* Endpoints grid  */
+  .endpoints { grid-template-columns: 1fr; }
+  } 
+ 
+/* ── 640px — Large phone  */
+ @media (max-width: 640px) {
+  /* Header — tighter */
+   header { padding: 10px 14px; flex-wrap: wrap; gap: 8px; }
+  .logo-sub { display: none; }
+  .status-dot span { display: none; } 
+ 
+  /* Search */
+  .search-row { flex-wrap: wrap; gap: 12px; }
+  .search-input { font-size: 14px; padding: 12px 12px 12px 70px; }
+  .search-button { width: 100%; gap: 12px;}
+
+  /* .button { flex-wrap: wrap;} */
+  .btn-primary { width:80%; justify-content: center; }
+  .btn-ghost   { padding: 14px 14px; } 
+
+
+ 
+  Quick test chips — scrollable row 
+  .quick-tests {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 4px;
+    scrollbar-width: none;
+  }
+  .quick-tests::-webkit-scrollbar { display: none; }
+  .quick-chip { white-space: nowrap; flex-shrink: 0; }
+ 
+  /* Stats row — 2 columns, smaller */
+  .stats-row { gap: 8px; }
+  .stat-card { padding: 14px; }
+  .stat-value { font-size: 22px; }
+  .stat-label { font-size: 9px; }
+  .stat-sub   { font-size: 10px; }
+ 
+  /* Score header — stack vertically */
+  .score-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+  }
+
+  /* .score-ring-wrap { width: 100px; height: 100px; } */
+  .score-num { font-size: 28px; }
+  .score-ip  { font-size: 20px; }
+ 
+  /* Panel body */
+  .panel-body { padding: 16px; }
+  .panel-header { padding: 14px 16px; }
+ 
+  /* Audit panel */
+  .audit-list { max-height: 300px; }
+  .audit-item { padding: 8px 12px; gap: 6px; }
+  .audit-ip   { font-size: 11px; }
+  .audit-ts   { display: none; } /* hide timestamp on small screens */
+ 
+  /* Bulk section */
+  #bulkSection { gap: 6px; }
+  #bulkSection .btn { padding: 6px 10px; font-size: 10px; }
+ 
+  /* Watchlist */
+  #watchlistSection { max-height: 260px; }
+  #mapContainer     { height: 220px !important; }
+ 
+  /* Tabs */
+  .tab-btn { padding: 8px 10px !important; font-size: 10px !important; letter-spacing: 0.5px !important; }
+ 
+  /* Signal items */
+  .signal-item { flex-wrap: wrap; gap: 6px; }
+  .sig-cat     { width: auto; }
+ 
+  /* KV rows */
+  .kv { flex-wrap: wrap; gap: 2px; }
+  .kv-val { max-width: 100%; text-align: left; }
+ 
+  /* Docs section */
+  .docs-section { padding: 16px; }
+  .docs-title   { font-size: 9px; }
+ 
+  /* Audit filter controls */
+  #auditControls { padding: 10px 12px; gap: 8px; }
+  #auditSearch   { font-size: 11px; }
+ 
+  /* Firewall modal */
+  #firewallModal > div { border-radius: 8px; max-height: 90vh; }
+  #firewallModal .fw-format-btn { padding: 4px 8px; font-size: 10px; }
+ 
+  /* SIEM modal */
+  #siemModal > div { border-radius: 8px; max-height: 90vh; }
+ 
+  /* WHOIS grid — single column */
+  #whoisPanel > div[style*="grid-template-columns"] {
+    grid-template-columns: 1fr !important;
+  }
+} 
+ 
+/* ── 480px — Phone portrait  */
+ @media (max-width: 480px) {
+  /* Header — minimal */
+  .logo-icon  { width: 28px; height: 28px; font-size: 14px; }
+  .logo-text  { font-size: 16px; }
+  header .btn { font-size: 9px; padding: 3px 6px; } 
+
+  
+  /* Search Button */
+  .search-button { width: 100%; gap: 12px;}
+
+  /* .button { flex-wrap: wrap;} */
+  .btn-primary { width:75%; justify-content: center; }
+  .btn-ghost   { padding: 14px 14px; } 
+
+
+ 
+  /* Stats — 2 small columns */
+  .stat-value  { font-size: 20px; }
+  .stats-row   { grid-template-columns: repeat(2, 1fr); gap: 6px; }
+  .stat-card   { padding: 12px 10px; } */
+ 
+  /* Score ring smaller */
+  /* .score-ring-wrap { width: 88px; height: 88px; } */
+  .score-num       { font-size: 24px; } */
+ 
+  /* Risk badge */
+   .risk-badge { font-size: 11px; padding: 4px 10px; } */
+ 
+  /* Map height */
+   #mapContainer { height: 180px !important; } */
+ 
+  /* Audit controls — stack sort + buttons */
+  #auditControls > div:last-child { flex-direction: column; align-items: flex-start; }
+  #auditSort { width: 100%; } */
+ 
+  /* Pagination */
+   #auditPrev, #auditNext { padding: 4px 8px; font-size: 10px; } */
+ 
+  /* Feed status bar */
+   #feedStatusBar { padding: 6px 14px; gap: 10px; font-size: 9px; } */
+ 
+  /* Score boost line */
+   .score-meta > div[style*="font-size:10px"] { font-size: 9px !important; } */
+ 
+  /* Action badge */
+   .action-badge { font-size: 10px; } */
+ 
+  /* Panel header */
+  .panel-header { padding: 12px 14px; }
+  .panel-title  { font-size: 10px; letter-spacing: 2px; }
+} 
+ 
+/* ── 380px — Small phone  */
+ @media (max-width: 380px) {
+  main { padding: 10px; gap: 12px; }
+
+   /* Search Button */
+  .search-button { width: 100%; gap: 12px; flex-wrap: wrap;}
+
+  /* .button { flex-wrap: wrap;} */
+  .btn-primary { width: 70%;  justify-content: center; }
+  .btn-ghost   { padding: 14px 14px; } 
+ 
+  .stats-row  { grid-template-columns: repeat(2, 1fr); gap: 6px; }
+  .stat-card  { padding: 10px 8px; }
+  .stat-value { font-size: 18px; }
+ 
+  /* .score-ring-wrap { width: 80px; height: 80px; } */
+  .score-num       { font-size: 22px; }
+  .score-ip        { font-size: 16px; }
+ 
+  /* Hide less important elements */
+  .audit-badge { display: none; }
+  #mapWatchRow { display: none; }  /* hide map+watchlist on very small screens */
+ 
+  /* Show a compact watchlist indicator instead */
+  .docs-section { padding: 12px; }
+} 
+ 
+/* ── Touch improvements (all mobile)  */
+ @media (hover: none) and (pointer: coarse) {
+  /* Larger tap targets */
+  .btn              { min-height: 40px; }
+  .quick-chip       { min-height: 32px; padding: 6px 14px; }
+  .audit-item       { min-height: 44px; }
+  .tab-btn          { min-height: 40px !important; }
+  .watchlist-item   { min-height: 48px; }
+  .audit-risk-chip  { min-height: 32px; }
+  .audit-toggle     { min-height: 32px; }
+ 
+  /* Remove hover effects that look broken on touch */
+  .btn-primary:hover { transform: none; }
+  .quick-chip:hover  { border-color: var(--border); color: var(--text2); }
+  .audit-item:hover  { background: transparent; } 
+} 
+ 
+/* ── Scrollbar polish (mobile webkit)  */
+ @media (max-width: 768px) {
+  .audit-list::-webkit-scrollbar,
+  #watchlistBody::-webkit-scrollbar,
+  #whoisPanel::-webkit-scrollbar { width: 3px; }
+ 
+  .audit-list::-webkit-scrollbar-thumb,
+  #watchlistBody::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+}
+
 </style>
+
 </html>

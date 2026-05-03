@@ -33,7 +33,7 @@
   setupEventListeners();
   detectAndFillIP();
 
-  // ── Auto-detect system IP ─────────────────────────────────────────────────
+  // ── Auto-detect system IP 
   async function detectAndFillIP() {
     try {
       const res  = await fetch("https://api.ipify.org?format=json");
@@ -46,18 +46,78 @@
     } catch (_) {}
   }
 
-  // ── Extra UI ───────────────────────────────────────────────────────────────
+  // apply Filter
+  function applyFilters(entries) {
+  return entries.filter(e => {
+    const f = auditFilters;
+
+    // Search — check ip, country, isp
+    if (f.q && f.q.trim()) {
+      const q = f.q.trim().toLowerCase();
+      const ip      = (e.ip              || "").toLowerCase();
+      const country = (e.geo?.country    || e.country || "").toLowerCase();
+      const isp     = (e.network?.isp    || e.isp     || "").toLowerCase();
+      if (!ip.includes(q) && !country.includes(q) && !isp.includes(q)) return false;
+    }
+
+    // Risk — handle both camelCase (session) and snake_case (DB)
+    if (f.risk) {
+      const risk = e.riskLevel || e.risk_level || "";
+      if (risk !== f.risk) return false;
+    }
+
+    // Score
+    if (f.minScore > 0   && (e.score ?? 0) < f.minScore) return false;
+    if (f.maxScore < 100 && (e.score ?? 0) > f.maxScore) return false;
+
+    // Boolean toggles — handle both formats
+    if (f.proxy !== null) {
+      const isProxy = e.intelligence?.isProxy ?? e.is_proxy ?? false;
+      if (!!isProxy !== f.proxy) return false;
+    }
+    if (f.tor !== null) {
+      const isTor = e.intelligence?.isTor ?? e.is_tor ?? false;
+      if (!!isTor !== f.tor) return false;
+    }
+    if (f.datacenter !== null) {
+      const isDC = e.intelligence?.isDatacenter ?? e.is_dc ?? false;
+      if (!!isDC !== f.datacenter) return false;
+    }
+
+    return true;
+  });
+}
+
+  // ── Extra UI 
   function injectExtraUI() {
     const headerRight = document.querySelector(".header-right");
+
+     // SIEM button — icon only on mobile
+    const siemBtn = document.createElement("button");
+    siemBtn.className   = "btn btn-ghost";
+    siemBtn.id          = "siemBtn";
+    siemBtn.title       = "SIEM Webhook Settings";
+    siemBtn.style.cssText = "padding:6px 12px;font-size:11px;";
+    // Show icon only on mobile, full label on desktop
+    siemBtn.innerHTML = `<span class="desktop-label">📡 SIEM</span><span class="mobile-label" style="display:none;">📡</span>`;
+    headerRight.prepend(siemBtn);
+          
     if (headerRight) {
+      // Theme toggle — hide label on very small screens via title attribute
       const toggle = document.createElement("button");
-      toggle.className = "btn btn-ghost";
-      toggle.id = "themeToggle";
+      toggle.className   = "btn btn-ghost";
+      toggle.id          = "themeToggle";
       toggle.textContent = "☀ LIGHT";
-      toggle.style.cssText = "padding:6px 12px;font-size:11px;";
+      toggle.title       = "Toggle dark/light mode";
+      toggle.style.cssText = "padding:6px 12px; font-size:11px";
       toggle.addEventListener("click", toggleTheme);
       headerRight.prepend(toggle);
+
+      // Show icon only on mobile, full label on desktop
+    toggle.innerHTML = `<span class="desktop-label">☀ LIGHT</span><span class="mobile-label" style="display:none;">☀</span>`;
+    headerRight.prepend(toggle);
     }
+
 
     const searchSection = document.querySelector(".search-section");
     if (searchSection) {
@@ -115,7 +175,24 @@
       style.textContent = "@media(max-width:768px){#mapWatchRow{grid-template-columns:1fr!important}}";
       document.head.appendChild(style);
     }
+
+    // Responsive label switching
+    const mq = window.matchMedia("(max-width: 480px)");
+    function updateLabels(e) {
+      document.querySelectorAll(".desktop-label").forEach(el => el.style.display = e.matches ? "none" : "");
+      document.querySelectorAll(".mobile-label").forEach(el => el.style.display = e.matches ? "inline" : "none");
+    }
+    mq.addEventListener("change", updateLabels);
+    updateLabels(mq);
+
+      // mobile responsive 
+    function getWatchlistMaxHeight() {
+    return window.innerWidth < 640 ? "200px" : "260px";
   }
+
+
+  }
+
 
   // Inject audit controls
   function injectAuditControls() {
@@ -150,15 +227,16 @@
     </div>
  
     <!-- Score range + toggles row -->
-    <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
-      <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text3);">
-        <span>Score:</span>
-        <input id="auditMinScore" type="number" min="0" max="100" value="0" placeholder="0"
-          style="width:44px;padding:3px 6px;background:var(--bg2);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:11px;font-family:inherit;">
-        <span>–</span>
-        <input id="auditMaxScore" type="number" min="0" max="100" value="100" placeholder="100"
-          style="width:44px;padding:3px 6px;background:var(--bg2);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:11px;font-family:inherit;">
-      </div>
+    <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text3);">
+    <span>Score:</span>
+    <input id="auditMinScore" type="number" min="0" max="100" value="0"
+      inputmode="numeric"
+      style="width:44px;padding:3px 6px;background:var(--bg2);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:11px;font-family:inherit;">
+    <span>–</span>
+    <input id="auditMaxScore" type="number" min="0" max="100" value="100"
+      inputmode="numeric"
+      style="width:44px;padding:3px 6px;background:var(--bg2);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:11px;font-family:inherit;">
+  </div>
  
       <div style="display:flex;gap:6px;">
         <button class="audit-toggle" data-key="proxy" data-val="null"
@@ -203,12 +281,17 @@
  
   // Wire up events
   let searchTimer;
-  document.getElementById("auditSearch")?.addEventListener("input", e => {
-    const clearBtn = document.getElementById("auditSearchClear");
-    if (clearBtn) clearBtn.style.display = e.target.value ? "block" : "none";
-    clearTimeout(searchTimer);
-    searchTimer = setTimeout(() => { auditFilters.q = e.target.value.trim(); auditPage = 0; renderAudit(); }, 300);
-  });
+  document.getElementById("auditSearch").addEventListener("input", e => {
+  const val      = e.target.value;
+  const clearBtn = document.getElementById("auditSearchClear");
+  if (clearBtn) clearBtn.style.display = val ? "block" : "none";
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(() => {
+    auditFilters.q = val.trim(); // ← use val, not e.target.value (stale closure issue)
+    auditPage = 0;
+    renderAudit();
+  }, 300);
+});
  
   document.getElementById("auditSearchClear")?.addEventListener("click", () => {
     const input = document.getElementById("auditSearch");
@@ -217,14 +300,20 @@
   });
  
   document.querySelectorAll(".audit-risk-chip").forEach(chip => {
-    chip.addEventListener("click", () => {
-      document.querySelectorAll(".audit-risk-chip").forEach(c => {
-        c.style.borderColor = "var(--border)"; c.style.background = "transparent"; c.style.color = "var(--text3)";
-      });
-      chip.style.borderColor = "var(--accent)"; chip.style.background = "rgba(0,217,255,0.1)"; chip.style.color = "var(--accent)";
-      auditFilters.risk = chip.dataset.risk; auditPage = 0; renderAudit();
+  chip.addEventListener("click", () => {
+    document.querySelectorAll(".audit-risk-chip").forEach(c => {
+      c.style.borderColor = "var(--border)";
+      c.style.background  = "transparent";
+      c.style.color       = "var(--text3)";
     });
+    chip.style.borderColor = "var(--accent)";
+    chip.style.background  = "rgba(0,217,255,0.1)";
+    chip.style.color       = "var(--accent)";
+    auditFilters.risk = chip.dataset.risk; // "" for ALL, "CRITICAL" etc for others
+    auditPage = 0;
+    renderAudit(); 
   });
+});
  
   document.getElementById("auditMinScore")?.addEventListener("change", e => {
     auditFilters.minScore = parseInt(e.target.value) || 0; auditPage = 0; renderAudit();
@@ -278,6 +367,62 @@
     const sort  = document.getElementById("auditSort");     if (sort)  sort.value  = "date_desc";
     renderAudit();
   });
+}
+
+ // Rate Limit
+  function showAPIStatus(apiStatus) {
+  // Remove existing banner if any
+  const existing = document.getElementById("apiStatusBanner");
+  if (existing) existing.remove();
+ 
+  if (!apiStatus || apiStatus.abuseIPDB === "ok") return;
+ 
+  const banner = document.createElement("div");
+  banner.id = "apiStatusBanner";
+ 
+  if (apiStatus.abuseIPDB === "rate_limited") {
+    banner.style.cssText = `
+      position:fixed;bottom:24px;right:24px;z-index:9999;
+      background:#111820;border:1px solid rgba(255,204,0,0.5);border-radius:8px;
+      padding:12px 16px;max-width:320px;box-shadow:0 4px 24px rgba(0,0,0,0.4);`;
+    banner.innerHTML = `
+      <div style="display:flex;align-items:flex-start;gap:10px;">
+        <span style="font-size:18px;">⚠</span>
+        <div>
+          <div style="font-size:12px;font-weight:700;color:#ffcc00;letter-spacing:1px;margin-bottom:4px;">ABUSEIPDB RATE LIMITED</div>
+          <div style="font-size:11px;color:#6a8fa8;line-height:1.5;">
+            Daily quota reached. Abuse scores show 0 until reset.
+            Other intel sources (Shodan, feeds, geo) are unaffected.
+          </div>
+          ${apiStatus.resetAt ? `<div style="font-size:10px;color:#3d5a72;margin-top:6px;">Resets: ${new Date(apiStatus.resetAt).toLocaleString()}</div>` : ""}
+        </div>
+        <button onclick="this.parentElement.parentElement.remove()"
+          style="background:none;border:none;color:#3d5a72;cursor:pointer;font-size:16px;padding:0;flex-shrink:0;">✕</button>
+      </div>`;
+  } else if (apiStatus.abuseIPDB === "key_error") {
+    banner.style.cssText = `
+      position:fixed;bottom:24px;right:24px;z-index:9999;
+      background:#111820;border:1px solid rgba(255,51,85,0.5);border-radius:8px;
+      padding:12px 16px;max-width:320px;box-shadow:0 4px 24px rgba(0,0,0,0.4);`;
+    banner.innerHTML = `
+      <div style="display:flex;align-items:flex-start;gap:10px;">
+        <span style="font-size:18px;">🔑</span>
+        <div>
+          <div style="font-size:12px;font-weight:700;color:#ff3355;letter-spacing:1px;margin-bottom:4px;">ABUSEIPDB KEY ERROR</div>
+          <div style="font-size:11px;color:#6a8fa8;line-height:1.5;">
+            API key is invalid or missing. Check ABUSE_IPDB_KEY in your environment variables.
+          </div>
+        </div>
+        <button onclick="this.parentElement.parentElement.remove()"
+          style="background:none;border:none;color:#3d5a72;cursor:pointer;font-size:16px;padding:0;flex-shrink:0;">✕</button>
+      </div>`;
+  }
+
+
+  document.body.appendChild(banner);
+ 
+  // Auto-dismiss after 10 seconds
+  setTimeout(() => banner.remove(), 10000);
 }
 
 // firewall export 
@@ -401,6 +546,19 @@ function showFirewallExport() {
   }
  
   updateOutput(); // initial render
+
+  // mobile responsive
+  const MODAL_OVERLAY_STYLE = `
+  position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:10000;
+  display:flex;align-items:${window.innerWidth < 640 ? "flex-end" : "center"};
+  justify-content:center;padding:${window.innerWidth < 640 ? "0" : "24px"};`;
+ 
+  const MODAL_STYLE = `
+    background:var(--bg1);border:1px solid var(--border);
+    border-radius:${window.innerWidth < 640 ? "12px 12px 0 0" : "12px"};
+    width:100%;max-width:${window.innerWidth < 640 ? "100%" : "700px"};
+    max-height:${window.innerWidth < 640 ? "92vh" : "85vh"};
+    display:flex;flex-direction:column;overflow:hidden;`;
 }
  
 function generateRules(format, ips, action = "DROP") {
@@ -542,10 +700,11 @@ function addAuditEntry(d) {
  
 function renderAudit() {
   if (usingDB) { fetchAndRenderFromDB(); return; }
- 
+
   const filtered = sortEntries(applyFilters(auditEntries));
   auditTotal     = filtered.length;
-  const page     = filtered.slice(auditPage * AUDIT_PAGE_SIZE, (auditPage + 1) * AUDIT_PAGE_SIZE);
+  const start    = auditPage * AUDIT_PAGE_SIZE;
+  const page     = filtered.slice(start, start + AUDIT_PAGE_SIZE);
   renderAuditEntries(page, filtered.length);
 }
  
@@ -613,15 +772,32 @@ function renderAuditEntries(entries, total) {
 }
 
   // ── Map 
-  function initMap() {
-    const container = document.getElementById("mapContainer");
-    if (!container || typeof L === "undefined") return;
-    container.innerHTML = "";
-    container.style.cssText = "height:320px;";
-    map = L.map("mapContainer", { zoomControl: true, attributionControl: false });
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 18 }).addTo(map);
-    map.setView([20, 0], 2);
-  }
+ function initMap() {
+  const container = document.getElementById("mapContainer");
+  if (!container || typeof L === "undefined") return;
+  container.innerHTML = "";
+ 
+  // Responsive height
+  const height = window.innerWidth < 480 ? "180px"
+               : window.innerWidth < 640 ? "220px"
+               : "320px";
+  container.style.cssText = `height:${height};`;
+ 
+  map = L.map("mapContainer", { zoomControl: window.innerWidth > 640, attributionControl: false });
+  L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
+    maxZoom: 19, subdomains: "abcd"
+  }).addTo(map);
+  map.setView([20, 0], 2);
+ 
+  // Update height on resize
+  window.addEventListener("resize", () => {
+    const newHeight = window.innerWidth < 480 ? "180px"
+                    : window.innerWidth < 640 ? "220px"
+                    : "320px";
+    const c = document.getElementById("mapContainer");
+    if (c) { c.style.height = newHeight; map.invalidateSize(); }
+  });
+}
 
   function updateMap(geo, ip, riskLevel) {
     if (!map || geo.lat == null || geo.lon == null) return;
@@ -656,6 +832,7 @@ function renderAuditEntries(entries, total) {
       if (e.target.id === "addWatchBtn") addCurrentToWatchlist();
       if (e.target.id === "pollBtn")     triggerPoll();
       if (e.target.id === "firewallBtn") showFirewallExport();
+      if (e.target.id === "siemBtn")     showSIEMPanel();
     });
 
     document.addEventListener("change", e => {
@@ -692,7 +869,7 @@ function renderAuditEntries(entries, total) {
     });
   }
 
-  // ── Theme ──────────────────────────────────────────────────────────────────
+  // ── Theme 
   function toggleTheme() {
     isDark = !isDark;
     const root = document.documentElement;
@@ -710,11 +887,14 @@ function renderAuditEntries(entries, total) {
     }
     if (map) {
       map.eachLayer(l => { if (l._url) map.removeLayer(l); });
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 18 }).addTo(map);
+      // L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 18 }).addTo(map);
+      L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
+        maxZoom: 19, subdomains: "abcd"
+      }).addTo(map);
     }
   }
 
-  // ── Score ──────────────────────────────────────────────────────────────────
+  // ── Score 
   async function scoreIP() {
     const ip = ipInput.value.trim();
     if (!ip) return;
@@ -730,14 +910,263 @@ function renderAuditEntries(entries, total) {
       addAuditEntry(data);
       updateStats(data.riskLevel);
       updateMap(data.geo || {}, data.ip, data.riskLevel);
-    } catch (err) {
+      showAPIStatus(data.apiStatus);
+    } 
+    catch (err) {
       showError(err.message || "Service temporarily unavailable.");
-    } finally {
+    } 
+    finally {
       setLoading(false);
     }
   }
 
-  // ── Watchlist ──────────────────────────────────────────────────────────────
+  // Show Rate Limiting
+  async function showSIEMPanel() {
+  // Fetch current status
+  let status = null;
+  let formats = [];
+  try {
+    const [sRes, fRes] = await Promise.all([
+      fetch(`${API}/siem/status`, { headers: { "x-api-key": API_KEY } }),
+      fetch(`${API}/siem/formats`, { headers: { "x-api-key": API_KEY } })
+    ]);
+    const sData = await sRes.json();
+    const fData = await fRes.json();
+    status  = sData.siem;
+    formats = fData.formats || [];
+  } catch (_) {}
+ 
+  const overlay = document.createElement("div");
+  overlay.id = "siemModal";
+  overlay.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:10000;display:flex;align-items:center;justify-content:center;padding:24px;";
+ 
+  const modal = document.createElement("div");
+  modal.style.cssText = "background:var(--bg1);border:1px solid var(--border);border-radius:12px;width:100%;max-width:700px;max-height:85vh;display:flex;flex-direction:column;overflow:hidden;";
+ 
+  const statusColor  = status?.enabled ? "var(--low)" : "var(--text3)";
+  const statusLabel  = status?.enabled ? "● ACTIVE" : "○ INACTIVE";
+ 
+  modal.innerHTML = `
+    <div style="padding:20px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+      <div>
+        <div style="font-size:13px;font-weight:700;color:var(--text);">SIEM Webhook Integration</div>
+        <div style="font-size:11px;margin-top:3px;color:${statusColor};">${statusLabel}${status?.type ? ` — ${status.type.toUpperCase()}` : ""}</div>
+      </div>
+      <button id="siemClose" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:20px;padding:4px;">✕</button>
+    </div>
+ 
+    <div style="overflow-y:auto;flex:1;padding:24px;display:flex;flex-direction:column;gap:20px;">
+ 
+      <!-- Config status -->
+      <div class="detail-card">
+        <div class="detail-card-title">// Current Configuration</div>
+        ${kv("Status",    status?.enabled ? "Enabled" : "Disabled")}
+        ${kv("Type",      status?.type?.toUpperCase() || "Not set")}
+        ${kv("Webhook URL", status?.url || "Not configured")}
+        ${kv("Token",     status?.hasToken ? "Set ✓" : "Not set")}
+        ${kv("Min Score", status?.minScore ?? 0)}
+        ${kv("Min Risk",  status?.minRisk  || "LOW")}
+      </div>
+ 
+      <!-- Env var instructions -->
+      <div class="detail-card">
+        <div class="detail-card-title">// Setup — Add to Render Environment Variables</div>
+        <div style="background:var(--bg);border-radius:6px;padding:12px;font-size:11px;line-height:2;color:var(--text2);font-family:'JetBrains Mono',monospace;overflow-x:auto;">
+SIEM_ENABLED=true<br>
+SIEM_TYPE=<span style="color:var(--accent)">splunk|elastic|sentinel|qradar|generic</span><br>
+SIEM_WEBHOOK_URL=<span style="color:var(--accent)">https://your-siem-endpoint</span><br>
+SIEM_TOKEN=<span style="color:var(--accent)">your_token_or_api_key</span><br>
+SIEM_MIN_SCORE=<span style="color:var(--accent)">0</span>     <span style="color:var(--text3)"># 0–100, only forward above this</span><br>
+SIEM_MIN_RISK=<span style="color:var(--accent)">LOW</span>    <span style="color:var(--text3)"># LOW|MEDIUM|HIGH|CRITICAL</span>
+        </div>
+      </div>
+ 
+      <!-- Supported formats -->
+      <div class="detail-card">
+        <div class="detail-card-title">// Supported Platforms</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;">
+          ${formats.map(f => `
+            <div style="padding:10px 12px;background:var(--bg);border-radius:6px;border:1px solid var(--border);">
+              <div style="font-size:11px;font-weight:700;color:var(--accent);margin-bottom:3px;">${escHtml(f.label)}</div>
+              <div style="font-size:10px;color:var(--text3);line-height:1.5;">${escHtml(f.description)}</div>
+            </div>`).join("")}
+        </div>
+      </div>
+ 
+      <!-- Test webhook -->
+      <div class="detail-card">
+        <div class="detail-card-title">// Test Webhook</div>
+        <div style="font-size:11px;color:var(--text3);margin-bottom:12px;">
+          Send a sample CRITICAL IP event to your configured SIEM. Uses current env var settings.
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+          <button id="siemTestBtn" class="btn btn-primary" style="padding:8px 20px;font-size:12px;">
+            Send Test Event
+          </button>
+          <span id="siemTestResult" style="font-size:12px;color:var(--text2);"></span>
+        </div>
+        <div id="siemTestDetail" style="margin-top:12px;font-size:11px;color:var(--text3);display:none;"></div>
+      </div>
+ 
+      <!-- Sample payload viewer -->
+      <div class="detail-card">
+        <div class="detail-card-title">// Sample Payload</div>
+        <div style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;">
+          ${formats.map((f, i) => `
+            <button class="siem-format-tab" data-format="${f.id}"
+              style="padding:4px 12px;border-radius:4px;border:1px solid ${i===0?"var(--accent)":"var(--border)"};
+                     background:${i===0?"rgba(0,217,255,0.1)":"transparent"};
+                     color:${i===0?"var(--accent)":"var(--text3)"};
+                     font-size:10px;cursor:pointer;font-family:inherit;">${f.label}</button>`).join("")}
+        </div>
+        <pre id="siemSamplePayload" style="background:var(--bg);border-radius:6px;padding:12px;font-size:10px;line-height:1.6;color:var(--text2);overflow:auto;max-height:200px;white-space:pre-wrap;word-break:break-all;">Loading…</pre>
+        <button id="siemCopySample" class="btn btn-ghost" style="margin-top:8px;padding:5px 14px;font-size:11px;">Copy Sample</button>
+      </div>
+    </div>`;
+ 
+  overlay.appendChild(modal);
+  document.body.appendChild(overlay);
+ 
+  // Close
+  document.getElementById("siemClose").addEventListener("click", () => overlay.remove());
+  overlay.addEventListener("click", e => { if (e.target === overlay) overlay.remove(); });
+ 
+  // Load first sample
+  loadSIEMSample(formats[0]?.id || "generic");
+ 
+  // Format tabs
+  modal.querySelectorAll(".siem-format-tab").forEach(btn => {
+    btn.addEventListener("click", () => {
+      modal.querySelectorAll(".siem-format-tab").forEach(b => {
+        b.style.borderColor = "var(--border)"; b.style.background = "transparent"; b.style.color = "var(--text3)";
+      });
+      btn.style.borderColor = "var(--accent)"; btn.style.background = "rgba(0,217,255,0.1)"; btn.style.color = "var(--accent)";
+      loadSIEMSample(btn.dataset.format);
+    });
+  });
+ 
+  // Test button
+  document.getElementById("siemTestBtn").addEventListener("click", async () => {
+    const btn    = document.getElementById("siemTestBtn");
+    const result = document.getElementById("siemTestResult");
+    const detail = document.getElementById("siemTestDetail");
+    btn.disabled = true; btn.textContent = "Sending…";
+    result.textContent = ""; detail.style.display = "none";
+    try {
+      const res  = await fetch(`${API}/siem/test`, {
+        method: "POST", headers: { "Content-Type": "application/json", "x-api-key": API_KEY },
+        body: JSON.stringify({})
+      });
+      const data = await res.json();
+      result.textContent = data.message;
+      result.style.color = data.success ? "var(--low)" : "var(--critical)";
+      if (!data.success && data.reason) {
+        detail.textContent = `Reason: ${data.reason}`;
+        detail.style.display = "block";
+        detail.style.color = "var(--text3)";
+      }
+    } catch (err) {
+      result.textContent = `Error: ${err.message}`;
+      result.style.color = "var(--critical)";
+    } finally {
+      btn.disabled = false; btn.textContent = "Send Test Event";
+    }
+  });
+ 
+  // Copy sample
+  document.getElementById("siemCopySample").addEventListener("click", () => {
+    const text = document.getElementById("siemSamplePayload").textContent;
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = document.getElementById("siemCopySample");
+      btn.textContent = "✓ Copied!";
+      setTimeout(() => { btn.textContent = "Copy Sample"; }, 2000);
+    });
+  });
+ 
+  async function loadSIEMSample(format) {
+    const pre = document.getElementById("siemSamplePayload");
+    pre.textContent = "Loading…";
+    try {
+      const res  = await fetch(`${API}/siem/sample/${format}`, { headers: { "x-api-key": API_KEY } });
+      const data = await res.json();
+      pre.textContent = JSON.stringify(data.sample, null, 2);
+    } catch (err) {
+      pre.textContent = `Error: ${err.message}`;
+    }
+  }
+
+  // mobile responsive 
+  const MODAL_OVERLAY_STYLE = `
+  position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:10000;
+  display:flex;align-items:${window.innerWidth < 640 ? "flex-end" : "center"};
+  justify-content:center;padding:${window.innerWidth < 640 ? "0" : "24px"};`;
+ 
+const MODAL_STYLE = `
+  background:var(--bg1);border:1px solid var(--border);
+  border-radius:${window.innerWidth < 640 ? "12px 12px 0 0" : "12px"};
+  width:100%;max-width:${window.innerWidth < 640 ? "100%" : "700px"};
+  max-height:${window.innerWidth < 640 ? "92vh" : "85vh"};
+  display:flex;flex-direction:column;overflow:hidden;`;
+  }
+
+  // rdnsCard Function
+  function rdnsCard(rdns) {
+  if (!rdns) return "";
+ 
+  if (rdns.private) {
+    return `
+      <div class="detail-card" style="margin-top:16px;">
+        <div class="detail-card-title">// Reverse DNS</div>
+        <div style="font-size:11px;color:var(--text3);padding:4px 0;">Private IP — no PTR record</div>
+      </div>`;
+  }
+ 
+  if (!rdns.primary && !rdns.hostnames?.length) {
+    return `
+      <div class="detail-card" style="margin-top:16px;">
+        <div class="detail-card-title">// Reverse DNS</div>
+        <div style="font-size:11px;color:var(--text3);padding:4px 0;">No PTR record found</div>
+      </div>`;
+  }
+ 
+  const fcrdnsBadge = rdns.fcrdns === true
+    ? `<span style="font-size:10px;padding:2px 8px;border-radius:3px;background:rgba(0,232,124,0.12);color:var(--low);border:1px solid rgba(0,232,124,0.3);margin-left:8px;">✓ FCrDNS</span>`
+    : rdns.fcrdns === false
+    ? `<span style="font-size:10px;padding:2px 8px;border-radius:3px;background:rgba(255,204,0,0.12);color:var(--medium);border:1px solid rgba(255,204,0,0.3);margin-left:8px;">⚠ Mismatch</span>`
+    : "";
+ 
+  const extraHostnames = (rdns.hostnames || []).slice(1);
+ 
+  return `
+    <div class="detail-card" style="margin-top:16px;">
+      <div class="detail-card-title">// Reverse DNS (PTR)</div>
+      <div class="kv" style="margin-top:6px;">
+        <span class="kv-key">Primary PTR</span>
+        <span style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;">
+          <span style="color:var(--accent);font-family:'JetBrains Mono',monospace;font-size:11px;">${escHtml(rdns.primary)}</span>
+          ${fcrdnsBadge}
+        </span>
+      </div>
+      ${extraHostnames.length ? `
+        <div class="kv">
+          <span class="kv-key">Other PTRs</span>
+          <span class="kv-val">
+            ${extraHostnames.map(h => `<div style="font-size:11px;color:var(--text2);font-family:'JetBrains Mono',monospace;">${escHtml(h)}</div>`).join("")}
+          </span>
+        </div>` : ""}
+      ${rdns.fcrdns === false ? `
+        <div style="margin-top:8px;padding:8px 10px;background:rgba(255,204,0,0.07);border-radius:6px;border-left:3px solid var(--medium);">
+          <div style="font-size:10px;color:var(--medium);font-weight:700;letter-spacing:1px;margin-bottom:3px;">FCrDNS MISMATCH</div>
+          <div style="font-size:11px;color:var(--text3);">PTR hostname does not resolve back to this IP — common indicator of spoofed or misconfigured reverse DNS.</div>
+        </div>` : ""}
+      ${rdns.fcrdns === true ? `
+        <div style="margin-top:6px;font-size:10px;color:var(--text3);">Forward-confirmed reverse DNS verified</div>` : ""}
+    </div>`;
+}
+
+
+
+  // ── Watchlist 
   async function loadWatchlist() {
     try {
       const res  = await fetch(`${API}/watchlist`, { headers: { "x-api-key": API_KEY } });
@@ -832,7 +1261,7 @@ function renderAuditEntries(entries, total) {
     });
   }
 
-  // ── WHOIS ──────────────────────────────────────────────────────────────────
+  // ── WHOIS 
   async function loadWhois(ip) {
     const panel = document.getElementById("whoisPanel");
     if (!panel) return;
@@ -901,7 +1330,7 @@ function renderAuditEntries(entries, total) {
         </div>` : ""}`;
   }
 
-  // ── Render result ──────────────────────────────────────────────────────────
+  // ── Render result 
   function renderResult(d) {
     const score     = d.score        ?? 0;
     const riskLevel = d.riskLevel    ?? "LOW";
@@ -909,6 +1338,7 @@ function renderAuditEntries(entries, total) {
     const geo       = d.geo          ?? {};
     const network   = d.network      ?? {};
     const intel     = d.intelligence ?? {};
+    const rdns      = d.rdns         ?? {};
     const meta      = d.meta         ?? {};
     const signals   = d.signals      || buildFallbackSignals(d);
 
@@ -968,41 +1398,47 @@ function renderAuditEntries(entries, total) {
       </div>
 
       <div id="tabContent-Network" style="display:none;">
-        <div class="detail-grid">
-          <div class="detail-card">
-            <div class="detail-card-title">// Geolocation</div>
-            ${kv("Country",  geo.country  || "—")}
-            ${kv("Region",   geo.region   || "—")}
-            ${kv("City",     geo.city     || "—")}
-            ${kv("Timezone", geo.timezone || "—")}
-            ${kv("Lat / Lon", geo.lat != null ? `${geo.lat}, ${geo.lon}` : "N/A (private)")}
-          </div>
-          <div class="detail-card">
-            <div class="detail-card-title">// Network</div>
-            ${kv("ISP",        network.isp  || "—")}
-            ${kv("ASN",        network.asn  || "—")}
-            ${kv("Type",       network.type || "—")}
-            ${kv("Datacenter", intel.isDatacenter ? "Yes" : "No")}
-            ${kv("Proxy",      intel.isProxy ? "⚠ Detected" : "No")}
-            ${kv("Tor",        intel.isTor   ? "⚠ Exit Node" : "No")}
-            ${intel.openPorts?.length ? kv("Open Ports", intel.openPorts.slice(0,6).join(", ")) : ""}
-            ${intel.vulns?.length     ? kv("CVEs", `${intel.vulns.length} found`) : ""}
-          </div>
+       <div class="detail-grid">
+      <div class="detail-card">
+        <div class="detail-card-title">// Geolocation</div>
+        ${kv("Country",  geo.country  || "—")}
+        ${kv("Region",   geo.region   || "—")}
+        ${kv("City",     geo.city     || "—")}
+        ${kv("Timezone", geo.timezone || "—")}
+        ${kv("Lat / Lon", geo.lat != null ? `${geo.lat}, ${geo.lon}` : "N/A (private)")}
+      </div>
+      <div class="detail-card">
+        <div class="detail-card-title">// Network</div>
+        ${kv("ISP",        network.isp  || "—")}
+        ${kv("ASN",        network.asn  || "—")}
+        ${kv("Type",       network.type || "—")}
+        ${kv("Datacenter", intel.isDatacenter ? "Yes" : "No")}
+        ${kv("Proxy",      intel.isProxy ? "⚠ Detected" : "No")}
+        ${kv("Tor",        intel.isTor   ? "⚠ Exit Node" : "No")}
+        ${intel.openPorts?.length ? kv("Open Ports", intel.openPorts.slice(0,6).join(", ")) : ""}
+        ${intel.vulns?.length     ? kv("CVEs", `${intel.vulns.length} found`) : ""}
+      </div>
+    </div>
+ 
+
+ 
+    ${intel.virusTotal ? `
+      <div class="detail-card" style="margin-top:16px;">
+        <div class="detail-card-title">// VirusTotal</div>
+        <div style="display:flex;gap:16px;margin-top:4px;">
+          ${vtBar("Malicious",  intel.virusTotal.malicious,  intel.virusTotal.total, "#ff3355")}
+          ${vtBar("Suspicious", intel.virusTotal.suspicious, intel.virusTotal.total, "#ff7700")}
+          ${vtBar("Harmless",   intel.virusTotal.harmless,   intel.virusTotal.total, "#00e87c")}
         </div>
-        ${intel.virusTotal ? `
-          <div class="detail-card" style="margin-top:16px;">
-            <div class="detail-card-title">// VirusTotal</div>
-            <div style="display:flex;gap:16px;margin-top:4px;">
-              ${vtBar("Malicious",  intel.virusTotal.malicious,  intel.virusTotal.total, "#ff3355")}
-              ${vtBar("Suspicious", intel.virusTotal.suspicious, intel.virusTotal.total, "#ff7700")}
-              ${vtBar("Harmless",   intel.virusTotal.harmless,   intel.virusTotal.total, "#00e87c")}
-            </div>
-          </div>` : ""}
-        ${d.threatFeeds?.otx?.pulseNames?.length ? `
-          <div class="detail-card" style="margin-top:16px;">
-            <div class="detail-card-title">// OTX Pulses</div>
-            ${d.threatFeeds.otx.pulseNames.map(n => `<div class="kv"><span class="kv-key">Pulse</span><span class="kv-val">${escHtml(n)}</span></div>`).join("")}
-          </div>` : ""}
+      </div>` : ""}
+ 
+    ${d.threatFeeds?.otx?.pulseNames?.length ? `
+      <div class="detail-card" style="margin-top:16px;">
+        <div class="detail-card-title">// OTX Pulses</div>
+        ${d.threatFeeds.otx.pulseNames.map(n => `
+          <div class="kv"><span class="kv-key">Pulse</span><span class="kv-val">${escHtml(n)}</span></div>`).join("")}
+      </div>` : ""}
+      ${rdnsCard(d.rdns)}
       </div>
 
       <div id="tabContent-WHOIS" style="display:none;">
@@ -1014,7 +1450,7 @@ function renderAuditEntries(entries, total) {
       </div>`;
   }
 
-  // ── Helpers ────────────────────────────────────────────────────────────────
+  // ── Helpers 
   function threatFeedBadges(tf) {
     if (!tf) return "";
     const badges = [];
