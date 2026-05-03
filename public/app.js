@@ -114,8 +114,8 @@
       headerRight.prepend(toggle);
 
       // Show icon only on mobile, full label on desktop
-    toggle.innerHTML = `<span class="desktop-label">☀ LIGHT</span><span class="mobile-label" style="display:none;">☀</span>`;
-    headerRight.prepend(toggle);
+          // toggle.innerHTML = `<span class="desktop-label">☀ LIGHT</span><span class="mobile-label" style="display:none;">☀</span>`;
+          // headerRight.prepend(toggle);
     }
 
 
@@ -972,13 +972,13 @@ function renderAuditEntries(entries, total) {
       <div class="detail-card">
         <div class="detail-card-title">// Setup — Add to Render Environment Variables</div>
         <div style="background:var(--bg);border-radius:6px;padding:12px;font-size:11px;line-height:2;color:var(--text2);font-family:'JetBrains Mono',monospace;overflow-x:auto;">
-SIEM_ENABLED=true<br>
-SIEM_TYPE=<span style="color:var(--accent)">splunk|elastic|sentinel|qradar|generic</span><br>
-SIEM_WEBHOOK_URL=<span style="color:var(--accent)">https://your-siem-endpoint</span><br>
-SIEM_TOKEN=<span style="color:var(--accent)">your_token_or_api_key</span><br>
-SIEM_MIN_SCORE=<span style="color:var(--accent)">0</span>     <span style="color:var(--text3)"># 0–100, only forward above this</span><br>
-SIEM_MIN_RISK=<span style="color:var(--accent)">LOW</span>    <span style="color:var(--text3)"># LOW|MEDIUM|HIGH|CRITICAL</span>
-        </div>
+          SIEM_ENABLED=true<br>
+          SIEM_TYPE=<span style="color:var(--accent)">splunk|elastic|sentinel|qradar|generic</span><br>
+          SIEM_WEBHOOK_URL=<span style="color:var(--accent)">https://your-siem-endpoint</span><br>
+          SIEM_TOKEN=<span style="color:var(--accent)">your_token_or_api_key</span><br>
+          SIEM_MIN_SCORE=<span style="color:var(--accent)">0</span>     <span style="color:var(--text3)"># 0–100, only forward above this</span><br>
+          SIEM_MIN_RISK=<span style="color:var(--accent)">LOW</span>    <span style="color:var(--text3)"># LOW|MEDIUM|HIGH|CRITICAL</span>
+          </div>
       </div>
  
       <!-- Supported formats -->
@@ -1265,7 +1265,7 @@ const MODAL_STYLE = `
   async function loadWhois(ip) {
     const panel = document.getElementById("whoisPanel");
     if (!panel) return;
-    panel.innerHTML = `<div style="padding:24px;text-align:center;color:var(--text2);font-size:12px;">Loading WHOIS data for ${escHtml(ip)}…</div>`;
+    panel.innerHTML = `<div style="padding:16px;text-align:center;color:var(--text2);font-size:12px;">Loading WHOIS data for ${escHtml(ip)}…</div>`;
     try {
       const res  = await fetch(`${API}/whois/${encodeURIComponent(ip)}`, { headers: { "x-api-key": API_KEY } });
       const data = await res.json();
@@ -1299,7 +1299,7 @@ const MODAL_STYLE = `
               <span class="sig-sev">${s.severity.toUpperCase()}</span>
             </div>`).join("")}
         </div>` : ""}
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:16px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
         <div class="detail-card">
           <div class="detail-card-title">// Registration</div>
           ${kv("Network",  w.network  || "—")}
@@ -1443,7 +1443,7 @@ const MODAL_STYLE = `
 
       <div id="tabContent-WHOIS" style="display:none;">
         <div id="whoisPanel" data-loaded="false">
-          <div style="padding:24px;text-align:center;color:var(--text3);font-size:11px;">
+          <div style="padding:16px;text-align:center;color:var(--text3);font-size:11px;">
             Click the WHOIS tab above to load deep registration data
           </div>
         </div>
