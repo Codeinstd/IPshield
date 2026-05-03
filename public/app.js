@@ -129,7 +129,6 @@
       <input type="file" id="csvUpload" accept=".csv,.txt" style="display:none">
       <button class="btn btn-ghost" id="csvBtn"      style="padding:8px 14px;font-size:11px;">↑ UPLOAD CSV</button>
           <button class="btn btn-ghost" id="exportBtn" style="padding:8px 14px;font-size:11px;">↓ EXPORT LOG</button>
-      <button class="btn btn-ghost" id="firewallBtn" style="padding:8px 14px;font-size:11px;">🛡 FIREWALL RULES</button>
       <span id="bulkStatus" style="font-size:11px;color:var(--text2);"></span>`;
       searchSection.appendChild(bulk);
     }
@@ -1322,7 +1321,7 @@ const MODAL_STYLE = `
         </div>
       </div>
       ${w.remarks?.length ? `
-        <div style="padding:0 16px 16px;">
+        <div style="padding:24px 2px 16px;">
           <div class="detail-card">
             <div class="detail-card-title">// Remarks</div>
             ${w.remarks.map(r => `<div style="font-size:11px;color:var(--text2);margin-bottom:4px;">${escHtml(r)}</div>`).join("")}
