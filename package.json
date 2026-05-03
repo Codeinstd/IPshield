@@ -28,6 +28,7 @@
     "ipapi.co": "^0.3.0",
     "morgan": "^1.10.1",
     "node-cache": "^5.1.2",
+    "pdfkit": "^0.18.0",
     "winston": "^3.19.0"
   },
   "optionalDependencies": {

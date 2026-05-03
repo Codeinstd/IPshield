@@ -1,10 +1,6 @@
-/**
- * score.controller.js
- * Place in: backend/controllers/score.controller.js
- */
-
 const { getFullIntel }    = require("../services/ipIntel.service");
 const { alertIfCritical } = require("../services/alerts.service");
+const { sendToSIEM }      = require("../services/siem.service");
 const { addAudit }        = require("../store/memory.store");
 const db                  = require("../store/db");
 const logger              = require("../utils/logger");
@@ -19,8 +15,9 @@ exports.scoreIP = async (req, res, next) => {
     addAudit(result);
     db.insertScore(result);
 
-    // Fire-and-forget alert — never blocks response
+    // Fire-and-forget — never block the response
     alertIfCritical(result).catch(() => {});
+    sendToSIEM(result).catch(() => {});
 
     res.json(result);
   } catch (err) {
@@ -40,6 +37,7 @@ exports.scoreBatch = async (req, res, next) => {
         addAudit(r.value);
         db.insertScore(r.value);
         alertIfCritical(r.value).catch(() => {});
+        sendToSIEM(r.value).catch(() => {});
         return r.value;
       }
       return { ip: ips[i], error: r.reason?.message || "Failed", score: null };

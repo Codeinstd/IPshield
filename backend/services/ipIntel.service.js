@@ -1,17 +1,11 @@
-/**
- * ipIntel.service.js
- * Place in: backend/services/ipIntel.service.js
- * Updated: integrates WHOIS deep dive
- */
-
-const axios                    = require("axios");
-const cache                    = require("../store/cache");
-const { checkThreatFeeds }     = require("./threatfeeds.service");
-const { getWhoisIntel }        = require("./whois.service");
+const axios                = require("axios");
+const cache                = require("../store/cache");
+const { checkThreatFeeds } = require("./threatfeeds.service");
+const { getWhoisIntel }    = require("./whois.service");
+const { getReverseDNS }    = require("./rdns.service");
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
-// ── AbuseIPDB ─────────────────────────────────────────────────────────────────
 async function getAbuseData(ip, retries = 2) {
   try {
     const res = await axios.get("https://api.abuseipdb.com/api/v2/check", {
@@ -27,7 +21,6 @@ async function getAbuseData(ip, retries = 2) {
   }
 }
 
-// ── Shodan InternetDB ─────────────────────────────────────────────────────────
 async function getShodanData(ip) {
   try {
     const res = await axios.get(`https://internetdb.shodan.io/${ip}`, { timeout: 5000 });
@@ -39,7 +32,6 @@ async function getShodanData(ip) {
   }
 }
 
-// ── VirusTotal ────────────────────────────────────────────────────────────────
 async function getVirusTotalData(ip) {
   if (!process.env.VIRUSTOTAL_KEY) return null;
   try {
@@ -60,7 +52,6 @@ async function getVirusTotalData(ip) {
   }
 }
 
-// ── Geo ───────────────────────────────────────────────────────────────────────
 const PRIVATE_IP = /^(10\.|172\.(1[6-9]|2\d|3[01])\.|192\.168\.|127\.|::1$|fc00:|fd)/;
 
 async function getGeoData(ip) {
@@ -68,13 +59,13 @@ async function getGeoData(ip) {
     return {
       _private: true, country_name: "Private Network", region: "Local",
       city: "Local", timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-      latitude: null, longitude: null, org: "Private / RFC1918", asn: "—",
-      proxy: false, hosting: false
+      latitude: null, longitude: null, org: "Private / RFC1918",
+      asn: "—", proxy: false, hosting: false
     };
   }
   try {
     const res = await axios.get(`http://ip-api.com/json/${ip}`, {
-      params:  { fields: "status,message,country,regionName,city,timezone,lat,lon,isp,org,as,proxy,hosting" },
+      params: { fields: "status,message,country,regionName,city,timezone,lat,lon,isp,org,as,proxy,hosting" },
       timeout: 5000
     });
     const d = res.data;
@@ -90,15 +81,13 @@ async function getGeoData(ip) {
   }
 }
 
-// ── Velocity ──────────────────────────────────────────────────────────────────
 function computeVelocity(abuse) {
   if (abuse.totalReports > 50) return "HIGH";
   if (abuse.totalReports > 10) return "MEDIUM";
   return "LOW";
 }
 
-// ── Build signals ─────────────────────────────────────────────────────────────
-function buildSignals({ abuse, geo, shodan, vt, feeds, whoisData, score }) {
+function buildSignals({ abuse, geo, shodan, vt, feeds, whoisData, rdns, score }) {
   const signals = [];
 
   signals.push({
@@ -107,8 +96,9 @@ function buildSignals({ abuse, geo, shodan, vt, feeds, whoisData, score }) {
     severity: score > 80 ? "critical" : score > 60 ? "high" : score > 30 ? "medium" : "low"
   });
 
-  if (feeds?.signals?.length) signals.push(...feeds.signals);
+  if (feeds?.signals?.length)     signals.push(...feeds.signals);
   if (whoisData?.signals?.length) signals.push(...whoisData.signals);
+  if (rdns?.signals?.length)      signals.push(...rdns.signals);
 
   if (shodan.tags?.length) {
     shodan.tags.forEach(tag => {
@@ -142,9 +132,18 @@ function buildSignals({ abuse, geo, shodan, vt, feeds, whoisData, score }) {
     });
   }
 
-  if (geo.proxy)                     signals.push({ category: "PROXY",   detail: "Proxy detected",        severity: "high" });
-  if (shodan.tags?.includes("tor"))  signals.push({ category: "TOR",     detail: "Tor exit node",          severity: "critical" });
-  if (geo.hosting)                   signals.push({ category: "HOSTING", detail: "Datacenter / cloud IP", severity: "medium" });
+  if (geo.proxy)                    signals.push({ category: "PROXY",   detail: "Proxy detected",        severity: "high" });
+  if (shodan.tags?.includes("tor")) signals.push({ category: "TOR",     detail: "Tor exit node",          severity: "critical" });
+  if (geo.hosting)                  signals.push({ category: "HOSTING", detail: "Datacenter / cloud IP", severity: "medium" });
+
+  // FCrDNS mismatch — PTR hostname doesn't resolve back to original IP
+  if (rdns?.fcrdns === false && rdns?.primary) {
+    signals.push({
+      category: "RDNS",
+      detail:   `FCrDNS mismatch — ${rdns.primary} does not resolve back to ${rdns.ip}`,
+      severity: "medium"
+    });
+  }
 
   const velocity = computeVelocity(abuse);
   signals.push({
@@ -156,7 +155,6 @@ function buildSignals({ abuse, geo, shodan, vt, feeds, whoisData, score }) {
   return signals;
 }
 
-// ── Main export ───────────────────────────────────────────────────────────────
 async function getFullIntel(ip, options = {}) {
   if (!options.bypassCache) {
     const cached = cache.get(ip);
@@ -165,14 +163,14 @@ async function getFullIntel(ip, options = {}) {
 
   const start = Date.now();
 
-  // All calls in parallel — WHOIS runs alongside everything else
-  const [abuse, geo, shodan, vt, feeds, whoisData] = await Promise.all([
+  const [abuse, geo, shodan, vt, feeds, whoisData, rdns] = await Promise.all([
     getAbuseData(ip),
     getGeoData(ip),
     getShodanData(ip),
     getVirusTotalData(ip),
     checkThreatFeeds(ip),
-    getWhoisIntel(ip)
+    getWhoisIntel(ip),
+    getReverseDNS(ip)
   ]);
 
   const baseScore = abuse.abuseConfidenceScore || 0;
@@ -189,15 +187,12 @@ async function getFullIntel(ip, options = {}) {
     score > 30 ? "MONITOR"   : "ALLOW";
 
   const velocity = computeVelocity(abuse);
-  const signals  = buildSignals({ abuse, geo, shodan, vt, feeds, whoisData, score });
+  const signals  = buildSignals({ abuse, geo, shodan, vt, feeds, whoisData, rdns, score });
 
   const result = {
-    ip,
-    score,
-    baseScore,
-    scoreBoost:  feeds?.scoreBoost || 0,
-    riskLevel,
-    action,
+    ip, score, baseScore,
+    scoreBoost: feeds?.scoreBoost || 0,
+    riskLevel, action,
 
     geo: {
       country:  geo.country_name || "—",
@@ -233,9 +228,14 @@ async function getFullIntel(ip, options = {}) {
       otx:             feeds?.otx             || null
     },
 
-    // WHOIS deep dive
-    whois: whoisData?.whois || null,
+    rdns: {
+      hostnames: rdns.hostnames || [],
+      primary:   rdns.primary   || null,
+      fcrdns:    rdns.fcrdns    ?? null,
+      private:   rdns.private   || false
+    },
 
+    whois:   whoisData?.whois || null,
     signals,
 
     meta: {
