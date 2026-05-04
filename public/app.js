@@ -226,7 +226,7 @@
     </div>
  
     <!-- Score range + toggles row -->
-    <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text3);">
+    <div style="display:block;align-items:center;gap:6px;font-size:11px;color:var(--text3);">
     <span>Score:</span>
     <input id="auditMinScore" type="number" min="0" max="100" value="0"
       inputmode="numeric"
@@ -234,11 +234,9 @@
     <span>–</span>
     <input id="auditMaxScore" type="number" min="0" max="100" value="100"
       inputmode="numeric"
-      style="width:44px;padding:3px 6px;background:var(--bg2);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:11px;font-family:inherit;">
-  </div>
- 
-      <div style="display:flex;gap:6px;">
-        <button class="audit-toggle" data-key="proxy" data-val="null"
+      style="width:50px;padding:3px 6px;background:var(--bg2);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:11px;font-family:inherit;">
+  
+    <button class="audit-toggle" data-key="proxy" data-val="null"
           style="padding:3px 8px;border-radius:4px;border:1px solid var(--border);background:transparent;color:var(--text3);font-size:10px;cursor:pointer;font-family:inherit;">
           PROXY
         </button>
@@ -251,8 +249,9 @@
           DC
         </button>
       </div>
+
  
-      <div style="margin-left:auto;display:flex;gap:6px;align-items:center;">
+      <div style="display:flex;gap:6px;align-items:center;">
         <select id="auditSort"
           style="padding:3px 8px;background:var(--bg2);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:11px;font-family:inherit;cursor:pointer;">
           <option value="date_desc">Newest first</option>
