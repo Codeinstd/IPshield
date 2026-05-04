@@ -18,16 +18,14 @@ router.get("/:ip",
 
     try {
       const ip     = req.params.ip;
-      const cached = req.query.cached !== "false"; // use cache by default
+      const cached = req.query.cached !== "false";
       logger.info(`PDF report requested for ${ip}`);
 
       const data = await getFullIntel(ip, { bypassCache: !cached });
 
-      // Generate PDF
       const PDFDocument = require("pdfkit");
-      const doc = new PDFDocument({ margin: 50, size: "A4" });
+      const doc = new PDFDocument({ margin: 50, size: "A4", autoFirstPage: true, bufferPages: true });
 
-      // Stream directly to response
       const filename = `ipshield-report-${ip.replace(/[:.]/g, "_")}-${Date.now()}.pdf`;
       res.setHeader("Content-Type", "application/pdf");
       res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
@@ -35,269 +33,376 @@ router.get("/:ip",
 
       buildPDF(doc, data);
       doc.end();
-
     } catch (err) {
       next(err);
     }
   }
 );
 
-// ── PDF builder 
+// ── Color palette 
+const C = {
+  bg:       "#080c0f",
+  dark:     "#0d1117",
+  card:     "#111820",
+  accent:   "#00d9ff",
+  critical: "#ff3355",
+  high:     "#ff7700",
+  medium:   "#ffcc00",
+  low:      "#00e87c",
+  white:    "#ffffff",
+  text:     "#c9d8e8",
+  text2:    "#6a8fa8",
+  border:   "#1e2d3d"
+};
+
+const RISK_COLOR = { CRITICAL: C.critical, HIGH: C.high, MEDIUM: C.medium, LOW: C.low };
+const SEV_COLOR  = { critical: C.critical, high: C.high, medium: C.medium, low: C.low, info: C.accent };
+
+// safe() — strips non-printable ASCII and uses "N/A" as fallback (not em-dash)
+function safe(val) {
+  if (val === null || val === undefined) return "N/A";
+  const str = String(val).replace(/[^\x20-\x7E]/g, "").trim();
+  return str || "N/A";
+}
+
+// has() — check if a value is meaningful (not null, undefined, "—", "N/A", empty)
+function has(val) {
+  if (val === null || val === undefined) return false;
+  const str = String(val).trim();
+  return str !== "" && str !== "N/A" && str !== "-" && str !== "N/A";
+}
+
 function buildPDF(doc, d) {
-  const score     = d.score     ?? 0;
-  const riskLevel = d.riskLevel ?? "LOW";
-  const geo       = d.geo       ?? {};
-  const network   = d.network   ?? {};
+  const score     = d.score        ?? 0;
+  const riskLevel = d.riskLevel    ?? "LOW";
+  const geo       = d.geo          ?? {};
+  const network   = d.network      ?? {};
   const intel     = d.intelligence ?? {};
-  const signals   = d.signals   ?? [];
-  const feeds     = d.threatFeeds ?? {};
-  const rdns      = d.rdns      ?? {};
-  const whois     = d.whois     ?? null;
+  const signals   = d.signals      ?? [];
+  const feeds     = d.threatFeeds  ?? {};
+  const rdns      = d.rdns         ?? {};
+  const whois     = d.whois        ?? null;
 
-  // Color palette
-  const COLORS = {
-    bg:       "#080c0f",
-    accent:   "#00d9ff",
-    critical: "#ff3355",
-    high:     "#ff7700",
-    medium:   "#ffcc00",
-    low:      "#00e87c",
-    text:     "#c9d8e8",
-    text2:    "#6a8fa8",
-    border:   "#1e2d3d",
-    white:    "#ffffff",
-    dark:     "#0d1117"
-  };
+  const riskColor = RISK_COLOR[riskLevel] || C.low;
+  const pageW     = doc.page.width;
+  const pageH     = doc.page.height;
+  const M         = 48;
+  const W         = pageW - M * 2;
+  const FOOTER_H  = 36;
+  const MAX_Y     = pageH - FOOTER_H - 16; // content must stay above footer
 
-  const riskColor = {
-    CRITICAL: COLORS.critical,
-    HIGH:     COLORS.high,
-    MEDIUM:   COLORS.medium,
-    LOW:      COLORS.low
-  }[riskLevel] || COLORS.low;
+  // ── Layout helpers 
+  function newPage() {
+    doc.addPage();
+    return M;
+  }
 
-  const pageW = doc.page.width;
-  const pageH = doc.page.height;
-  const margin = 50;
-  const contentW = pageW - margin * 2;
+  function checkY(y, needed) {
+    if (y + needed > MAX_Y) return newPage();
+    return y;
+  }
 
-  // ── Header bar 
-  doc.rect(0, 0, pageW, 70).fill(COLORS.dark);
-  doc.fontSize(20).font("Helvetica-Bold").fillColor(COLORS.white)
-     .text("IP", margin, 24, { continued: true })
-     .fillColor(COLORS.accent).text("Shield");
-  doc.fontSize(10).font("Helvetica").fillColor(COLORS.text2)
-     .text("Risk Intelligence Report", margin, 48);
-  doc.fontSize(9).fillColor(COLORS.text2)
-     .text(new Date().toUTCString(), 0, 48, { align: "right", width: pageW - margin });
+  function sectionHeader(title, x, y, w) {
+    doc.rect(x, y, w, 18).fill(C.dark);
+    doc.fontSize(8).font("Helvetica-Bold").fillColor(C.accent)
+       .text(`// ${title.toUpperCase()}`, x + 8, y + 5, { width: w - 16, lineBreak: false });
+    return y + 22;
+  }
+
+  // kvRow — label on left, value on right, no em-dash issues
+  function kvRow(label, value, x, y, w, valColor) {
+    const lw = 115;
+    const vw = w - lw - 20;
+    const display = has(value) ? safe(value) : "N/A";
+    const color   = has(value) ? (valColor || C.white) : C.text2;
+    doc.fontSize(8).font("Helvetica").fillColor(C.text2)
+       .text(safe(label), x + 8, y, { width: lw, lineBreak: false });
+    doc.fontSize(8).font("Helvetica").fillColor(color)
+       .text(display, x + 8 + lw, y, { width: vw, lineBreak: false, ellipsis: true });
+    return y + 14;
+  }
+
+  
+  // HEADER
+  doc.rect(0, 0, pageW, 68).fill(C.dark);
+  doc.fontSize(22).font("Helvetica-Bold")
+     .fillColor(C.white).text("IP", M, 20, { continued: true })
+     .fillColor(C.accent).text("Shield");
+  doc.fontSize(9).font("Helvetica").fillColor(C.text2)
+     .text("Risk Intelligence Report", M, 46);
+  doc.fontSize(8).fillColor(C.text2)
+     .text(new Date().toUTCString(), M, 46, { align: "right", width: W });
 
   // ── Risk banner 
-  doc.rect(0, 70, pageW, 48).fill(riskColor);
-  doc.fontSize(14).font("Helvetica-Bold").fillColor("#000000")
-     .text(`${riskLevel} RISK — ${d.action}`, margin, 82);
-  doc.fontSize(24).font("Helvetica-Bold").fillColor("#000000")
-     .text(d.ip, 0, 78, { align: "right", width: pageW - margin });
+  doc.rect(0, 68, pageW, 44).fill(riskColor);
+  doc.fontSize(11).font("Helvetica-Bold").fillColor("#000000")
+     .text(`${riskLevel} RISK  |  Action: ${safe(d.action)}`, M, 78, { width: W * 0.6 });
+  doc.fontSize(19).font("Helvetica-Bold").fillColor("#000000")
+     .text(safe(d.ip), M, 78, { align: "right", width: W });
 
-  let y = 138;
+  // ── Score Strip 
+  let y = 124;
+  doc.rect(M, y, W, 52).fill(C.dark);
+  doc.circle(M + 36, y + 26, 22).stroke(riskColor).lineWidth(2);
+  doc.fontSize(16).font("Helvetica-Bold").fillColor(riskColor)
+     .text(String(score), M + 14, y + 15, { width: 44, align: "center" });
+  doc.fontSize(7).font("Helvetica").fillColor(C.text2)
+     .text("/100", M + 14, y + 33, { width: 44, align: "center" });
 
-  // ── Score row 
-  doc.rect(margin, y, contentW, 60).fill(COLORS.dark).stroke(COLORS.border);
+  const boostNote = d.scoreBoost > 0
+    ? `Base score: ${d.baseScore}  +  Feed boost: +${d.scoreBoost}`
+    : "Source: AbuseIPDB";
+  doc.fontSize(10).font("Helvetica-Bold").fillColor(C.white)
+     .text("ABUSE CONFIDENCE SCORE", M + 70, y + 8);
+  doc.fontSize(8).font("Helvetica").fillColor(C.text2)
+     .text(boostNote, M + 70, y + 24);
 
-  // Score circle (drawn as text block)
-  doc.circle(margin + 40, y + 30, 26).fill(COLORS.bg).stroke(riskColor);
-  doc.fontSize(18).font("Helvetica-Bold").fillColor(riskColor)
-     .text(String(score), margin + 20, y + 19, { width: 40, align: "center" });
-  doc.fontSize(8).font("Helvetica").fillColor(COLORS.text2)
-     .text("/100", margin + 20, y + 39, { width: 40, align: "center" });
+  const scoredAt = d.meta?.scoredAt ? new Date(d.meta.scoredAt).toUTCString() : new Date().toUTCString();
+  const procMs   = d.meta?.processingMs ? `${d.meta.processingMs}ms${d.meta.cached ? " (cached)" : ""}` : "";
+  doc.fontSize(8).font("Helvetica").fillColor(C.text2)
+     .text(`Generated: ${scoredAt}   ${procMs}`, M + 70, y + 38);
 
-  // Score meta
-  doc.fontSize(11).font("Helvetica-Bold").fillColor(COLORS.white)
-     .text("ABUSE CONFIDENCE SCORE", margin + 78, y + 10);
-  if (d.scoreBoost > 0) {
-    doc.fontSize(9).font("Helvetica").fillColor(COLORS.text2)
-       .text(`Base score: ${d.baseScore} + Threat feed boost: +${d.scoreBoost}`, margin + 78, y + 27);
+  y += 64;
+
+  
+  // TWO COLUMNS: Geolocation | Network
+  const colW = (W - 12) / 2;
+  const lx   = M;
+  const rx   = M + colW + 12;
+
+  y = checkY(y, 130);
+  let ly = sectionHeader("Geolocation", lx, y, colW);
+  let ry = sectionHeader("Network", rx, y, colW);
+
+  // Geo rows — use direct property access, not fallback em-dash
+  ly = kvRow("Country",   geo.country,  lx, ly, colW);
+  ly = kvRow("Region",    geo.region,   lx, ly, colW);
+  ly = kvRow("City",      geo.city,     lx, ly, colW);
+  ly = kvRow("Timezone",  geo.timezone, lx, ly, colW);
+  ly = kvRow("Latitude",  geo.lat,      lx, ly, colW);
+  ly = kvRow("Longitude", geo.lon,      lx, ly, colW);
+
+  // Show note if geo data unavailable
+  if (!has(geo.country) && !has(geo.city)) {
+    doc.fontSize(7).font("Helvetica").fillColor(C.text2)
+       .text("Geo data unavailable for this IP", lx + 8, ly);
+    ly += 14;
   }
-  doc.fontSize(9).font("Helvetica").fillColor(COLORS.text2)
-     .text(`Generated: ${new Date(d.meta?.scoredAt || Date.now()).toUTCString()}`, margin + 78, y + 42);
 
-  if (d.meta?.processingMs) {
-    doc.fontSize(9).fillColor(COLORS.text2)
-       .text(`Processing time: ${d.meta.processingMs}ms${d.meta.cached ? " (cached)" : ""}`,
-             0, y + 42, { align: "right", width: pageW - margin });
-  }
+  // Network rows
+  ry = kvRow("ISP",        network.isp,  rx, ry, colW);
+  ry = kvRow("ASN",        network.asn,  rx, ry, colW);
+  ry = kvRow("Type",       network.type, rx, ry, colW);
+  ry = kvRow("Datacenter", intel.isDatacenter ? "Yes" : "No", rx, ry, colW,
+             intel.isDatacenter ? C.medium : C.white);
+  ry = kvRow("Proxy",      intel.isProxy ? "Detected" : "No", rx, ry, colW,
+             intel.isProxy ? C.high : C.white);
+  ry = kvRow("Tor",        intel.isTor   ? "Exit Node" : "No", rx, ry, colW,
+             intel.isTor ? C.critical : C.white);
+  ry = kvRow("Velocity",   intel.velocity || "LOW", rx, ry, colW,
+             intel.velocity === "HIGH" ? C.critical : intel.velocity === "MEDIUM" ? C.medium : C.low);
 
-  y += 76;
+  y = Math.max(ly, ry) + 14;
 
-  // ── Two-column layout helper 
-  function section(title, x, sy, w) {
-    doc.rect(x, sy, w, 16).fill(COLORS.dark);
-    doc.fontSize(8).font("Helvetica-Bold").fillColor(COLORS.accent)
-       .text(`// ${title}`, x + 8, sy + 4);
-    return sy + 20;
-  }
 
-  function row(label, value, x, ry, w, valueColor) {
-    doc.fontSize(8).font("Helvetica").fillColor(COLORS.text2)
-       .text(label, x + 8, ry, { width: w * 0.4 });
-    doc.fontSize(8).font("Helvetica").fillColor(valueColor || COLORS.white)
-       .text(String(value || "—"), x + 8 + w * 0.4, ry, { width: w * 0.55, align: "right" });
-    return ry + 13;
-  }
+  // TWO COLUMNS: Reverse DNS | WHOIS
+  y = checkY(y, 120);
 
-  const colW    = (contentW - 12) / 2;
-  const leftX   = margin;
-  const rightX  = margin + colW + 12;
+  ly = sectionHeader("Reverse DNS (PTR)", lx, y, colW);
+  ry = sectionHeader("WHOIS / RDAP", rx, y, colW);
 
-  // ── Geolocation column 
-  let ly = section("GEOLOCATION", leftX, y, colW);
-  ly = row("Country",  geo.country  || "—", leftX, ly, colW);
-  ly = row("Region",   geo.region   || "—", leftX, ly, colW);
-  ly = row("City",     geo.city     || "—", leftX, ly, colW);
-  ly = row("Timezone", geo.timezone || "—", leftX, ly, colW);
-  ly = row("Lat / Lon", geo.lat != null ? `${geo.lat}, ${geo.lon}` : "N/A", leftX, ly, colW);
+  // rDNS
+  if (rdns.private) {
+    doc.fontSize(8).font("Helvetica").fillColor(C.text2)
+       .text("Private IP - no PTR record", lx + 8, ly); ly += 14;
+  } else if (has(rdns.primary)) {
+    doc.fontSize(8).font("Helvetica").fillColor(C.text2)
+       .text("PTR Record", lx + 8, ly, { width: 80, lineBreak: false });
+    doc.fontSize(8).font("Helvetica").fillColor(C.accent)
+       .text(safe(rdns.primary), lx + 90, ly, { width: colW - 98, lineBreak: false, ellipsis: true });
+    ly += 14;
 
-  // ── Network column 
-  let ry2 = section("NETWORK", rightX, y, colW);
-  ry2 = row("ISP",       network.isp  || "—",              rightX, ry2, colW);
-  ry2 = row("ASN",       network.asn  || "—",              rightX, ry2, colW);
-  ry2 = row("Type",      network.type || "—",              rightX, ry2, colW);
-  ry2 = row("Datacenter",intel.isDatacenter ? "Yes" : "No",rightX, ry2, colW, intel.isDatacenter ? COLORS.medium : COLORS.white);
-  ry2 = row("Proxy",     intel.isProxy      ? "Detected" : "No", rightX, ry2, colW, intel.isProxy ? COLORS.high : COLORS.white);
-  ry2 = row("Tor",       intel.isTor        ? "Exit Node" : "No", rightX, ry2, colW, intel.isTor ? COLORS.critical : COLORS.white);
+    const fcLabel = rdns.fcrdns === true  ? "Verified"
+                  : rdns.fcrdns === false ? "Mismatch"
+                  : "N/A";
+    const fcColor = rdns.fcrdns === true  ? C.low
+                  : rdns.fcrdns === false ? C.medium : C.text2;
+    ly = kvRow("FCrDNS Check", fcLabel, lx, ly, colW, fcColor);
 
-  y = Math.max(ly, ry2) + 16;
-
-  // ── Reverse DNS + WHOIS row 
-  let ly2 = section("REVERSE DNS", leftX, y, colW);
-  if (rdns.primary) {
-    ly2 = row("PTR Record", rdns.primary, leftX, ly2, colW, COLORS.accent);
-    ly2 = row("FCrDNS", rdns.fcrdns === true ? "Verified ✓" : rdns.fcrdns === false ? "Mismatch ⚠" : "N/A",
-              leftX, ly2, colW, rdns.fcrdns === true ? COLORS.low : rdns.fcrdns === false ? COLORS.medium : COLORS.text2);
-    if (rdns.hostnames?.length > 1) {
-      ly2 = row("Other PTRs", `${rdns.hostnames.length - 1} more`, leftX, ly2, colW);
+    if ((rdns.hostnames?.length || 0) > 1) {
+      ly = kvRow("Additional PTRs", `${rdns.hostnames.length - 1} more record(s)`, lx, ly, colW);
     }
   } else {
-    doc.fontSize(8).font("Helvetica").fillColor(COLORS.text2)
-       .text("No PTR record found", leftX + 8, ly2);
-    ly2 += 13;
+    doc.fontSize(8).font("Helvetica").fillColor(C.text2)
+       .text("No PTR record found", lx + 8, ly); ly += 14;
   }
 
-  let ry3 = section("WHOIS", rightX, y, colW);
+  // WHOIS
   if (whois) {
-    ry3 = row("Org Name",    whois.orgName    || "—", rightX, ry3, colW);
-    ry3 = row("Country",     whois.country    || "—", rightX, ry3, colW);
-    ry3 = row("Abuse Email", whois.abuseEmail || "—", rightX, ry3, colW, COLORS.accent);
-    ry3 = row("Registered",  whois.registered ? new Date(whois.registered).toLocaleDateString() : "—", rightX, ry3, colW);
-    ry3 = row("Age",         whois.agedays != null ? `${whois.agedays} days` : "—", rightX, ry3, colW,
-              whois.agedays < 30 ? COLORS.critical : whois.agedays < 90 ? COLORS.medium : COLORS.white);
+    ry = kvRow("Organisation", whois.orgName,    rx, ry, colW);
+    ry = kvRow("Org ID",       whois.orgId,      rx, ry, colW);
+    ry = kvRow("Country",      whois.country,    rx, ry, colW);
+    ry = kvRow("Abuse Email",  whois.abuseEmail, rx, ry, colW,
+               has(whois.abuseEmail) ? C.accent : C.text2);
+    ry = kvRow("CIDR Range",   whois.cidr,       rx, ry, colW);
+    const regDate = has(whois.registered)
+      ? new Date(whois.registered).toLocaleDateString("en-GB")
+      : null;
+    ry = kvRow("Registered", regDate, rx, ry, colW);
+    const ageColor = whois.agedays != null
+      ? (whois.agedays < 30 ? C.critical : whois.agedays < 90 ? C.medium : C.white)
+      : C.text2;
+    ry = kvRow("Network Age",
+               whois.agedays != null ? `${whois.agedays} days` : null,
+               rx, ry, colW, ageColor);
   } else {
-    doc.fontSize(8).font("Helvetica").fillColor(COLORS.text2)
-       .text("WHOIS data unavailable", rightX + 8, ry3);
-    ry3 += 13;
+    doc.fontSize(8).font("Helvetica").fillColor(C.text2)
+       .text("WHOIS data unavailable", rx + 8, ry); ry += 14;
   }
 
-  y = Math.max(ly2, ry3) + 16;
+  y = Math.max(ly, ry) + 14;
 
-  // ── Threat feeds bar 
-  let feedY = section("THREAT FEED ANALYSIS", leftX, y, contentW);
+
+  // Threat Feed Analysis
+  y = checkY(y, 64);
+  y = sectionHeader("Threat Feed Analysis", M, y, W);
+
   const feedItems = [
-    { label: "Feodo Tracker (C2)",    hit: feeds.feodo           },
-    { label: "Spamhaus DROP",         hit: feeds.spamhaus        },
-    { label: "Emerging Threats",      hit: feeds.emergingThreats },
+    { label: "Feodo Tracker (C2)",    hit: !!feeds.feodo           },
+    { label: "Spamhaus DROP",         hit: !!feeds.spamhaus        },
+    { label: "Emerging Threats",      hit: !!feeds.emergingThreats },
     { label: `OTX (${feeds.otx?.pulseCount || 0} pulses)`, hit: (feeds.otx?.pulseCount || 0) > 0 }
   ];
 
-  const feedColW = contentW / 4;
+  const feedW = (W - 9) / 4;
   feedItems.forEach((f, i) => {
-    const fx = leftX + i * feedColW;
-    const color = f.hit ? COLORS.critical : COLORS.low;
-    doc.rect(fx, feedY, feedColW - 4, 20).fill(f.hit ? "rgba(255,51,85,0.1)" : COLORS.dark).stroke(color);
-    doc.fontSize(7).font("Helvetica-Bold").fillColor(color)
-       .text(f.hit ? "● LISTED" : "○ CLEAN", fx + 4, feedY + 4, { width: feedColW - 8 });
-    doc.fontSize(6).font("Helvetica").fillColor(COLORS.text2)
-       .text(f.label, fx + 4, feedY + 12, { width: feedColW - 8 });
+    const fx    = M + i * (feedW + 3);
+    const color = f.hit ? C.critical : C.low;
+    doc.rect(fx, y, feedW, 30).fill(C.card);
+    doc.rect(fx, y, feedW, 3).fill(color);
+    doc.fontSize(9).font("Helvetica-Bold").fillColor(color)
+       .text(f.hit ? "LISTED" : "CLEAN", fx, y + 8, { width: feedW, align: "center" });
+    doc.fontSize(6).font("Helvetica").fillColor(C.text2)
+       .text(f.label, fx, y + 20, { width: feedW, align: "center" });
   });
 
-  y = feedY + 32;
+  y += 42;
 
-  // ── Signals section 
-  const sevColor = { critical: COLORS.critical, high: COLORS.high, medium: COLORS.medium, low: COLORS.low, info: COLORS.accent };
 
-  y = section("THREAT SIGNALS", leftX, y, contentW);
+  // Threat Signals
 
-  signals.slice(0, 12).forEach(sig => {
-    // Check page overflow
-    if (y > pageH - 100) { doc.addPage(); y = 50; }
+  y = checkY(y, 60);
+  y = sectionHeader("Threat Signals", M, y, W);
 
-    const color = sevColor[sig.severity] || COLORS.text2;
-    doc.rect(leftX, y, 3, 12).fill(color);
-    doc.fontSize(7).font("Helvetica-Bold").fillColor(color)
-       .text(sig.category, leftX + 8, y + 2, { width: 60, continued: false });
-    doc.fontSize(7).font("Helvetica").fillColor(COLORS.white)
-       .text(sig.detail, leftX + 72, y + 2, { width: contentW - 130 });
-    doc.fontSize(7).font("Helvetica-Bold").fillColor(color)
-       .text(sig.severity.toUpperCase(), 0, y + 2, { align: "right", width: pageW - margin });
-    y += 14;
+  // Header row
+  doc.fontSize(7).font("Helvetica-Bold").fillColor(C.text2)
+     .text("CATEGORY", M + 8,       y, { width: 72, lineBreak: false })
+     .text("DETAIL",   M + 84,      y, { width: W - 164, lineBreak: false })
+     .text("SEVERITY", M + W - 72,  y, { width: 64, align: "right" });
+  y += 11;
+  doc.rect(M, y, W, 1).fill(C.border);
+  y += 5;
+
+  signals.forEach(sig => {
+    y = checkY(y, 17);
+    const color = SEV_COLOR[sig.severity] || C.text2;
+    doc.rect(M, y + 1, 3, 11).fill(color);
+    doc.fontSize(7.5).font("Helvetica-Bold").fillColor(color)
+       .text(safe(sig.category), M + 8, y + 2, { width: 70, lineBreak: false });
+    doc.fontSize(7.5).font("Helvetica").fillColor(C.white)
+       .text(safe(sig.detail), M + 84, y + 2, { width: W - 164, lineBreak: false, ellipsis: true });
+    doc.fontSize(7.5).font("Helvetica-Bold").fillColor(color)
+       .text(sig.severity.toUpperCase(), M, y + 2, { width: W - 4, align: "right" });
+    y += 15;
   });
 
   y += 8;
 
-  // ── Open ports + CVEs 
+  // Shodan Intelligence
   if (intel.openPorts?.length || intel.vulns?.length || intel.shodanTags?.length) {
-    if (y > pageH - 120) { doc.addPage(); y = 50; }
+    y = checkY(y, 70);
+    y = sectionHeader("Shodan Intelligence", M, y, W);
 
-    y = section("SHODAN INTELLIGENCE", leftX, y, contentW);
-
-    if (intel.openPorts?.length) {
-      doc.fontSize(8).font("Helvetica").fillColor(COLORS.text2).text("Open Ports:", leftX + 8, y);
-      doc.fontSize(8).font("Helvetica").fillColor(COLORS.white)
-         .text(intel.openPorts.join(", "), leftX + 72, y, { width: contentW - 80 });
-      y += 14;
-    }
     if (intel.shodanTags?.length) {
-      doc.fontSize(8).font("Helvetica").fillColor(COLORS.text2).text("Tags:", leftX + 8, y);
-      doc.fontSize(8).font("Helvetica").fillColor(COLORS.accent)
-         .text(intel.shodanTags.join(", "), leftX + 72, y);
-      y += 14;
+      y = kvRow("Tags",       intel.shodanTags.join(", "), M, y, W, C.accent);
+    }
+    if (intel.openPorts?.length) {
+      y = kvRow("Open Ports", intel.openPorts.join(", "),  M, y, W, C.white);
     }
     if (intel.vulns?.length) {
-      doc.fontSize(8).font("Helvetica").fillColor(COLORS.text2).text("CVEs:", leftX + 8, y);
-      doc.fontSize(8).font("Helvetica").fillColor(COLORS.critical)
-         .text(intel.vulns.slice(0, 6).join(", ") + (intel.vulns.length > 6 ? "…" : ""), leftX + 72, y);
-      y += 14;
+      y = kvRow("CVEs",
+                `${intel.vulns.length} found: ${intel.vulns.slice(0,4).join(", ")}${intel.vulns.length > 4 ? "..." : ""}`,
+                M, y, W, C.critical);
     }
     y += 8;
   }
 
-  // ── VirusTotal 
+
+  // VirusTotal
+
   if (intel.virusTotal) {
-    if (y > pageH - 100) { doc.addPage(); y = 50; }
-    y = section("VIRUSTOTAL", leftX, y, contentW);
-    const vt = intel.virusTotal;
+    y = checkY(y, 72);
+    y = sectionHeader("VirusTotal Multi-Engine Analysis", M, y, W);
+
+    const vt      = intel.virusTotal;
     const vtItems = [
-      { label: "Malicious",  val: vt.malicious,  color: COLORS.critical },
-      { label: "Suspicious", val: vt.suspicious, color: COLORS.high },
-      { label: "Harmless",   val: vt.harmless,   color: COLORS.low },
-      { label: "Total Engines", val: vt.total,   color: COLORS.text2 }
+      { label: "Malicious",     val: vt.malicious,  color: C.critical },
+      { label: "Suspicious",    val: vt.suspicious, color: C.high     },
+      { label: "Harmless",      val: vt.harmless,   color: C.low      },
+      { label: "Total Engines", val: vt.total,      color: C.text2    }
     ];
-    let vtX = leftX + 8;
-    vtItems.forEach(item => {
-      doc.fontSize(14).font("Helvetica-Bold").fillColor(item.color).text(String(item.val), vtX, y);
-      doc.fontSize(7).font("Helvetica").fillColor(COLORS.text2).text(item.label, vtX, y + 16, { width: 70 });
-      vtX += 80;
+    const vtW = (W - 9) / 4;
+    vtItems.forEach((item, i) => {
+      const vx = M + i * (vtW + 3);
+      doc.rect(vx, y, vtW, 36).fill(C.card);
+      doc.fontSize(20).font("Helvetica-Bold").fillColor(item.color)
+         .text(String(item.val), vx, y + 4, { width: vtW, align: "center" });
+      doc.fontSize(7).font("Helvetica").fillColor(C.text2)
+         .text(item.label, vx, y + 26, { width: vtW, align: "center" });
     });
-    y += 36;
+    y += 44;
+
+    // Malicious % bar
+    const pct = vt.total > 0 ? vt.malicious / vt.total : 0;
+    doc.rect(M, y, W, 5).fill(C.card);
+    if (pct > 0) doc.rect(M, y, Math.round(W * pct), 5).fill(C.critical);
+    doc.fontSize(7).font("Helvetica").fillColor(C.text2)
+       .text(`${Math.round(pct * 100)}% of engines flagged malicious`, M, y + 8);
+    y += 22;
   }
 
-  // ── Footer 
-  const footerY = pageH - 36;
-  doc.rect(0, footerY, pageW, 36).fill(COLORS.dark);
-  doc.fontSize(7).font("Helvetica").fillColor(COLORS.text2)
-     .text("Generated by IPShield — IP Risk Intelligence Platform", margin, footerY + 8);
-  doc.fontSize(7).fillColor(COLORS.text2)
-     .text(`ipshield-nk0w.onrender.com  ·  ${new Date().toISOString()}`, 0, footerY + 8, { align: "right", width: pageW - margin });
-  doc.fontSize(7).fillColor(COLORS.text2)
-     .text("This report is generated automatically and should be verified by a qualified security analyst before action.", margin, footerY + 20, { width: contentW });
+
+  // OTX Pulses
+  if (feeds.otx?.pulseNames?.length) {
+    y = checkY(y, 60);
+    y = sectionHeader("AlienVault OTX Threat Pulses", M, y, W);
+    feeds.otx.pulseNames.slice(0, 6).forEach(name => {
+      y = checkY(y, 16);
+      doc.rect(M, y + 1, 3, 10).fill(C.medium);
+      doc.fontSize(7.5).font("Helvetica").fillColor(C.white)
+         .text(safe(name), M + 10, y + 2, { width: W - 18, lineBreak: false, ellipsis: true });
+      y += 14;
+    });
+    y += 6;
+  }
+
+
+  // FOOTER — rendered on every page using bufferedPageRange
+
+  // const range = doc.bufferedPageRange();
+  // for (let i = 0; i < range.count; i++) {
+  //   doc.switchToPage(range.start + i);
+  //   doc.rect(0, pageH - FOOTER_H, pageW, FOOTER_H).fill(C.dark);
+  //   // doc.fontSize(7).font("Helvetica").fillColor(C.text2)
+  //   //    .text("Generated by IPShield — IP Risk Intelligence Platform",
+  //   //          M, pageH - FOOTER_H + 6, { width: W * 0.55, lineBreak: false });
+  //   // doc.fontSize(7).fillColor(C.text2)
+  //   //    .text(`${safe(d.ip)}  |  Page ${i + 1} of ${range.count}  |  ipshield-nk0w.onrender.com`,
+  //   //          M, pageH - FOOTER_H + 6, { align: "right", width: W });
+  //   doc.fontSize(6).fillColor(C.text2)
+  //      .text("This report is auto-generated. Verify findings with a qualified security analyst before taking action.",
+  //            M, pageH - FOOTER_H + 18, { width: W });
+  // }
 }
 
 module.exports = router;

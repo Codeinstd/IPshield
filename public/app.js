@@ -838,12 +838,50 @@ function renderAuditEntries(entries, total) {
       if (e.target.id === "csvUpload") handleCSVUpload(e.target.files[0]);
     });
 
+   
+
     // Single unified click handler on resultBody — no inline onclick needed
     resultBody.addEventListener("click", e => {
       if (e.target.id === "watchCurrentBtn") {
         addCurrentToWatchlist();
         return;
       }
+
+    // download pdfbtn
+    if (e.target.id === "downloadPdfBtn") {
+        const ip  = currentIP || ipInput.value.trim();
+        if (!ip) return;
+        const url = `${API}/report/${encodeURIComponent(ip)}?cached=true`;
+        // Open in new tab — browser handles the PDF download
+        const a = Object.assign(document.createElement("a"), {
+          href:     url,
+          download: `ipshield-${ip}-report.pdf`
+        });
+        // Must add auth header — use fetch + blob instead of direct link
+        e.target.textContent = "Generating…";
+        e.target.disabled    = true;
+        fetch(url, { headers: { "x-api-key": API_KEY } })
+          .then(r => {
+            if (!r.ok) throw new Error("Report generation failed");
+            return r.blob();
+          })
+          .then(blob => {
+            const blobUrl = URL.createObjectURL(blob);
+            Object.assign(a, { href: blobUrl });
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(blobUrl);
+          })
+          .catch(err => setBulkStatus(`PDF error: ${err.message}`))
+          .finally(() => {
+            e.target.textContent = "↓ PDF Report";
+            e.target.disabled    = false;
+          });
+      }
+
+
+      // ── Tab switching
       const tabBtn = e.target.closest(".tab-btn");
       if (tabBtn) {
         const tab = tabBtn.dataset.tab;
@@ -1290,7 +1328,7 @@ const MODAL_STYLE = `
 
     panel.innerHTML = `
       ${signals.length ? `
-        <div style="padding:12px 16px;border-bottom:1px solid var(--border);">
+        <div style="padding:12px 0px;">
           ${signals.map(s => `
             <div class="signal-item ${s.severity}" style="margin-bottom:6px;">
               <span class="sig-cat">${escHtml(s.category)}</span>
@@ -1368,9 +1406,10 @@ const MODAL_STYLE = `
           ${intel.shodanTags?.length ? `<div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap;">
             ${intel.shodanTags.map(t => `<span style="font-size:10px;padding:2px 8px;border-radius:3px;background:rgba(0,217,255,0.1);color:var(--accent);border:1px solid rgba(0,217,255,0.3);">${escHtml(t)}</span>`).join("")}
           </div>` : ""}
-          <div style="margin-top:10px;">
-            <button id="watchCurrentBtn" class="btn btn-ghost" style="padding:5px 12px;font-size:11px;">+ Watch</button>
-          </div>
+          <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
+          <button id="watchCurrentBtn"  class="btn btn-ghost"    style="padding:5px 12px;font-size:11px;">+ Watch</button>
+          <button id="downloadPdfBtn"   class="btn btn-ghost"    style="padding:5px 12px;font-size:11px;">↓ PDF Report</button>
+        </div>
         </div>
       </div>
 

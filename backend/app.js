@@ -23,6 +23,7 @@ const docsRoutes      = require("./routes/docs.routes");
 const authMiddleware  = require("./middleware/auth.middleware");
 const errorMiddleware = require("./middleware/error.middleware");
 const logger          = require("./utils/logger");
+const reportRoutes    = require("./routes/report.routes");
 
 const isProd = process.env.NODE_ENV === "production";
 const app    = express();
@@ -126,6 +127,9 @@ app.get("/api/health", (req, res) => {
 
 // ── Auth  
 app.use("/api/", authMiddleware);
+
+app.use("/api/report", reportRoutes);
+app.use("/api/report", makeRateLimiter(60 * 1000, 10, "Report rate limit: 10 per minute."));
 
 // ── API routes  
 app.use("/api/score",     scoreRoutes);
