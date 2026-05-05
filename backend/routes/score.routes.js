@@ -1,7 +1,3 @@
-/**
- * score.routes.js
- * Place in: backend/routes/score.routes.js
- */
 
 const express  = require("express");
 const router   = express.Router();

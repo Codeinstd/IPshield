@@ -1,4 +1,3 @@
-// auth.middleware.js — FIXED
 
 const EXEMPT = [
   "/health",

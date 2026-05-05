@@ -1,10 +1,3 @@
-/**
- * whois.routes.js
- * Place in: backend/routes/whois.routes.js
- *
- * GET /api/whois/:ip  — full WHOIS/RDAP deep dive for an IP
- */
-
 const express = require("express");
 const router  = express.Router();
 const { param, validationResult } = require("express-validator");

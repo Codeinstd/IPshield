@@ -2,14 +2,14 @@ const express = require("express");
 const router  = express.Router();
 const spec    = require("../config/openapi");
 
-// ── Raw OpenAPI JSON spec ─────────────────────────────────────────────────────
+// ── Raw OpenAPI JSON spec 
 router.get("/openapi.json", (req, res) => {
   res.setHeader("Content-Type", "application/json");
   res.setHeader("Access-Control-Allow-Origin", "*"); // allow external tools like Postman
   res.json(spec);
 });
 
-// ── Swagger UI HTML ───────────────────────────────────────────────────────────
+// ── Swagger UI HTML 
 router.get("/", (req, res) => {
   // We serve Swagger UI assets from cdnjs (on CSP allowlist)
   // and inline the spec as a JS variable to avoid fetch() CSP issues

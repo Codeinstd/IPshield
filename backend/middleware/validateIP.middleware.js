@@ -1,9 +1,3 @@
-/**
- * validateIP.middleware.js
- * Place in: backend/middleware/validateIP.middleware.js
- *
- * Install dep: npm install express-validator
- */
 
 const { param, body, validationResult } = require("express-validator");
 

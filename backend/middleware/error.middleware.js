@@ -1,7 +1,3 @@
-/**
- * error.middleware.js
- * Place in: backend/middleware/error.middleware.js
- */
 
 const logger = require("../utils/logger");
 

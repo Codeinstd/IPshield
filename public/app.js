@@ -15,7 +15,7 @@
   let auditEntries   = [];
   let map            = null;
   let mapMarker      = null;
-  let isDark         = true;
+  let isDark         = localStorage.getItem("ipshield_theme") !== "light";
   let currentIP      = null;
   let lastResult     = null;
 
@@ -26,6 +26,7 @@
   const AUDIT_PAGE_SIZE = 25;
 
   injectExtraUI();
+  applyTheme(isDark); 
   injectAuditControls();
   initMap();
   loadStats();
@@ -907,28 +908,52 @@ function renderAuditEntries(entries, total) {
 
   // ── Theme 
   function toggleTheme() {
-    isDark = !isDark;
-    const root = document.documentElement;
-    const btn  = document.getElementById("themeToggle");
-    if (isDark) {
-      ["--bg","--bg1","--bg2","--bg3","--text","--text2","--text3","--border","--border2"].forEach(v => root.style.removeProperty(v));
-      if (btn) btn.textContent = "☀ LIGHT";
-    } else {
-      root.style.setProperty("--bg","#f0f4f8"); root.style.setProperty("--bg1","#ffffff");
-      root.style.setProperty("--bg2","#e8edf2"); root.style.setProperty("--bg3","#dce3ea");
-      root.style.setProperty("--text","#1a2332"); root.style.setProperty("--text2","#4a6278");
-      root.style.setProperty("--text3","#7a95a8"); root.style.setProperty("--border","#c8d8e4");
-      root.style.setProperty("--border2","#b0c4d4");
-      if (btn) btn.textContent = "☾ DARK";
-    }
+  isDark = !isDark;
+  applyTheme(isDark);
+  localStorage.setItem("ipshield_theme", isDark ? "dark" : "light");
+}
+ 
+function applyTheme(dark) {
+  const root = document.documentElement;
+  const btn  = document.getElementById("themeToggle");
+ 
+  if (dark) {
+    // Remove all overrides — CSS variables revert to dark defaults
+    [
+      "--bg","--bg1","--bg2","--bg3",
+      "--text","--text2","--text3",
+      "--border","--border2"
+    ].forEach(v => root.style.removeProperty(v));
+ 
+    if (btn) btn.textContent = "☀ LIGHT";
+ 
     if (map) {
       map.eachLayer(l => { if (l._url) map.removeLayer(l); });
-      // L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 18 }).addTo(map);
       L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
         maxZoom: 19, subdomains: "abcd"
       }).addTo(map);
     }
+  } else {
+    root.style.setProperty("--bg",      "#f0f4f8");
+    root.style.setProperty("--bg1",     "#ffffff");
+    root.style.setProperty("--bg2",     "#e8edf2");
+    root.style.setProperty("--bg3",     "#dce3ea");
+    root.style.setProperty("--text",    "#1a2332");
+    root.style.setProperty("--text2",   "#4a6278");
+    root.style.setProperty("--text3",   "#7a95a8");
+    root.style.setProperty("--border",  "#c8d8e4");
+    root.style.setProperty("--border2", "#b0c4d4");
+ 
+    if (btn) btn.textContent = "☾ DARK";
+ 
+    if (map) {
+      map.eachLayer(l => { if (l._url) map.removeLayer(l); });
+      L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
+        maxZoom: 19, subdomains: "abcd"
+      }).addTo(map);
+    }
   }
+}
 
   // ── Score 
   async function scoreIP() {
