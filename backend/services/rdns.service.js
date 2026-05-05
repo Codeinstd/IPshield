@@ -1,6 +1,6 @@
 const dns = require("dns").promises;
 
-// ── Suspicious PTR patterns ───────────────────────────────────────────────────
+// ── Suspicious PTR patterns 
 const PATTERNS = [
   // Tor / anonymization
   { regex: /tor[-_.]?exit|\.torproject\./i,          label: "Tor exit node hostname",   severity: "critical" },
@@ -32,7 +32,7 @@ const PATTERNS = [
 
 const PRIVATE_IP = /^(10\.|172\.(1[6-9]|2\d|3[01])\.|192\.168\.|127\.|::1$)/;
 
-// ── Main reverse DNS lookup ───────────────────────────────────────────────────
+// ── Main reverse DNS lookup 
 async function getReverseDNS(ip) {
   if (PRIVATE_IP.test(ip)) {
     return { ip, hostnames: [], primary: null, signals: [], private: true, fcrdns: null };
@@ -62,7 +62,7 @@ async function getReverseDNS(ip) {
   return { ip, hostnames, primary, signals, private: false, fcrdns };
 }
 
-// ── Pattern analysis ──────────────────────────────────────────────────────────
+// ── Pattern analysis 
 function buildRDNSSignals(hostnames) {
   if (!hostnames.length) return [];
   const signals = [];
@@ -80,7 +80,7 @@ function buildRDNSSignals(hostnames) {
   return signals;
 }
 
-// ── Forward-confirmed reverse DNS (FCrDNS) ────────────────────────────────────
+// ── Forward-confirmed reverse DNS (FCrDNS)
 // Checks that the PTR hostname resolves back to the original IP
 async function verifyFCrDNS(ip, hostname) {
   try {

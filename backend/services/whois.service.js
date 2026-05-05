@@ -1,19 +1,6 @@
-/**
- * whois.service.js
- * Place in: backend/services/whois.service.js
- *
- * Install dep: npm install whois-json
- *
- * Provides deep WHOIS intelligence:
- * - IP WHOIS (ARIN, RIPE, APNIC, LACNIC, AFRINIC)
- * - Registration dates, org, abuse contacts
- * - Risk signals: young registration, anonymous registrar, etc.
- */
-
 const axios = require("axios");
 
-// ── RDAP lookup (modern replacement for WHOIS) ────────────────────────────────
-// RDAP is the standardized REST API for WHOIS data — no parsing needed
+// ── RDAP lookup (modern replacement for WHOIS)
 async function getRDAPData(ip) {
   try {
     // Step 1: Find the correct RDAP server for this IP
@@ -145,7 +132,7 @@ function extractEmail(entity) {
   return null;
 }
 
-// ── Risk signals from WHOIS data ──────────────────────────────────────────────
+// ── Risk signals from WHOIS data 
 function buildWhoisSignals(whois) {
   if (!whois) return [];
   const signals = [];
@@ -186,7 +173,7 @@ function buildWhoisSignals(whois) {
   return signals;
 }
 
-// ── Main export ───────────────────────────────────────────────────────────────
+// ── Main export 
 async function getWhoisIntel(ip) {
   const whois   = await getRDAPData(ip);
   const signals = buildWhoisSignals(whois);

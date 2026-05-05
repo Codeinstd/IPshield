@@ -41,3 +41,51 @@
 {"level":"error","message":"SIEM webhook failed for 185.220.101.1:","timestamp":"2026-05-04T08:52:06.260Z"}
 {"level":"error","message":"SIEM webhook failed for 185.220.101.1:","timestamp":"2026-05-04T08:57:53.505Z"}
 {"level":"error","message":"SIEM webhook failed for 185.220.101.1:","timestamp":"2026-05-04T09:07:11.211Z"}
+{"level":"error","message":"SIEM webhook failed for 185.220.101.1:","timestamp":"2026-05-04T20:35:24.978Z"}
+{"level":"error","message":"SIEM webhook failed for 185.220.101.1:","timestamp":"2026-05-04T20:45:50.794Z"}
+{"level":"error","message":"GET /api/report/45.33.32.156 → 500: ENOENT: no such file or directory, open 'Inter-Bold'","params":{},"timestamp":"2026-05-04T21:09:03.067Z"}
+{"level":"error","message":"GET /api/report/45.33.32.156 → 500: ENOENT: no such file or directory, open 'Inter-Bold'","params":{},"timestamp":"2026-05-04T21:09:10.429Z"}
+{"level":"error","message":"GET /api/report/45.33.32.156 → 500: ENOENT: no such file or directory, open 'Inter-Bold'","params":{},"timestamp":"2026-05-04T21:09:55.662Z"}
+{"level":"error","message":"SIEM webhook failed for 185.220.101.1:","timestamp":"2026-05-04T21:14:12.026Z"}
+{"level":"error","message":"GET /api/report/185.220.101.1 → 500: ENOENT: no such file or directory, open 'Inter-Bold'","params":{},"timestamp":"2026-05-04T21:14:13.652Z"}
+{"level":"error","message":"GET /api/report/8.8.8.8 → 500: ENOENT: no such file or directory, open 'Inter-Bold'","params":{},"timestamp":"2026-05-04T21:16:53.840Z"}
+{"level":"error","message":"GET /api/report/8.8.8.8 → 500: ENOENT: no such file or directory, open 'Inter-Bold'","params":{},"timestamp":"2026-05-04T21:23:15.252Z"}
+{"level":"error","message":"GET /api/report/8.8.8.8 → 500: ENOENT: no such file or directory, open 'Inter-Bold'","params":{},"timestamp":"2026-05-04T21:23:46.895Z"}
+{"level":"error","message":"GET /api/report/45.33.32.156 → 500: ENOENT: no such file or directory, open 'Inter-Bold'","params":{},"timestamp":"2026-05-04T21:25:57.280Z"}
+{"level":"error","message":"GET /api/report/198.20.69.98 → 500: ENOENT: no such file or directory, open 'Inter-Bold'","params":{},"timestamp":"2026-05-04T21:29:39.827Z"}
+{"level":"error","message":"GET /api/report/45.33.32.156 → 500: ENOENT: no such file or directory, open 'Inter-Bold'","params":{},"timestamp":"2026-05-04T21:30:42.495Z"}
+{"level":"error","message":"GET /api/report/45.33.32.156 → 500: ENOENT: no such file or directory, open 'Inter-Bold'","params":{},"timestamp":"2026-05-04T21:31:16.778Z"}
+{"level":"error","message":"SIEM webhook failed for 185.220.101.1:","timestamp":"2026-05-04T21:36:38.508Z"}
+{"level":"error","message":"SIEM webhook failed for 185.220.101.1:","timestamp":"2026-05-04T22:20:11.184Z"}
+{"level":"error","message":"SIEM webhook failed for 185.220.101.1:","timestamp":"2026-05-04T22:24:32.761Z"}
+{"level":"error","message":"SIEM webhook failed for 185.220.101.1:","timestamp":"2026-05-04T22:29:22.028Z"}
+{"level":"error","message":"SIEM webhook failed for 185.220.101.1:","timestamp":"2026-05-04T22:59:44.983Z"}
+{"level":"error","message":"SIEM webhook failed for 185.220.101.1:","timestamp":"2026-05-04T22:59:44.984Z"}
+{"level":"error","message":"SIEM webhook failed for 185.220.101.1:","timestamp":"2026-05-05T03:44:46.518Z"}
+{"level":"error","message":"SIEM webhook failed for 185.220.101.1:","timestamp":"2026-05-05T10:45:35.978Z"}
+{"level":"error","message":"SIEM webhook failed for 185.220.101.1:","timestamp":"2026-05-05T10:52:26.960Z"}
+{"level":"error","message":"SIEM webhook failed for 185.220.101.1:","timestamp":"2026-05-05T10:54:23.888Z"}
+{"level":"error","message":"SIEM webhook failed for 185.220.101.1:","timestamp":"2026-05-05T10:56:24.592Z"}
+{"level":"error","message":"SIEM webhook failed for 185.220.101.1:","timestamp":"2026-05-05T10:57:37.020Z"}
+{"level":"error","message":"SIEM webhook failed for 185.220.101.1:","timestamp":"2026-05-05T11:04:26.311Z"}
+{"level":"error","message":"GET /api/report/185.220.101.1 → 500: ENOENT: no such file or directory, open 'Inter-Bold'","params":{},"timestamp":"2026-05-05T11:04:57.971Z"}
+{"level":"error","message":"GET /api/report/185.220.101.1 → 500: ENOENT: no such file or directory, open 'Inter-Bold'","params":{},"timestamp":"2026-05-05T11:05:07.392Z"}
+{"level":"error","message":"SIEM webhook failed for 185.220.101.1:","timestamp":"2026-05-05T11:05:35.238Z"}
+{"level":"error","message":"GET /api/report/185.220.101.1 → 500: ENOENT: no such file or directory, open 'Inter-Bold'","params":{},"timestamp":"2026-05-05T11:05:36.464Z"}
+{"level":"error","message":"GET /api/report/185.220.101.1 → 500: ENOENT: no such file or directory, open 'Inter-Bold'","params":{},"timestamp":"2026-05-05T11:05:59.799Z"}
+{"level":"error","message":"SIEM webhook failed for 185.220.101.1:","timestamp":"2026-05-05T11:07:49.990Z"}
+{"level":"error","message":"GET /api/report/185.220.101.1 → 500: ENOENT: no such file or directory, open 'Inter-Bold'","params":{},"timestamp":"2026-05-05T11:08:21.477Z"}
+{"level":"error","message":"GET /api/report/154.118.22.59 → 500: ENOENT: no such file or directory, open 'Inter-Bold'","params":{},"timestamp":"2026-05-05T11:10:03.766Z"}
+{"level":"error","message":"SIEM webhook failed for 185.220.101.1:","timestamp":"2026-05-05T11:37:24.696Z"}
+{"level":"error","message":"GET /api/report/185.220.101.1 → 500: ENOENT: no such file or directory, open 'Syne'","params":{},"timestamp":"2026-05-05T11:37:26.396Z"}
+{"level":"error","message":"SIEM webhook failed for 185.220.101.1:","timestamp":"2026-05-05T12:36:50.137Z"}
+{"level":"error","message":"GET /api/report/185.220.101.1 → 500: ENOENT: no such file or directory, open 'Syne'","params":{},"timestamp":"2026-05-05T12:38:05.535Z"}
+{"level":"error","message":"GET /api/report/185.220.101.1 → 500: ENOENT: no such file or directory, open 'Syne'","params":{},"timestamp":"2026-05-05T12:38:12.911Z"}
+{"level":"error","message":"GET /api/report/154.118.22.59 → 500: ENOENT: no such file or directory, open 'Syne'","params":{},"timestamp":"2026-05-05T12:39:54.801Z"}
+{"level":"error","message":"SIEM webhook failed for 185.220.101.1:","timestamp":"2026-05-05T12:40:21.867Z"}
+{"level":"error","message":"SIEM webhook failed for 185.220.101.1:","timestamp":"2026-05-05T12:55:55.379Z"}
+{"level":"error","message":"SIEM webhook failed for 185.220.101.1:","timestamp":"2026-05-05T13:09:42.893Z"}
+{"level":"error","message":"SIEM webhook failed for 185.220.101.1:","timestamp":"2026-05-05T13:11:43.023Z"}
+{"level":"error","message":"SIEM webhook failed for 185.220.101.1:","timestamp":"2026-05-05T13:15:43.892Z"}
+{"level":"error","message":"SIEM webhook failed for 185.220.101.1:","timestamp":"2026-05-05T13:17:28.520Z"}
+{"level":"error","message":"SIEM webhook failed for 185.220.101.1:","timestamp":"2026-05-05T13:17:53.494Z"}

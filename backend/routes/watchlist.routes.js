@@ -1,7 +1,4 @@
-/**
- * watchlist.routes.js
- * Place in: backend/routes/watchlist.routes.js
- */
+
 
 const express = require("express");
 const router  = express.Router();

@@ -1,14 +1,3 @@
-/**
- * alerts.service.js
- * Place in: backend/services/alerts.service.js
- *
- * Sends webhook alerts to Slack/Discord when critical IPs are scored.
- * Add to .env:
- *   SLACK_WEBHOOK=https://hooks.slack.com/services/xxx
- *   DISCORD_WEBHOOK=https://discord.com/api/webhooks/xxx
- *   ALERT_THRESHOLD=80   (optional, default 80)
- */
-
 const axios = require("axios");
 
 const THRESHOLD = parseInt(process.env.ALERT_THRESHOLD || "80");
@@ -22,13 +11,13 @@ async function alertIfCritical(result) {
   const intel     = result.intelligence || {};
 
   const flags = [
-    intel.isTor        && "🧅 Tor Exit Node",
-    intel.isProxy      && "🔀 Proxy",
-    intel.isDatacenter && "🏢 Datacenter",
+    intel.isTor        && "Tor Exit Node",
+    intel.isProxy      && "Proxy",
+    intel.isDatacenter && "Datacenter",
     intel.vulns?.length && `⚠ ${intel.vulns.length} CVEs`,
   ].filter(Boolean).join(" · ") || "None";
 
-  // ── Slack ──────────────────────────────────────────────
+  // ── Slack 
   if (process.env.SLACK_WEBHOOK) {
     try {
       await axios.post(process.env.SLACK_WEBHOOK, {
@@ -51,7 +40,7 @@ async function alertIfCritical(result) {
     }
   }
 
-  // ── Discord ────────────────────────────────────────────
+  // ── Discord 
   if (process.env.DISCORD_WEBHOOK) {
     try {
       await axios.post(process.env.DISCORD_WEBHOOK, {

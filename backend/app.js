@@ -1,8 +1,3 @@
-/**
- * app.js — backend
- * Place in: backend/app.js
- * Updated: adds SIEM route + rate limit feedback headers
- */
 
 const express      = require("express");
 const cors         = require("cors");
@@ -40,14 +35,14 @@ app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
-      scriptSrc:  ["'self'", "https://cdnjs.cloudflare.com"],
+      scriptSrc:  ["'self'", "https://cdnjs.cloudflare.com", "'sha256-xUfC0wkAtk0wNIS7KujZjrozjuhc4fYltSpwd1nHv6w='"],
       styleSrc:   ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://cdnjs.cloudflare.com"],
       fontSrc:    ["'self'", "https://fonts.gstatic.com"],
       imgSrc:     ["'self'", "data:", 
                     "https://*.basemaps.cartocdn.com", 
                     "https://*.cartocdn.com",
-                    "https://*.tile.openstreetmap.org",  // ← add this
-                    "https://*.openstreetmap.org"         // ← add this
+                    "https://*.tile.openstreetmap.org",  
+                    "https://*.openstreetmap.org"        
                   ],
       connectSrc: ["'self'", "https://api.ipify.org"],
       workerSrc:  ["'self'", "blob:"],
@@ -55,7 +50,9 @@ app.use(helmet({
     }
   },
   hsts: isProd ? { maxAge: 31536000, includeSubDomains: true } : false
-}));
+}
+
+));
 
 const allowedOrigins = (process.env.ALLOWED_ORIGIN || "").split(",").map(s => s.trim()).filter(Boolean);
 app.use(cors({
