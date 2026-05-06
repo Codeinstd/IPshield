@@ -103,7 +103,7 @@
       mapWrap.style.cssText = "background:var(--bg1);border:1px solid var(--border);border-radius:12px;overflow:hidden;";
       mapWrap.innerHTML = `
         <div class="panel-header">
-          <div class="panel-title">// Geo Map</div>
+          <div class="panel-title" style="font-size:11px;font-weight:400;">Geo Map</div>
           <div id="mapLabel" style="font-size:11px;color:var(--text3);">Score an IP to see location</div>
         </div>
         <div id="mapContainer" style="height:320px;background:var(--bg2);display:flex;align-items:center;justify-content:center;color:var(--text3);font-size:12px;">Loading map…</div>`;
@@ -113,7 +113,7 @@
       watchWrap.style.cssText = "background:var(--bg1);border:1px solid var(--border);border-radius:12px;overflow:hidden;display:flex;flex-direction:column;";
       watchWrap.innerHTML = `
         <div class="panel-header" style="justify-content:space-between;">
-          <div class="panel-title">// Watchlist</div>
+          <div class="panel-title" style="font-size:11px;font-weight:400;">Watchlist</div>
           <div style="display:flex;gap:8px;align-items:center;">
             <span id="watchlistCount" style="font-size:11px;color:var(--text3);">0 IPs</span>
             <button id="addWatchBtn" class="btn btn-ghost" style="padding:4px 10px;font-size:11px;">+ WATCH</button>
@@ -205,7 +205,7 @@
     <div style="position:relative;">
       <input id="auditSearch" type="text" placeholder="Search IP, country, ISP…"
         maxlength="45"
-        style="width:100%;padding:8px 36px 8px 12px;background:var(--bg2);border:1px solid var(--border);border-radius:6px;
+        style="width:100%;padding:8px 36px 8px 12px;background:var(--bg2);border:0.9px solid var(--border);border-radius:6px;
                color:var(--text);font-family:inherit;font-size:12px;outline:none;">
       <button id="auditSearchClear" title="Clear search"
         style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px;display:none;">✕</button>
@@ -387,7 +387,7 @@
       </div>
       <button id="timelineClose" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:20px;padding:4px;">✕</button>
     </div>
-    <div id="timelineContent" style="flex:1;overflow-y:auto;padding:24px;">
+    <div id="timelineContent" style="flex:1;overflow-y:auto;padding:24px;background:var(--bg2);">
       <div style="text-align:center;color:var(--text3);font-size:12px;padding:40px 0;">
         <div class="spinner" style="margin:0 auto 12px;"></div>
         Loading score history…
@@ -442,14 +442,14 @@ function renderTimeline(data, container) {
         { label: "Min",      val: stats.min,    color: scoreColor(stats.min)    },
         { label: "Max",      val: stats.max,    color: scoreColor(stats.max)    }
       ].map(s => `
-        <div style="background:var(--bg2);border-radius:8px;padding:14px;text-align:center;border:1px solid var(--border);">
+        <div style="background:var(--bg1);border-radius:8px;padding:14px;text-align:center;border:0.9px solid var(--border);">
           <div style="font-size:22px;font-weight:800;color:${s.color};font-family:'Syne',sans-serif;">${s.val}</div>
           <div style="font-size:10px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-top:2px;">${s.label}</div>
         </div>`).join("")}
     </div>
  
     <!-- Trend -->
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;padding:10px 14px;background:var(--bg2);border-radius:8px;border:1px solid var(--border);">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;padding:10px 14px;background:var(--bg1);border-radius:8px;border:0.9px solid var(--border);">
       <span style="font-size:18px;color:${trendColor};font-weight:700;">${trendIcon}</span>
       <div>
         <span style="font-size:12px;color:var(--text);font-weight:600;">Trend: ${stats.trend.charAt(0).toUpperCase() + stats.trend.slice(1)}</span>
@@ -458,13 +458,13 @@ function renderTimeline(data, container) {
     </div>
  
     <!-- Chart canvas -->
-    <div style="background:var(--bg2);border-radius:10px;border:1px solid var(--border);padding:16px;margin-bottom:20px;">
+    <div style="background:var(--bg1);border-radius:10px;border:0.9px solid var(--border);padding:16px;margin-bottom:20px;">
       <div style="font-size:10px;color:var(--text3);letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;">// Score Over Time</div>
       <canvas id="timelineCanvas" style="width:100%;display:block;"></canvas>
     </div>
  
     <!-- History table -->
-    <div style="background:var(--bg2);border-radius:10px;border:1px solid var(--border);overflow:hidden;">
+    <div style="background:var(--bg1);border-radius:10px;border:0.9px solid var(--border);overflow:hidden;">
       <div style="padding:12px 16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
         <div style="font-size:10px;color:var(--text3);letter-spacing:2px;text-transform:uppercase;">// Scoring History</div>
         <div style="font-size:11px;color:var(--text3);">${data.total} record${data.total !== 1 ? "s" : ""}</div>
@@ -472,7 +472,7 @@ function renderTimeline(data, container) {
       <div style="max-height:200px;overflow-y:auto;">
         <table style="width:100%;border-collapse:collapse;font-size:11px;">
           <thead>
-            <tr style="background:var(--bg3);">
+            <tr style="background:var(--bg1);">
               <th style="padding:8px 14px;text-align:left;color:var(--text3);font-weight:600;letter-spacing:1px;font-size:10px;">DATE</th>
               <th style="padding:8px 14px;text-align:center;color:var(--text3);font-weight:600;letter-spacing:1px;font-size:10px;">SCORE</th>
               <th style="padding:8px 14px;text-align:center;color:var(--text3);font-weight:600;letter-spacing:1px;font-size:10px;">RISK</th>
@@ -533,7 +533,7 @@ function drawTimelineChart(history, canvas) {
  
   // Background
   ctx.fillStyle = getComputedStyle(document.documentElement)
-    .getPropertyValue("--bg2").trim() || "#111820";
+    .getPropertyValue("--bg1").trim() || "#111820";
   ctx.fillRect(0, 0, W, H);
  
   // Grid lines
@@ -1298,11 +1298,11 @@ function applyTheme(dark) {
       <button id="siemClose" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:20px;padding:4px;">✕</button>
     </div>
  
-    <div style="overflow-y:auto;flex:1;padding:24px;display:flex;flex-direction:column;gap:20px;">
+    <div style="background:var(--bg2);overflow-y:auto;flex:1;padding:24px;display:flex;flex-direction:column;gap:20px;">
  
       <!-- Config status -->
       <div class="detail-card">
-        <div class="detail-card-title">// Current Configuration</div>
+        <div class="detail-card-title" style="color:var(--text);font-size:11px;font-weight:400;">Current Configuration</div>
         ${kv("Status",    status?.enabled ? "Enabled" : "Disabled")}
         ${kv("Type",      status?.type?.toUpperCase() || "Not set")}
         ${kv("Webhook URL", status?.url || "Not configured")}
@@ -1313,8 +1313,8 @@ function applyTheme(dark) {
  
       <!-- Env var instructions -->
       <div class="detail-card">
-        <div class="detail-card-title">// Setup — Add to Render Environment Variables</div>
-        <div style="background:var(--bg);border-radius:6px;padding:12px;font-size:11px;line-height:2;color:var(--text2);font-family:'JetBrains Mono',monospace;overflow-x:auto;">
+        <div class="detail-card-title" style="color:var(--text);font-size:11px;font-weight:400;">Setup — Add to Render Environment Variables</div>
+        <div style="background:var(--bg1);border-radius:6px;font-size:11px;line-height:2;color:var(--text2);font-family:'JetBrains Mono',monospace;overflow-x:auto;">
           SIEM_ENABLED=true<br>
           SIEM_TYPE=<span style="color:var(--accent)">splunk|elastic|sentinel|qradar|generic</span><br>
           SIEM_WEBHOOK_URL=<span style="color:var(--accent)">https://your-siem-endpoint</span><br>
@@ -1326,10 +1326,10 @@ function applyTheme(dark) {
  
       <!-- Supported formats -->
       <div class="detail-card">
-        <div class="detail-card-title">// Supported Platforms</div>
+        <div class="detail-card-title" style="color:var(--text);font-size:11px;font-weight:400;">Supported Platforms</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;">
           ${formats.map(f => `
-            <div style="padding:10px 12px;background:var(--bg);border-radius:6px;border:1px solid var(--border);">
+            <div style="padding:10px 12px;background:var(--bg1);border-radius:6px;border:0.9px solid var(--border);">
               <div style="font-size:11px;font-weight:700;color:var(--accent);margin-bottom:3px;">${escHtml(f.label)}</div>
               <div style="font-size:10px;color:var(--text3);line-height:1.5;">${escHtml(f.description)}</div>
             </div>`).join("")}
@@ -1338,7 +1338,7 @@ function applyTheme(dark) {
  
       <!-- Test webhook -->
       <div class="detail-card">
-        <div class="detail-card-title">// Test Webhook</div>
+        <div class="detail-card-title" style="color:var(--text);font-size:11px;font-weight:400;">Test Webhook</div>
         <div style="font-size:11px;color:var(--text3);margin-bottom:12px;">
           Send a sample CRITICAL IP event to your configured SIEM. Uses current env var settings.
         </div>
@@ -1353,7 +1353,7 @@ function applyTheme(dark) {
  
       <!-- Sample payload viewer -->
       <div class="detail-card">
-        <div class="detail-card-title">// Sample Payload</div>
+        <div class="detail-card-title" style="color:var(--text);font-size:11px;font-weight:400;">Sample Payload</div>
         <div style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;">
           ${formats.map((f, i) => `
             <button class="siem-format-tab" data-format="${f.id}"

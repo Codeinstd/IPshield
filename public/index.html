@@ -50,7 +50,7 @@
     pointer-events: none; z-index: 9998; opacity: 0.4;
   }
 
-  /* ── Layout ─────────────────────────────────────────────── */
+  /* ── Layout  */
   .app { min-height: 100vh; display: flex; flex-direction: column; }
 
   header {
@@ -88,7 +88,7 @@
 
   main { flex: 1; padding: 32px; display: flex; flex-direction: column; gap: 24px; max-width: 1400px; margin: 0 auto; width: 100%; }
 
-  /* ── Search bar ─────────────────────────────────────────── */
+  /* ── Search bar  */
   .search-section { display: flex; flex-direction: column; gap: 12px; }
   .search-label { font-size: 10px; color: var(--text3); letter-spacing: 3px; text-transform: uppercase; }
   .search-row { display: flex; gap: 12px; }
@@ -132,7 +132,7 @@
   }
   .quick-chip:hover { border-color: var(--accent); color: var(--accent); }
 
-  /* ── Stats row ──────────────────────────────────────────── */
+  /* ── Stats row */
   .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
   .stat-card {
     background: var(--bg1); border: 1px solid var(--border); border-radius: 10px;
@@ -151,10 +151,10 @@
   .stat-value { font-family: 'Syne', sans-serif; font-size: 32px; font-weight: 800; color: var(--accent-color, var(--text)); }
   .stat-sub { font-size: 11px; color: var(--text3); margin-top: 4px; }
 
-  /* ── Main grid ──────────────────────────────────────────── */
+  /* ── Main grid  */
   .main-grid { display: grid; grid-template-columns: 1fr 380px; gap: 24px; }
 
-  /* ── Result panel ───────────────────────────────────────── */
+  /* ── Result panel  */
   .result-panel {
     background: var(--bg1); border: 1px solid var(--border); border-radius: 12px;
     min-height: 480px; display: flex; flex-direction: column;
@@ -163,7 +163,7 @@
     padding: 18px 24px; border-bottom: 1px solid var(--border);
     display: flex; align-items: center; justify-content: space-between;
   }
-  .panel-title { font-size: 11px; color: var(--text3); letter-spacing: 3px; text-transform: uppercase; }
+  .panel-title { font-size: 11px; color: var(--text); letter-spacing: 3px; text-transform: uppercase; }
   .panel-body { padding: 24px; flex: 1; }
 
   /* Score ring */
@@ -207,7 +207,7 @@
   .signal-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 24px; }
   .signal-item {
     display: flex; align-items: center; gap: 12px;
-    padding: 10px 14px; background: var(--bg2); border-radius: 6px;
+    padding: 10px 14px; background: var(--bg1); border: 0.9px solid var(--border); border-radius: 6px;
     border-left: 3px solid var(--s-color, var(--border));
     animation: slide-in 0.3s ease forwards;
   }
@@ -223,7 +223,7 @@
 
   /* Detail grid */
   .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-  .detail-card { background: var(--bg2); border-radius: 8px; padding: 16px; }
+  .detail-card { background: var(--bg1); border: 0.9px solid var(--border);border-radius: 8px; padding: 16px; }
   .detail-card-title { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px; }
   .kv { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; gap: 8px; }
   .kv-key { font-size: 11px; color: var(--text3); }
@@ -249,7 +249,7 @@
   }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  /* ── Audit log panel ────────────────────────────────────── */
+  /* ── Audit log panel  */
   .audit-panel {
     background: var(--bg1); border: 1px solid var(--border); border-radius: 12px;
     display: flex; flex-direction: column; overflow: hidden;
@@ -283,11 +283,11 @@
   .audit-badge.MEDIUM   { background: rgba(255,204,0,0.15); color: var(--medium); }
   .audit-badge.LOW      { background: rgba(0,232,124,0.15); color: var(--low); }
 
-  /* ── API Docs ───────────────────────────────────────────── */
+  /* ── API Docs  */
   .docs-section { background: var(--bg1); border: 1px solid var(--border); border-radius: 12px; padding: 24px; }
   .docs-title { font-size: 10px; color: var(--text3); letter-spacing: 3px; text-transform: uppercase; margin-bottom: 20px; }
   .endpoints { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; }
-  .endpoint-card { background: var(--bg2); border-radius: 8px; padding: 16px; border: 1px solid var(--border); }
+  .endpoint-card { background: var(--bg1); border-radius: 8px; padding: 16px; border: 0.9px solid var(--border); }
   .ep-method { font-size: 10px; font-weight: 700; letter-spacing: 1px; }
   .ep-method.GET { color: var(--low); }
   .ep-method.POST { color: var(--medium); }
@@ -337,7 +337,7 @@
   <main>
     <!-- Search -->
     <div class="search-section">
-      <div class="search-label">// IP Risk Analysis {Detect IP by default}</div>
+      <div class="search-label" >IP Risk Analysis {Detect IP by default}</div>
       <div class="search-row">
         <div class="search-input-wrap">
           <span class="search-prefix">SCORE:</span>
@@ -403,7 +403,7 @@
       <!-- Result panel -->
       <div class="result-panel" id="resultPanel">
         <div class="panel-header">
-          <div class="panel-title">// Score Result</div>
+          <div class="panel-title" style="color:var(--text);font-size:11px;font-weight:400;">Score Result</div>
           <div id="processingTime" style="font-size:11px;color:var(--text3);"></div>
         </div>
         <div class="panel-body" id="resultBody">
@@ -421,7 +421,7 @@
       <!-- Audit log -->
       <div class="audit-panel">
         <div class="panel-header">
-          <div class="panel-title">// Audit Log</div>
+          <div class="panel-title" style="color:var(--text);font-size:11px;font-weight:400;">Audit Log</div>
           <div style="font-size:11px;color:var(--text3);" id="auditCount">0 entries</div>
         </div>
         <div class="audit-list" id="auditList">
@@ -433,7 +433,7 @@
     <!-- API Docs -->
     <div class="docs-section">
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
-    <div class="docs-title" style="margin-bottom:0;">// REST API</div>
+    <div class="panel-title" style="color:var(--text);font-size:11px;font-weight:400;">REST API</div>
     <a href="https://ipshield.live/api/docs" target="_blank"
       style="display:inline-flex;align-items:center;gap:8px;padding:10px 12px;
              background:var(--accent);color:#000;border-radius:8px;text-decoration:none;
