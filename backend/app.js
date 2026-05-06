@@ -19,6 +19,7 @@ const authMiddleware  = require("./middleware/auth.middleware");
 const errorMiddleware = require("./middleware/error.middleware");
 const logger          = require("./utils/logger");
 const reportRoutes    = require("./routes/report.routes");
+const timelineRoutes  = require("./routes/timeline.routes");
 
 const isProd = process.env.NODE_ENV === "production";
 const app    = express();
@@ -136,6 +137,8 @@ app.use("/api/stream",    streamRoutes);
 app.use("/api/watchlist", watchlistRoutes);
 app.use("/api/whois",     whoisRoutes);
 app.use("/api/siem",      siemRoutes);
+app.use("/api/timeline",  timelineRoutes);
+
 
 // ── SPA fallback  
 app.get("/", (req, res) => res.sendFile(path.join(__dirname, "../public/index.html")));

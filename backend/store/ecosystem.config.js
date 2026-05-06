@@ -1,6 +1,3 @@
-// ecosystem.config.js
-// Place in project root
-// Usage: pm2 start ecosystem.config.js
 
 module.exports = {
   apps: [{
