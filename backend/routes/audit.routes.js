@@ -4,7 +4,7 @@ const { query, validationResult } = require("express-validator");
 const { getAuditLog } = require("../store/memory.store");
 const db              = require("../store/db");
 
-// ── GET /api/audit ────────────────────────────────────────────────────────────
+// ── GET /api/audit 
 router.get("/", (req, res) => {
   const limit  = Math.min(parseInt(req.query.limit) || 50, 200);
   const offset = parseInt(req.query.offset) || 0;
@@ -24,7 +24,7 @@ router.get("/", (req, res) => {
   });
 });
 
-// ── GET /api/audit/search ─────────────────────────────────────────────────────
+// ── GET /api/audit/search
 router.get("/search",
   [
     query("q").optional().trim().isLength({ max: 100 }),
@@ -89,14 +89,14 @@ router.get("/search",
   }
 );
 
-// ── GET /api/audit/threats ────────────────────────────────────────────────────
+// ── GET /api/audit/threats 
 router.get("/threats", (req, res) => {
   const limit   = Math.min(parseInt(req.query.limit) || 20, 100);
   const threats = db.isAvailable() ? db.getTopThreats(limit) : [];
   res.json({ total: threats.length, threats });
 });
 
-// ── GET /api/audit/breakdown ──────────────────────────────────────────────────
+// ── GET /api/audit/breakdown 
 router.get("/breakdown", (req, res) => {
   if (!db.isAvailable()) {
     const log  = getAuditLog();
@@ -112,7 +112,7 @@ router.get("/breakdown", (req, res) => {
   });
 });
 
-// ── In-memory filter fallback ─────────────────────────────────────────────────
+// ── In-memory filter fallback 
 function filterMemory(log, filters, limit, offset, sort) {
   let results = log.filter(e => {
     if (filters.q) {

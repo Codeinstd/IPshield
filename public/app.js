@@ -47,70 +47,28 @@
     } catch (_) {}
   }
 
-  // apply Filter
-  function applyFilters(entries) {
-  return entries.filter(e => {
-    const f = auditFilters;
-
-    // Search — check ip, country, isp
-    if (f.q && f.q.trim()) {
-      const q = f.q.trim().toLowerCase();
-      const ip      = (e.ip              || "").toLowerCase();
-      const country = (e.geo?.country    || e.country || "").toLowerCase();
-      const isp     = (e.network?.isp    || e.isp     || "").toLowerCase();
-      if (!ip.includes(q) && !country.includes(q) && !isp.includes(q)) return false;
-    }
-
-    // Risk — handle both camelCase (session) and snake_case (DB)
-    if (f.risk) {
-      const risk = e.riskLevel || e.risk_level || "";
-      if (risk !== f.risk) return false;
-    }
-
-    // Score
-    if (f.minScore > 0   && (e.score ?? 0) < f.minScore) return false;
-    if (f.maxScore < 100 && (e.score ?? 0) > f.maxScore) return false;
-
-    // Boolean toggles — handle both formats
-    if (f.proxy !== null) {
-      const isProxy = e.intelligence?.isProxy ?? e.is_proxy ?? false;
-      if (!!isProxy !== f.proxy) return false;
-    }
-    if (f.tor !== null) {
-      const isTor = e.intelligence?.isTor ?? e.is_tor ?? false;
-      if (!!isTor !== f.tor) return false;
-    }
-    if (f.datacenter !== null) {
-      const isDC = e.intelligence?.isDatacenter ?? e.is_dc ?? false;
-      if (!!isDC !== f.datacenter) return false;
-    }
-
-    return true;
-  });
-}
-
   // ── Extra UI 
   function injectExtraUI() {
     const headerRight = document.querySelector(".header-right");
 
      // SIEM button — icon only on mobile
-    const siemBtn = document.createElement("button");
-    siemBtn.className   = "btn btn-ghost";
-    siemBtn.id          = "siemBtn";
-    siemBtn.title       = "SIEM Webhook Settings";
+    const siemBtn         = document.createElement("button");
+    siemBtn.className     = "btn btn-ghost";
+    siemBtn.id            = "siemBtn";
+    siemBtn.title         = "SIEM Webhook Settings";
     siemBtn.style.cssText = "padding:6px 12px;font-size:11px;";
     // Show icon only on mobile, full label on desktop
-    siemBtn.innerHTML = `<span class="desktop-label">📡 SIEM</span><span class="mobile-label" style="display:none;">📡</span>`;
+    siemBtn.innerHTML     = `<span class="desktop-label">📡 SIEM</span><span class="mobile-label" style="display:none;">📡</span>`;
     headerRight.prepend(siemBtn);
           
     if (headerRight) {
       // Theme toggle — hide label on very small screens via title attribute
-      const toggle = document.createElement("button");
-      toggle.className   = "btn btn-ghost";
-      toggle.id          = "themeToggle";
-      toggle.textContent = "☀ LIGHT";
-      toggle.title       = "Toggle dark/light mode";
-      toggle.style.cssText = "padding:6px 12px; font-size:11px";
+      const toggle          = document.createElement("button");
+      toggle.className      = "btn btn-ghost";
+      toggle.id             = "themeToggle";
+      toggle.textContent    = "☀ LIGHT";
+      toggle.title          = "Toggle dark/light mode";
+      toggle.style.cssText  = "padding:6px 12px; font-size:11px";
       toggle.addEventListener("click", toggleTheme);
       headerRight.prepend(toggle);
 
@@ -193,8 +151,48 @@
 
   }
 
+  // apply Filter
+  function applyFilters(entries) {
+  return entries.filter(e => {
+    const f = auditFilters;
 
-  // Inject audit controls
+    // Search — check ip, country, isp
+    if (f.q && f.q.trim()) {
+      const q = f.q.trim().toLowerCase();
+      const ip      = (e.ip              || "").toLowerCase();
+      const country = (e.geo?.country    || e.country || "").toLowerCase();
+      const isp     = (e.network?.isp    || e.isp     || "").toLowerCase();
+      if (!ip.includes(q) && !country.includes(q) && !isp.includes(q)) return false;
+    }
+
+    // Risk — handle both camelCase (session) and snake_case (DB)
+    if (f.risk) {
+      const risk = e.riskLevel || e.risk_level || "";
+      if (risk !== f.risk) return false;
+    }
+
+    // Score
+    if (f.minScore > 0   && (e.score ?? 0) < f.minScore) return false;
+    if (f.maxScore < 100 && (e.score ?? 0) > f.maxScore) return false;
+
+    // Boolean toggles — handle both formats
+    if (f.proxy !== null) {
+      const isProxy = e.intelligence?.isProxy ?? e.is_proxy ?? false;
+      if (!!isProxy !== f.proxy) return false;
+    }
+    if (f.tor !== null) {
+      const isTor = e.intelligence?.isTor ?? e.is_tor ?? false;
+      if (!!isTor !== f.tor) return false;
+    }
+    if (f.datacenter !== null) {
+      const isDC = e.intelligence?.isDatacenter ?? e.is_dc ?? false;
+      if (!!isDC !== f.datacenter) return false;
+    }
+
+    return true;
+  });
+}
+   // Inject audit controls
   function injectAuditControls() {
   const auditPanel = document.querySelector(".audit-panel");
   if (!auditPanel) return;
@@ -206,7 +204,7 @@
     <!-- Search bar -->
     <div style="position:relative;">
       <input id="auditSearch" type="text" placeholder="Search IP, country, ISP…"
-        maxlength="100"
+        maxlength="45"
         style="width:100%;padding:8px 36px 8px 12px;background:var(--bg2);border:1px solid var(--border);border-radius:6px;
                color:var(--text);font-family:inherit;font-size:12px;outline:none;">
       <button id="auditSearchClear" title="Clear search"
@@ -286,7 +284,7 @@
   if (clearBtn) clearBtn.style.display = val ? "block" : "none";
   clearTimeout(searchTimer);
   searchTimer = setTimeout(() => {
-    auditFilters.q = val.trim(); // ← use val, not e.target.value (stale closure issue)
+    auditFilters.q = val.trim(); 
     auditPage = 0;
     renderAudit();
   }, 300);
@@ -308,7 +306,7 @@
     chip.style.borderColor = "var(--accent)";
     chip.style.background  = "rgba(0,217,255,0.1)";
     chip.style.color       = "var(--accent)";
-    auditFilters.risk = chip.dataset.risk; // "" for ALL, "CRITICAL" etc for others
+    auditFilters.risk = chip.dataset.risk; 
     auditPage = 0;
     renderAudit(); 
   });
@@ -367,6 +365,7 @@
     renderAudit();
   });
 }
+
 
   // timeline history
   async function showTimeline(ip) {
