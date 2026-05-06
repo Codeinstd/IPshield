@@ -1,10 +1,3 @@
-/**
- * logger.js
- * Place in: backend/utils/logger.js
- *
- * Uses winston if available, falls back to console.
- * Install optional: npm install winston
- */
 
 let logger;
 

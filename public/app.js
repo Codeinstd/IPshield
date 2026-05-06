@@ -368,6 +368,284 @@
   });
 }
 
+  // timeline history
+  async function showTimeline(ip) {
+  if (!ip || !isValidIP(ip)) { setBulkStatus("No IP to show history for."); return; }
+ 
+  // Build modal
+  const overlay = document.createElement("div");
+  overlay.id = "timelineModal";
+  overlay.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:10000;display:flex;align-items:center;justify-content:center;padding:24px;";
+ 
+  const modal = document.createElement("div");
+  modal.style.cssText = "background:var(--bg1);border:1px solid var(--border);border-radius:12px;width:100%;max-width:720px;max-height:85vh;display:flex;flex-direction:column;overflow:hidden;";
+ 
+  modal.innerHTML = `
+    <div style="padding:18px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+      <div>
+        <div style="font-size:13px;font-weight:700;color:var(--text);">Score Timeline</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:2px;font-family:'JetBrains Mono',monospace;">${escHtml(ip)}</div>
+      </div>
+      <button id="timelineClose" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:20px;padding:4px;">✕</button>
+    </div>
+    <div id="timelineContent" style="flex:1;overflow-y:auto;padding:24px;">
+      <div style="text-align:center;color:var(--text3);font-size:12px;padding:40px 0;">
+        <div class="spinner" style="margin:0 auto 12px;"></div>
+        Loading score history…
+      </div>
+    </div>`;
+ 
+  overlay.appendChild(modal);
+  document.body.appendChild(overlay);
+ 
+  document.getElementById("timelineClose").addEventListener("click", () => overlay.remove());
+  overlay.addEventListener("click", e => { if (e.target === overlay) overlay.remove(); });
+ 
+  // Fetch data
+  try {
+    const res  = await fetch(`${API}/timeline/${encodeURIComponent(ip)}?limit=100`, {
+      headers: { "x-api-key": API_KEY }
+    });
+    const data = await res.json();
+    renderTimeline(data, document.getElementById("timelineContent"));
+  } catch (err) {
+    document.getElementById("timelineContent").innerHTML =
+      `<div style="padding:24px;color:var(--critical);font-size:12px;">⚠ Failed to load history: ${escHtml(err.message)}</div>`;
+  }
+}
+ 
+function renderTimeline(data, container) {
+  if (!data.total || !data.history?.length) {
+    container.innerHTML = `
+      <div style="text-align:center;padding:40px 0;color:var(--text3);">
+        <div style="font-size:32px;margin-bottom:12px;">📊</div>
+        <div style="font-size:13px;">No scoring history found for this IP.</div>
+        <div style="font-size:11px;margin-top:6px;">Score the IP a few times to build a history.</div>
+      </div>`;
+    return;
+  }
+ 
+  const stats   = data.stats;
+  const history = data.history;
+ 
+  // Trend indicator
+  const trendIcon  = stats.trend === "increasing" ? "↑" : stats.trend === "decreasing" ? "↓" : "→";
+  const trendColor = stats.trend === "increasing" ? "var(--critical)"
+                   : stats.trend === "decreasing" ? "var(--low)" : "var(--text2)";
+  const changeStr  = stats.change > 0 ? `+${stats.change}` : String(stats.change);
+ 
+  container.innerHTML = `
+    <!-- Stats row -->
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;">
+      ${[
+        { label: "Latest",   val: stats.latest, color: scoreColor(stats.latest) },
+        { label: "Average",  val: stats.avg,    color: scoreColor(stats.avg)    },
+        { label: "Min",      val: stats.min,    color: scoreColor(stats.min)    },
+        { label: "Max",      val: stats.max,    color: scoreColor(stats.max)    }
+      ].map(s => `
+        <div style="background:var(--bg2);border-radius:8px;padding:14px;text-align:center;border:1px solid var(--border);">
+          <div style="font-size:22px;font-weight:800;color:${s.color};font-family:'Syne',sans-serif;">${s.val}</div>
+          <div style="font-size:10px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-top:2px;">${s.label}</div>
+        </div>`).join("")}
+    </div>
+ 
+    <!-- Trend -->
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;padding:10px 14px;background:var(--bg2);border-radius:8px;border:1px solid var(--border);">
+      <span style="font-size:18px;color:${trendColor};font-weight:700;">${trendIcon}</span>
+      <div>
+        <span style="font-size:12px;color:var(--text);font-weight:600;">Trend: ${stats.trend.charAt(0).toUpperCase() + stats.trend.slice(1)}</span>
+        <span style="font-size:11px;color:var(--text3);margin-left:8px;">Score changed ${changeStr} points over ${data.total} scoring${data.total !== 1 ? "s" : ""}</span>
+      </div>
+    </div>
+ 
+    <!-- Chart canvas -->
+    <div style="background:var(--bg2);border-radius:10px;border:1px solid var(--border);padding:16px;margin-bottom:20px;">
+      <div style="font-size:10px;color:var(--text3);letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;">// Score Over Time</div>
+      <canvas id="timelineCanvas" style="width:100%;display:block;"></canvas>
+    </div>
+ 
+    <!-- History table -->
+    <div style="background:var(--bg2);border-radius:10px;border:1px solid var(--border);overflow:hidden;">
+      <div style="padding:12px 16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
+        <div style="font-size:10px;color:var(--text3);letter-spacing:2px;text-transform:uppercase;">// Scoring History</div>
+        <div style="font-size:11px;color:var(--text3);">${data.total} record${data.total !== 1 ? "s" : ""}</div>
+      </div>
+      <div style="max-height:200px;overflow-y:auto;">
+        <table style="width:100%;border-collapse:collapse;font-size:11px;">
+          <thead>
+            <tr style="background:var(--bg3);">
+              <th style="padding:8px 14px;text-align:left;color:var(--text3);font-weight:600;letter-spacing:1px;font-size:10px;">DATE</th>
+              <th style="padding:8px 14px;text-align:center;color:var(--text3);font-weight:600;letter-spacing:1px;font-size:10px;">SCORE</th>
+              <th style="padding:8px 14px;text-align:center;color:var(--text3);font-weight:600;letter-spacing:1px;font-size:10px;">RISK</th>
+              <th style="padding:8px 14px;text-align:center;color:var(--text3);font-weight:600;letter-spacing:1px;font-size:10px;">ACTION</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${[...history].reverse().map((h, i) => {
+              const risk   = h.risk_level || "LOW";
+              const rColor = { CRITICAL:"var(--critical)", HIGH:"var(--high)", MEDIUM:"var(--medium)", LOW:"var(--low)" }[risk] || "var(--low)";
+              const date   = new Date(h.scored_at).toLocaleString([], { month:"short", day:"numeric", hour:"2-digit", minute:"2-digit" });
+              return `<tr style="border-top:1px solid var(--border);${i === 0 ? "background:rgba(0,217,255,0.03);" : ""}">
+                <td style="padding:8px 14px;color:var(--text2);">${date}</td>
+                <td style="padding:8px 14px;text-align:center;font-weight:700;color:${scoreColor(h.score)};">${h.score}</td>
+                <td style="padding:8px 14px;text-align:center;">
+                  <span style="font-size:10px;font-weight:700;color:${rColor};padding:2px 7px;border-radius:3px;background:${rColor}22;">${risk}</span>
+                </td>
+                <td style="padding:8px 14px;text-align:center;color:var(--text2);">${h.action || "—"}</td>
+              </tr>`;
+            }).join("")}
+          </tbody>
+        </table>
+      </div>
+    </div>`;
+ 
+  // Draw chart after DOM renders
+  requestAnimationFrame(() => drawTimelineChart(history, document.getElementById("timelineCanvas")));
+}
+ 
+function scoreColor(score) {
+  if (score > 80) return "var(--critical)";
+  if (score > 60) return "var(--high)";
+  if (score > 30) return "var(--medium)";
+  return "var(--low)";
+}
+ 
+function drawTimelineChart(history, canvas) {
+  if (!canvas) return;
+ 
+  const dpr     = window.devicePixelRatio || 1;
+  const W       = canvas.parentElement.clientWidth - 32;
+  const H       = 140;
+  canvas.width  = W * dpr;
+  canvas.height = H * dpr;
+  canvas.style.width  = W + "px";
+  canvas.style.height = H + "px";
+ 
+  const ctx = canvas.getContext("2d");
+  ctx.scale(dpr, dpr);
+ 
+  const PAD   = { top: 12, right: 16, bottom: 28, left: 36 };
+  const chartW = W - PAD.left - PAD.right;
+  const chartH = H - PAD.top  - PAD.bottom;
+ 
+  const scores   = history.map(h => h.score);
+  const minScore = 0;
+  const maxScore = 100;
+ 
+  // Background
+  ctx.fillStyle = getComputedStyle(document.documentElement)
+    .getPropertyValue("--bg2").trim() || "#111820";
+  ctx.fillRect(0, 0, W, H);
+ 
+  // Grid lines
+  ctx.strokeStyle = getComputedStyle(document.documentElement)
+    .getPropertyValue("--border").trim() || "#1e2d3d";
+  ctx.lineWidth = 0.5;
+ 
+  [0, 25, 50, 75, 100].forEach(val => {
+    const y = PAD.top + chartH - (val / maxScore) * chartH;
+    ctx.beginPath();
+    ctx.moveTo(PAD.left, y);
+    ctx.lineTo(PAD.left + chartW, y);
+    ctx.stroke();
+ 
+    // Y axis labels
+    ctx.fillStyle = getComputedStyle(document.documentElement)
+      .getPropertyValue("--text3").trim() || "#3d5a72";
+    ctx.font = `${10 * dpr / dpr}px monospace`;
+    ctx.textAlign = "right";
+    ctx.fillText(String(val), PAD.left - 6, y + 3);
+  });
+ 
+  if (scores.length < 2) {
+    // Single point — just draw a dot
+    const x = PAD.left + chartW / 2;
+    const y = PAD.top + chartH - (scores[0] / maxScore) * chartH;
+    ctx.beginPath();
+    ctx.arc(x, y, 5, 0, Math.PI * 2);
+    ctx.fillStyle = resolveScoreColor(scores[0]);
+    ctx.fill();
+    return;
+  }
+ 
+  // Compute point positions
+  const pts = scores.map((s, i) => ({
+    x: PAD.left + (i / (scores.length - 1)) * chartW,
+    y: PAD.top + chartH - (s / maxScore) * chartH,
+    score: s
+  }));
+ 
+  // Gradient fill under line
+  const grad = ctx.createLinearGradient(0, PAD.top, 0, PAD.top + chartH);
+  grad.addColorStop(0,   "rgba(0,217,255,0.3)");
+  grad.addColorStop(1,   "rgba(0,217,255,0.0)");
+ 
+  ctx.beginPath();
+  ctx.moveTo(pts[0].x, pts[0].y);
+  pts.slice(1).forEach(p => {
+    // Smooth curve using bezier
+    const prev = pts[pts.indexOf(p) - 1];
+    const cpX  = (prev.x + p.x) / 2;
+    ctx.bezierCurveTo(cpX, prev.y, cpX, p.y, p.x, p.y);
+  });
+  ctx.lineTo(pts[pts.length - 1].x, PAD.top + chartH);
+  ctx.lineTo(pts[0].x, PAD.top + chartH);
+  ctx.closePath();
+  ctx.fillStyle = grad;
+  ctx.fill();
+ 
+  // Line
+  ctx.beginPath();
+  ctx.moveTo(pts[0].x, pts[0].y);
+  pts.slice(1).forEach(p => {
+    const prev = pts[pts.indexOf(p) - 1];
+    const cpX  = (prev.x + p.x) / 2;
+    ctx.bezierCurveTo(cpX, prev.y, cpX, p.y, p.x, p.y);
+  });
+  ctx.strokeStyle = "#00d9ff";
+  ctx.lineWidth   = 2;
+  ctx.stroke();
+ 
+  // Data points — color by risk
+  pts.forEach((p, i) => {
+    const color = resolveScoreColor(p.score);
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, scores.length > 20 ? 2.5 : 4, 0, Math.PI * 2);
+    ctx.fillStyle   = color;
+    ctx.strokeStyle = "#080c0f";
+    ctx.lineWidth   = 1.5;
+    ctx.fill();
+    ctx.stroke();
+  });
+ 
+  // X axis date labels (show ~5 evenly spaced)
+  const labelCount = Math.min(5, scores.length);
+  const step       = Math.floor((scores.length - 1) / (labelCount - 1)) || 1;
+  ctx.fillStyle  = getComputedStyle(document.documentElement)
+    .getPropertyValue("--text3").trim() || "#3d5a72";
+  ctx.font       = `${9 * dpr / dpr}px monospace`;
+  ctx.textAlign  = "center";
+ 
+  for (let i = 0; i < scores.length; i += step) {
+    if (i >= history.length) break;
+    const x    = PAD.left + (i / (scores.length - 1)) * chartW;
+    const date = new Date(history[i].scored_at);
+    const label = date.toLocaleDateString([], { month: "short", day: "numeric" });
+    ctx.fillText(label, x, H - 8);
+  }
+  // Always label last point
+  const lastX = PAD.left + chartW;
+  const lastDate = new Date(history[history.length - 1].scored_at);
+  ctx.fillText(lastDate.toLocaleDateString([], { month:"short", day:"numeric" }), lastX, H - 8);
+}
+ 
+function resolveScoreColor(score) {
+  if (score > 80) return "#ff3355";
+  if (score > 60) return "#ff7700";
+  if (score > 30) return "#ffcc00";
+  return "#00e87c";
+}
+
  // Rate Limit
   function showAPIStatus(apiStatus) {
   // Remove existing banner if any
@@ -879,6 +1157,11 @@ function renderAuditEntries(entries, total) {
             e.target.disabled    = false;
           });
       }
+
+    // timelinebtn
+    if (e.target.id === "timelineBtn") {
+    showTimeline(currentIP || ipInput.value.trim());
+   }
 
 
       // ── Tab switching
@@ -1430,10 +1713,11 @@ const MODAL_STYLE = `
           ${intel.shodanTags?.length ? `<div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap;">
             ${intel.shodanTags.map(t => `<span style="font-size:10px;padding:2px 8px;border-radius:3px;background:rgba(0,217,255,0.1);color:var(--accent);border:1px solid rgba(0,217,255,0.3);">${escHtml(t)}</span>`).join("")}
           </div>` : ""}
-          <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
-          <button id="watchCurrentBtn"  class="btn btn-ghost"    style="padding:5px 12px;font-size:11px;">+ Watch</button>
-          <button id="downloadPdfBtn"   class="btn btn-ghost"    style="padding:5px 12px;font-size:11px;">↓ PDF Report</button>
-        </div>
+        <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
+        <button id="watchCurrentBtn" class="btn btn-ghost" style="padding:5px 12px;font-size:11px;">+ Watch</button>
+        <button id="downloadPdfBtn"  class="btn btn-ghost" style="padding:5px 12px;font-size:11px;">↓ PDF Report</button>
+        <button id="timelineBtn"     class="btn btn-ghost" style="padding:5px 12px;font-size:11px;">↑ History</button> 
+          </div>
         </div>
       </div>
 

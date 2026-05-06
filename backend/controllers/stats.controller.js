@@ -1,7 +1,3 @@
-/**
- * stats.controller.js
- * Place in: backend/controllers/stats.controller.js
- */
 
 const { getStatsData }  = require("../store/memory.store");
 const db                = require("../store/db");

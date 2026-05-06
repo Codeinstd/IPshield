@@ -1,7 +1,3 @@
-/**
- * watchlist.store.js
- * Place in: backend/store/watchlist.store.js
- */
 
 const db = require("./db");
 
