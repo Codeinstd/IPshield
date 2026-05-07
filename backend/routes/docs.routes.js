@@ -23,6 +23,7 @@ router.get("/", (req, res) => {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>IPShield API Docs</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.11.0/swagger-ui.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
   <style>
     * { box-sizing: border-box; }
     body { margin: 0; background: #0d1117; font-family: 'Inter', 'JetBrains Mono', monospace; }
@@ -51,17 +52,17 @@ router.get("/", (req, res) => {
     .swagger-ui { background: #080c0f; }
     .swagger-ui .topbar { display: none; }
     .swagger-ui .info    { margin: 32px 0 24px; }
-    .swagger-ui .info .title { color: #c9d8e8; font-family: inherit; }
-    .swagger-ui .info p,
-    .swagger-ui .info li   { color: #6a8fa8; }
+    .swagger-ui .info .title { color: #c9d8e8; font-family: JetBrains Mono, monospace; }
+    .swagger-ui .info p { color: #6a8fa8; font-family: JetBrains Mono, monospace; }
+    .swagger-ui .info li   { color: #6a8fa8; font-family: JetBrains Mono, monospace; }
     .swagger-ui .info code { background: #111820; color: #00d9ff; border-radius: 4px; }
     .swagger-ui .scheme-container { background: #0d1117; padding: 12px 0; box-shadow: none; border-bottom: 1px solid #1e2d3d; }
     .swagger-ui .opblock-tag { color: #c9d8e8; border-bottom: 1px solid #1e2d3d; }
     .swagger-ui .opblock-tag:hover { background: #111820; }
     .swagger-ui .opblock { background: #0d1117; border: 1px solid #1e2d3d; border-radius: 8px; margin-bottom: 8px; }
     .swagger-ui .opblock-summary { padding: 10px 16px; }
-    .swagger-ui .opblock-summary-method { border-radius: 4px; font-family: inherit; font-size: 12px; font-weight: 700; min-width: 60px; text-align: center; }
-    .swagger-ui .opblock-summary-description { color: #6a8fa8; font-family: inherit; }
+    .swagger-ui .opblock-summary-method { border-radius: 4px; font-family: JetBrains Mono, monospace; font-size: 12px; font-weight: 700; min-width: 60px; text-align: center; }
+    .swagger-ui .opblock-summary-description { color: #6a8fa8; font-family: JetBrains Mono, monospace; }
     .swagger-ui .opblock.opblock-get    { border-color: rgba(0,232,124,0.3); }
     .swagger-ui .opblock.opblock-post   { border-color: rgba(255,204,0,0.3); }
     .swagger-ui .opblock.opblock-delete { border-color: rgba(255,51,85,0.3); }
@@ -69,17 +70,17 @@ router.get("/", (req, res) => {
     .swagger-ui .opblock.opblock-post   .opblock-summary-method { background: #ffcc00; color: #000; }
     .swagger-ui .opblock.opblock-delete .opblock-summary-method { background: #ff3355; color: #fff; }
     .swagger-ui .opblock-body-description,
-    .swagger-ui .opblock-description-wrapper p { color: #6a8fa8; }
+    .swagger-ui .opblock-description-wrapper p { color: #6a8fa8; font-family: JetBrains Mono, monospace; }
     .swagger-ui .opblock-section-header { background: #111820; border-bottom: 1px solid #1e2d3d; }
-    .swagger-ui .opblock-section-header h4 { color: #c9d8e8; }
+    .swagger-ui .opblock-section-header h4 { color: #c9d8e8; font-family: JetBrains Mono, monospace; }
     .swagger-ui table thead tr th { color: #6a8fa8; border-bottom: 1px solid #1e2d3d; }
     .swagger-ui .parameter__name { color: #00d9ff; }
-    .swagger-ui .parameter__type { color: #6a8fa8; }
+    .swagger-ui .parameter__type { color: #6a8fa8; font-family: JetBrains Mono, monospace; }
     .swagger-ui input[type=text],
     .swagger-ui textarea { background: #111820; border: 1px solid #1e2d3d; color: #c9d8e8; border-radius: 4px; }
     .swagger-ui input[type=text]:focus,
     .swagger-ui textarea:focus { border-color: #00d9ff; outline: none; }
-    .swagger-ui .btn { font-family: inherit; border-radius: 6px; }
+    .swagger-ui .btn { font-family: JetBrains Mono, monospace; border-radius: 6px; }
     .swagger-ui .btn.execute { background: #00d9ff; color: #000; border: none; font-weight: 700; }
     .swagger-ui .btn.execute:hover { background: #33e5ff; }
     .swagger-ui .btn.cancel { background: transparent; border: 1px solid #1e2d3d; color: #6a8fa8; }
@@ -110,7 +111,7 @@ router.get("/", (req, res) => {
 </head>
 <body>
   <div class="docs-header">
-    <div class="docs-logo">IP<span>Shield</span> <span style="font-size:13px;color:#3d5a72;font-weight:400;">API Documentation</span></div>
+    <div class="docs-logo">IP<span>Shield</span> <span style="font-family: JetBrains Mono, monospace; font-size:13px;color:#3d5a72;font-weight:400;">API Documentation</span></div>
     <a href="/" class="docs-back">← Back to App</a>
   </div>
 
