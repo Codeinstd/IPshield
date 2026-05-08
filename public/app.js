@@ -374,7 +374,6 @@
   });
 }
 
-
   // timeline history
   async function showTimeline(ip) {
   if (!ip || !isValidIP(ip)) { setBulkStatus("No IP to show history for."); return; }
@@ -420,6 +419,61 @@
       `<div style="padding:24px;color:var(--critical);font-size:12px;">⚠ Failed to load history: ${escHtml(err.message)}</div>`;
   }
 }
+
+  // Blacklistbanner
+  function blacklistBanner(bl) {
+    if (!bl) return "";
+    const sevColor = {
+      CRITICAL: "#ff3355", HIGH: "#ff7700", MEDIUM: "#ffcc00", LOW: "#00e87c"
+    }[bl.severity] || "#ff7700";
+
+    return `
+      <div style="
+        display:flex;align-items:flex-start;gap:12px;
+        padding:12px 16px;margin-bottom:16px;
+        background:rgba(255,119,0,0.08);
+        border:1px solid ${sevColor};
+        border-left:4px solid ${sevColor};
+        border-radius:8px;">
+        <span style="font-size:20px;flex-shrink:0;">🚫</span>
+        <div style="flex:1;min-width:0;">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px;">
+            <span style="font-size:11px;font-weight:700;color:${sevColor};letter-spacing:1px;">
+              BLACKLISTED
+            </span>
+            <span style="font-size:10px;padding:2px 8px;border-radius:3px;
+              background:${sevColor}22;color:${sevColor};font-weight:700;">
+              ${escHtml(bl.severity)}
+            </span>
+            ${bl.category ? `<span style="font-size:10px;padding:2px 8px;border-radius:3px;
+              background:var(--bg3);color:var(--text2);">${escHtml(bl.category)}</span>` : ""}
+            ${(bl.tags||[]).map(t => `<span style="font-size:10px;padding:2px 6px;border-radius:3px;
+              background:var(--bg3);color:var(--text3);">${escHtml(t)}</span>`).join("")}
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px 16px;">
+            ${bl.reason ? `
+              <div style="grid-column:1/-1;font-size:11px;color:var(--text2);margin-bottom:2px;">
+                <span style="color:var(--text3);">Reason:</span> ${escHtml(bl.reason)}
+              </div>` : ""}
+            ${bl.added_by ? `<div style="font-size:10px;color:var(--text3);">
+              Added by: <span style="color:var(--text2);">${escHtml(bl.added_by)}</span></div>` : ""}
+            ${bl.added_at ? `<div style="font-size:10px;color:var(--text3);">
+              Added: <span style="color:var(--text2);">${new Date(bl.added_at).toLocaleDateString()}</span></div>` : ""}
+            ${bl.expires_at ? `<div style="font-size:10px;color:var(--text3);">
+              Expires: <span style="color:var(--text2);">${new Date(bl.expires_at).toLocaleDateString()}</span></div>` : ""}
+            <div style="font-size:10px;color:var(--text3);">
+              Entry ID: <span style="color:var(--text2);">#${bl.id}</span>
+            </div>
+          </div>
+        </div>
+        <button onclick="showBlacklistPanel()" style="
+          background:none;border:1px solid ${sevColor};color:${sevColor};
+          border-radius:4px;padding:4px 10px;font-size:10px;cursor:pointer;
+          font-family:inherit;flex-shrink:0;white-space:nowrap;">
+          View List
+        </button>
+      </div>`;
+  }
 
   // blacklist panel
   async function showBlacklistPanel() {
@@ -1603,7 +1657,13 @@ function renderAuditEntries(entries, total) {
    }
 
    // blacklistbtn
-   if (e.target.id === "blockCurrentBtn") quickBlock(currentIP);
+    if (e.target.id === "blockCurrentBtn") {
+      if (lastResult?.blacklisted) {
+        showBlacklistPanel(); // 
+      } else {
+        quickBlock(currentIP);
+      }
+    }
 
 
       // ── Tab switching
@@ -2116,6 +2176,7 @@ const MODAL_STYLE = `
         </div>` : ""}`;
   }
 
+
   // ── Render result 
   function renderResult(d) {
     const score     = d.score        ?? 0;
@@ -2159,7 +2220,7 @@ const MODAL_STYLE = `
         <button id="watchCurrentBtn" class="btn btn-ghost" style="padding:5px 12px;font-size:11px;">+ Watch</button>
         <button id="downloadPdfBtn"  class="btn btn-ghost" style="padding:5px 12px;font-size:11px;">↓ PDF Report</button>
         <button id="timelineBtn"     class="btn btn-ghost" style="padding:5px 12px;font-size:11px;">↑ History</button> 
-        <button id="blockCurrentBtn" class="btn btn-ghost" style="padding:5px 12px;font-size:11px;color:var(--critical);border-color:var(--critical);">🚫 Block</button>
+        <button id="blockCurrentBtn" class="btn btn-ghost" style="padding:5px 12px;font-size:11px;color:var(--critical);border-color:var(--critical);">${d.blacklisted ? "✓ Blacklisted" : "🚫 Block"}</button>
           </div>
         </div>
       </div>
@@ -2176,6 +2237,7 @@ const MODAL_STYLE = `
       </div>
 
       <div id="tabContent-Signals">
+       ${blacklistBanner(d.blacklisted)}
         <div class="signal-list">
           ${signals.map(s => `
             <div class="signal-item ${s.severity}">
@@ -2238,6 +2300,8 @@ const MODAL_STYLE = `
         </div>
       </div>`;
   }
+
+
 
   // ── Helpers 
   function threatFeedBadges(tf) {

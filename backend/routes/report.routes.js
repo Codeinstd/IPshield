@@ -4,6 +4,7 @@ const { param, validationResult } = require("express-validator");
 const { getFullIntel } = require("../services/ipIntel.service");
 const logger = require("../utils/logger");
 
+
 router.get("/:ip",
   [
     param("ip").trim().notEmpty().custom(ip => {
