@@ -156,6 +156,8 @@ router.post("/", [
   const { ip, severity = "HIGH", category = "", reason = "", added_by = "analyst", expires_at, tags = [] } = req.body;
   const entry = addToBlacklist({ ip, severity, category, reason, added_by, expires_at, tags });
   if (!entry) return res.status(500).json({ error: "Failed to add entry" });
+  if (entry.duplicate)    return res.status(409).json({ error: `${ip} is already blacklisted (ID: ${entry.id})` });
+
   logger.info(`Blacklist: added ${ip} (${severity})`);
   res.status(201).json({ message: "Added to blacklist", entry });
 });

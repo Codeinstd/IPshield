@@ -60,7 +60,15 @@
     // Show icon only on mobile, full label on desktop
     siemBtn.innerHTML     = `<span class="desktop-label">📡 SIEM</span><span class="mobile-label" style="display:none;">📡</span>`;
     headerRight.prepend(siemBtn);
-          
+
+    const blBtn = document.createElement("button");
+      blBtn.className   = "btn btn-ghost";
+      blBtn.id          = "blacklistBtn";
+      blBtn.textContent = "🚫 Blacklist";
+      blBtn.style.cssText = "padding:6px 12px;font-size:11px;";
+      headerRight.prepend(blBtn);
+
+             
     if (headerRight) {
       // Theme toggle — hide label on very small screens via title attribute
       const toggle          = document.createElement("button");
@@ -205,7 +213,7 @@
     <div style="position:relative;">
       <input id="auditSearch" type="text" placeholder="Search IP, country, ISP…"
         maxlength="45"
-        style="width:100%;padding:8px 36px 8px 12px;background:var(--bg2);border:0.9px solid var(--border);border-radius:6px;
+        style="width:100%;padding:8px 36px 8px 12px;background:var(--bg1);border:1px solid var(--border);border-radius:6px;
                color:var(--text);font-family:inherit;font-size:12px;outline:none;">
       <button id="auditSearchClear" title="Clear search"
         style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px;display:none;">✕</button>
@@ -229,11 +237,11 @@
     <span>Score:</span>
     <input id="auditMinScore" type="number" min="0" max="100" value="0"
       inputmode="numeric"
-      style="width:44px;padding:3px 6px;background:var(--bg2);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:11px;font-family:inherit;">
+      style="width:44px;padding:3px 6px;background:var(--bg1);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:11px;font-family:inherit;">
     <span>–</span>
     <input id="auditMaxScore" type="number" min="0" max="100" value="100"
       inputmode="numeric"
-      style="width:50px;padding:3px 6px;background:var(--bg2);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:11px;font-family:inherit;">
+      style="width:50px;padding:3px 6px;background:var(--bg1);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:11px;font-family:inherit;">
   
     <button class="audit-toggle" data-key="proxy" data-val="null"
           style="padding:3px 8px;border-radius:4px;border:1px solid var(--border);background:transparent;color:var(--text3);font-size:10px;cursor:pointer;font-family:inherit;">
@@ -252,7 +260,7 @@
  
       <div style="display:flex;gap:6px;align-items:center;">
         <select id="auditSort"
-          style="padding:3px 8px;background:var(--bg2);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:11px;font-family:inherit;cursor:pointer;">
+          style="padding:3px 8px;background:var(--bg1);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:11px;font-family:inherit;cursor:pointer;">
           <option value="date_desc">Newest first</option>
           <option value="date_asc">Oldest first</option>
           <option value="score_desc">Highest score</option>
@@ -410,6 +418,437 @@
   } catch (err) {
     document.getElementById("timelineContent").innerHTML =
       `<div style="padding:24px;color:var(--critical);font-size:12px;">⚠ Failed to load history: ${escHtml(err.message)}</div>`;
+  }
+}
+
+  // blacklist panel
+  async function showBlacklistPanel() {
+  const overlay = document.createElement("div");
+  overlay.id = "blacklistModal";
+  overlay.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:10000;display:flex;align-items:center;justify-content:center;padding:16px;";
+ 
+  const modal = document.createElement("div");
+  modal.style.cssText = "background:var(--bg1);border:1px solid var(--border);border-radius:12px;width:100%;max-width:900px;max-height:90vh;display:flex;flex-direction:column;overflow:hidden;";
+ 
+  modal.innerHTML = `
+    <div style="padding:16px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+      <div>
+        <div style="font-size:14px;font-weight:700;color:var(--text);">Blacklist IP</div>
+        <div id="blStats" style="font-size:11px;color:var(--text3);margin-top:2px;">Blacklisted Details</div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <button id="blAddBtn"    class="btn btn-primary" style="padding:6px 14px;font-size:11px;">+ Add IP</button>
+        <button id="blExportBtn" class="btn btn-ghost"   style="padding:6px 14px;font-size:11px;">↓ Export</button>
+        <button id="blCloseBtn" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:20px;padding:4px;">✕</button>
+      </div>
+    </div>
+ 
+    <!-- Filters -->
+    <div style="padding:12px 24px;border-bottom:1px solid var(--border);display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+      <input id="blSearch" type="text" placeholder="Search IP, reason, category…" maxlength="100"
+        style="flex:1;min-width:160px;padding:7px 12px;background:var(--bg1);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:inherit;font-size:12px;outline:none;">
+      <select id="blSevFilter" style="padding:7px 10px;background:var(--bg1);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:inherit;font-size:12px;">
+        <option value="">All Severities</option>
+        <option value="CRITICAL">CRITICAL</option>
+        <option value="HIGH">HIGH</option>
+        <option value="MEDIUM">MEDIUM</option>
+        <option value="LOW">LOW</option>
+      </select>
+      <select id="blStatusFilter" style="padding:7px 10px;background:var(--bg1);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:inherit;font-size:12px;">
+        <option value="active">Active</option>
+        <option value="expired">Expired</option>
+        <option value="">All</option>
+      </select>
+      <button id="blBulkDeleteBtn" class="btn btn-ghost" style="padding:6px 12px;font-size:11px;color:var(--critical);border-color:var(--critical);display:none;">
+        Delete Selected
+      </button>
+    </div>
+ 
+    <!-- Table -->
+    <div style="flex:1;overflow-y:auto;" id="blTableWrap">
+      <div style="padding:40px;text-align:center;color:var(--text3);">
+        <div class="spinner" style="margin:0 auto 12px;"></div>Loading blacklist…
+      </div>
+    </div>
+ 
+    <!-- Add/Edit form (hidden initially) -->
+    <div id="blForm" style="display:none;padding:20px 24px;border-top:1px solid var(--border);background:var(--bg2);">
+      <div style="font-size:11px;font-weight:600;color:var(--text);letter-spacing:2px;text-transform:uppercase;margin-bottom:14px;" id="blFormTitle">Add to Blacklist</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div>
+          <label style="font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--text3);display:block;margin-bottom:4px;">IP ADDRESS</label>
+          <input id="blFormIp" type="text" maxlength="45" placeholder="e.g. 185.220.101.1"
+            style="width:100%;padding:8px 12px;background:var(--bg1);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:12px;outline:none;box-sizing:border-box;">
+        </div>
+        <div>
+          <label style="font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--text3);display:block;margin-bottom:4px;">SEVERITY</label>
+          <select id="blFormSeverity" style="width:100%;padding:8px 12px;background:var(--bg1);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:inherit;font-size:12px;">
+            <option value="HIGH" selected>HIGH</option>
+            <option value="CRITICAL">CRITICAL</option>
+            <option value="MEDIUM">MEDIUM</option>
+            <option value="LOW">LOW</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--text3);display:block;margin-bottom:4px;">CATEGORY</label>
+          <select id="blFormCategory" style="width:100%;padding:8px 12px;background:var(--bg1);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:inherit;font-size:12px;">
+            <option value="">Select category…</option>
+            ${["Malware","Botnet","C2","Scanner","Spam","Proxy","Tor","Phishing","Brute Force","Manual","Other"]
+              .map(c => `<option value="${c}">${c}</option>`).join("")}
+          </select>
+        </div>
+        <div>
+          <label style="font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--text3);display:block;margin-bottom:4px;">EXPIRES AT (optional)</label>
+          <input id="blFormExpiry" type="datetime-local"
+            style="width:100%;padding:8px 12px;background:var(--bg1);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:inherit;font-size:12px;box-sizing:border-box;">
+        </div>
+        <div style="grid-column:1/-1;">
+          <label style="font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--text3);display:block;margin-bottom:4px;">REASON</label>
+          <input id="blFormReason" type="text" maxlength="500" placeholder="Why is this IP blacklisted?"
+            style="width:100%;padding:8px 12px;background:var(--bg1);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:inherit;font-size:12px;outline:none;box-sizing:border-box;">
+        </div>
+        <div style="grid-column:1/-1;">
+          <label style="font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--text3);display:block;margin-bottom:4px;">TAGS (comma-separated)</label>
+          <input id="blFormTags" type="text" maxlength="200" placeholder="e.g. tor, scanner, incident-2026"
+            style="width:100%;padding:8px 12px;background:var(--bg1);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:inherit;font-size:12px;outline:none;box-sizing:border-box;">
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:14px;justify-content:flex-end;">
+        <div id="blFormError" style="flex:1;font-size:11px;color:var(--critical);align-self:center;"></div>
+        <button id="blFormCancel" class="btn btn-ghost" style="padding:7px 16px;font-family:'JetBrains Mono',monospace;font-size:12px;">Cancel</button>
+        <button id="blFormSave"   class="btn btn-primary" style="padding:7px 16px;font-family:'JetBrains Mono',monospace;font-size:12px;">Save</button>
+      </div>
+    </div>
+ 
+    <!-- Export panel (hidden) -->
+    <div id="blExportPanel" style="display:none;padding:16px 24px;border-top:1px solid var(--border);background:var(--bg2);">
+      <div style="font-size:11px;color:var(--text3);letter-spacing:2px;margin-bottom:12px;">// EXPORT FORMAT</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        ${["txt","csv","json","iptables","nginx","cisco","paloalto","windows"].map(fmt => `
+          <button class="bl-export-fmt btn btn-ghost" data-fmt="${fmt}"
+            style="padding:6px 14px;font-size:11px;text-transform:uppercase;">${fmt}</button>`).join("")}
+      </div>
+    </div>`;
+ 
+  overlay.appendChild(modal);
+  document.body.appendChild(overlay);
+ 
+  // State
+  let editingId    = null;
+  let selectedIds  = new Set();
+  let currentQuery = { q: "", severity: "", status: "active" };
+ 
+  // ── Load & render
+  async function loadBlacklist() {
+    const params = new URLSearchParams({
+      limit:  200,
+      status: currentQuery.status || "active"
+    });
+    if (currentQuery.q)        params.set("q",        currentQuery.q);
+    if (currentQuery.severity) params.set("severity", currentQuery.severity);
+ 
+    try {
+      const res  = await fetch(`${API}/blacklist?${params}`, { headers: { "x-api-key": API_KEY } });
+      const data = await res.json();
+      renderStats(data.stats);
+      renderTable(data.entries || []);
+    } catch (err) {
+      document.getElementById("blTableWrap").innerHTML =
+        `<div style="padding:24px;color:var(--critical);font-size:12px;">Error: ${escHtml(err.message)}</div>`;
+    }
+  }
+ 
+  function renderStats(stats) {
+    if (!stats) return;
+    const el = document.getElementById("blStats");
+    if (el) el.textContent = `${stats.active || 0} active  ·  ${stats.total || 0} total  ·  ${stats.expired || 0} expired`;
+  }
+ 
+  function renderTable(entries) {
+    selectedIds.clear();
+    updateBulkBtn();
+    const wrap = document.getElementById("blTableWrap");
+ 
+    if (!entries.length) {
+      wrap.innerHTML = `<div style="padding:40px;text-align:center;color:var(--text3);font-size:12px;">
+        No entries found${currentQuery.q || currentQuery.severity ? " matching filters" : ""}.</div>`;
+      return;
+    }
+ 
+    const sevColor = { CRITICAL:"var(--critical)", HIGH:"var(--high)", MEDIUM:"var(--medium)", LOW:"var(--low)" };
+ 
+    wrap.innerHTML = `
+      <table style="width:100%;border-collapse:collapse;font-size:12px;">
+        <thead>
+          <tr style="background:var(--bg2);border-bottom:1px solid var(--border);">
+            <th style="padding:10px 8px 10px 16px;text-align:left;">
+              <input type="checkbox" id="blSelectAll" style="cursor:pointer;">
+            </th>
+            <th style="padding:10px 8px;text-align:left;color:var(--text3);font-size:10px;letter-spacing:1px;">IP</th>
+            <th style="padding:10px 8px;text-align:left;color:var(--text3);font-size:10px;letter-spacing:1px;">SEVERITY</th>
+            <th style="padding:10px 8px;text-align:left;color:var(--text3);font-size:10px;letter-spacing:1px;">CATEGORY</th>
+            <th style="padding:10px 8px;text-align:left;color:var(--text3);font-size:10px;letter-spacing:1px;">REASON</th>
+            <th style="padding:10px 8px;text-align:left;color:var(--text3);font-size:10px;letter-spacing:1px;">ADDED</th>
+            <th style="padding:10px 8px;text-align:left;color:var(--text3);font-size:10px;letter-spacing:1px;">EXPIRES</th>
+            <th style="padding:10px 16px 10px 8px;text-align:right;color:var(--text3);font-size:10px;letter-spacing:1px;">ACTIONS</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${entries.map((e, i) => {
+            const color   = sevColor[e.severity] || "var(--text2)";
+            const expired = e.expired;
+            const tags    = (e.tags || []).slice(0, 3);
+            const added   = e.added_at ? new Date(e.added_at).toLocaleDateString() : "—";
+            const expires = e.expires_at ? new Date(e.expires_at).toLocaleDateString() : "Never";
+            return `
+              <tr class="bl-row" data-id="${e.id}"
+                style="border-bottom:1px solid var(--border);${expired ? "opacity:0.5;" : ""}${i % 2 === 0 ? "" : "background:var(--bg2);"}">
+                <td style="padding:10px 8px 10px 16px;">
+                  <input type="checkbox" class="bl-check" data-id="${e.id}" style="cursor:pointer;">
+                </td>
+                <td style="padding:10px 8px;">
+                  <div style="font-family:'JetBrains Mono',monospace;font-weight:600;color:var(--text);">${escHtml(e.ip)}</div>
+                  ${tags.length ? `<div style="display:flex;gap:4px;margin-top:3px;flex-wrap:wrap;">
+                    ${tags.map(t => `<span style="font-size:9px;padding:1px 5px;border-radius:2px;background:var(--bg3);color:var(--text3);">${escHtml(t)}</span>`).join("")}
+                  </div>` : ""}
+                </td>
+                <td style="padding:10px 8px;">
+                  <span style="font-size:10px;font-weight:700;color:${color};padding:2px 8px;border-radius:3px;background:${color}22;">${e.severity}</span>
+                </td>
+                <td style="padding:10px 8px;color:var(--text2);">${escHtml(e.category || "—")}</td>
+                <td style="padding:10px 8px;color:var(--text2);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"
+                    title="${escHtml(e.reason || "")}">${escHtml(e.reason || "—")}</td>
+                <td style="padding:10px 8px;color:var(--text3);white-space:nowrap;">${added}</td>
+                <td style="padding:10px 8px;color:${expired ? "var(--critical)" : "var(--text3)"};white-space:nowrap;">
+                  ${expired ? "⚠ Expired" : expires}
+                </td>
+                <td style="padding:10px 16px 10px 8px;text-align:right;white-space:nowrap;">
+                  <button class="bl-edit-btn btn btn-ghost" data-id="${e.id}"
+                    style="padding:3px 10px;font-size:10px;margin-right:4px;">Edit</button>
+                  <button class="bl-del-btn btn btn-ghost" data-id="${e.id}"
+                    style="padding:3px 10px;font-size:10px;color:var(--critical);border-color:var(--critical);">Del</button>
+                </td>
+              </tr>`;
+          }).join("")}
+        </tbody>
+      </table>`;
+ 
+    // Select all checkbox
+    document.getElementById("blSelectAll")?.addEventListener("change", e => {
+      document.querySelectorAll(".bl-check").forEach(cb => {
+        cb.checked = e.target.checked;
+        const id   = parseInt(cb.dataset.id);
+        e.target.checked ? selectedIds.add(id) : selectedIds.delete(id);
+      });
+      updateBulkBtn();
+    });
+ 
+    // Individual checkboxes
+    document.querySelectorAll(".bl-check").forEach(cb => {
+      cb.addEventListener("change", e => {
+        const id = parseInt(e.target.dataset.id);
+        e.target.checked ? selectedIds.add(id) : selectedIds.delete(id);
+        updateBulkBtn();
+      });
+    });
+ 
+    // Edit buttons
+    document.querySelectorAll(".bl-edit-btn").forEach(btn => {
+      btn.addEventListener("click", () => openEditForm(parseInt(btn.dataset.id), entries));
+    });
+ 
+    // Delete buttons
+    document.querySelectorAll(".bl-del-btn").forEach(btn => {
+      btn.addEventListener("click", async () => {
+        if (!confirm("Delete this entry?")) return;
+        await fetch(`${API}/blacklist/${btn.dataset.id}`, {
+          method: "DELETE", headers: { "x-api-key": API_KEY }
+        });
+        loadBlacklist();
+      });
+    });
+ 
+    // Click IP to score it
+    document.querySelectorAll(".bl-row").forEach(row => {
+      row.addEventListener("click", e => {
+        if (e.target.tagName === "INPUT" || e.target.tagName === "BUTTON") return;
+        const ip = row.querySelector("[style*='JetBrains']")?.textContent?.trim();
+        if (ip) { ipInput.value = ip; overlay.remove(); scoreIP(); }
+      });
+    });
+  }
+ 
+  function updateBulkBtn() {
+    const btn = document.getElementById("blBulkDeleteBtn");
+    if (btn) {
+      btn.style.display = selectedIds.size > 0 ? "inline-flex" : "none";
+      btn.textContent   = `Delete ${selectedIds.size} Selected`;
+    }
+  }
+ 
+  // ── Form helpers 
+  function openAddForm() {
+    editingId = null;
+    document.getElementById("blFormTitle").textContent   = "Add to Blacklist";
+    document.getElementById("blFormIp").value            = currentIP || "";
+    document.getElementById("blFormIp").disabled         = false;
+    document.getElementById("blFormSeverity").value      = "HIGH";
+    document.getElementById("blFormCategory").value      = "";
+    document.getElementById("blFormReason").value        = "";
+    document.getElementById("blFormExpiry").value        = "";
+    document.getElementById("blFormTags").value          = "";
+    document.getElementById("blFormError").textContent   = "";
+    document.getElementById("blForm").style.display      = "block";
+    document.getElementById("blExportPanel").style.display = "none";
+    document.getElementById("blFormIp").focus();
+  }
+ 
+  function openEditForm(id, entries) {
+    const entry = entries.find(e => e.id === id);
+    if (!entry) return;
+    editingId = id;
+    document.getElementById("blFormTitle").textContent   = "Edit Blacklist";
+    document.getElementById("blFormIp").value            = entry.ip;
+    document.getElementById("blFormIp").disabled         = true;
+    document.getElementById("blFormSeverity").value      = entry.severity;
+    document.getElementById("blFormCategory").value      = entry.category || "";
+    document.getElementById("blFormReason").value        = entry.reason   || "";
+    document.getElementById("blFormExpiry").value        = entry.expires_at
+      ? new Date(entry.expires_at).toISOString().slice(0,16) : "";
+    document.getElementById("blFormTags").value          = (entry.tags || []).join(", ");
+    document.getElementById("blFormError").textContent   = "";
+    document.getElementById("blForm").style.display      = "block";
+    document.getElementById("blExportPanel").style.display = "none";
+  }
+ 
+  async function saveForm() {
+    const ip       = document.getElementById("blFormIp").value.trim();
+    const severity = document.getElementById("blFormSeverity").value;
+    const category = document.getElementById("blFormCategory").value;
+    const reason   = document.getElementById("blFormReason").value.trim();
+    const expiry   = document.getElementById("blFormExpiry").value;
+    const tagsRaw  = document.getElementById("blFormTags").value;
+    const tags     = tagsRaw.split(",").map(t => t.trim()).filter(Boolean);
+    const errEl    = document.getElementById("blFormError");
+ 
+    if (!editingId && !ip) { errEl.textContent = "IP address is required."; return; }
+ 
+    const body = { severity, category, reason, tags };
+    if (!editingId) body.ip = ip;
+    if (expiry) body.expires_at = new Date(expiry).toISOString();
+ 
+    const url    = editingId ? `${API}/blacklist/${editingId}` : `${API}/blacklist`;
+    const method = editingId ? "PUT" : "POST";
+ 
+    try {
+      const res  = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json", "x-api-key": API_KEY },
+        body:    JSON.stringify(body)
+      });
+      const data = await res.json();
+
+      if (res.status === 409) {
+      errEl.textContent = `⚠ ${ip} is already actively blacklisted.`;
+      return;
+    }
+
+      if (!res.ok) { errEl.textContent = data.error || "Save failed."; return; }
+      document.getElementById("blForm").style.display = "none";
+      loadBlacklist();
+    } catch (err) {
+      errEl.textContent = err.message;
+    }
+  }
+ 
+  // ── Wire events 
+  document.getElementById("blCloseBtn").addEventListener("click", () => overlay.remove());
+  overlay.addEventListener("click", e => { if (e.target === overlay) overlay.remove(); });
+ 
+  document.getElementById("blAddBtn").addEventListener("click", openAddForm);
+  document.getElementById("blFormSave").addEventListener("click", saveForm);
+  document.getElementById("blFormCancel").addEventListener("click", () => {
+    document.getElementById("blForm").style.display = "none";
+  });
+ 
+  // Search & filter with debounce
+  let blSearchTimer;
+  document.getElementById("blSearch").addEventListener("input", e => {
+    clearTimeout(blSearchTimer);
+    blSearchTimer = setTimeout(() => { currentQuery.q = e.target.value.trim(); loadBlacklist(); }, 300);
+  });
+  document.getElementById("blSevFilter").addEventListener("change", e => {
+    currentQuery.severity = e.target.value; loadBlacklist();
+  });
+  document.getElementById("blStatusFilter").addEventListener("change", e => {
+    currentQuery.status = e.target.value; loadBlacklist();
+  });
+ 
+  // Bulk delete
+  document.getElementById("blBulkDeleteBtn").addEventListener("click", async () => {
+    if (!selectedIds.size || !confirm(`Delete ${selectedIds.size} entries?`)) return;
+    await fetch(`${API}/blacklist/bulk`, {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json", "x-api-key": API_KEY },
+      body: JSON.stringify({ ids: [...selectedIds] })
+    });
+    selectedIds.clear();
+    loadBlacklist();
+  });
+ 
+  // Export
+  document.getElementById("blExportBtn").addEventListener("click", () => {
+    const panel = document.getElementById("blExportPanel");
+    const form  = document.getElementById("blForm");
+    form.style.display  = "none";
+    panel.style.display = panel.style.display === "none" ? "block" : "none";
+  });
+ 
+  document.querySelectorAll(".bl-export-fmt").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const fmt = btn.dataset.fmt;
+      const url = `${API}/blacklist/export?fmt=${fmt}`;
+      const a   = Object.assign(document.createElement("a"), { href: url });
+      // Must include auth header — use fetch + blob
+      fetch(url, { headers: { "x-api-key": API_KEY } })
+        .then(r => r.blob())
+        .then(blob => {
+          const ext = { txt:"txt", csv:"csv", json:"json", nginx:"conf", iptables:"sh", cisco:"txt", paloalto:"txt", windows:"ps1" }[fmt] || "txt";
+          const bUrl = URL.createObjectURL(blob);
+          Object.assign(a, { href: bUrl, download: `ipshield-blacklist-${Date.now()}.${ext}` });
+          document.body.appendChild(a); a.click(); document.body.removeChild(a);
+          URL.revokeObjectURL(bUrl);
+        })
+        .catch(err => setBulkStatus(`Export error: ${err.message}`));
+    });
+  });
+ 
+  // Initial load
+  loadBlacklist();
+}
+ 
+// ── Quick block from score result 
+async function quickBlock(ip) {
+  if (!ip || !isValidIP(ip)) { setBulkStatus("No valid IP to block."); return; }
+
+  const reason   = prompt(`Reason for blocking ${ip}:`, "Manual block") ?? "Manual block";
+
+  try {
+    const res  = await fetch(`${API}/blacklist`, {
+      method:  "POST",
+      headers: { "Content-Type": "application/json", "x-api-key": API_KEY },
+      body:    JSON.stringify({ ip, severity: "HIGH", reason, category: "Manual", added_by: "analyst" })
+    });
+    const data = await res.json();
+
+    if (res.status === 409) {
+      setBulkStatus(`⚠ ${ip} is already blacklisted`);
+      return;
+    }
+    if (!res.ok) throw new Error(data.error || "Failed");
+    setBulkStatus(`✓ ${ip} added to blacklist`);
+  } catch (err) {
+    setBulkStatus(`Error: ${err.message}`);
   }
 }
  
@@ -1109,6 +1548,7 @@ function renderAuditEntries(entries, total) {
       if (e.target.id === "pollBtn")     triggerPoll();
       if (e.target.id === "firewallBtn") showFirewallExport();
       if (e.target.id === "siemBtn")     showSIEMPanel();
+      if (e.target.id === "blacklistBtn") showBlacklistPanel();
     });
 
     document.addEventListener("change", e => {
@@ -1161,6 +1601,9 @@ function renderAuditEntries(entries, total) {
     if (e.target.id === "timelineBtn") {
     showTimeline(currentIP || ipInput.value.trim());
    }
+
+   // blacklistbtn
+   if (e.target.id === "blockCurrentBtn") quickBlock(currentIP);
 
 
       // ── Tab switching
@@ -1716,6 +2159,7 @@ const MODAL_STYLE = `
         <button id="watchCurrentBtn" class="btn btn-ghost" style="padding:5px 12px;font-size:11px;">+ Watch</button>
         <button id="downloadPdfBtn"  class="btn btn-ghost" style="padding:5px 12px;font-size:11px;">↓ PDF Report</button>
         <button id="timelineBtn"     class="btn btn-ghost" style="padding:5px 12px;font-size:11px;">↑ History</button> 
+        <button id="blockCurrentBtn" class="btn btn-ghost" style="padding:5px 12px;font-size:11px;color:var(--critical);border-color:var(--critical);">🚫 Block</button>
           </div>
         </div>
       </div>

@@ -52,6 +52,7 @@ router.get("/", (req, res) => {
     .swagger-ui { background: #080c0f; }
     .swagger-ui .topbar { display: none; }
     .swagger-ui .info    { margin: 32px 0 24px; }
+    swagger-ui .info a { color: #4990e2;font-family: 'JetBrains Mono', monospace;font-size: 14px;transition: all .4s;}
     .swagger-ui .info .title { color: #c9d8e8; font-family: JetBrains Mono, monospace; }
     .swagger-ui .info p { color: #6a8fa8; font-family: JetBrains Mono, monospace; }
     .swagger-ui .info li   { color: #6a8fa8; font-family: JetBrains Mono, monospace; }

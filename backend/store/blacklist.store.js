@@ -76,6 +76,18 @@ function listBlacklist({ severity, status, q, limit = 200, offset = 0 } = {}) {
 function addToBlacklist({ ip, severity = "HIGH", category = "", reason = "", added_by = "analyst", expires_at = null, tags = [] }) {
   const tagsJson = JSON.stringify(Array.isArray(tags) ? tags : []);
 
+
+   // ── Duplicate check 
+  if (db.isAvailable()) {
+    const existing = db.getDb().prepare(
+      "SELECT id FROM blacklist WHERE ip = ? AND (expires_at IS NULL OR expires_at > datetime('now')) LIMIT 1"
+    ).get(ip);
+    if (existing) return { duplicate: true, id: existing.id };
+  } else {
+    const existing = memStore.find(e => e.ip === ip && (!e.expires_at || new Date(e.expires_at) > new Date()));
+    if (existing) return { duplicate: true, id: existing.id };
+  }
+
   if (db.isAvailable()) {
     try {
       const result = db.getDb().prepare(`

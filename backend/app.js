@@ -20,6 +20,7 @@ const errorMiddleware = require("./middleware/error.middleware");
 const logger          = require("./utils/logger");
 const reportRoutes    = require("./routes/report.routes");
 const timelineRoutes  = require("./routes/timeline.routes");
+const blacklistRoutes = require("./routes/blacklist.routes");
 
 const isProd = process.env.NODE_ENV === "production";
 const app    = express();
@@ -138,6 +139,7 @@ app.use("/api/watchlist", watchlistRoutes);
 app.use("/api/whois",     whoisRoutes);
 app.use("/api/siem",      siemRoutes);
 app.use("/api/timeline",  timelineRoutes);
+app.use("/api/blacklist", blacklistRoutes);
 
 
 // ── SPA fallback  
