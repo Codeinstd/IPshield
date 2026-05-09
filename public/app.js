@@ -865,15 +865,19 @@
       const a   = Object.assign(document.createElement("a"), { href: url });
       // Must include auth header — use fetch + blob
       fetch(url, { headers: { "x-api-key": API_KEY } })
-        .then(r => r.blob())
-        .then(blob => {
-          const ext = { txt:"txt", csv:"csv", json:"json", nginx:"conf", iptables:"sh", cisco:"txt", paloalto:"txt", windows:"ps1" }[fmt] || "txt";
-          const bUrl = URL.createObjectURL(blob);
-          Object.assign(a, { href: bUrl, download: `ipshield-blacklist-${Date.now()}.${ext}` });
-          document.body.appendChild(a); a.click(); document.body.removeChild(a);
-          URL.revokeObjectURL(bUrl);
-        })
-        .catch(err => setBulkStatus(`Export error: ${err.message}`));
+      .then(r => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.blob();
+      })
+      .then(blob => {
+        const ext  = { txt:"txt", csv:"csv", json:"json", nginx:"conf", iptables:"sh", cisco:"txt", paloalto:"txt", windows:"ps1" }[fmt] || "txt";
+        const bUrl = URL.createObjectURL(blob);
+        Object.assign(a, { href: bUrl, download: `ipshield-blacklist-${Date.now()}.${ext}` });
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+        URL.revokeObjectURL(bUrl);
+        toast(`Blacklist exported as ${fmt.toUpperCase()}`, "success");
+      })
+      .catch(err => toast(`Export failed: ${err.message}`, "error"));
     });
   });
  
@@ -1370,6 +1374,7 @@ function showFirewallExport() {
     const url  = URL.createObjectURL(blob);
     const a    = Object.assign(document.createElement("a"), { href: url, download: `ipshield-firewall-${fmt}-${Date.now()}.${ext}` });
     a.click(); URL.revokeObjectURL(url);
+    toast(`Firewall rules exported as ${fmt.toUpperCase()} (${ips.length} IPs)`, "success");
   });
  
   // Generate rules
@@ -1708,10 +1713,11 @@ function renderAuditEntries(entries, total) {
             Object.assign(a, { href: blobUrl });
             document.body.appendChild(a);
             a.click();
+            toast(`PDF report downloaded for ${ip}`, "success");
             document.body.removeChild(a);
             URL.revokeObjectURL(blobUrl);
           })
-          .catch(err => setBulkStatus(`PDF error: ${err.message}`))
+          .catch(err => toast(`PDF error: ${err.message}`, "error"))
           .finally(() => {
             e.target.textContent = "↓ PDF Report";
             e.target.disabled    = false;
@@ -2432,7 +2438,7 @@ const MODAL_STYLE = `
   }
 
   function exportLog() {
-    if (!auditEntries.length) { setBulkStatus("No entries to export."); return; }
+    if (!auditEntries.length) { toast("No audit entries to export yet.", "warning"); return; }
     const headers = ["IP","Score","Risk","Action","Country","City","ISP","Feodo","Spamhaus","ET","Scored At"];
     const rows    = auditEntries.map(e => [
       e.ip, e.score, e.riskLevel, e.action,
@@ -2448,7 +2454,7 @@ const MODAL_STYLE = `
     const a    = Object.assign(document.createElement("a"),{href:url,download:`ipshield-${Date.now()}.csv`});
     a.click();
     URL.revokeObjectURL(url);
-    setBulkStatus(`✓ Exported ${auditEntries.length} entries.`);
+    toast(`Exported ${auditEntries.length} audit ${auditEntries.length === 1 ? "entry" : "entries"}`, "success");
   }
 
   function addAuditEntry(d) {
