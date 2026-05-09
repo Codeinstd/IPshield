@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>IPShield — Real-Time Risk Scoring</title>
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon.ico/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="96x96" href="/favicon.ico/favicon-96x96.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon.ico/favicon-16x16.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/leaflet.min.css">
@@ -732,6 +735,16 @@
  
   .audit-list::-webkit-scrollbar-thumb,
   #watchlistBody::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+}
+
+/* mobile css */
+@media (max-width: 640px) {
+  #ipshieldToast {
+    bottom: 16px;
+    right:  16px;
+    left:   16px;
+    max-width: unset;
+  }
 }
 
 </style>

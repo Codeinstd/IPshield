@@ -45,10 +45,11 @@ router.get("/", (req, res) => {
     .docs-back {
       color: #6a8fa8; font-size: 12px; text-decoration: none;
       border: 1px solid #1e2d3d; padding: 6px 14px; border-radius: 6px;
+      font-family: 'JetBrains Mono', monospace; transition: all .3s;
     }
     .docs-back:hover { color: #00d9ff; border-color: #00d9ff; }
 
-    /* Swagger UI overrides to match IPShield dark theme */
+    /* Swagger UI to match IPShield dark theme */
     .swagger-ui { background: #080c0f; }
     .swagger-ui .topbar { display: none; }
     .swagger-ui .info    { margin: 32px 0 24px; }
@@ -101,6 +102,17 @@ router.get("/", (req, res) => {
     .swagger-ui .dialog-ux .modal-ux-header h3 { color: #c9d8e8; }
     .swagger-ui .dialog-ux .modal-ux-content p,
     .swagger-ui .dialog-ux .modal-ux-content label { color: #6a8fa8; }
+    .swagger-ui .servers-title {
+    font-size: 12px;
+    font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+    }
+    swagger-ui .model-box-control, .swagger-ui .models-control, .swagger-ui .opblock-summary-control {
+    all: inherit;
+    border-bottom: 0;
+    cursor: pointer;
+    flex: 1;
+    }
 
     /* Authorize button */
     .swagger-ui .authorization__btn { color: #00d9ff; border-color: #00d9ff; }

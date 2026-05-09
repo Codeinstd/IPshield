@@ -803,7 +803,7 @@
       const data = await res.json();
 
       if (res.status === 409) {
-      errEl.textContent = `⚠ ${ip} is already actively blacklisted.`;
+      errEl.textContent = toast(`${ip} is already blacklisted`, "warning");;
       return;
     }
 
@@ -880,6 +880,73 @@
   // Initial load
   loadBlacklist();
 }
+
+  // toast msg
+  function toast(message, type = "success", duration = 3500) {
+  // Remove existing toast if any
+  const existing = document.getElementById("ipshieldToast");
+  if (existing) existing.remove();
+
+  const colors = {
+    success: { bg: "rgba(0,232,124,0.12)", border: "var(--low)",      icon: "✓" },
+    error:   { bg: "rgba(255,51,85,0.12)", border: "var(--critical)",  icon: "⚠" },
+    warning: { bg: "rgba(255,204,0,0.12)", border: "var(--medium)",    icon: "⚑" },
+    info:    { bg: "rgba(0,217,255,0.12)", border: "var(--accent)",    icon: "ℹ" }
+  };
+  const c = colors[type] || colors.info;
+
+  const el = document.createElement("div");
+  el.id = "ipshieldToast";
+  el.style.cssText = `
+    position:fixed;bottom:24px;right:24px;z-index:99999;
+    display:flex;align-items:center;gap:10px;
+    padding:12px 18px;
+    background:var(--bg1);
+    border:1px solid ${c.border};
+    border-left:4px solid ${c.border};
+    border-radius:8px;
+    box-shadow:0 8px 32px rgba(0,0,0,0.4);
+    font-family:'JetBrains Mono',monospace;
+    font-size:12px;
+    color:var(--text);
+    max-width:360px;
+    animation:toastIn 0.25s ease forwards;
+    cursor:pointer;
+  `;
+
+  // Inject keyframes once
+  if (!document.getElementById("toastStyles")) {
+    const style = document.createElement("style");
+    style.id = "toastStyles";
+    style.textContent = `
+      @keyframes toastIn {
+        from { opacity:0; transform:translateY(16px); }
+        to   { opacity:1; transform:translateY(0); }
+      }
+      @keyframes toastOut {
+        from { opacity:1; transform:translateY(0); }
+        to   { opacity:0; transform:translateY(16px); }
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  el.innerHTML = `
+    <span style="font-size:16px;color:${c.border};flex-shrink:0;">${c.icon}</span>
+    <span style="flex:1;line-height:1.5;">${escHtml(message)}</span>
+    <button id="toastClose" style="background:none;border:none;color:var(--text3);cursor:pointer;
+      font-size:16px;padding:0 0 0 8px;line-height:1;flex-shrink:0;">✕</button>`;
+
+  document.body.appendChild(el);
+
+  function dismiss() {
+    el.style.animation = "toastOut 0.2s ease forwards";
+    setTimeout(() => el.remove(), 200);
+  }
+
+  el.addEventListener("click", dismiss);
+  setTimeout(dismiss, duration);
+}
  
 // ── Quick block from score result 
 async function quickBlock(ip) {
@@ -896,13 +963,13 @@ async function quickBlock(ip) {
     const data = await res.json();
 
     if (res.status === 409) {
-      setBulkStatus(`⚠ ${ip} is already blacklisted`);
+      toast(`${ip} is already blacklisted`, "warning");
       return;
     }
     if (!res.ok) throw new Error(data.error || "Failed");
-    setBulkStatus(`✓ ${ip} added to blacklist`);
+    toast(`${ip} added to blacklist`, "success");
   } catch (err) {
-    setBulkStatus(`Error: ${err.message}`);
+    toast(`Blacklist error: ${err.message}`, "error");
   }
 }
  
@@ -2024,7 +2091,7 @@ const MODAL_STYLE = `
 
   async function addCurrentToWatchlist() {
     const ip = currentIP || ipInput.value.trim();
-    if (!ip || !isValidIP(ip)) { setBulkStatus("Score an IP first, then click + WATCH"); return; }
+    if (!ip || !isValidIP(ip)) { toast("Score an IP first, then click + WATCH", "warning"); return; }
     const label     = prompt(`Label for ${ip}:`, ip) ?? ip;
     const threshold = parseInt(prompt("Alert threshold (0-100):", "30") || "30");
     try {
@@ -2035,9 +2102,9 @@ const MODAL_STYLE = `
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
-      setBulkStatus(`✓ ${ip} added to watchlist`);
+      toast(`${ip} added to watchlist`, "success");
       loadWatchlist();
-    } catch (err) { setBulkStatus(`Error: ${err.message}`); }
+    } catch (err) { toast(`Watchlist error: ${err.message}`, "error"); }
   }
 
   async function removeFromWatchlist(ip) {
@@ -2046,7 +2113,7 @@ const MODAL_STYLE = `
         method: "DELETE", headers: { "x-api-key": API_KEY }
       });
       loadWatchlist();
-    } catch (err) { setBulkStatus(`Error: ${err.message}`); }
+    } catch (err) { toast(`Watchlist error: ${err.message}`, "error"); }
   }
 
   async function triggerPoll() {
@@ -2054,7 +2121,7 @@ const MODAL_STYLE = `
     if (btn) { btn.disabled = true; btn.textContent = "↻ POLLING…"; }
     try {
       await fetch(`${API}/watchlist/poll`, { method: "POST", headers: { "x-api-key": API_KEY } });
-      setBulkStatus("Poll triggered — watchlist updating…");
+      toast("Watchlist poll triggered — updating shortly", "info");
       setTimeout(loadWatchlist, 5000);
     } finally {
       if (btn) { btn.disabled = false; btn.textContent = "↻ POLL"; }
@@ -2358,10 +2425,10 @@ const MODAL_STYLE = `
       if (!res.ok) throw new Error(data.error);
       data.results.forEach(r => { if (r.score != null) { addAuditEntry(r); updateStats(r.riskLevel); } });
       const failed = data.results.filter(r => r.error).length;
-      setBulkStatus(`✓ ${data.results.length - failed} scored${failed ? `, ${failed} failed` : ""}.`);
+      toast(`${data.results.length - failed} IPs scored${failed ? `, ${failed} failed` : ""}`, failed ? "warning" : "success");
       const last = data.results.find(r => r.score != null);
       if (last) { renderResult(last); updateMap(last.geo||{}, last.ip, last.riskLevel); }
-    } catch (err) { setBulkStatus(`Error: ${err.message}`); }
+    } catch (err) { toast(`Error: ${err.message}`, "error"); }
   }
 
   function exportLog() {
