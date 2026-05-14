@@ -9,6 +9,7 @@
   const procTime   = document.getElementById("processingTime");
   const auditList  = document.getElementById("auditList");
   const auditCount = document.getElementById("auditCount");
+  const apiDocsBtn = document.getElementById("apiDocsBtn");
   
 
   const sessionStats = { CRITICAL: 0, HIGH: 0, MEDIUM: 0, LOW: 0 };
@@ -52,31 +53,46 @@
     const headerRight = document.querySelector(".header-right");
 
      // SIEM button — icon only on mobile
-    const siemBtn         = document.createElement("button");
-    siemBtn.className     = "btn btn-ghost";
-    siemBtn.id            = "siemBtn";
-    siemBtn.title         = "SIEM Webhook Settings";
-    siemBtn.style.cssText = "padding:6px 12px;font-size:11px;";
-    // Show icon only on mobile, full label on desktop
+    if (headerRight) {
+      const siemBtn         = document.createElement("button");
+      siemBtn.className     = "btn btn-ghost";
+      siemBtn.id            = "siemBtn";
+      siemBtn.title         = "SIEM Webhook Settings";
+      siemBtn.style.cssText = "padding:6px 12px;font-size:11px;";
+      // Show icon only on mobile, full label on desktop
     siemBtn.innerHTML     = `<span class="desktop-label">📡 SIEM</span><span class="mobile-label" style="display:none;">📡</span>`;
     headerRight.prepend(siemBtn);
+    }
 
-    const blBtn = document.createElement("button");
-      blBtn.className   = "btn btn-ghost";
-      blBtn.id          = "blacklistBtn";
-      blBtn.textContent = "🚫 Blacklist";
-      blBtn.style.cssText = "padding:6px 12px;font-size:11px;";
+    // blacklist
+    if (headerRight) {
+      const blBtn = document.createElement("button");
+      blBtn.className           = "btn btn-ghost";
+      blBtn.id                  = "blacklistBtn";
+      blBtn.textContent         = "🚫 Blacklist";
+      blBtn.style.cssText       = "padding:6px 12px;font-size:11px;";
       headerRight.prepend(blBtn);
+    }
 
-             
+    // Cases
+    if (headerRight) {
+      const casesBtn = document.createElement("button");
+      casesBtn.className          = "btn btn-ghost";
+      casesBtn.id                 = "casesBtn";
+      casesBtn.textContent        = "Cases";
+      casesBtn.style.cssText      = "padding:6px 12px;font-size:11px;font-family:'JetBrains Mono', monospace;";
+       headerRight.prepend(casesBtn);
+    }
+
+    // Theme toggle       
     if (headerRight) {
       // Theme toggle — hide label on very small screens via title attribute
-      const toggle          = document.createElement("button");
-      toggle.className      = "btn btn-ghost";
-      toggle.id             = "themeToggle";
-      toggle.textContent    = "☀ LIGHT";
-      toggle.title          = "Toggle dark/light mode";
-      toggle.style.cssText  = "padding:6px 12px; font-size:11px";
+      const toggle               = document.createElement("button");
+      toggle.className           = "btn btn-ghost";
+      toggle.id                  = "themeToggle";
+      toggle.textContent         = "☀ LIGHT";
+      toggle.title               = "Toggle dark/light mode";
+      toggle.style.cssText       = "padding:6px 12px; font-size:11px";
       toggle.addEventListener("click", toggleTheme);
       headerRight.prepend(toggle);
 
@@ -85,7 +101,7 @@
           // headerRight.prepend(toggle);
     }
 
-
+    // Quick tests btn
     const searchSection = document.querySelector(".search-section");
     if (searchSection) {
       const bulk = document.createElement("div");
@@ -100,12 +116,14 @@
       searchSection.appendChild(bulk);
     }
 
+    // Map panels
     const mainGrid = document.querySelector(".main-grid");
     if (mainGrid) {
       const row = document.createElement("div");
       row.id = "mapWatchRow";
       row.style.cssText = "display:grid;grid-template-columns:1fr 1fr;gap:24px;";
 
+      // Score IP panels
       const mapWrap = document.createElement("div");
       mapWrap.id = "mapSection";
       mapWrap.style.cssText = "background:var(--bg1);border:1px solid var(--border);border-radius:12px;overflow:hidden;";
@@ -116,6 +134,8 @@
         </div>
         <div id="mapContainer" style="height:320px;background:var(--bg2);display:flex;align-items:center;justify-content:center;color:var(--text3);font-size:12px;">Loading map…</div>`;
 
+      
+      // Watchlist Panel
       const watchWrap = document.createElement("div");
       watchWrap.id = "watchlistSection";
       watchWrap.style.cssText = "background:var(--bg1);border:1px solid var(--border);border-radius:12px;overflow:hidden;display:flex;flex-direction:column;";
@@ -256,8 +276,6 @@
           DC
         </button>
       </div>
-
- 
       <div style="display:flex;gap:6px;align-items:center;">
         <select id="auditSort"
           style="padding:3px 8px;background:var(--bg1);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:11px;font-family:inherit;cursor:pointer;">
@@ -563,7 +581,7 @@
         </div>
         <div style="grid-column:1/-1;">
           <label style="font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--text3);display:block;margin-bottom:4px;">TAGS (comma-separated)</label>
-          <input id="blFormTags" type="text" maxlength="200" placeholder="e.g. tor, scanner, incident-2026"
+          <input id="blFormTags" type="text" maxlength="200" placeholder="e.g. fraud, scam, phishing, malware, incident-2026"
             style="width:100%;padding:8px 12px;background:var(--bg1);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:inherit;font-size:12px;outline:none;box-sizing:border-box;">
         </div>
       </div>
@@ -575,8 +593,8 @@
     </div>
  
     <!-- Export panel (hidden) -->
-    <div id="blExportPanel" style="display:none;padding:16px 24px;border-top:1px solid var(--border);background:var(--bg2);">
-      <div style="font-size:11px;color:var(--text3);letter-spacing:2px;margin-bottom:12px;">// EXPORT FORMAT</div>
+    <div id="blExportPanel" style="display:none;padding:16px 24px;border-top:1px solid var(--border);background:var(--bg);">
+      <div style="font-size:11px;color:var(--text3);letter-spacing:2px;margin-bottom:12px;">EXPORT FORMAT</div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;">
         ${["txt","csv","json","iptables","nginx","cisco","paloalto","windows"].map(fmt => `
           <button class="bl-export-fmt btn btn-ghost" data-fmt="${fmt}"
@@ -656,7 +674,7 @@
             const expires = e.expires_at ? new Date(e.expires_at).toLocaleDateString() : "Never";
             return `
               <tr class="bl-row" data-id="${e.id}"
-                style="border-bottom:1px solid var(--border);${expired ? "opacity:0.5;" : ""}${i % 2 === 0 ? "" : "background:var(--bg2);"}">
+                style="border-bottom:1px solid var(--border);${expired ? "opacity:0.5;" : ""}${i % 2 === 0 ? "" : "background:var(--bg);"}">
                 <td style="padding:10px 8px 10px 16px;">
                   <input type="checkbox" class="bl-check" data-id="${e.id}" style="cursor:pointer;">
                 </td>
@@ -743,17 +761,17 @@
   // ── Form helpers 
   function openAddForm() {
     editingId = null;
-    document.getElementById("blFormTitle").textContent   = "Add to Blacklist";
-    document.getElementById("blFormIp").value            = currentIP || "";
-    document.getElementById("blFormIp").disabled         = false;
-    document.getElementById("blFormSeverity").value      = "HIGH";
-    document.getElementById("blFormCategory").value      = "";
-    document.getElementById("blFormReason").value        = "";
-    document.getElementById("blFormExpiry").value        = "";
-    document.getElementById("blFormTags").value          = "";
-    document.getElementById("blFormError").textContent   = "";
-    document.getElementById("blForm").style.display      = "block";
-    document.getElementById("blExportPanel").style.display = "none";
+    document.getElementById("blFormTitle").textContent      = "Add to Blacklist";
+    document.getElementById("blFormIp").value               = currentIP || "";
+    document.getElementById("blFormIp").disabled            = false;
+    document.getElementById("blFormSeverity").value         = "HIGH";
+    document.getElementById("blFormCategory").value         = "";
+    document.getElementById("blFormReason").value           = "";
+    document.getElementById("blFormExpiry").value           = "";
+    document.getElementById("blFormTags").value             = "";
+    document.getElementById("blFormError").textContent      = "";
+    document.getElementById("blForm").style.display         = "block";
+    document.getElementById("blExportPanel").style.display  = "none";
     document.getElementById("blFormIp").focus();
   }
  
@@ -761,18 +779,18 @@
     const entry = entries.find(e => e.id === id);
     if (!entry) return;
     editingId = id;
-    document.getElementById("blFormTitle").textContent   = "Edit Blacklist";
-    document.getElementById("blFormIp").value            = entry.ip;
-    document.getElementById("blFormIp").disabled         = true;
-    document.getElementById("blFormSeverity").value      = entry.severity;
-    document.getElementById("blFormCategory").value      = entry.category || "";
-    document.getElementById("blFormReason").value        = entry.reason   || "";
+    document.getElementById("blFormTitle").textContent      = "Edit Blacklist";
+    document.getElementById("blFormIp").value               = entry.ip;
+    document.getElementById("blFormIp").disabled            = true;
+    document.getElementById("blFormSeverity").value         = entry.severity;
+    document.getElementById("blFormCategory").value         = entry.category || "";
+    document.getElementById("blFormReason").value           = entry.reason   || "";
     document.getElementById("blFormExpiry").value        = entry.expires_at
       ? new Date(entry.expires_at).toISOString().slice(0,16) : "";
-    document.getElementById("blFormTags").value          = (entry.tags || []).join(", ");
-    document.getElementById("blFormError").textContent   = "";
-    document.getElementById("blForm").style.display      = "block";
-    document.getElementById("blExportPanel").style.display = "none";
+    document.getElementById("blFormTags").value             = (entry.tags || []).join(", ");
+    document.getElementById("blFormError").textContent      = "";
+    document.getElementById("blForm").style.display         = "block";
+    document.getElementById("blExportPanel").style.display  = "none";
   }
  
   async function saveForm() {
@@ -785,7 +803,8 @@
     const tags     = tagsRaw.split(",").map(t => t.trim()).filter(Boolean);
     const errEl    = document.getElementById("blFormError");
  
-    if (!editingId && !ip) { errEl.textContent = "IP address is required."; return; }
+    if (!editingId && !ip) { errEl.textContent = "IP address is required."; errEl.style.display = "block"; return; }
+
  
     const body = { severity, category, reason, tags };
     if (!editingId) body.ip = ip;
@@ -885,14 +904,664 @@
   loadBlacklist();
 }
 
+  // Cases Panel 
+  // ── Status colors & icons 
+  function caseStatusColor(status) {
+    return { 
+      Open:"var(--accent)", 
+      Investigating:"var(--high)", 
+      Contained:"var(--medium)", 
+      Resolved:"var(--low)", 
+      Closed:"var(--text3)" }[status] || "var(--text2)";
+  }
+
+  // - Severity Color
+    function caseSeverityColor(sev) {
+  return { 
+    CRITICAL:"var(--critical)", 
+    HIGH:"var(--high)", 
+    MEDIUM:"var(--medium)", 
+    LOW:"var(--low)" }[sev] || "var(--text2)";
+}
+
+  // - Main Cases panel 
+      async function showCasesPanel() {
+    document.getElementById("casesModal")?.remove();
+ 
+  const overlay = document.createElement("div");
+  overlay.id = "casesModal";
+  overlay.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:10000;display:flex;align-items:center;justify-content:center;padding:16px;";
+ 
+  const modal = document.createElement("div");
+  modal.style.cssText = "background:var(--bg1);border:1px solid var(--border);border-radius:12px;width:100%;max-width:1000px;max-height:92vh;display:flex;flex-direction:column;overflow:hidden;";
+ 
+  modal.innerHTML = `
+    <div style="padding:16px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+      <div>
+        <div style="font-size:14px;font-weight:700;color:var(--text);">Manage Cases</div>
+        <div id="caseStats" style="font-size:11px;color:var(--text3);margin-top:2px;">Loading…</div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button id="caseNewBtn" class="btn btn-primary" style="padding:6px 14px;font-size:11px;">+ New Case</button>
+        <button id="casesCloseBtn" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:20px;padding:4px;">✕</button>
+      </div>
+    </div>
+    <div style="padding:10px 24px;border-bottom:1px solid var(--border);display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+      <input id="caseSearch" type="text" placeholder="Search cases…" maxlength="100"
+        style="flex:1;min-width:140px;padding:7px 12px;background:var(--bg1);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:inherit;font-size:12px;outline:none;">
+      <select id="caseStatusFilter" style="padding:7px 10px;background:var(--bg1);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:inherit;font-size:12px;">
+        <option value="">All Statuses</option>
+        <option value="Open">Open</option>
+        <option value="Investigating">Investigating</option>
+        <option value="Contained">Contained</option>
+        <option value="Resolved">Resolved</option>
+        <option value="Closed">Closed</option>
+      </select>
+      <select id="caseSevFilter" style="padding:7px 10px;background:var(--bg1);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:inherit;font-size:12px;">
+        <option value="">All Severities</option>
+        <option value="CRITICAL">CRITICAL</option>
+        <option value="HIGH">HIGH</option>
+        <option value="MEDIUM">MEDIUM</option>
+        <option value="LOW">LOW</option>
+      </select>
+    </div>
+    <div style="flex:1;display:grid;grid-template-columns:320px 1fr;overflow:hidden;min-height:0;">
+      <div style="border-right:1px solid var(--border);overflow-y:auto;min-height:0;" id="caseList">
+        <div style="padding:32px;text-align:center;color:var(--text3);">
+          <div class="spinner" style="margin:0 auto 12px;"></div>Loading…
+        </div>
+      </div>
+      <div style="overflow-y:auto;min-height:0;" id="caseDetail">
+        <div style="padding:48px 32px;text-align:center;color:var(--text3);">
+          <div style="font-size:32px;margin-bottom:12px;">📁</div>
+          <div style="font-size:13px;">Select a case to view details</div>
+        </div>
+      </div>
+    </div>`;
+ 
+  overlay.appendChild(modal);
+  document.body.appendChild(overlay);
+ 
+  let activeCaseId = null;
+  let caseQuery    = { q: "", status: "", severity: "" };
+ 
+  // - API helpers 
+  async function apiGet(path) {
+    const r = await fetch(`${API}${path}`, { headers: { "x-api-key": API_KEY } });
+    return r.json();
+  }
+  async function apiPost(path, body) {
+    const r = await fetch(`${API}${path}`, { method:"POST", headers:{"Content-Type":"application/json","x-api-key":API_KEY}, body:JSON.stringify(body) });
+    return { ok: r.ok, status: r.status, data: await r.json() };
+  }
+  async function apiPut(path, body) {
+    const r = await fetch(`${API}${path}`, { method:"PUT", headers:{"Content-Type":"application/json","x-api-key":API_KEY}, body:JSON.stringify(body) });
+    return { ok: r.ok, data: await r.json() };
+  }
+  async function apiDelete(path) {
+    const r = await fetch(`${API}${path}`, { method:"DELETE", headers:{"x-api-key":API_KEY} });
+    return r.ok;
+  }
+ 
+  // - Stats 
+  async function refreshStats() {
+    try {
+      const data = await apiGet("/cases/stats");
+      const el   = document.getElementById("caseStats");
+      if (el) el.textContent =
+        `${data.total||0} total  ·  ${data.byStatus?.Open||0} open  ·  ${data.byStatus?.Investigating||0} investigating`;
+    } catch (_) {}
+  }
+ 
+  // - Case List 
+  async function refreshList() {
+    const params = new URLSearchParams({ limit:100 });
+    if (caseQuery.q)        params.set("q",        caseQuery.q);
+    if (caseQuery.status)   params.set("status",   caseQuery.status);
+    if (caseQuery.severity) params.set("severity", caseQuery.severity);
+    try {
+      const data = await apiGet(`/cases?${params}`);
+      renderCaseList(data.cases || []);
+    } catch (_) {}
+  }
+ 
+  function renderCaseList(cases) {
+    const el = document.getElementById("caseList");
+    if (!el) return;
+ 
+    if (!cases.length) {
+      el.innerHTML = `<div style="padding:32px;text-align:center;color:var(--text3);font-size:12px;">
+        No cases found.<br><br>
+        <button id="caseFirstNew" class="btn btn-primary" style="padding:8px 18px;font-size:12px;">+ Create First Case</button>
+      </div>`;
+      document.getElementById("caseFirstNew")?.addEventListener("click", () => showCaseForm(null));
+      return;
+    }
+ 
+    el.innerHTML = cases.map(c => {
+      const sc = caseStatusColor(c.status);
+      const sv = caseSeverityColor(c.severity);
+      const ia = c.id === activeCaseId;
+      return `<div class="case-list-item" data-id="${c.id}"
+        style="padding:14px 16px;border-bottom:1px solid var(--border);cursor:pointer;
+               border-left:3px solid ${ia ? sc : "transparent"};
+               background:${ia ? "rgba(0,217,255,0.04)" : "transparent"};">
+        <div style="display:flex;justify-content:space-between;gap:8px;margin-bottom:6px;">
+          <div style="font-size:12px;font-weight:700;color:var(--text);line-height:1.3;flex:1;">${escHtml(c.title)}</div>
+          <span style="font-size:9px;font-weight:700;color:${sv};padding:2px 6px;border-radius:3px;background:${sv}22;white-space:nowrap;">${c.severity}</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+          <span style="font-size:10px;font-weight:600;color:${sc};">● ${c.status}</span>
+          ${c.ip_count   ? `<span style="font-size:10px;color:var(--text3);">🔗 ${c.ip_count}</span>` : ""}
+          ${c.note_count ? `<span style="font-size:10px;color:var(--text3);">💬 ${c.note_count}</span>` : ""}
+          <span style="font-size:10px;color:var(--text3);margin-left:auto;">${c.updated_at ? new Date(c.updated_at).toLocaleDateString() : ""}</span>
+        </div>
+      </div>`;
+    }).join("");
+ 
+    el.querySelectorAll(".case-list-item").forEach(item => {
+      item.addEventListener("mouseover", () => { if (parseInt(item.dataset.id) !== activeCaseId) item.style.background = "rgba(0,217,255,0.03)"; });
+      item.addEventListener("mouseout",  () => { if (parseInt(item.dataset.id) !== activeCaseId) item.style.background = ""; });
+      item.addEventListener("click", () => {
+        activeCaseId = parseInt(item.dataset.id);
+        el.querySelectorAll(".case-list-item").forEach(i => {
+          const ia = parseInt(i.dataset.id) === activeCaseId;
+          const sc2 = cases.find(c => c.id === parseInt(i.dataset.id));
+          i.style.background      = ia ? "rgba(0,217,255,0.04)" : "";
+          i.style.borderLeftColor = ia ? caseStatusColor(sc2?.status || "Open") : "transparent";
+        });
+        loadAndRenderCase(activeCaseId);
+      });
+    });
+ 
+    if (activeCaseId && cases.find(c => c.id === activeCaseId)) {
+      el.querySelector(`.case-list-item[data-id="${activeCaseId}"]`)?.click();
+    } else if (cases.length && !activeCaseId) {
+      el.querySelector(".case-list-item")?.click();
+    }
+  }
+ 
+  // - Load Case and do ONE full Render 
+  async function loadAndRenderCase(id) {
+    if (!id) return;
+    activeCaseId = id;
+    try {
+      const c = await apiGet(`/cases/${id}`);
+      renderCaseDetail(c);    // ← called ONCE, never again for this case
+    } catch (err) {
+      const el = document.getElementById("caseDetail");
+      if (el) el.innerHTML = `<div style="padding:24px;color:var(--critical);font-size:12px;">⚠ ${escHtml(err.message)}</div>`;
+    }
+  }
+ 
+  // - Only Update IP list Container 
+  function updateIPList(ips, caseId) {
+    const container = document.getElementById("caseIPList");
+    const label     = document.getElementById("ipCountLabel");
+    if (!container) return;
+    if (label) label.textContent = `ATTACHED IPs (${ips.length})`;
+ 
+    container.innerHTML = ips.length
+      ? `<div style="border:1px solid var(--border);border-radius:8px;overflow:hidden;">
+          ${ips.map((ip, i) => {
+            const rc = { CRITICAL:"var(--critical)", HIGH:"var(--high)", MEDIUM:"var(--medium)", LOW:"var(--low)" }[ip.risk_level] || "var(--accent)";
+            return `<div class="ci-row" style="display:flex;align-items:center;gap:10px;padding:10px 14px;
+              ${i > 0 ? "border-top:1px solid var(--border);" : ""}background:${i%2===0?"var(--bg1)":"var(--bg2)"};">
+              <span class="ci-score" data-ip="${escHtml(ip.ip)}"
+                style="font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;color:var(--accent);cursor:pointer;flex:1;"
+                title="Click to score">${escHtml(ip.ip)}</span>
+              ${ip.score != null ? `<span style="font-size:12px;font-weight:700;color:${rc};">${ip.score}</span>` : ""}
+              ${ip.risk_level ? `<span style="font-size:9px;padding:2px 7px;border-radius:3px;background:${rc}22;color:${rc};font-weight:700;">${ip.risk_level}</span>` : ""}
+              ${ip.note ? `<span style="font-size:10px;color:var(--text3);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${escHtml(ip.note)}">${escHtml(ip.note)}</span>` : ""}
+              <span style="font-size:10px;color:var(--text3);white-space:nowrap;">${ip.added_at ? new Date(ip.added_at).toLocaleDateString() : ""}</span>
+              <button class="ci-rm" data-ip-id="${ip.id}"
+                style="background:none;border:1px solid var(--border);border-radius:4px;color:var(--text3);cursor:pointer;padding:2px 8px;font-size:10px;flex-shrink:0;">✕</button>
+            </div>`;
+          }).join("")}
+        </div>`
+      : `<div style="padding:16px;text-align:center;background:var(--bg);border-radius:8px;border:1px solid var(--border);font-size:11px;color:var(--text3);">
+           No IPs attached yet — click <strong>+ Attach IP</strong> above
+         </div>`;
+ 
+    // - Wire IP row events
+    container.querySelectorAll(".ci-score").forEach(span => {
+      span.addEventListener("click", () => { ipInput.value = span.dataset.ip; overlay.remove(); scoreIP(); });
+    });
+    container.querySelectorAll(".ci-rm").forEach(btn => {
+      btn.addEventListener("click", async () => {
+        if (btn._busy) return; btn._busy = true; btn.textContent = "…";
+        const ok = await apiDelete(`/cases/${caseId}/ips/${btn.dataset.ipId}`);
+        if (ok) {
+          toast("IP removed", "info");
+          const fresh = await apiGet(`/cases/${caseId}`);
+          updateIPList(fresh.ips || [], caseId);
+          refreshList(); refreshStats();
+        } else { btn._busy = false; btn.textContent = "✕"; }
+      });
+    });
+  }
+ 
+  // - Only update notes list container 
+  function updateNotesList(notes, caseId) {
+    const container = document.getElementById("caseNotesList");
+    const label     = document.getElementById("noteCountLabel");
+    if (!container) return;
+    if (label) label.textContent = `INVESTIGATION NOTES (${notes.length})`;
+ 
+    container.innerHTML = notes.length
+      ? notes.map(n => `
+          <div style="padding:12px 14px;background:var(--bg2);border-radius:8px;border:1px solid var(--border);margin-bottom:8px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+              <span style="font-size:10px;font-weight:600;color:var(--accent);">👤 ${escHtml(n.author||"analyst")}</span>
+              <div style="display:flex;align-items:center;gap:8px;">
+                <span style="font-size:10px;color:var(--text3);">${n.created_at ? new Date(n.created_at).toLocaleString() : ""}</span>
+                <button class="cn-rm" data-note-id="${n.id}"
+                  style="background:none;border:1px solid var(--border);border-radius:4px;color:var(--text3);cursor:pointer;padding:1px 7px;font-size:10px;">✕</button>
+              </div>
+            </div>
+            <div style="font-size:12px;color:var(--text);line-height:1.7;white-space:pre-wrap;">${escHtml(n.note)}</div>
+          </div>`).join("")
+      : `<div style="padding:16px;text-align:center;background:var(--bg);border-radius:8px;border:1px solid var(--border);font-size:11px;color:var(--text3);">
+           No notes yet — add your first note below
+         </div>`;
+ 
+    // - Wire note delete events
+    container.querySelectorAll(".cn-rm").forEach(btn => {
+      btn.addEventListener("click", async () => {
+        if (btn._busy) return; btn._busy = true; btn.textContent = "…";
+        const ok = await apiDelete(`/cases/${caseId}/notes/${btn.dataset.noteId}`);
+        if (ok) {
+          toast("Note deleted", "info");
+          const fresh = await apiGet(`/cases/${caseId}`);
+          updateNotesList(fresh.notes || [], caseId);
+          refreshList(); refreshStats();
+        } else { btn._busy = false; btn.textContent = "✕"; }
+      });
+    });
+  }
+ 
+  // - Full case detail render — called ONCE per case 
+  function renderCaseDetail(c) {
+    const detailEl = document.getElementById("caseDetail");
+    if (!detailEl) return;
+ 
+    const caseId  = c.id; // primitive — never stale
+    const sColor  = caseStatusColor(c.status);
+    const svColor = caseSeverityColor(c.severity);
+    const tags    = c.tags || [];
+ 
+    // - Build static HTML (IPs and notes have dedicated containers)
+    detailEl.innerHTML = `
+      <div style="padding:20px 24px;">
+        <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:14px;flex-wrap:wrap;">
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:15px;font-weight:700;color:var(--text);line-height:1.3;margin-bottom:8px;">${escHtml(c.title)}</div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+              <span style="font-size:11px;font-weight:700;color:${sColor};padding:3px 10px;border-radius:4px;background:${sColor}22;border:1px solid ${sColor}44;">● ${c.status}</span>
+              <span style="font-size:10px;font-weight:700;color:${svColor};padding:3px 8px;border-radius:4px;background:${svColor}22;">${c.severity}</span>
+              ${tags.map(t=>`<span style="font-size:10px;padding:2px 7px;border-radius:3px;background:var(--bg2);color:var(--text3);">${escHtml(t)}</span>`).join("")}
+              <span style="font-size:10px;color:var(--text3);">Case #${caseId}</span>
+            </div>
+          </div>
+          <div style="display:flex;gap:6px;flex-shrink:0;align-items:center;flex-wrap:wrap;">
+            <select id="caseStatusChange" style="padding:5px 8px;background:var(--bg1);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:inherit;font-size:11px;">
+              ${["Open","Investigating","Contained","Resolved","Closed"].map(s=>`<option value="${s}"${s===c.status?" selected":""}>${s}</option>`).join("")}
+            </select>
+            <button id="caseEditBtn"   class="btn btn-ghost" style="padding:5px 12px;font-size:11px;">Edit</button>
+            <button id="caseDeleteBtn" class="btn btn-ghost" style="padding:5px 12px;font-size:11px;color:var(--critical);border-color:var(--critical);">Delete</button>
+          </div>
+        </div>
+ 
+        ${c.description ? `<div style="padding:10px 14px;background:var(--bg2);border-radius:8px;border:1px solid var(--border);margin-bottom:14px;">
+          <div style="font-size:11px;color:var(--text2);line-height:1.6;">${escHtml(c.description)}</div></div>` : ""}
+ 
+        <div style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:18px;font-size:10px;color:var(--text3);padding:8px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);">
+          ${c.assigned_to ? `<span>👤 ${escHtml(c.assigned_to)}</span>` : ""}
+          ${c.created_at  ? `<span>📅 ${new Date(c.created_at).toLocaleString()}</span>` : ""}
+          ${c.updated_at  ? `<span>🔄 ${new Date(c.updated_at).toLocaleString()}</span>` : ""}
+          ${c.closed_at   ? `<span>✅ Closed: ${new Date(c.closed_at).toLocaleString()}</span>` : ""}
+        </div>
+ 
+        <!-- IPs section -->
+        <div style="margin-bottom:20px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+            <div id="ipCountLabel" style="font-size:10px;color:var(--text);letter-spacing:2px;font-weight:700;">ATTACHED IPs (${(c.ips||[]).length})</div>
+            <button id="caseAttachIPBtn" class="btn btn-ghost" style="padding:4px 12px;font-size:11px;">+ Attach IP</button>
+          </div>
+          <div id="attachIPForm" style="display:none;margin-bottom:10px; background:var(--bg1);padding:14px;border-radius:8px;border:1.5px solid #0099cc;">
+            <div style="font-size:10px;color:var(--text);margin-bottom:10px;letter-spacing:1px;">ATTACH IP TO THIS CASE</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <input id="attachIPInput" type="text" placeholder="IP address *" maxlength="45"
+                style="flex:1;min-width:120px;padding:8px 12px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:12px;outline:none;">
+              <input id="attachIPNote" type="text" placeholder="Note (optional)" maxlength="200"
+                style="flex:2;min-width:160px;padding:8px 12px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:inherit;font-size:12px;outline:none;">
+            </div>
+            <div id="attachIPError" style="font-size:11px;color:var(--critical);margin-top:6px;display:none;"></div>
+            <div style="display:flex;gap:8px;margin-top:10px;justify-content:flex-end;">
+              <button id="attachIPCancel" class="btn btn-ghost"   style="padding:6px 14px;font-size:11px;">Cancel</button>
+              <button id="attachIPSave"   class="btn btn-primary" style="padding:6px 14px;font-size:11px;">Attach</button>
+            </div>
+          </div>
+          <div id="caseIPList"></div>
+        </div>
+ 
+        <!-- Notes section -->
+        <div>
+          <div id="noteCountLabel" style="font-size:10px;color:var(--text);letter-spacing:2px;font-weight:700;margin-bottom:10px;">INVESTIGATION NOTES (${(c.notes||[]).length})</div>
+          
+          <div id="caseNotesList" style="margin-bottom:12px;"></div>
+          <div style="background:var(--bg1);border-radius:8px;border:1px solid var(--border);overflow:hidden;">
+            <textarea id="caseNoteInput" placeholder="Add investigation note…" rows="3"
+              style="width:100%;padding:12px 14px;background:transparent;border:none;color:var(--text);font-family:inherit;font-size:12px;outline:none;resize:vertical;box-sizing:border-box;line-height:1.6;"></textarea>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;border-top:1px solid var(--border);">
+              <span style="font-size:10px;color:var(--text3);"></span>
+              <button id="caseNoteSubmit" class="btn btn-primary" style="padding:6px 16px;font-size:11px;">Add Note</button>
+            </div>
+          </div>
+        </div>
+      </div>`;
+ 
+    // Populate sub-sections surgically
+    updateIPList(c.ips   || [], caseId);
+    updateNotesList(c.notes || [], caseId);
+ 
+    // - Wire all static events — these elements never get replaced 
+ 
+    document.getElementById("caseStatusChange")?.addEventListener("change", async e => {
+      const r = await apiPut(`/cases/${caseId}`, { status: e.target.value });
+      if (r.ok) { toast(`Status → ${e.target.value}`, "success"); loadAndRenderCase(caseId); refreshList(); refreshStats(); }
+    });
+ 
+    document.getElementById("caseEditBtn")?.addEventListener("click", async () => {
+      const data = await apiGet(`/cases/${caseId}`);
+      showCaseForm(data);
+    });
+ 
+    document.getElementById("caseDeleteBtn")?.addEventListener("click", async () => {
+      if (!confirm("Delete this case? Cannot be undone.")) return;
+      const ok = await apiDelete(`/cases/${caseId}`);
+      if (ok) {
+        toast("Case deleted", "success");
+        activeCaseId = null;
+        document.getElementById("caseDetail").innerHTML = `
+          <div style="padding:48px 32px;text-align:center;color:var(--text3);">
+            <div style="font-size:32px;margin-bottom:12px;">📁</div><div>Case deleted.</div>
+          </div>`;
+        refreshList(); refreshStats();
+      }
+    });
+ 
+    document.getElementById("caseAttachIPBtn")?.addEventListener("click", () => {
+      const form = document.getElementById("attachIPForm");
+      const show = form.style.display === "none";
+      form.style.display = show ? "block" : "none";
+      if (show) {
+        const inp = document.getElementById("attachIPInput");
+        if (inp && !inp.value && currentIP) inp.value = currentIP;
+        inp?.focus();
+      }
+    });
+ 
+    document.getElementById("attachIPCancel")?.addEventListener("click", () => {
+      document.getElementById("attachIPForm").style.display = "none";
+      document.getElementById("attachIPInput").value = "";
+      document.getElementById("attachIPNote").value  = "";
+      document.getElementById("attachIPError").style.display = "none";
+    });
+ 
+    // - Attach IP
+    document.getElementById("attachIPSave")?.addEventListener("click", async () => {
+      const ipVal   = document.getElementById("attachIPInput").value.trim();
+      const noteVal = document.getElementById("attachIPNote").value.trim();
+      const errEl   = document.getElementById("attachIPError");
+      const saveBtn = document.getElementById("attachIPSave");
+ 
+      errEl.style.display = "none";
+      if (!ipVal) { errEl.textContent = "IP address is required."; errEl.style.display = "block"; return; }
+      if (saveBtn._busy) return;
+ 
+      saveBtn._busy = true; saveBtn.disabled = true; saveBtn.textContent = "Attaching…";
+ 
+      const body = { ip: ipVal, note: noteVal };
+      if (lastResult?.ip === ipVal) { body.score = lastResult.score; body.risk_level = lastResult.riskLevel; }
+ 
+      const r = await apiPost(`/cases/${caseId}/ips`, body);
+ 
+      saveBtn._busy = false; saveBtn.disabled = false; saveBtn.textContent = "Attach";
+ 
+      if (r.status === 409) { errEl.textContent = `${ipVal} is already attached.`; errEl.style.display = "block"; return; }
+      if (!r.ok)            { errEl.textContent = r.data?.error || "Failed.";       errEl.style.display = "block"; return; }
+ 
+      // - Clear form
+      document.getElementById("attachIPInput").value = "";
+      document.getElementById("attachIPNote").value  = "";
+      document.getElementById("attachIPForm").style.display = "none";
+ 
+      toast(`${ipVal} attached to case`, "success");
+ 
+      // - Fetch fresh IPs only, update only #caseIPList
+      const fresh = await apiGet(`/cases/${caseId}`);
+      updateIPList(fresh.ips || [], caseId);   // ← only IPs rebuilt
+      refreshList();
+      refreshStats();
+    });
+ 
+    // - Add Note 
+    async function submitNote() {
+      const textarea  = document.getElementById("caseNoteInput");
+      const submitBtn = document.getElementById("caseNoteSubmit");
+      const noteText  = textarea?.value.trim();
+ 
+      if (!noteText) { toast("Note cannot be empty", "warning"); return; }
+      if (submitBtn._busy) return;
+ 
+      submitBtn._busy = true; submitBtn.disabled = true; submitBtn.textContent = "Adding…";
+ 
+      const r = await apiPost(`/cases/${caseId}/notes`, { note: noteText, author: "analyst" });
+ 
+      submitBtn._busy = false; submitBtn.disabled = false; submitBtn.textContent = "Add Note";
+ 
+      if (!r.ok) { toast("Failed to add note", "error"); return; }
+ 
+      textarea.value = ""; // clear before DOM update
+      toast("Note added", "success");
+ 
+      // - Fetch fresh notes only, update only #caseNotesList 
+      const fresh = await apiGet(`/cases/${caseId}`);
+      updateNotesList(fresh.notes || [], caseId); // ← only notes rebuilt
+      refreshList();
+      refreshStats();
+ 
+      // - Scroll last note into view
+      setTimeout(() => {
+        const list = document.getElementById("caseNotesList");
+        list?.lastElementChild?.scrollIntoView({ behavior:"smooth", block:"nearest" });
+      }, 100);
+    }
+ 
+    document.getElementById("caseNoteSubmit")?.addEventListener("click", submitNote);
+    document.getElementById("caseNoteInput")?.addEventListener("keydown", e => {
+      if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) submitNote();
+    });
+  }
+ 
+  // - Case Create / Edit Form 
+  function showCaseForm(c) {
+    const isEdit = !!c;
+    const fo = document.createElement("div");
+    fo.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:10001;display:flex;align-items:center;justify-content:center;padding:24px;";
+    const f = document.createElement("div");
+    f.style.cssText = "background:var(--bg1);border:1px solid var(--border);border-radius:12px;width:100%;max-width:540px;padding:24px;max-height:90vh;overflow-y:auto;";
+    f.innerHTML = `
+      <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:20px;">${isEdit ? `✏️ Edit Case #${c.id}` : "New Investigation Case"}</div>
+      <div style="display:flex;flex-direction:column;gap:14px;">
+        <div>
+          <label style="font-size:10px;color:var(--text3);display:block;margin-bottom:4px;">TITLE *</label>
+          <input id="cfTitle" type="text" maxlength="200" value="${isEdit?escHtml(c.title):""}" placeholder="e.g. Fraud Incident — May 2026"
+            style="width:100%;padding:9px 12px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:inherit;font-size:12px;outline:none;box-sizing:border-box;">
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div>
+            <label style="font-size:10px;color:var(--text3);display:block;margin-bottom:4px;">SEVERITY</label>
+            <select id="cfSeverity" style="width:100%;padding:9px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:inherit;font-size:12px;">
+              ${["CRITICAL","HIGH","MEDIUM","LOW"].map(s=>`<option value="${s}"${isEdit&&c.severity===s?" selected":s==="MEDIUM"&&!isEdit?" selected":""}>${s}</option>`).join("")}
+            </select>
+          </div>
+          <div>
+            <label style="font-size:10px;color:var(--text3);display:block;margin-bottom:4px;">STATUS</label>
+            <select id="cfStatus" style="width:100%;padding:9px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:inherit;font-size:12px;">
+              ${["Open","Investigating","Contained","Resolved","Closed"].map(s=>`<option value="${s}"${isEdit&&c.status===s?" selected":s==="Open"&&!isEdit?" selected":""}>${s}</option>`).join("")}
+            </select>
+          </div>
+        </div>
+        <div>
+          <label style="font-size:10px;color:var(--text3);display:block;margin-bottom:4px;">ASSIGNED TO</label>
+          <input id="cfAssigned" type="text" maxlength="100" value="${isEdit?escHtml(c.assigned_to||""):"analyst"}"
+            style="width:100%;padding:9px 12px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:inherit;font-size:12px;outline:none;box-sizing:border-box;">
+        </div>
+        <div>
+          <label style="font-size:10px;color:var(--text3);display:block;margin-bottom:4px;">DESCRIPTION</label>
+          <textarea id="cfDesc" rows="3" maxlength="2000" placeholder="Brief description of the investigation"
+            style="width:100%;padding:9px 12px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:inherit;font-size:12px;outline:none;resize:vertical;box-sizing:border-box;">${isEdit?escHtml(c.description||""):""}</textarea>
+        </div>
+        <div>
+          <label style="font-size:10px;color:var(--text3);display:block;margin-bottom:4px;">TAGS (comma-separated)</label>
+          <input id="cfTags" type="text" maxlength="200" value="${isEdit?(c.tags||[]).join(", "):""}" placeholder="e.g. fraud, botnet, tor"
+            style="width:100%;padding:9px 12px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:inherit;font-size:12px;outline:none;box-sizing:border-box;">
+        </div>
+        <div id="cfError" style="font-size:11px;color:var(--critical);display:none;padding:8px 12px;background:rgba(255,51,85,0.08);border-radius:6px;"></div>
+        <div style="display:flex;gap:8px;justify-content:flex-end;">
+          <button id="cfCancel" class="btn btn-ghost"   style="padding:8px 18px;font-size:12px;">Cancel</button>
+          <button id="cfSave"   class="btn btn-primary" style="padding:8px 18px;font-size:12px;">${isEdit?"Save Changes":"Create Case"}</button>
+        </div>
+      </div>`;
+ 
+    fo.appendChild(f);
+    document.body.appendChild(fo);
+    document.getElementById("cfTitle").focus();
+    document.getElementById("cfCancel").addEventListener("click", () => fo.remove());
+    fo.addEventListener("click", e => { if (e.target === fo) fo.remove(); });
+ 
+    document.getElementById("cfSave").addEventListener("click", async () => {
+      const title       = document.getElementById("cfTitle").value.trim();
+      const severity    = document.getElementById("cfSeverity").value;
+      const status      = document.getElementById("cfStatus").value;
+      const assigned_to = document.getElementById("cfAssigned").value.trim();
+      const description = document.getElementById("cfDesc").value.trim();
+      const tags        = document.getElementById("cfTags").value.split(",").map(t=>t.trim()).filter(Boolean);
+      const errEl       = document.getElementById("cfError");
+ 
+      if (!title) { errEl.textContent = "Title is required."; errEl.style.display = "block"; return; }
+ 
+      const r = isEdit
+        ? await apiPut(`/cases/${c.id}`, { title, severity, status, assigned_to, description, tags })
+        : await apiPost("/cases",         { title, severity, status, assigned_to, description, tags });
+ 
+      if (!r.ok) { errEl.textContent = r.data?.error || "Save failed."; errEl.style.display = "block"; return; }
+ 
+      fo.remove();
+      toast(isEdit ? "Case updated" : `Case created: ${title}`, "success");
+ 
+      const targetId = isEdit ? c.id : r.data.id;
+      activeCaseId   = targetId;
+      await refreshList();
+      await loadAndRenderCase(targetId);
+      await refreshStats();
+    });
+  }
+ 
+  // - Panel Event Listeners 
+  document.getElementById("caseNewBtn").addEventListener("click", () => showCaseForm(null));
+  document.getElementById("casesCloseBtn").addEventListener("click", () => overlay.remove());
+  overlay.addEventListener("click", e => { if (e.target === overlay) overlay.remove(); });
+ 
+  let searchTimer;
+  document.getElementById("caseSearch").addEventListener("input", e => {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => { caseQuery.q = e.target.value.trim(); refreshList(); }, 300);
+  });
+  document.getElementById("caseStatusFilter").addEventListener("change", e => { caseQuery.status   = e.target.value; refreshList(); });
+  document.getElementById("caseSevFilter").addEventListener("change",    e => { caseQuery.severity = e.target.value; refreshList(); });
+ 
+  // - Initial Load
+  await refreshStats();
+  await refreshList();
+}
+
+    // ── Add current IP to an existing or new case 
+    async function addIPToCase(ip, result) {
+  if (!ip || !isValidIP(ip)) { toast("Score an IP first", "warning"); return; }
+ 
+  try {
+    const data  = await (await fetch(`${API}/cases?limit=50`, { headers:{"x-api-key":API_KEY} })).json();
+    const cases = (data.cases||[]).filter(c => c.status !== "Closed" && c.status !== "Resolved");
+ 
+    if (!cases.length) {
+      if (confirm(`No active cases found. Create a new case for ${ip}?`)) showCasesPanel();
+      return;
+    }
+ 
+    const ov = document.createElement("div");
+    ov.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:10001;display:flex;align-items:center;justify-content:center;padding:24px;";
+ 
+    const panel = document.createElement("div");
+    panel.style.cssText = "background:var(--bg1);border:1px solid var(--border);border-radius:12px;width:100%;max-width:460px;max-height:60vh;display:flex;flex-direction:column;overflow:hidden;";
+    panel.innerHTML = `
+      <div style="padding:16px 20px;border-bottom:1px solid var(--border);font-size:13px;font-weight:700;color:var(--text);">
+        📁 Attach ${escHtml(ip)} to Case
+      </div>
+      <div style="overflow-y:auto;flex:1;">
+        ${cases.map(c=>`
+          <div class="cpick" data-id="${c.id}"
+            style="padding:12px 20px;border-bottom:1px solid var(--border);cursor:pointer;display:flex;align-items:center;gap:10px;">
+            <span style="font-size:10px;font-weight:700;color:${caseStatusColor(c.status)};flex-shrink:0;">● ${c.status}</span>
+            <span style="font-size:12px;color:var(--text);flex:1;">${escHtml(c.title)}</span>
+            <span style="font-size:10px;color:var(--text3);">#${c.id}</span>
+          </div>`).join("")}
+        <div class="cpick" data-id="new"
+          style="padding:12px 20px;cursor:pointer;display:flex;align-items:center;gap:8px;color:var(--accent);">
+          <span style="font-size:14px;">+</span>
+          <span style="font-size:12px;font-weight:600;">Create new case</span>
+        </div>
+      </div>`;
+ 
+    ov.appendChild(panel);
+    document.body.appendChild(ov);
+    ov.addEventListener("click", e => { if (e.target === ov) ov.remove(); });
+ 
+    panel.querySelectorAll(".cpick").forEach(item => {
+      item.addEventListener("mouseover", () => { item.style.background = "var(--bg2)"; });
+      item.addEventListener("mouseout",  () => { item.style.background = ""; });
+      item.addEventListener("click", async () => {
+        ov.remove();
+        if (item.dataset.id === "new") { showCasesPanel(); return; }
+ 
+        const caseId = parseInt(item.dataset.id);
+        const r = await fetch(`${API}/cases/${caseId}/ips`, {
+          method:"POST",
+          headers:{"Content-Type":"application/json","x-api-key":API_KEY},
+          body:JSON.stringify({ ip, score:result?.score??null, risk_level:result?.riskLevel??null, note:`From score result — ${result?.riskLevel||""} risk` })
+        });
+        const d = await r.json();
+        if (r.status === 409) { toast(`${ip} already in this case`, "warning"); return; }
+        if (!r.ok)            { toast(d.error || "Failed to attach", "error");  return; }
+        toast(`${ip} attached to case #${caseId}`, "success");
+      });
+    });
+  } catch (err) {
+    toast(`Error: ${err.message}`, "error");
+  }
+}
+
   // toast msg
   function toast(message, type = "success", duration = 3500) {
+
   // Remove existing toast if any
   const existing = document.getElementById("ipshieldToast");
   if (existing) existing.remove();
 
   const colors = {
-    success: { bg: "rgba(0,232,124,0.12)", border: "var(--low)",      icon: "✓" },
+    success: { bg: "rgba(0,232,124,0.12)", border: "var(--low)",       icon: "✓" },
     error:   { bg: "rgba(255,51,85,0.12)", border: "var(--critical)",  icon: "⚠" },
     warning: { bg: "rgba(255,204,0,0.12)", border: "var(--medium)",    icon: "⚑" },
     info:    { bg: "rgba(0,217,255,0.12)", border: "var(--accent)",    icon: "ℹ" }
@@ -1206,11 +1875,12 @@ function resolveScoreColor(score) {
   if (score > 80) return "#ff3355";
   if (score > 60) return "#ff7700";
   if (score > 30) return "#ffcc00";
-  return "#00e87c";
+                  return "#00e87c";
 }
 
  // Rate Limit
   function showAPIStatus(apiStatus) {
+
   // Remove existing banner if any
   const existing = document.getElementById("apiStatusBanner");
   if (existing) existing.remove();
@@ -1267,6 +1937,7 @@ function resolveScoreColor(score) {
 
 // firewall export 
 function showFirewallExport() {
+
   // Collect CRITICAL and HIGH IPs from session
   const threats = auditEntries.filter(e => e.riskLevel === "CRITICAL" || e.riskLevel === "HIGH");
  
@@ -1485,11 +2156,11 @@ function applyFilters(entries) {
           !e.geo?.country?.toLowerCase().includes(q) &&
           !e.network?.isp?.toLowerCase().includes(q)) return false;
     }
-    if (f.risk       && e.riskLevel !== f.risk)                         return false;
-    if (f.minScore != null && (e.score??0) < f.minScore)                return false;
-    if (f.maxScore != null && (e.score??0) > f.maxScore)                return false;
-    if (f.proxy    != null && !!e.intelligence?.isProxy !== f.proxy)     return false;
-    if (f.tor      != null && !!e.intelligence?.isTor   !== f.tor)       return false;
+    if (f.risk       && e.riskLevel !== f.risk)                                  return false;
+    if (f.minScore != null && (e.score??0) < f.minScore)                         return false;
+    if (f.maxScore != null && (e.score??0) > f.maxScore)                         return false;
+    if (f.proxy    != null && !!e.intelligence?.isProxy !== f.proxy)             return false;
+    if (f.tor      != null && !!e.intelligence?.isTor   !== f.tor)               return false;
     if (f.datacenter != null && !!e.intelligence?.isDatacenter !== f.datacenter) return false;
     return true;
   });
@@ -1513,13 +2184,13 @@ async function fetchAndRenderFromDB() {
     offset: auditPage * AUDIT_PAGE_SIZE,
     sort:   auditFilters.sort
   });
-  if (auditFilters.q)              params.set("q",          auditFilters.q);
-  if (auditFilters.risk)           params.set("risk",       auditFilters.risk);
-  if (auditFilters.minScore > 0)   params.set("minScore",   auditFilters.minScore);
-  if (auditFilters.maxScore < 100) params.set("maxScore",   auditFilters.maxScore);
-  if (auditFilters.proxy    != null) params.set("proxy",    auditFilters.proxy);
-  if (auditFilters.tor      != null) params.set("tor",      auditFilters.tor);
-  if (auditFilters.datacenter != null) params.set("datacenter", auditFilters.datacenter);
+  if (auditFilters.q)                   params.set("q",           auditFilters.q);
+  if (auditFilters.risk)                params.set("risk",        auditFilters.risk);
+  if (auditFilters.minScore > 0)        params.set("minScore",    auditFilters.minScore);
+  if (auditFilters.maxScore < 100)      params.set("maxScore",    auditFilters.maxScore);
+  if (auditFilters.proxy    != null)    params.set("proxy",       auditFilters.proxy);
+  if (auditFilters.tor      != null)    params.set("tor",         auditFilters.tor);
+  if (auditFilters.datacenter != null)  params.set("datacenter",  auditFilters.datacenter);
  
   try {
     const res  = await fetch(`${API}/audit/search?${params}`, { headers: { "x-api-key": API_KEY } });
@@ -1571,6 +2242,7 @@ function renderAuditEntries(entries, total) {
   }
  
   auditList.innerHTML = entries.map(e => {
+
     // Handle both in-memory format and DB row format
     const ip        = e.ip;
     const score     = e.score       ?? 0;
@@ -1661,6 +2333,7 @@ function renderAuditEntries(entries, total) {
   function setupEventListeners() {
     scoreBtn.addEventListener("click", scoreIP);
     clearBtn.addEventListener("click", clearPanel);
+    apiDocsBtn.addEventListener("click", () => window.open("https://ipshield.live/api/docs", "_blank"));
     ipInput.addEventListener("keydown", e => { if (e.key === "Enter") scoreIP(); });
 
     document.querySelectorAll(".quick-chip").forEach(chip => {
@@ -1668,13 +2341,15 @@ function renderAuditEntries(entries, total) {
     });
 
     document.addEventListener("click", e => {
-      if (e.target.id === "csvBtn")      document.getElementById("csvUpload").click();
-      if (e.target.id === "exportBtn")   exportLog();
-      if (e.target.id === "addWatchBtn") addCurrentToWatchlist();
-      if (e.target.id === "pollBtn")     triggerPoll();
-      if (e.target.id === "firewallBtn") showFirewallExport();
-      if (e.target.id === "siemBtn")     showSIEMPanel();
-      if (e.target.id === "blacklistBtn") showBlacklistPanel();
+      if (e.target.id === "csvBtn")        document.getElementById("csvUpload").click();
+      if (e.target.id === "exportBtn")     exportLog();
+      if (e.target.id === "addWatchBtn")   addCurrentToWatchlist();
+      if (e.target.id === "pollBtn")       triggerPoll();
+      if (e.target.id === "firewallBtn")   showFirewallExport();
+      if (e.target.id === "siemBtn")       showSIEMPanel();
+      if (e.target.id === "blacklistBtn")  showBlacklistPanel();
+      if (e.target.id === "casesBtn")      showCasesPanel();
+      if (e.target.id === "addToCaseBtn")  addIPToCase(currentIP, lastResult);
     });
 
     document.addEventListener("change", e => {
@@ -1695,6 +2370,7 @@ function renderAuditEntries(entries, total) {
         const ip  = currentIP || ipInput.value.trim();
         if (!ip) return;
         const url = `${API}/report/${encodeURIComponent(ip)}?cached=true`;
+
         // Open in new tab — browser handles the PDF download
         const a = Object.assign(document.createElement("a"), {
           href:     url,
@@ -1841,6 +2517,7 @@ function applyTheme(dark) {
 
   // Show Rate Limiting
   async function showSIEMPanel() {
+
   // Fetch current status
   let status = null;
   let formats = [];
@@ -1879,12 +2556,12 @@ function applyTheme(dark) {
       <!-- Config status -->
       <div class="detail-card">
         <div class="detail-card-title" style="color:var(--text);font-size:11px;font-weight:400;">Current Configuration</div>
-        ${kv("Status",    status?.enabled ? "Enabled" : "Disabled")}
-        ${kv("Type",      status?.type?.toUpperCase() || "Not set")}
-        ${kv("Webhook URL", status?.url || "Not configured")}
-        ${kv("Token",     status?.hasToken ? "Set ✓" : "Not set")}
-        ${kv("Min Score", status?.minScore ?? 0)}
-        ${kv("Min Risk",  status?.minRisk  || "LOW")}
+        ${kv("Status",        status?.enabled ? "Enabled" : "Disabled")}
+        ${kv("Type",          status?.type?.toUpperCase() || "Not set")}
+        ${kv("Webhook URL",   status?.url || "Not configured")}
+        ${kv("Token",         status?.hasToken ? "Set ✓" : "Not set")}
+        ${kv("Min Score",     status?.minScore ?? 0)}
+        ${kv("Min Risk",      status?.minRisk  || "LOW")}
       </div>
  
       <!-- Env var instructions -->
@@ -2294,6 +2971,7 @@ const MODAL_STYLE = `
         <button id="downloadPdfBtn"  class="btn btn-ghost" style="padding:5px 12px;font-size:11px;">↓ PDF Report</button>
         <button id="timelineBtn"     class="btn btn-ghost" style="padding:5px 12px;font-size:11px;">↑ History</button> 
         <button id="blockCurrentBtn" class="btn btn-ghost" style="padding:5px 12px;font-size:11px;color:var(--critical);border-color:var(--critical);">${d.blacklisted ? "✓ Blacklisted" : "🚫 Block"}</button>
+        <button id="addToCaseBtn" class="btn btn-ghost" style="padding:5px 12px;font-size:11px;">📁 Case</button>
           </div>
         </div>
       </div>
@@ -2325,10 +3003,10 @@ const MODAL_STYLE = `
        <div class="detail-grid">
       <div class="detail-card">
         <div class="detail-card-title">// Geolocation</div>
-        ${kv("Country",  geo.country  || "—")}
-        ${kv("Region",   geo.region   || "—")}
-        ${kv("City",     geo.city     || "—")}
-        ${kv("Timezone", geo.timezone || "—")}
+        ${kv("Country",   geo.country  || "—")}
+        ${kv("Region",    geo.region   || "—")}
+        ${kv("City",      geo.city     || "—")}
+        ${kv("Timezone",  geo.timezone || "—")}
         ${kv("Lat / Lon", geo.lat != null ? `${geo.lat}, ${geo.lon}` : "N/A (private)")}
       </div>
       <div class="detail-card">
@@ -2407,10 +3085,10 @@ const MODAL_STYLE = `
     const intel = d.intelligence ?? {};
     const sigs  = [];
     sigs.push({ category:"ABUSE",    detail:`Confidence score: ${score}/100`, severity: score>80?"critical":score>60?"high":score>30?"medium":"low" });
-    if (intel.isProxy)      sigs.push({ category:"PROXY",   detail:"Proxy detected",        severity:"high" });
-    if (intel.isTor)        sigs.push({ category:"TOR",     detail:"Tor exit node",          severity:"critical" });
-    if (intel.isDatacenter) sigs.push({ category:"HOSTING", detail:"Datacenter / cloud IP", severity:"medium" });
-    sigs.push({ category:"VELOCITY", detail:`Velocity: ${intel.velocity||"LOW"}`,            severity:"info" });
+    if (intel.isProxy)      sigs.push({ category:"PROXY",     detail:"Proxy detected",          severity:"high" });
+    if (intel.isTor)        sigs.push({ category:"TOR",       detail:"Tor exit node",           severity:"critical" });
+    if (intel.isDatacenter) sigs.push({ category:"HOSTING",   detail:"Datacenter / cloud IP",   severity:"medium" });
+    sigs.push({ category:"VELOCITY", detail:`Velocity: ${intel.velocity||"LOW"}`,               severity:"info" });
     return sigs;
   }
 

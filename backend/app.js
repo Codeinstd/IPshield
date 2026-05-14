@@ -21,6 +21,8 @@ const logger          = require("./utils/logger");
 const reportRoutes    = require("./routes/report.routes");
 const timelineRoutes  = require("./routes/timeline.routes");
 const blacklistRoutes = require("./routes/blacklist.routes");
+const casesRoutes     = require("./routes/cases.routes");
+
 
 const isProd = process.env.NODE_ENV === "production";
 const app    = express();
@@ -131,6 +133,7 @@ app.use("/api/report", reportRoutes);
 app.use("/api/report", makeRateLimiter(60 * 1000, 10, "Report rate limit: 10 per minute."));
 
 // ── API routes  
+app.use("/api/cases",     casesRoutes);
 app.use("/api/score",     scoreRoutes);
 app.use("/api/stats",     statsRoutes);
 app.use("/api/audit",     auditRoutes);

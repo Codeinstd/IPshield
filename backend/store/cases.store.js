@@ -70,14 +70,18 @@ function listCases({ status, severity, q, limit = 100, offset = 0 } = {}) {
       if (q)        { conds.push("(title LIKE ? OR description LIKE ?)"); params.push(`%${q}%`, `%${q}%`); }
 
       const where = conds.length ? `WHERE ${conds.join(" AND ")}` : "";
-      const total = db.getDb().prepare(`SELECT COUNT(*) as c FROM cases ${where}`).get(...params).c;
-      const rows  = db.getDb().prepare(
-        `SELECT c.*, COUNT(DISTINCT ci.id) as ip_count, COUNT(DISTINCT cn.id) as note_count
-         FROM cases c
-         LEFT JOIN case_ips   ci ON ci.case_id = c.id
-         LEFT JOIN case_notes cn ON cn.case_id = c.id
-         ${where} GROUP BY c.id ORDER BY c.updated_at DESC LIMIT ? OFFSET ?`
-      ).all(...params, limit, offset);
+      const total = db.getDb().prepare(
+        `SELECT COUNT(*) as c FROM cases ${where}`
+      ).get(...params).c;
+      const rows = db.getDb().prepare(`
+        SELECT c.*,
+          (SELECT COUNT(*) FROM case_ips   ci WHERE ci.case_id = c.id) as ip_count,
+          (SELECT COUNT(*) FROM case_notes cn WHERE cn.case_id = c.id) as note_count
+        FROM cases c
+        ${where}
+        ORDER BY c.updated_at DESC
+        LIMIT ? OFFSET ?
+      `).all(...params, limit, offset);
 
       return { total, cases: rows.map(r => formatCase(r)) };
     } catch (err) {
@@ -89,6 +93,7 @@ function listCases({ status, severity, q, limit = 100, offset = 0 } = {}) {
 }
 
 function getCase(id) {
+    id = Number(id);
   if (db.isAvailable()) {
     try {
       const row   = db.getDb().prepare("SELECT * FROM cases WHERE id = ?").get(id);
@@ -148,6 +153,7 @@ function deleteCase(id) {
 
 // ── Case IPs 
 function addCaseIP(caseId, { ip, score, risk_level, note = "" }) {
+  caseId = Number(caseId);
   if (db.isAvailable()) {
     try {
       // Check if IP already attached
@@ -164,6 +170,8 @@ function addCaseIP(caseId, { ip, score, risk_level, note = "" }) {
 }
 
 function removeCaseIP(caseId, ipId) {
+  caseId = Number(caseId);
+  ipId = Number(ipId);
   if (db.isAvailable()) {
     try {
       db.getDb().prepare("DELETE FROM case_ips WHERE id = ? AND case_id = ?").run(ipId, caseId);
@@ -176,6 +184,7 @@ function removeCaseIP(caseId, ipId) {
 
 // ── Case Notes 
 function addCaseNote(caseId, { note, author = "analyst" }) {
+  caseId = Number(caseId);
   if (db.isAvailable()) {
     try {
       const result = db.getDb().prepare(
@@ -189,6 +198,8 @@ function addCaseNote(caseId, { note, author = "analyst" }) {
 }
 
 function deleteCaseNote(caseId, noteId) {
+  caseId = Number(caseId);
+  noteId = Number(noteId);
   if (db.isAvailable()) {
     try { db.getDb().prepare("DELETE FROM case_notes WHERE id = ? AND case_id = ?").run(noteId, caseId); return true; }
     catch { return false; }
@@ -200,9 +211,13 @@ function deleteCaseNote(caseId, noteId) {
 function getCaseStats() {
   if (db.isAvailable()) {
     try {
-      const total       = db.getDb().prepare("SELECT COUNT(*) as c FROM cases").get().c;
-      const byStatus    = db.getDb().prepare("SELECT status, COUNT(*) as count FROM cases GROUP BY status").all();
-      const bySeverity  = db.getDb().prepare("SELECT severity, COUNT(*) as count FROM cases GROUP BY severity").all();
+      const total      = db.getDb().prepare("SELECT COUNT(*) as c FROM cases").get().c;
+      const byStatus   = db.getDb().prepare(
+        "SELECT status, COUNT(*) as count FROM cases GROUP BY status"
+      ).all();
+      const bySeverity = db.getDb().prepare(
+        "SELECT severity, COUNT(*) as count FROM cases GROUP BY severity"
+      ).all();
       return {
         total,
         byStatus:   Object.fromEntries(byStatus.map(r   => [r.status,   r.count])),

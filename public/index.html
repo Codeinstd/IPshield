@@ -15,6 +15,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>IPShield — Real-Time Risk Scoring</title>
+<!-- Favicon metadata -->
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon.ico/favicon-32x32.png">
 <link rel="icon" type="image/png" sizes="96x96" href="/favicon.ico/favicon-96x96.png">
 <link rel="icon" type="image/png" sizes="16x16" href="/favicon.ico/favicon-16x16.png">
@@ -29,7 +30,7 @@
     --bg3:        #162030;
     --border:     #1e2d3d;
     --border2:    #243447;
-    --accent:     #00d9ff;
+    --accent:     #02bfe0 ;
     --accent2:    #0099cc;
     --text:       #c9d8e8;
     --text2:      #6a8fa8;
@@ -37,7 +38,7 @@
     --critical:   #ff3355;
     --high:       #ff7700;
     --medium:     #ffcc00;
-    --low:        #00e87c;
+    --low:        #01cd6e;
     --info:       #00d9ff;
     --glow-c:     0 0 20px rgba(255,51,85,0.4);
     --glow-h:     0 0 20px rgba(255,119,0,0.4);
@@ -54,6 +55,7 @@
     position: fixed; inset: 0;
     background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.06) 2px, rgba(0,0,0,0.06) 4px);
     pointer-events: none; z-index: 9999;
+    font-family: 'JetBrains Mono', monospace;
   }
 
   /* Grid noise texture */
@@ -62,6 +64,7 @@
     position: fixed; inset: 0;
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
     pointer-events: none; z-index: 9998; opacity: 0.4;
+    font-family: 'JetBrains Mono', monospace;
   }
 
   /* ── Layout  */
@@ -73,6 +76,7 @@
     border-bottom: 1px solid var(--border);
     background: var(--bg1);
     position: sticky; top: 0; z-index: 100;
+    font-family: 'JetBrains Mono', monospace;
   }
   .logo { display: flex; align-items: center; gap: 12px; }
   .logo-icon {
@@ -104,17 +108,19 @@
 
   /* ── Search bar  */
   .search-section { display: flex; flex-direction: column; gap: 12px; }
-  .search-label { font-size: 10px; color: var(--text3); letter-spacing: 3px; text-transform: uppercase; }
+  .search-label { font-size: 10px; color: var(--text3); letter-spacing: 3px; text-transform: uppercase; font-family: 'JetBrains Mono', monospace; }
   .search-row { display: flex; gap: 12px; }
   .search-input-wrap {
     flex: 1; position: relative;
     border: 1px solid var(--border2); border-radius: 8px;
     background: var(--bg1); overflow: hidden;
     transition: border-color 0.2s, box-shadow 0.2s;
+    font-family: 'JetBrains Mono', monospace;
   }
   .search-input-wrap:focus-within {
     border-color: var(--accent);
     box-shadow: 0 0 0 2px rgba(0,217,255,0.1);
+    font-family: 'JetBrains Mono', monospace;
   }
   .search-prefix { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--text3); font-size: 13px; }
   .search-input {
@@ -122,7 +128,7 @@
     background: transparent; border: none; outline: none;
     color: var(--text); font-family: 'JetBrains Mono', monospace; font-size: 15px;
   }
-  .search-input::placeholder { color: var(--text3); }
+  .search-input::placeholder { color: var(--text3); font-family: 'JetBrains Mono', monospace; }
   .btn {
     padding: 14px 28px; border-radius: 8px; border: none; cursor: pointer;
     font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 600;
@@ -131,18 +137,20 @@
   .btn-primary {
     background: var(--accent); color: #000;
     box-shadow: 0 0 20px rgba(0,217,255,0.3);
+    font-family: 'JetBrains Mono', monospace;
   }
-  .btn-primary:hover { background: #33e5ff; box-shadow: 0 0 30px rgba(0,217,255,0.5); transform: translateY(-1px); }
-  .btn-primary:active { transform: translateY(0); }
-  .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
-  .btn-ghost { background: transparent; color: var(--text2); border: 1px solid var(--border2); }
-  .btn-ghost:hover { border-color: var(--text2); color: var(--text); }
+  .btn-primary:hover { background: #0099cc; box-shadow: 0 0 30px rgba(0,217,255,0.5); transform: translateY(-1px); font-family: 'JetBrains Mono', monospace; }
+  .btn-primary:active { transform: translateY(0); font-family: 'JetBrains Mono', monospace;}
+  .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; transform: none; font-family: 'JetBrains Mono', monospace; }
+  .btn-ghost { background: transparent; color: var(--text2); border: 1px solid var(--border2);font-family: 'JetBrains Mono', monospace; }
+  .btn-ghost:hover { border-color: var(--accent2); color: var(--accent2); font-family: 'JetBrains Mono', monospace; }
 
   .quick-tests { display: flex; gap: 8px; flex-wrap: wrap; }
   .quick-chip {
     padding: 6px 12px; border-radius: 4px; font-size: 11px; cursor: pointer;
     border: 1px solid var(--border); color: var(--text2); background: var(--bg1);
     transition: all 0.15s; letter-spacing: 0.5px;
+    font-family: 'JetBrains Mono', monospace;
   }
   .quick-chip:hover { border-color: var(--accent); color: var(--accent); }
 
@@ -151,19 +159,20 @@
   .stat-card {
     background: var(--bg1); border: 1px solid var(--border); border-radius: 10px;
     padding: 20px; position: relative; overflow: hidden;
-    transition: border-color 0.2s;
+    transition: border-color 0.2s; font-family: 'JetBrains Mono', monospace;
   }
   .stat-card::before {
     content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
     background: linear-gradient(90deg, transparent, var(--accent-color, var(--accent)), transparent);
+    font-family: 'JetBrains Mono', monospace;
   }
   .stat-card.critical { --accent-color: var(--critical); }
   .stat-card.high     { --accent-color: var(--high); }
   .stat-card.medium   { --accent-color: var(--medium); }
   .stat-card.low      { --accent-color: var(--low); }
-  .stat-label { font-size: 10px; color: var(--text3); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px; }
+  .stat-label { font-size: 10px; color: var(--text3); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px; font-family: 'JetBrains Mono', monospace; }
   .stat-value { font-family: 'Syne', sans-serif; font-size: 32px; font-weight: 800; color: var(--accent-color, var(--text)); }
-  .stat-sub { font-size: 11px; color: var(--text3); margin-top: 4px; }
+  .stat-sub { font-size: 11px; color: var(--text3); margin-top: 4px; font-family: 'JetBrains Mono', monospace; }
 
   /* ── Main grid  */
   .main-grid { display: grid; grid-template-columns: 1fr 380px; gap: 24px; }
@@ -208,7 +217,7 @@
   .risk-badge.MEDIUM   { background: rgba(255,204,0,0.12); color: var(--medium);   border: 1px solid rgba(255,204,0,0.4); box-shadow: var(--glow-m); }
   .risk-badge.LOW      { background: rgba(0,232,124,0.12); color: var(--low);      border: 1px solid rgba(0,232,124,0.4); box-shadow: var(--glow-l); }
   .action-badge {
-    font-size: 11px; color: var(--text2); letter-spacing: 1.5px;
+    font-size: 11px; color: var(--text2); letter-spacing: 1.5px; font-family: 'JetBrains Mono', monospace;
   }
   .action-badge .action-val { font-weight: 700; }
   .action-badge.BLOCK   .action-val { color: var(--critical); }
@@ -217,7 +226,7 @@
   .action-badge.ALLOW   .action-val { color: var(--low); }
 
   /* Signal list */
-  .signals-title { font-size: 10px; color: var(--text3); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 12px; }
+  .signals-title { font-size: 10px; color: var(--text3); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 12px; font-family: 'JetBrains Mono', monospace; }
   .signal-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 24px; }
   .signal-item {
     display: flex; align-items: center; gap: 12px;
@@ -238,7 +247,7 @@
   /* Detail grid */
   .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
   .detail-card { background: var(--bg1); border: 0.9px solid var(--border);border-radius: 8px; padding: 16px; }
-  .detail-card-title { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px; }
+  .detail-card-title { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px; font-family: 'JetBrains Mono', monospace; }
   .kv { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; gap: 8px; }
   .kv-key { font-size: 11px; color: var(--text3); }
   .kv-val { font-size: 11px; color: var(--text); text-align: right; max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -247,6 +256,7 @@
   .placeholder {
     flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
     gap: 16px; color: var(--text3); text-align: center;
+    font-family: 'JetBrains Mono', monospace;
   }
   .placeholder-icon { font-size: 48px; opacity: 0.3; }
   .placeholder-text { font-size: 12px; line-height: 1.8; }
@@ -254,7 +264,7 @@
   /* Loading */
   .loading {
     flex: 1; display: flex; align-items: center; justify-content: center; gap: 12px;
-    color: var(--text2); font-size: 13px;
+    color: var(--text2); font-size: 13px; font-family: 'JetBrains Mono', monospace;
   }
   .spinner {
     width: 24px; height: 24px; border: 2px solid var(--border);
@@ -267,6 +277,7 @@
   .audit-panel {
     background: var(--bg1); border: 1px solid var(--border); border-radius: 12px;
     display: flex; flex-direction: column; overflow: hidden;
+    font-family: 'JetBrains Mono', monospace;
   }
   .audit-list { flex: 1; overflow-y: auto; max-height: 500px; }
   .audit-list::-webkit-scrollbar { width: 4px; }
@@ -321,7 +332,7 @@
     .score-header { flex-direction: column; align-items: flex-start; gap: 16px; }
   }
 
-  .error-msg { color: var(--critical); font-size: 12px; padding: 12px 16px; background: rgba(255,51,85,0.1); border-radius: 6px; border: 1px solid rgba(255,51,85,0.3); }
+  .error-msg { color: var(--critical); font-size: 12px; padding: 12px 16px; background: rgba(255,51,85,0.1); border-radius: 6px; border: 1px solid rgba(255,51,85,0.3); font-family: 'JetBrains Mono', monospace; }
 
   /* Geo map mini */
   .geo-indicator { display: flex; align-items: center; gap: 6px; }
@@ -351,7 +362,7 @@
   <main>
     <!-- Search -->
     <div class="search-section">
-      <div class="search-label" >IP Risk Analysis {Detect IP by default}</div>
+      <div class="search-label" >IP Risk Analysis {Analyze IP by default}</div>
       <div class="search-row">
         <div class="search-input-wrap">
           <span class="search-prefix">SCORE:</span>
@@ -448,55 +459,188 @@
     <div class="docs-section">
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
     <div class="panel-title" style="color:var(--text);font-size:11px;font-weight:400;">REST API</div>
-    <a href="https://ipshield.live/api/docs" target="_blank"
-      style="display:inline-flex;align-items:center;gap:8px;padding:10px 12px;
-             background:var(--accent);color:#000;border-radius:8px;text-decoration:none;
-             font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;
-             letter-spacing:1px;box-shadow:0 0 20px rgba(0,217,255,0.3);
-             transition:all 0.15s;">
-      OPEN INTERACTIVE DOCS →
-    </a>
+    <button class="btn btn-primary" id="apiDocsBtn" style="padding: 10px 12px; font-size: 12px;">API Documentation →</button>
+
   </div>
-  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;">
-    <div class="endpoint-card">
-      <div class="ep-method GET">GET</div>
-      <div class="ep-path">/api/score/:ip</div>
-      <div class="ep-desc">Full risk score — geo, threat intel, Shodan, VirusTotal, feeds, WHOIS signals.</div>
+ <div style="padding:10px 16px;background:rgba(0,217,255,0.06);border:1px solid rgba(0,217,255,0.2);border-radius:8px;margin-bottom:20px;font-size:11px;color:var(--text2);">
+    <span style="color:var(--accent);font-weight:700;">Authentication:</span>
+    All endpoints require <code style="background:var(--bg2);padding:1px 6px;border-radius:3px;color:var(--accent);">x-api-key</code> header
+    except <code style="background:var(--bg2);padding:1px 6px;border-radius:3px;">/api/health</code> and
+    <code style="background:var(--bg2);padding:1px 6px;border-radius:3px;">/api/docs</code>.
+  </div>
+ 
+  <!-- Scoring -->
+  <div style="margin-bottom:24px;">
+    <div style="font-size:10px;color:var(--text3);letter-spacing:2px;font-weight:700;margin-bottom:10px;">SCORING</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px;">
+      <div class="endpoint-card">
+        <div class="ep-method GET">GET</div>
+        <div class="ep-path">/api/score/:ip</div>
+        <div class="ep-desc">Full risk score — geo, threat intel, Shodan, VirusTotal, rDNS, feeds, WHOIS signals, blacklist status.</div>
+      </div>
+      <div class="endpoint-card">
+        <div class="ep-method POST">POST</div>
+        <div class="ep-path">/api/score/batch</div>
+        <div class="ep-desc">Score up to 50 IPs in one parallel request. Body: <code style="color:var(--accent)">{"ips":[...]}</code></div>
+      </div>
+      <div class="endpoint-card">
+        <div class="ep-method GET">GET</div>
+        <div class="ep-path">/api/report/:ip</div>
+        <div class="ep-desc">Download full PDF threat report for an IP. Streams directly as attachment.</div>
+      </div>
     </div>
-    <div class="endpoint-card">
-      <div class="ep-method POST">POST</div>
-      <div class="ep-path">/api/score/batch</div>
-      <div class="ep-desc">Score up to 50 IPs in one request. Body: <code style="color:var(--accent)">{"ips":[...]}</code></div>
+  </div>
+ 
+  <!-- Intelligence -->
+  <div style="margin-bottom:24px;">
+    <div style="font-size:10px;color:var(--text3);letter-spacing:2px;font-weight:700;margin-bottom:10px;">INTELLIGENCE</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px;">
+      <div class="endpoint-card">
+        <div class="ep-method GET">GET</div>
+        <div class="ep-path">/api/whois/:ip</div>
+        <div class="ep-desc">RDAP deep dive — registration, org, abuse contact, age signals via ARIN→RIPE→APNIC.</div>
+      </div>
+      <div class="endpoint-card">
+        <div class="ep-method GET">GET</div>
+        <div class="ep-path">/api/timeline/:ip</div>
+        <div class="ep-desc">Historical score chart for an IP — trend, min, max, avg from the database.</div>
+      </div>
     </div>
-    <div class="endpoint-card">
-      <div class="ep-method GET">GET</div>
-      <div class="ep-path">/api/whois/:ip</div>
-      <div class="ep-desc">RDAP deep dive — registration, org, abuse contact, age signals.</div>
+  </div>
+ 
+  <!-- Blacklist -->
+  <div style="margin-bottom:24px;">
+    <div style="font-size:10px;color:var(--text3);letter-spacing:2px;font-weight:700;margin-bottom:10px;">BLACKLIST</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px;">
+      <div class="endpoint-card">
+        <div class="ep-method GET">GET</div>
+        <div class="ep-path">/api/blacklist</div>
+        <div class="ep-desc">List all blacklisted IPs. Filter by <code style="color:var(--accent)">severity</code>, <code style="color:var(--accent)">status</code> (active/expired), or search query.</div>
+      </div>
+      <div class="endpoint-card">
+        <div class="ep-method POST">POST</div>
+        <div class="ep-path">/api/blacklist</div>
+        <div class="ep-desc">Add IP to blacklist. Returns 409 if already actively blacklisted. Body: ip, severity, category, reason, tags, expires_at.</div>
+      </div>
+      <div class="endpoint-card">
+        <div class="ep-method GET">GET</div>
+        <div class="ep-path">/api/blacklist/export</div>
+        <div class="ep-desc">Export active IPs as firewall rules. Formats: <code style="color:var(--accent)">txt, csv, json, iptables, nginx, cisco, paloalto, windows</code></div>
+      </div>
+      <div class="endpoint-card">
+        <div class="ep-method GET">GET</div>
+        <div class="ep-path">/api/blacklist/stats</div>
+        <div class="ep-desc">Total, active, expired counts broken down by severity (CRITICAL/HIGH/MEDIUM/LOW).</div>
+      </div>
+      <div class="endpoint-card">
+        <div class="ep-method PUT">PUT</div>
+        <div class="ep-path">/api/blacklist/:id</div>
+        <div class="ep-desc">Update severity, category, reason, tags or expiry of an existing entry.</div>
+      </div>
+      <div class="endpoint-card">
+        <div class="ep-method DELETE" style="color:#ff3355;">DEL</div>
+        <div class="ep-path">/api/blacklist/:id</div>
+        <div class="ep-desc">Remove a single blacklist entry by ID.</div>
+      </div>
+      <div class="endpoint-card">
+        <div class="ep-method DELETE" style="color:#ff3355;">DEL</div>
+        <div class="ep-path">/api/blacklist/bulk</div>
+        <div class="ep-desc">Bulk delete multiple entries. Body: <code style="color:var(--accent)">{"ids":[1,2,3]}</code></div>
+      </div>
     </div>
-    <div class="endpoint-card">
-      <div class="ep-method GET">GET</div>
-      <div class="ep-path">/api/watchlist</div>
-      <div class="ep-desc">List watched IPs with scores and monitor status.</div>
+  </div>
+ 
+  <!-- Case Management -->
+  <div style="margin-bottom:24px;">
+    <div style="font-size:10px;color:var(--text3);letter-spacing:2px;font-weight:700;margin-bottom:10px;">CASE MANAGEMENT</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px;">
+      <div class="endpoint-card">
+        <div class="ep-method GET">GET</div>
+        <div class="ep-path">/api/cases</div>
+        <div class="ep-desc">List all cases with IP and note counts. Filter by status, severity, or search title/description.</div>
+      </div>
+      <div class="endpoint-card">
+        <div class="ep-method POST">POST</div>
+        <div class="ep-path">/api/cases</div>
+        <div class="ep-desc">Create a new investigation case. Body: title, description, severity, status, assigned_to, tags.</div>
+      </div>
+      <div class="endpoint-card">
+        <div class="ep-method GET">GET</div>
+        <div class="ep-path">/api/cases/stats</div>
+        <div class="ep-desc">Case counts by status (Open, Investigating, Contained, Resolved, Closed) and severity.</div>
+      </div>
+      <div class="endpoint-card">
+        <div class="ep-method GET">GET</div>
+        <div class="ep-path">/api/cases/:id</div>
+        <div class="ep-desc">Full case detail including all attached IPs and investigation notes.</div>
+      </div>
+      <div class="endpoint-card">
+        <div class="ep-method PUT">PUT</div>
+        <div class="ep-path">/api/cases/:id</div>
+        <div class="ep-desc">Update case title, description, severity, status, tags. Closing a case auto-sets <code style="color:var(--accent)">closed_at</code>.</div>
+      </div>
+      <div class="endpoint-card">
+        <div class="ep-method DELETE" style="color:#ff3355;">DEL</div>
+        <div class="ep-path">/api/cases/:id</div>
+        <div class="ep-desc">Delete a case and all its IPs and notes (cascade delete).</div>
+      </div>
+      <div class="endpoint-card">
+        <div class="ep-method POST">POST</div>
+        <div class="ep-path">/api/cases/:id/ips</div>
+        <div class="ep-desc">Attach an IP to the case. Optionally include current score and risk_level. Returns 409 if already attached.</div>
+      </div>
+      <div class="endpoint-card">
+        <div class="ep-method DELETE" style="color:#ff3355;">DEL</div>
+        <div class="ep-path">/api/cases/:id/ips/:ipId</div>
+        <div class="ep-desc">Remove a specific IP attachment from the case.</div>
+      </div>
+      <div class="endpoint-card">
+        <div class="ep-method POST">POST</div>
+        <div class="ep-path">/api/cases/:id/notes</div>
+        <div class="ep-desc">Add a timestamped analyst note to the case. Body: note (required), author (default: analyst).</div>
+      </div>
+      <div class="endpoint-card">
+        <div class="ep-method DELETE" style="color:#ff3355;">DEL</div>
+        <div class="ep-path">/api/cases/:id/notes/:noteId</div>
+        <div class="ep-desc">Delete a specific note from the case.</div>
+      </div>
     </div>
-    <div class="endpoint-card">
-      <div class="ep-method GET">GET</div>
-      <div class="ep-path">/api/audit/search</div>
-      <div class="ep-desc">Search history by IP, risk, score range, country, proxy, tor, date.</div>
-    </div>
-    <div class="endpoint-card">
-      <div class="ep-method GET">GET</div>
-      <div class="ep-path">/api/stats</div>
-      <div class="ep-desc">Risk distribution, cache size, feed status, memory usage.</div>
-    </div>
-    <div class="endpoint-card">
-      <div class="ep-method GET">GET</div>
-      <div class="ep-path">/api/health</div>
-      <div class="ep-desc">Health check — no auth required. Returns DB and monitor status.</div>
-    </div>
-    <div class="endpoint-card">
-      <div class="ep-method GET" style="color:var(--accent);">DOCS</div>
-      <div class="ep-path">/api/docs</div>
-      <div class="ep-desc">Live Swagger UI — try every endpoint interactively with your API key.</div>
+  </div>
+ 
+  <!-- Watchlist, Audit, System -->
+  <div style="margin-bottom:24px;">
+    <div style="font-size:10px;color:var(--text3);letter-spacing:2px;font-weight:700;margin-bottom:10px;">WATCHLIST · AUDIT · SYSTEM</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px;">
+      <div class="endpoint-card">
+        <div class="ep-method GET">GET</div>
+        <div class="ep-path">/api/watchlist</div>
+        <div class="ep-desc">List watched IPs with last scores and monitor job status.</div>
+      </div>
+      <div class="endpoint-card">
+        <div class="ep-method POST">POST</div>
+        <div class="ep-path">/api/watchlist/poll</div>
+        <div class="ep-desc">Trigger immediate re-score of all watched IPs (async).</div>
+      </div>
+      <div class="endpoint-card">
+        <div class="ep-method GET">GET</div>
+        <div class="ep-path">/api/audit/search</div>
+        <div class="ep-desc">Search history by IP, risk, score range, country, proxy, tor, date range, sort order.</div>
+      </div>
+      <div class="endpoint-card">
+        <div class="ep-method GET">GET</div>
+        <div class="ep-path">/api/stats</div>
+        <div class="ep-desc">Risk distribution, cache size, feed status, DB and memory usage.</div>
+      </div>
+      <div class="endpoint-card">
+        <div class="ep-method GET">GET</div>
+        <div class="ep-path">/api/health</div>
+        <div class="ep-desc">Health check — no auth required. Returns DB, monitor, SIEM and memory status.</div>
+      </div>
+      <div class="endpoint-card" style="border-color:rgba(0,217,255,0.3);background:var(--bg1);">
+        <div class="ep-method GET" style="color:var(--accent);">DOCS</div>
+        <div class="ep-path">/api/docs</div>
+        <div class="ep-desc">Live Swagger UI — try every endpoint interactively with your API key pre-filled.</div>
+      </div>
     </div>
   </div>
 </div>
@@ -562,7 +706,7 @@
 
 
  
-  Quick test chips — scrollable row 
+  /* Quick test chips — scrollable row  */
   .quick-tests {
     flex-wrap: nowrap;
     overflow-x: auto;
