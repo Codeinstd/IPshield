@@ -17,7 +17,7 @@ router.get("/", (req, res) => {
 
   res.setHeader("Content-Type", "text/html");
   res.send(`<!DOCTYPE html>
-<html lang="en">x
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -25,108 +25,379 @@ router.get("/", (req, res) => {
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.11.0/swagger-ui.min.css">
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
   <style>
-    * { box-sizing: border-box; }
-    body { margin: 0; background: #0d1117; font-family: 'Inter', 'JetBrains Mono', monospace; }
 
-    /* Header bar */
-    .docs-header {
-      background: #0d1117;
-      border-bottom: 1px solid #1e2d3d;
-      padding: 14px 32px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      position: sticky;
-      top: 0;
-      z-index: 1000;
-    }
-      
-    .docs-logo { color: #c9d8e8; font-size: 18px; font-weight: 700; }
-    .docs-logo span { color: #00d9ff; }
-    .docs-back {
-      color: #6a8fa8; font-size: 12px; text-decoration: none;
-      border: 1px solid #1e2d3d; padding: 6px 14px; border-radius: 6px;
-      font-family: 'JetBrains Mono', monospace; transition: all .3s;
-    }
-    .docs-back:hover { color: #00d9ff; border-color: #00d9ff; }
+  :root {
+  --bg: #050816;
+  --panel: rgba(13, 17, 23, 0.72);
+  --panel-border: rgba(255,255,255,0.06);
 
-    /* Swagger UI to match IPShield dark theme */
-    .swagger-ui { background: #080c0f; }
-    .swagger-ui .topbar { display: none; }
-    .swagger-ui .info    { margin: 32px 0 24px; }
-    swagger-ui .info a { color: #4990e2;font-family: 'JetBrains Mono', monospace;font-size: 14px;transition: all .4s;}
-    .swagger-ui .info .title { color: #c9d8e8; font-family: JetBrains Mono, monospace; }
-    .swagger-ui .info p { color: #6a8fa8; font-family: JetBrains Mono, monospace; }
-    .swagger-ui .info li   { color: #6a8fa8; font-family: JetBrains Mono, monospace; }
-    .swagger-ui .info code { background: #111820; color: #00d9ff; border-radius: 4px; }
-    .swagger-ui .scheme-container { background: #0d1117; padding: 12px 0; box-shadow: none; border-bottom: 1px solid #1e2d3d; }
-    .swagger-ui .opblock-tag { color: #c9d8e8; border-bottom: 1px solid #1e2d3d; }
-    .swagger-ui .opblock-tag:hover { background: #111820; }
-    .swagger-ui .opblock { background: #0d1117; border: 1px solid #1e2d3d; border-radius: 8px; margin-bottom: 8px; }
-    .swagger-ui .opblock-summary { padding: 10px 16px; }
-    .swagger-ui .opblock-summary-method { border-radius: 4px; font-family: JetBrains Mono, monospace; font-size: 12px; font-weight: 700; min-width: 60px; text-align: center; }
-    .swagger-ui .opblock-summary-description { color: #6a8fa8; font-family: JetBrains Mono, monospace; }
-    .swagger-ui .opblock.opblock-get    { border-color: rgba(0,232,124,0.3); }
-    .swagger-ui .opblock.opblock-post   { border-color: rgba(255,204,0,0.3); }
-    .swagger-ui .opblock.opblock-delete { border-color: rgba(255,51,85,0.3); }
-    .swagger-ui .opblock.opblock-get    .opblock-summary-method { background: #00e87c; color: #000; }
-    .swagger-ui .opblock.opblock-post   .opblock-summary-method { background: #ffcc00; color: #000; }
-    .swagger-ui .opblock.opblock-delete .opblock-summary-method { background: #ff3355; color: #fff; }
-    .swagger-ui .opblock-body-description,
-    .swagger-ui .opblock-description-wrapper p { color: #6a8fa8; font-family: JetBrains Mono, monospace; }
-    .swagger-ui .opblock-section-header { background: #111820; border-bottom: 1px solid #1e2d3d; }
-    .swagger-ui .opblock-section-header h4 { color: #c9d8e8; font-family: JetBrains Mono, monospace; }
-    .swagger-ui table thead tr th { color: #6a8fa8; border-bottom: 1px solid #1e2d3d; }
-    .swagger-ui .parameter__name { color: #00d9ff; }
-    .swagger-ui .parameter__type { color: #6a8fa8; font-family: JetBrains Mono, monospace; }
-    .swagger-ui input[type=text],
-    .swagger-ui textarea { background: #111820; border: 1px solid #1e2d3d; color: #c9d8e8; border-radius: 4px; }
-    .swagger-ui input[type=text]:focus,
-    .swagger-ui textarea:focus { border-color: #00d9ff; outline: none; }
-    .swagger-ui .btn { font-family: JetBrains Mono, monospace; border-radius: 6px; }
-    .swagger-ui .btn.execute { background: #00d9ff; color: #000; border: none; font-weight: 700; }
-    .swagger-ui .btn.execute:hover { background: #33e5ff; }
-    .swagger-ui .btn.cancel { background: transparent; border: 1px solid #1e2d3d; color: #6a8fa8; }
-    .swagger-ui .responses-table .response-col_status { color: #00e87c; }
-    .swagger-ui .response-col_description { color: #c9d8e8; }
-    .swagger-ui .microlight { background: #111820; border-radius: 6px; padding: 12px; }
-    .swagger-ui .model-box { background: #111820; border-radius: 6px; }
-    .swagger-ui .model { color: #c9d8e8; }
-    .swagger-ui .prop-type { color: #00d9ff; }
-    .swagger-ui section.models { border: 1px solid #1e2d3d; border-radius: 8px; }
-    .swagger-ui section.models h4 { color: #c9d8e8; }
-    .swagger-ui .auth-container { background: #0d1117; }
-    .swagger-ui .auth-container h4 { color: #c9d8e8; }
-    .swagger-ui .auth-container .wrapper { border-color: #1e2d3d; }
-    .swagger-ui .dialog-ux .modal-ux { background: #0d1117; border: 1px solid #1e2d3d; border-radius: 12px; }
-    .swagger-ui .dialog-ux .modal-ux-header { border-bottom: 1px solid #1e2d3d; }
-    .swagger-ui .dialog-ux .modal-ux-header h3 { color: #c9d8e8; }
-    .swagger-ui .dialog-ux .modal-ux-content p,
-    .swagger-ui .dialog-ux .modal-ux-content label { color: #6a8fa8; }
-    .swagger-ui .servers-title {
-    font-size: 12px;
-    font-weight: 700;
-    font-family: 'JetBrains Mono', monospace;
-    }
-    swagger-ui .model-box-control, .swagger-ui .models-control, .swagger-ui .opblock-summary-control {
-    all: inherit;
-    border-bottom: 0;
-    cursor: pointer;
-    flex: 1;
-    }
+  --text: #dbe7f5;
+  --muted: #7f97b2;
 
-    /* Authorize button */
-    .swagger-ui .authorization__btn { color: #00d9ff; border-color: #00d9ff; }
-    .swagger-ui .unlocked { fill: #6a8fa8; }
-    .swagger-ui .locked   { fill: #00d9ff; }
+  --cyan: #00d9ff;
+  --green: #00e87c;
+  --yellow: #ffcc00;
+  --red: #ff4d6d;
 
-    #swagger-ui { max-width: 1200px; margin: 0 auto; padding: 0 24px 48px; }
+  --shadow:
+    0 10px 40px rgba(0,0,0,0.45);
+
+  --radius: 18px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  color: var(--text);
+
+  background:
+    radial-gradient(circle at top left, rgba(0,217,255,.08), transparent 25%),
+    radial-gradient(circle at bottom right, rgba(0,232,124,.05), transparent 25%),
+    #050816;
+
+  font-family: Inter, sans-serif;
+}
+
+.docs-header {
+  position: sticky;
+  top: 0;
+  z-index: 999;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 18px 36px;
+
+  backdrop-filter: blur(16px);
+
+  background: rgba(5, 8, 22, 0.75);
+
+  border-bottom:
+    1px solid rgba(255,255,255,0.06);
+}
+
+.docs-hero {
+  position: relative;
+
+  padding:
+    90px 32px 70px;
+
+  overflow: hidden;
+}
+
+.hero-grid {
+  position: absolute;
+  inset: 0;
+
+  background-image:
+    linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px);
+
+  background-size: 40px 40px;
+
+  mask-image:
+    radial-gradient(circle at center, black 30%, transparent 80%);
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+
+  max-width: 900px;
+  margin: auto;
+  text-align: center;
+}
+
+.hero-badge {
+  display: inline-flex;
+
+  padding: 8px 14px;
+
+  border-radius: 999px;
+
+  background: rgba(0,217,255,.08);
+
+  border: 1px solid rgba(0,217,255,.18);
+
+  color: var(--cyan);
+
+  font-size: 12px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.hero-content h1 {
+  margin: 24px 0 12px;
+
+  font-size: 78px;
+  line-height: 1;
+
+  font-weight: 800;
+
+  font-family: Syne, sans-serif;
+}
+
+.hero-content h1 span {
+  color: var(--cyan);
+}
+
+.hero-content p {
+  max-width: 760px;
+
+  margin: auto;
+
+  color: var(--muted);
+
+  font-size: 18px;
+  line-height: 1.8;
+}
+
+.hero-actions {
+  margin-top: 34px;
+
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+}
+
+.hero-btn {
+  padding: 14px 22px;
+
+  border-radius: 14px;
+
+  text-decoration: none;
+
+  font-weight: 600;
+
+  transition: .25s ease;
+}
+
+.hero-btn.primary {
+  background: var(--cyan);
+  color: #000;
+
+  box-shadow:
+    0 0 25px rgba(0,217,255,.35);
+}
+
+.hero-btn.primary:hover {
+  transform: translateY(-2px);
+}
+
+.hero-btn.secondary {
+  border: 1px solid rgba(255,255,255,.08);
+
+  background: rgba(255,255,255,.03);
+
+  color: var(--text);
+}
+
+.swagger-ui .opblock {
+  overflow: hidden;
+
+  margin-bottom: 18px;
+
+  border-radius: 20px;
+
+  border:
+    1px solid rgba(255,255,255,.05);
+
+  background:
+    rgba(13,17,23,.72);
+
+  backdrop-filter: blur(18px);
+
+  box-shadow: var(--shadow);
+
+  transition:
+    transform .2s ease,
+    border-color .2s ease;
+}
+
+.swagger-ui .opblock:hover {
+  transform: translateY(-2px);
+
+  border-color:
+    rgba(0,217,255,.25);
+}
+
+.swagger-ui .opblock-tag {
+  position: sticky;
+  top: 72px;
+
+  z-index: 5;
+
+  margin-top: 48px;
+
+  padding: 18px 20px;
+
+  background:
+    rgba(5,8,22,.88);
+
+  backdrop-filter: blur(12px);
+
+  border:
+    1px solid rgba(255,255,255,.04);
+
+  border-radius: 16px;
+
+  font-size: 28px;
+  font-weight: 700;
+
+  color: #fff;
+}
+
+.swagger-ui .opblock-summary {
+  padding: 18px 22px;
+}
+
+.swagger-ui .opblock-summary-path {
+  color: #dbe7f5;
+
+  font-weight: 600;
+}
+
+.swagger-ui .opblock-summary-description {
+  color: #7f97b2;
+}
+
+.swagger-ui input[type=text],
+.swagger-ui textarea,
+.swagger-ui select {
+  background: rgba(255,255,255,.03);
+
+  border:
+    1px solid rgba(255,255,255,.08);
+
+  border-radius: 12px;
+
+  color: white;
+
+  padding: 12px;
+}
+
+.swagger-ui .btn.execute {
+  border: none;
+
+  border-radius: 12px;
+
+  background: linear-gradient(
+    135deg,
+    #00d9ff,
+    #00e87c
+  );
+
+  color: #031018;
+
+  font-weight: 700;
+
+  box-shadow:
+    0 10px 25px rgba(0,217,255,.25);
+}
+
+#swagger-ui {
+  max-width: 1400px;
+
+  margin: auto;
+
+  padding:
+    0 28px 120px;
+}
+
+window.addEventListener("load", () => {
+  const icons = {
+    Scoring: "🛰️",
+    Intelligence: "🧠",
+    Blacklist: "⛔",
+    Cases: "📂",
+    Watchlist: "👁️",
+    Audit: "📜",
+    System: "⚙️"
+  };
+
+  document.querySelectorAll(".opblock-tag").forEach(tag => {
+    const text = tag.textContent.trim();
+
+    if (icons[text]) {
+      tag.innerHTML = \`
+        <span style="margin-right:10px">
+          \${icons[text]}
+        </span>
+        \${text}
+      \`;
+    }
+  });
+});
+
+.swagger-ui .btn,
+.swagger-ui .opblock,
+.docs-back,
+.hero-btn {
+  transition: all .22s ease;
+}
+
+.swagger-ui .topbar {
+  display: none;
+}
+
+.swagger-ui .info .title small {
+  display: none;
+}
+
+.swagger-ui .scheme-container {
+  background: transparent;
+  box-shadow: none;
+  border: none;
+}
+
+.swagger-ui section.models {
+  margin-top: 50px;
+}
+
   </style>
 </head>
 <body>
   <div class="docs-header">
-    <div class="docs-logo">IP<span>Shield</span> <span style="font-family: JetBrains Mono, monospace; font-size:13px;color:#3d5a72;font-weight:400;">API Documentation</span></div>
-    <a href="/" class="docs-back">← Back to App</a>
+    <div class="docs-logo">
+      IP<span>Shield</span>
+    </div>
+
+    <a href="/" class="docs-back">
+      ← Back to App
+    </a>
+  </div>
+
+  <div class="docs-hero">
+    <div class="hero-grid"></div>
+
+    <div class="hero-content">
+      <div class="hero-badge">
+        v2.2.0 • Threat Intelligence API
+      </div>
+
+      <h1>
+        IP<span>Shield</span>
+      </h1>
+
+      <p>
+        Real-time IP reputation, threat feeds, WHOIS intelligence,
+        blacklist management and investigation workflows.
+      </p>
+
+      <div class="hero-actions">
+        <a href="#swagger-ui" class="hero-btn primary">
+          Explore API
+        </a>
+
+        <a href="/api/openapi.json" class="hero-btn secondary">
+          OpenAPI Spec
+        </a>
+      </div>
+    </div>
   </div>
 
   <div id="swagger-ui"></div>
@@ -158,6 +429,30 @@ router.get("/", (req, res) => {
         return req;
       }
     });
+
+    window.addEventListener("load", () => {
+  const icons = {
+    Scoring: "🛰️",
+    Intelligence: "🧠",
+    Blacklist: "⛔",
+    Cases: "📂",
+    Watchlist: "👁️",
+    Audit: "📜",
+    System: "⚙️"
+  };
+
+  document.querySelectorAll(".opblock-tag").forEach(tag => {
+    const text = tag.textContent.trim();
+
+    if (icons[text]) {
+      tag.innerHTML =
+        '<span style="margin-right:10px">' +
+        icons[text] +
+        '</span>' +
+        text;
+    }
+  });
+});
   </script>
 </body>
 </html>`);

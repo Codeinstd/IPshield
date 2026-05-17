@@ -7,6 +7,7 @@ const compression  = require("compression");
 const path         = require("path");
 const rateLimit    = require("express-rate-limit");
 
+// ── Routes
 const scoreRoutes     = require("./routes/score.routes");
 const statsRoutes     = require("./routes/stats.routes");
 const auditRoutes     = require("./routes/audit.routes");
@@ -20,6 +21,8 @@ const errorMiddleware = require("./middleware/error.middleware");
 const logger          = require("./utils/logger");
 const reportRoutes    = require("./routes/report.routes");
 const timelineRoutes  = require("./routes/timeline.routes");
+
+// v2-only Routes
 const blacklistRoutes = require("./routes/blacklist.routes");
 const casesRoutes     = require("./routes/cases.routes");
 
@@ -27,6 +30,8 @@ const casesRoutes     = require("./routes/cases.routes");
 const isProd = process.env.NODE_ENV === "production";
 const app    = express();
 
+
+// ── Security & middleware 
 if (process.env.SENTRY_DSN) {
   try {
     const Sentry = require("@sentry/node");
@@ -80,8 +85,7 @@ if (isProd) {
 
 // ── Rate limiting with structured error body 
 const makeRateLimiter = (windowMs, max, message) => rateLimit({
-  windowMs,
-  max,
+  windowMs, max,
   standardHeaders: true,
   legacyHeaders:   false,
   handler: (req, res) => {
@@ -98,56 +102,143 @@ const makeRateLimiter = (windowMs, max, message) => rateLimit({
   }
 });
 
-app.use("/api/",      makeRateLimiter(15 * 60 * 1000, 200, "Too many requests. Try again in 15 minutes."));
-app.use("/api/score", makeRateLimiter(60 * 1000,       30,  "Score rate limit: 30 requests per minute."));
-app.use("/api/whois", makeRateLimiter(60 * 1000,       20,  "WHOIS rate limit: 20 requests per minute."));
+
+// Apply to all /api/* variants
+["/api/", "/api/v1/", "/api/v2/"].forEach(prefix => {
+  app.use(prefix, makeRateLimiter(15 * 60 * 1000, 200, "Too many requests. Try again in 15 minutes."));
+});
+["/api/score", "/api/v1/score", "/api/v2/score"].forEach(p => {
+  app.use(p, makeRateLimiter(60 * 1000, 30, "Score rate limit: 30 requests per minute."));
+});
+["/api/whois", "/api/v1/whois", "/api/v2/whois"].forEach(p => {
+  app.use(p, makeRateLimiter(60 * 1000, 20, "WHOIS rate limit: 20 requests per minute."));
+});
+
 
 // ── Static files  
 app.use(express.static(path.join(__dirname, "../public"), { maxAge: isProd ? "1d" : 0, etag: true }));
 
-// ── Docs (public — no auth)  
-app.use("/api/docs", docsRoutes);
 
-// ── Health check (public — no auth) 
-app.get("/api/health", (req, res) => {
+// ── Health (public — all versions)
+function healthHandler(req, res) {
   const db      = require("./store/db");
   const monitor = require("./jobs/monitor.job");
   const { getSIEMStatus } = require("./services/siem.service");
+  // Detect which version is being called
+  const version = req.path.includes("/v1/") ? "v1"
+                : req.path.includes("/v2/") ? "v2"
+                : "v1"; // default
   res.json({
     status:      "ok",
     version:     process.env.npm_package_version || "2.2.0",
+    api_version: version,
     environment: process.env.NODE_ENV || "development",
     uptime:      Math.floor(process.uptime()),
     db:          db.isAvailable() ? "connected" : "memory-only",
-    monitor:     monitor.getMonitorStatus(),
+    monitor:     monitor.getMonitorStatus?.() || {},
     siem:        getSIEMStatus(),
     memoryMB:    Math.round(process.memoryUsage().heapUsed / 1024 / 1024),
     timestamp:   new Date().toISOString()
   });
+}
+ 
+app.get("/api/health",    healthHandler);
+app.get("/api/v1/health", healthHandler);
+app.get("/api/v2/health", healthHandler);
+ 
+// ── Docs (public — all versions) 
+// Each version gets its own spec
+app.use("/api/docs",    docsRoutes);
+app.use("/api/v1/docs", require("./routes/docs.v1.routes"));
+app.use("/api/v2/docs", require("./routes/docs.v2.routes"));
+
+
+// ── Version info endpoints (public) 
+function versionInfoHandler(req, res) {
+  const isV1 = req.path.startsWith("/v1") || req.baseUrl?.includes("/v1");
+  res.json({
+    versions: {
+      v1: {
+        status:      "stable",
+        base_url:    "/api/v1",
+        docs:        "/api/v1/docs",
+        description: "Core IP intelligence — scoring, WHOIS, watchlist, audit, SIEM, reports",
+        features:    ["scoring","whois","watchlist","audit","siem","timeline","report"]
+      },
+      v2: {
+        status:      "latest",
+        base_url:    "/api/v2",
+        docs:        "/api/v2/docs",
+        description: "Full platform — everything in v1 plus blacklist management and case management",
+        features:    ["scoring","whois","watchlist","audit","siem","timeline","report","blacklist","cases"]
+      }
+    },
+    current:  "v2",
+    default:  "/api routes to v2"
+  });
+}
+ 
+app.get("/api/versions", versionInfoHandler);
+app.get("/api/v1",       versionInfoHandler);
+app.get("/api/v2",       versionInfoHandler);
+
+
+// ── Auth middleware 
+app.use("/api/",    authMiddleware);
+app.use("/api/v1/", authMiddleware);
+app.use("/api/v2/", authMiddleware);
+ 
+// ── Helper: mount shared routes on multiple prefixes 
+function mountShared(prefixes, path, router) {
+  prefixes.forEach(prefix => app.use(`${prefix}${path}`, router));
+}
+
+// ── Shared routes (v1 + v2 + default) 
+const SHARED_PREFIXES = ["/api", "/api/v1", "/api/v2"];
+ 
+mountShared(SHARED_PREFIXES, "/score",     scoreRoutes);
+mountShared(SHARED_PREFIXES, "/stats",     statsRoutes);
+mountShared(SHARED_PREFIXES, "/audit",     auditRoutes);
+mountShared(SHARED_PREFIXES, "/watchlist", watchlistRoutes);
+mountShared(SHARED_PREFIXES, "/whois",     whoisRoutes);
+mountShared(SHARED_PREFIXES, "/siem",      siemRoutes);
+mountShared(SHARED_PREFIXES, "/report",    reportRoutes);
+mountShared(SHARED_PREFIXES, "/timeline",  timelineRoutes);
+
+// ── v2-only routes 
+const V2_PREFIXES = ["/api", "/api/v2"]; // /api defaults to v2
+ 
+mountShared(V2_PREFIXES, "/blacklist", blacklistRoutes);
+mountShared(V2_PREFIXES, "/cases",     casesRoutes);
+
+
+// ── v1 — explicit 404 for v2-only features 
+app.use("/api/v1/blacklist", (req, res) => {
+  res.status(404).json({
+    error:       "not_available_in_v1",
+    message:     "Blacklist management is a v2 feature. Use /api/v2/blacklist",
+    upgrade_url: "/api/v2/blacklist",
+    docs:        "/api/v2/docs"
+  });
+});
+ 
+app.use("/api/v1/cases", (req, res) => {
+  res.status(404).json({
+    error:       "not_available_in_v1",
+    message:     "Case management is a v2 feature. Use /api/v2/cases",
+    upgrade_url: "/api/v2/cases",
+    docs:        "/api/v2/docs"
+  });
 });
 
-// ── Auth  
-app.use("/api/", authMiddleware);
-
-app.use("/api/report", reportRoutes);
-app.use("/api/report", makeRateLimiter(60 * 1000, 10, "Report rate limit: 10 per minute."));
-
-// ── API routes  
-app.use("/api/cases",     casesRoutes);
-app.use("/api/score",     scoreRoutes);
-app.use("/api/stats",     statsRoutes);
-app.use("/api/audit",     auditRoutes);
-app.use("/api/stream",    streamRoutes);
-app.use("/api/watchlist", watchlistRoutes);
-app.use("/api/whois",     whoisRoutes);
-app.use("/api/siem",      siemRoutes);
-app.use("/api/timeline",  timelineRoutes);
-app.use("/api/blacklist", blacklistRoutes);
-
-
-// ── SPA fallback  
+// ── SPA fallback 
 app.get("/", (req, res) => res.sendFile(path.join(__dirname, "../public/index.html")));
-app.use((req, res) => res.status(404).json({ error: "Not Found", path: req.path }));
+ 
+app.use((req, res) => res.status(404).json({
+  error:   "Not Found",
+  path:    req.path,
+  hint:    "See /api/versions for available API versions"
+}));
 
 if (process.env.SENTRY_DSN) {
   try { app.use(require("@sentry/node").Handlers.errorHandler()); } catch (_) {}

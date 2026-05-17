@@ -355,7 +355,7 @@
         <div class="dot"></div>
         <span>LIVE</span>
       </div>
-      <div class="version">v1.0.0</div>
+      <div class="version" id="dashboard-version">v1.0.0</div>
     </div>
   </header>
 
@@ -428,7 +428,7 @@
       <!-- Result panel -->
       <div class="result-panel" id="resultPanel">
         <div class="panel-header">
-          <div class="panel-title" style="color:var(--text);font-size:11px;font-weight:400;">Score Result</div>
+          <div class="panel-title" style="color:var(--text);font-size:11px;font-weight:700;">Score Result</div>
           <div id="processingTime" style="font-size:11px;color:var(--text3);"></div>
         </div>
         <div class="panel-body" id="resultBody">
@@ -446,7 +446,7 @@
       <!-- Audit log -->
       <div class="audit-panel">
         <div class="panel-header">
-          <div class="panel-title" style="color:var(--text);font-size:11px;font-weight:400;">Audit Log</div>
+          <div class="panel-title" style="color:var(--text);font-size:11px;font-weight:700;">Audit Log</div>
           <div style="font-size:11px;color:var(--text3);" id="auditCount">0 entries</div>
         </div>
         <div class="audit-list" id="auditList">
@@ -458,25 +458,26 @@
     <!-- API Docs -->
     <div class="docs-section">
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
-    <div class="panel-title" style="color:var(--text);font-size:11px;font-weight:400;">REST API</div>
+    <div class="panel-title" style="color:var(--text);font-size:11px;font-weight:700;">REST API</div>
     <a href="https://ipshield.live/api/docs" target="_blank"
       style="display:inline-flex;align-items:center;gap:8px;padding:10px 20px;
              background:var(--accent);color:#000;border-radius:8px;text-decoration:none;
              font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;
              letter-spacing:1px;box-shadow:0 0 20px rgba(0,217,255,0.3);">
-      API Documentation →
+             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-book-open"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+      See Documentation
     </a>
 
   </div>
  <div style="padding:10px 16px;background:rgba(0,217,255,0.06);border:1px solid rgba(0,217,255,0.2);border-radius:8px;margin-bottom:20px;font-size:11px;color:var(--text2);">
-    <span style="color:var(--accent);font-weight:700;">Authentication:</span>
-    All endpoints require <code style="background:var(--bg2);padding:1px 6px;border-radius:3px;color:var(--accent);">x-api-key</code> header
-    except <code style="background:var(--bg2);padding:1px 6px;border-radius:3px;">/api/health</code> and
-    <code style="background:var(--bg2);padding:1px 6px;border-radius:3px;">/api/docs</code>.
+    <span style="color:var(--text);font-weight:700;">Authentication:</span>
+    All endpoints require <code style="color:var(--accent);">x-api-key</code> header
+    except<code style="padding:1px 6px;border-radius:3px;">/api/health</code>and
+    <code>/api/docs</code>.
   </div>
  
   <!-- Scoring -->
-  <div style="margin-bottom:24px;">
+  <!-- <div style="margin-bottom:24px;">
     <div style="font-size:10px;color:var(--text3);letter-spacing:2px;font-weight:700;margin-bottom:10px;">SCORING</div>
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px;">
       <div class="endpoint-card">
@@ -495,10 +496,10 @@
         <div class="ep-desc">Download full PDF threat report for an IP. Streams directly as attachment.</div>
       </div>
     </div>
-  </div>
+  </div> -->
  
   <!-- Intelligence -->
-  <div style="margin-bottom:24px;">
+  <!-- <div style="margin-bottom:24px;">
     <div style="font-size:10px;color:var(--text3);letter-spacing:2px;font-weight:700;margin-bottom:10px;">INTELLIGENCE</div>
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px;">
       <div class="endpoint-card">
@@ -512,10 +513,10 @@
         <div class="ep-desc">Historical score chart for an IP — trend, min, max, avg from the database.</div>
       </div>
     </div>
-  </div>
+  </div> -->
  
   <!-- Blacklist -->
-  <div style="margin-bottom:24px;">
+  <!-- <div style="margin-bottom:24px;">
     <div style="font-size:10px;color:var(--text3);letter-spacing:2px;font-weight:700;margin-bottom:10px;">BLACKLIST</div>
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px;">
       <div class="endpoint-card">
@@ -554,10 +555,10 @@
         <div class="ep-desc">Bulk delete multiple entries. Body: <code style="color:var(--accent)">{"ids":[1,2,3]}</code></div>
       </div>
     </div>
-  </div>
+  </div> -->
  
   <!-- Case Management -->
-  <div style="margin-bottom:24px;">
+  <!-- <div style="margin-bottom:24px;">
     <div style="font-size:10px;color:var(--text3);letter-spacing:2px;font-weight:700;margin-bottom:10px;">CASE MANAGEMENT</div>
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px;">
       <div class="endpoint-card">
@@ -612,9 +613,9 @@
       </div>
     </div>
   </div>
- 
+  -->
   <!-- Watchlist, Audit, System -->
-  <div style="margin-bottom:24px;">
+  <!-- <div style="margin-bottom:24px;">
     <div style="font-size:10px;color:var(--text3);letter-spacing:2px;font-weight:700;margin-bottom:10px;">WATCHLIST · AUDIT · SYSTEM</div>
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px;">
       <div class="endpoint-card">
@@ -648,7 +649,7 @@
         <div class="ep-desc">Live Swagger UI — try every endpoint interactively with your API key pre-filled.</div>
       </div>
     </div>
-  </div>
+  </div> -->
 </div>
     
   </main>

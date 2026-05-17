@@ -1,6 +1,10 @@
 (() => {
-  const API     = "/api";
+  // const API     = "/api";
   const API_KEY = "b2bc8fe074823d37e59d57a80bbb67f6558bc145e8d6f6ef5111133a0159f020";
+
+  let apiVersion = localStorage.getItem("ipshield_api_version") || "v2";
+  const getAPI   = () => `/api/${apiVersion}`;
+  let API = `/api/${apiVersion}`;
 
   const ipInput    = document.getElementById("ipInput");
   const scoreBtn   = document.getElementById("scoreBtn");
@@ -9,7 +13,7 @@
   const procTime   = document.getElementById("processingTime");
   const auditList  = document.getElementById("auditList");
   const auditCount = document.getElementById("auditCount");
-  const apiDocsBtn = document.getElementById("apiDocsBtn");
+  // const apiDocsBtn = document.getElementById("apiDocsBtn");
   
 
   const sessionStats = { CRITICAL: 0, HIGH: 0, MEDIUM: 0, LOW: 0 };
@@ -48,70 +52,128 @@
     } catch (_) {}
   }
 
+  // Switch API version
+  function switchAPIVersion(version) {
+  if (version !== "v1" && version !== "v2") 
+    
+  return;
+  apiVersion = version;
+  API        = `/api/${version}`;
+  localStorage.setItem("ipshield_api_version", version);
+ 
+  // Update version badge in header
+  const badge = document.getElementById("apiBadge");
+  if (badge) {
+    badge.textContent       = version.toUpperCase();
+    badge.style.color       = version === "v2" ?   "var(--accent)" : "var(--accent2)";
+    badge.style.borderColor = version === "v2" ?   "var(--accent)" : "var(--accent2)";
+    badge.style.background  = version === "v2" ?   "rgba(0,217,255,0.1)" : "rgba(0,217,255,0.1)";
+  }
+
+  // update version label
+  
+  document.getElementById(
+    "dashboard-version"
+  ).textContent = `${version}.0.0`;
+
+
+
+    // Show/hide v2-only features
+    const v2Only = document.querySelectorAll(".v2-only");
+    v2Only.forEach(el => {
+      el.style.display = version === "v2" ? "" : "none";
+    });
+  
+    // Reload stats with new API version
+    loadStats();
+    loadWatchlist();
+  
+    toast(
+    version === "v2"
+      ? "Switched to v2 — All features enabled"
+      : "Switched to v1 — Core features only",
+    "success"
+  );
+}
+
+ 
+
+
   // ── Extra UI 
   function injectExtraUI() {
     const headerRight = document.querySelector(".header-right");
 
-     // SIEM button — icon only on mobile
     if (headerRight) {
+    // Theme toggle
+      const toggle = document.createElement("button");
+      toggle.className      = "btn btn-ghost";
+      toggle.id             = "themeToggle";
+      toggle.textContent    = isDark ? "☀ LIGHT" : "☾ DARK";
+      toggle.style.cssText  = "padding:6px 12px;font-size:11px;";
+      toggle.addEventListener("click", toggleTheme);
+      headerRight.prepend(toggle);
+
+    // API version badge — clickable to show version panel
+      const badge = document.createElement("button");
+      badge.id          = "apiBadge";
+      badge.textContent = apiVersion.toUpperCase();
+      badge.title       = "Click to switch API version";
+      badge.style.cssText = `
+        padding:4px 10px;font-size:10px;font-weight:700;font-family:inherit;
+        border-radius:4px;cursor:pointer;letter-spacing:1px;
+        color:${apiVersion === "v2" ? "var(--accent)" : "var(--accent2)"};
+        border:1px solid ${apiVersion === "v2" ? "var(--accent)" : "var(--accent2)"};
+        background:${apiVersion === "v2" ? "rgba(0,217,255,0.12)" : "rgba(0,217,255,0.12)"};`;
+      badge.addEventListener("click", showVersionPanel);
+      headerRight.prepend(badge);
+
+    
+     // SIEM button 
       const siemBtn         = document.createElement("button");
       siemBtn.className     = "btn btn-ghost";
       siemBtn.id            = "siemBtn";
       siemBtn.title         = "SIEM Webhook Settings";
+      siemBtn.textContent   = "📡 SIEM";
       siemBtn.style.cssText = "padding:6px 12px;font-size:11px;";
       // Show icon only on mobile, full label on desktop
-    siemBtn.innerHTML     = `<span class="desktop-label">📡 SIEM</span><span class="mobile-label" style="display:none;">📡</span>`;
-    headerRight.prepend(siemBtn);
-    }
+      // siemBtn.innerHTML     = `<span class="desktop-label">📡 SIEM</span><span class="mobile-label" style="display:none;">📡</span>`;
+      headerRight.prepend(siemBtn);
+    
 
     // blacklist
-    if (headerRight) {
-      const blBtn = document.createElement("button");
-      blBtn.className           = "btn btn-ghost";
-      blBtn.id                  = "blacklistBtn";
-      blBtn.textContent         = "🚫 Blacklist";
-      blBtn.style.cssText       = "padding:6px 12px;font-size:11px;";
-      headerRight.prepend(blBtn);
-    }
+    const blBtn = document.createElement("button");
+    blBtn.className           = "btn btn-ghost v2-only";
+    blBtn.id                  = "blacklistBtn";
+    blBtn.textContent         = "🚫 Blacklist";
+    blBtn.style.cssText       = "padding:6px 12px;font-size:11px;";
+    if (apiVersion === "v1") blBtn.style.display = "none";
+    headerRight.prepend(blBtn);
+      
 
     // Cases
-    if (headerRight) {
-      const casesBtn = document.createElement("button");
-      casesBtn.className          = "btn btn-ghost";
-      casesBtn.id                 = "casesBtn";
-      casesBtn.textContent        = "Cases";
-      casesBtn.style.cssText      = "padding:6px 12px;font-size:11px;font-family:'JetBrains Mono', monospace;";
-       headerRight.prepend(casesBtn);
+    const casesBtn              = document.createElement("button");
+    casesBtn.className          = "btn btn-ghost v2-only";
+    casesBtn.id                 = "casesBtn";
+    casesBtn.textContent        = "📁 Cases";
+    casesBtn.style.cssText      = "padding:6px 12px;font-size:11px;font-family:'JetBrains Mono', monospace;";
+    if (apiVersion === "v1") casesBtn.style.display = "none";
+    headerRight.prepend(casesBtn);
+    
     }
 
-    // Theme toggle       
-    if (headerRight) {
-      // Theme toggle — hide label on very small screens via title attribute
-      const toggle               = document.createElement("button");
-      toggle.className           = "btn btn-ghost";
-      toggle.id                  = "themeToggle";
-      toggle.textContent         = "☀ LIGHT";
-      toggle.title               = "Toggle dark/light mode";
-      toggle.style.cssText       = "padding:6px 12px; font-size:11px";
-      toggle.addEventListener("click", toggleTheme);
-      headerRight.prepend(toggle);
-
-      // Show icon only on mobile, full label on desktop
-          // toggle.innerHTML = `<span class="desktop-label">☀ LIGHT</span><span class="mobile-label" style="display:none;">☀</span>`;
-          // headerRight.prepend(toggle);
-    }
-
-    // Quick tests btn
+    // Quick Tests Btn - Bulk Section
     const searchSection = document.querySelector(".search-section");
     if (searchSection) {
       const bulk = document.createElement("div");
       bulk.id = "bulkSection";
       bulk.style.cssText = "margin-top:8px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;";
       bulk.innerHTML = `
+
       <label style="font-size:10px;color:var(--text3);letter-spacing:2px;text-transform:uppercase;">Bulk:</label>
       <input type="file" id="csvUpload" accept=".csv,.txt" style="display:none">
       <button class="btn btn-ghost" id="csvBtn"      style="padding:8px 14px;font-size:11px;">↑ UPLOAD CSV</button>
-          <button class="btn btn-ghost" id="exportBtn" style="padding:8px 14px;font-size:11px;">↓ EXPORT LOG</button>
+      <button class="btn btn-ghost" id="exportBtn"   style="padding:8px 14px;font-size:11px;">↓ EXPORT LOG</button>
+      <button class="btn btn-ghost" id="firewallBtn" style="padding:8px 14px;font-size:11px;">🛡 FIREWALL</button>
       <span id="bulkStatus" style="font-size:11px;color:var(--text2);"></span>`;
       searchSection.appendChild(bulk);
     }
@@ -120,7 +182,7 @@
     const mainGrid = document.querySelector(".main-grid");
     if (mainGrid) {
       const row = document.createElement("div");
-      row.id = "mapWatchRow";
+      row.id            = "mapWatchRow";
       row.style.cssText = "display:grid;grid-template-columns:1fr 1fr;gap:24px;";
 
       // Score IP panels
@@ -129,7 +191,7 @@
       mapWrap.style.cssText = "background:var(--bg1);border:1px solid var(--border);border-radius:12px;overflow:hidden;";
       mapWrap.innerHTML = `
         <div class="panel-header">
-          <div class="panel-title" style="font-size:11px;font-weight:400;">Geo Map</div>
+          <div class="panel-title" style="font-size:11px;font-weight:700;">Geo Map</div>
           <div id="mapLabel" style="font-size:11px;color:var(--text3);">Score an IP to see location</div>
         </div>
         <div id="mapContainer" style="height:320px;background:var(--bg2);display:flex;align-items:center;justify-content:center;color:var(--text3);font-size:12px;">Loading map…</div>`;
@@ -141,14 +203,14 @@
       watchWrap.style.cssText = "background:var(--bg1);border:1px solid var(--border);border-radius:12px;overflow:hidden;display:flex;flex-direction:column;";
       watchWrap.innerHTML = `
         <div class="panel-header" style="justify-content:space-between;">
-          <div class="panel-title" style="font-size:11px;font-weight:400;">Watchlist</div>
+          <div class="panel-title" style="font-size:11px;font-weight:700;">Watchlist</div>
           <div style="display:flex;gap:8px;align-items:center;">
             <span id="watchlistCount" style="font-size:11px;color:var(--text3);">0 IPs</span>
             <button id="addWatchBtn" class="btn btn-ghost" style="padding:4px 10px;font-size:11px;">+ WATCH</button>
             <button id="pollBtn"     class="btn btn-ghost" style="padding:4px 10px;font-size:11px;">↻ POLL</button>
           </div>
         </div>
-        <div id="watchlistBody" style="flex:1;overflow-y:auto;max-height:260px;">
+        <div id="watchlistBody" style="flex:1;overflow-y:auto;">
           <div style="padding:24px;text-align:center;color:var(--text3);font-size:11px;">No IPs being watched</div>
         </div>
         <div id="monitorStatus" style="padding:8px 16px;font-size:10px;color:var(--text3);border-top:1px solid var(--border);"></div>`;
@@ -178,6 +240,162 @@
 
 
   }
+
+
+  // Versioning Panel
+  async function showVersionPanel() {
+  document.getElementById("versionModal")?.remove();
+ 
+  const overlay = document.createElement("div");
+  overlay.id = "versionModal";
+  overlay.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:10000;display:flex;align-items:center;justify-content:center;padding:24px;";
+ 
+  const modal = document.createElement("div");
+  modal.style.cssText = "background:var(--bg1);border:1px solid var(--border);border-radius:12px;width:100%;max-width:680px;overflow:hidden;max-height:90vh;display:flex;flex-direction:column;";
+ 
+  const features = [
+    { label:"IP Scoring (single + batch)",         v1:true,  v2:true  },
+    { label:"Threat Feeds (Feodo, Spamhaus, OTX)",  v1:true,  v2:true  },
+    { label:"WHOIS / RDAP Deep Dive",               v1:true,  v2:true  },
+    { label:"Reverse DNS + FCrDNS Verification",    v1:true,  v2:true  },
+    { label:"Geo Map (CartoDB tiles)",              v1:true,  v2:true  },
+    { label:"Watchlist & Score Monitoring",         v1:true,  v2:true  },
+    { label:"Audit Log (search, filter, sort)",     v1:true,  v2:true  },
+    { label:"Score Timeline Chart",                 v1:true,  v2:true  },
+    { label:"PDF Threat Reports",                   v1:true,  v2:true  },
+    { label:"Firewall Rule Export (10 formats)",    v1:true,  v2:true  },
+    { label:"SIEM Webhook Integration",             v1:true,  v2:true  },
+    { label:"Rate Limit Feedback UI",               v1:true,  v2:true  },
+    { label:"Swagger Interactive API Docs",         v1:true,  v2:true  },
+    { label:"IP Blacklist Management",              v1:false, v2:true  },
+    { label:"Blacklist Export (8 formats)",         v1:false, v2:true  },
+    { label:"Blacklist Status in Score Results",    v1:false, v2:true  },
+    { label:"Case Management",                      v1:false, v2:true  },
+    { label:"Case IP Attachments",                  v1:false, v2:true  },
+    { label:"Case Investigation Notes",             v1:false, v2:true  },
+    { label:"Quick Attach IP to Case",              v1:false, v2:true  },
+  ];
+ 
+  modal.innerHTML = `
+    <!-- Header -->
+    <div style="padding:20px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
+      <div>
+        <div style="font-size:14px;font-weight:700;color:var(--text);">IPshield Version</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:2px;">
+          Currently using <strong style="color:${apiVersion === "v2" ? "var(--accent)" : "var(--accent2)"};">${apiVersion.toUpperCase()}</strong>
+          — preference saved across sessions
+        </div>
+      </div>
+      <button id="verClose" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:20px;padding:4px;">✕</button>
+    </div>
+ 
+    <!-- Version toggle cards -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;flex-shrink:0;">
+ 
+      <!-- v1 -->
+      <div id="v1Card" style="padding:20px 24px;border-right:1px solid var(--border);border-bottom:1px solid var(--border);cursor:pointer;
+            background:${apiVersion === "v1" ? "rgba(61,122,107,0.08)" : "transparent"};
+            border-left:3px solid ${apiVersion === "v1" ? "var(--accent2)" : "transparent"};"
+            data-version="v1">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;pointer-events:none;">
+          <span style="font-size:20px;font-weight:800;color:#0099cc;">v1</span>
+          <span style="font-size:10px;padding:2px 8px;border-radius:3px;background:rgba(0,217,255,0.12);color:#0099cc;font-weight:700;">STABLE</span>
+          ${apiVersion === "v1" ? `<span style="font-size:10px;padding:2px 8px;border-radius:3px;background:rgba(0,232,124,0.1);color:var(--low);font-weight:700;">ACTIVE</span>` : ""}
+        </div>
+        <div style="font-size:11px;color:var(--text2);line-height:1.6;pointer-events:none;">
+          Core intelligence — scoring, WHOIS, watchlist, audit, SIEM and PDF reports.
+        </div>
+        <div style="margin-top:12px;display:flex;gap:8px;pointer-events:none;">
+          <span style="font-size:10px;background:var(--bg);padding:3px 8px;border-radius:4px;color:var(--text2);border:0.8px solid var(--border);border-radius:4px;">/api/v1</span>
+        </div>
+      </div>
+ 
+      <!-- v2 -->
+      <div id="v2Card" style="padding:20px 24px;border-bottom:1px solid var(--border);cursor:pointer;
+            background:${apiVersion === "v2" ? "rgba(0,217,255,0.06)" : "transparent"};
+            border-left:3px solid ${apiVersion === "v2" ? "var(--accent)" : "transparent"};"
+            data-version="v2">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;pointer-events:none;">
+          <span style="font-size:20px;font-weight:800;color:var(--accent);">v2</span>
+          <span style="font-size:10px;padding:2px 8px;border-radius:3px;background:rgba(0,217,255,0.12);color:var(--accent);font-weight:700;">LATEST</span>
+          <span style="font-size:10px;padding:2px 8px;border-radius:3px;background:var(--bg2);color:var(--text2);font-weight:700;">DEFAULT</span>
+          ${apiVersion === "v2" ? `<span style="font-size:10px;padding:2px 8px;border-radius:3px;background:rgba(0,232,124,0.1);color:var(--low);font-weight:700;">ACTIVE</span>` : ""}
+        </div>
+        <div style="font-size:11px;color:var(--text2);line-height:1.6;pointer-events:none;">
+          Full platform — everything in v1 plus Blacklist and Case Management.
+        </div>
+        <div style="margin-top:12px;display:flex;gap:8px;pointer-events:none;">
+          <span style="font-size:10px;background:var(--bg);padding:3px 8px;border-radius:4px;color:var(--text2);border:0.8px solid var(--border);border-radius:4px;">/api/v2</span>
+          <span style="font-size:10px;background:var(--bg);padding:3px 8px;border-radius:4px;color:var(--text2);border:0.8px solid var(--border);border-radius:4px;">/api</span>
+        </div>
+      </div>
+    </div>
+ 
+    <!-- Feature comparison -->
+    <div style="overflow-y:auto;flex:1;">
+      <table style="width:100%;border-collapse:collapse;font-size:11px;">
+        <thead>
+          <tr style="background:var(--bg2);position:sticky;top:0;z-index:1;">
+            <th style="padding:10px 16px;text-align:left;color:var(--text);font-weight:700;font-size:10px;letter-spacing:1px;">FEATURE</th>
+            <th style="padding:10px 20px;text-align:center;color:var(--accent2);font-weight:700;font-size:10px;width:80px;">V1</th>
+            <th style="padding:10px 20px;text-align:center;color:var(--accent);font-weight:700;font-size:10px;width:80px;">V2</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${features.map((f, i) => `
+            <tr style="border-top:1px solid var(--border);${i % 2 !== 0 ? "background:var(--bg);" : ""}${!f.v1 ? "background:rgba(0,217,255,0.02);" : ""}">
+              <td style="padding:9px 16px;color:${!f.v1 ? "var(--accent)" : "var(--text2)"};${!f.v1 ? "font-weight:600;" : ""}">
+                ${!f.v1 ? '<span style="color:var(--accent);margin-right:4px;">✦</span>' : ""}${escHtml(f.label)}
+              </td>
+              <td style="padding:9px 16px;text-align:center;">
+                ${f.v1 ? `<span style="color:var(--critical);font-size:15px;font-weight:700;">✓</span>` : `<span style="color:var(--text3);font-size:13px;">—</span>`}
+              </td>
+              <td style="padding:9px 16px;text-align:center;">
+                ${f.v2 ? `<span style="color:var(--low);font-size:15px;font-weight:700;">✓</span>` : `<span style="color:var(--text3);font-size:13px;">—</span>`}
+              </td>
+            </tr>`).join("")}
+        </tbody>
+      </table>
+    </div>
+ 
+    <!-- Footer with docs links -->
+    <div style="padding:12px 24px;border-top:1px solid var(--border);background:var(--bg1);display:flex;justify-content:space-between;align-items:center;flex-shrink:0;flex-wrap:wrap;gap:8px;">
+      <div style="font-size:10px;color:var(--text3);">↑ Click a version card to switch</div>
+      <div style="display:flex;gap:8px;">
+        <a href="/api/v1/docs" target="_blank"
+          style="font-size:11px;color:var(--accent2);text-decoration:none;padding:4px 10px;border:1px solid var(--accent2);border-radius:4px;">
+          v1 Docs ↗
+        </a>
+        <a href="/api/v2/docs" target="_blank"
+          style="font-size:11px;color:var(--accent);text-decoration:none;padding:4px 10px;border:1px solid var(--accent);border-radius:4px;">
+          v2 Docs ↗
+        </a>
+      </div>
+    </div>`;
+ 
+  overlay.appendChild(modal);
+  document.body.appendChild(overlay);
+ 
+  // Close
+  document.getElementById("verClose").addEventListener("click", () => overlay.remove());
+  overlay.addEventListener("click", e => { if (e.target === overlay) overlay.remove(); });
+ 
+  // Version card click — switch API version
+  modal.querySelectorAll("[data-version]").forEach(card => {
+    card.addEventListener("mouseover", () => {
+      if (card.dataset.version !== apiVersion) card.style.opacity = "0.8";
+    });
+    card.addEventListener("mouseout", () => { card.style.opacity = "1"; });
+ 
+    card.addEventListener("click", () => {
+      const version = card.dataset.version;
+      if (version === apiVersion) return; // already active
+ 
+      switchAPIVersion(version);
+      overlay.remove();
+    });
+  });
+}
 
   // apply Filter
   function applyFilters(entries) {
@@ -1197,9 +1415,9 @@
           <div style="flex:1;min-width:0;">
             <div style="font-size:15px;font-weight:700;color:var(--text);line-height:1.3;margin-bottom:8px;">${escHtml(c.title)}</div>
             <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
-              <span style="font-size:11px;font-weight:700;color:${sColor};padding:3px 10px;border-radius:4px;background:${sColor}22;border:1px solid ${sColor}44;">● ${c.status}</span>
+              <span style="font-size:11px;font-weight:700;color:${sColor};border-radius:4px;background:${sColor}22;border:1px solid ${sColor}44;">● ${c.status}</span>
               <span style="font-size:10px;font-weight:700;color:${svColor};padding:3px 8px;border-radius:4px;background:${svColor}22;">${c.severity}</span>
-              ${tags.map(t=>`<span style="font-size:10px;padding:2px 7px;border-radius:3px;background:var(--bg2);color:var(--text3);">${escHtml(t)}</span>`).join("")}
+              ${tags.map(t=>`<span style="font-size:10px;padding:2px 7px;border-radius:3px;background:var(--bg2);color:var(--text2);">${escHtml(t)}</span>`).join("")}
               <span style="font-size:10px;color:var(--text3);">Case #${caseId}</span>
             </div>
           </div>
@@ -1942,7 +2160,7 @@ function showFirewallExport() {
   const threats = auditEntries.filter(e => e.riskLevel === "CRITICAL" || e.riskLevel === "HIGH");
  
   if (!threats.length) {
-    setBulkStatus("No CRITICAL or HIGH IPs in audit log to export.");
+    setBulkStatus; toast("No CRITICAL or HIGH IPs in audit log to export.", "warning");
     return;
   }
  
@@ -2333,7 +2551,7 @@ function renderAuditEntries(entries, total) {
   function setupEventListeners() {
     scoreBtn.addEventListener("click", scoreIP);
     clearBtn.addEventListener("click", clearPanel);
-    apiDocsBtn.addEventListener("click", () => window.open("https://ipshield.live/api/docs", "_blank"));
+    // apiDocsBtn.addEventListener("click", () => window.open("https://ipshield.live/api/docs", "_blank"));
     ipInput.addEventListener("keydown", e => { if (e.key === "Enter") scoreIP(); });
 
     document.querySelectorAll(".quick-chip").forEach(chip => {
@@ -2341,15 +2559,17 @@ function renderAuditEntries(entries, total) {
     });
 
     document.addEventListener("click", e => {
+      if (e.target.id === "apiBadge")      showVersionPanel();
+      if (e.target.id === "siemBtn")       showSIEMPanel();
+      if (e.target.id === "blacklistBtn")  showBlacklistPanel();
+      if (e.target.id === "casesBtn")      showCasesPanel();
+      if (e.target.id === "firewallBtn")   showFirewallExport();
       if (e.target.id === "csvBtn")        document.getElementById("csvUpload").click();
       if (e.target.id === "exportBtn")     exportLog();
       if (e.target.id === "addWatchBtn")   addCurrentToWatchlist();
       if (e.target.id === "pollBtn")       triggerPoll();
-      if (e.target.id === "firewallBtn")   showFirewallExport();
-      if (e.target.id === "siemBtn")       showSIEMPanel();
-      if (e.target.id === "blacklistBtn")  showBlacklistPanel();
-      if (e.target.id === "casesBtn")      showCasesPanel();
       if (e.target.id === "addToCaseBtn")  addIPToCase(currentIP, lastResult);
+      if (e.target.id === "versionBtn")    showVersionPanel();
     });
 
     document.addEventListener("change", e => {
@@ -2970,8 +3190,16 @@ const MODAL_STYLE = `
         <button id="watchCurrentBtn" class="btn btn-ghost" style="padding:5px 12px;font-size:11px;">+ Watch</button>
         <button id="downloadPdfBtn"  class="btn btn-ghost" style="padding:5px 12px;font-size:11px;">↓ PDF Report</button>
         <button id="timelineBtn"     class="btn btn-ghost" style="padding:5px 12px;font-size:11px;">↑ History</button> 
-        <button id="blockCurrentBtn" class="btn btn-ghost" style="padding:5px 12px;font-size:11px;color:var(--critical);border-color:var(--critical);">${d.blacklisted ? "✓ Blacklisted" : "🚫 Block"}</button>
-        <button id="addToCaseBtn" class="btn btn-ghost" style="padding:5px 12px;font-size:11px;">📁 Case</button>
+         <button id="blockCurrentBtn" class="btn btn-ghost v2-only"
+      style="padding:5px 12px;font-size:11px;${apiVersion === "v1" ? "display:none;" : ""}
+             color:${d.blacklisted ? "var(--low)" : "var(--critical)"};
+             border-color:${d.blacklisted ? "var(--low)" : "var(--critical)"};">
+      ${d.blacklisted ? "✓ Blacklisted" : "🚫 Block"}
+    </button>
+         <button id="addToCaseBtn" class="btn btn-ghost v2-only"
+      style="padding:5px 12px;font-size:11px;${apiVersion === "v1" ? "display:none;" : ""}">
+      📁 Case
+    </button>
           </div>
         </div>
       </div>
