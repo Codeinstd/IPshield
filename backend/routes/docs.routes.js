@@ -310,6 +310,13 @@ body {
   padding: 12px;
 }
 
+.docs-logo {
+  font-family: 'Syne',
+  font-size: 24px;
+  font-weight: 800;
+  color: #ffffff
+}
+
 .swagger-ui .btn.execute {
   border: none;
 
@@ -391,6 +398,12 @@ window.addEventListener("load", () => {
   display: none;
 }
 
+.swagger-ui .execute-wrapper .btn {
+    padding: 16px 40px;
+    width: 50%;
+    text-align:left;
+}
+
 .swagger-ui .model {
     color: #a5adbd;
     font-family: monospace;
@@ -403,7 +416,6 @@ window.addEventListener("load", () => {
 }
 
 .swagger-ui .scheme-container {
-  background: transparent;
   box-shadow: none;
   border: none;
 }
@@ -411,7 +423,13 @@ window.addEventListener("load", () => {
 .swagger-ui .scheme-container {
     box-shadow: 0 1px 2px 0 rgba(0, 0, 0, .15);
     margin: 0 0 20px;
-]
+    background: #060816; 
+}
+
+.swagger-ui table tbody tr td:first-of-type {
+    min-width: 10em;
+    padding: 10px 0;
+}
 
 .swagger-ui section.models h4 {
     align-items: center;
@@ -423,6 +441,15 @@ window.addEventListener("load", () => {
     margin: 0;
     padding: 10px 20px 10px 10px;
     transition: all .2s;
+}
+
+.swagger-ui .btn.authorize {
+    background-color: transparent;
+    border-color: #49cc90;
+    color: #49cc90;
+    display: inline;
+    line-height: 1;
+    font-family: 'JetBrains Mono';
 }
 
 .swagger-ui .model-title {
