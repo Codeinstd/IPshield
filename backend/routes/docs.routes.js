@@ -24,6 +24,124 @@ router.get("/", (req, res) => {
   <title>IPShield API Docs</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.11.0/swagger-ui.min.css">
   <style>
+
+  .docs-hero {
+  position: relative;
+
+  padding:
+    90px 32px 70px;
+
+  overflow: hidden;
+}
+
+  .hero-grid {
+  position: absolute;
+  inset: 0;
+
+  background-image:
+    linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px);
+
+  background-size: 40px 40px;
+
+  mask-image:
+    radial-gradient(circle at center, black 30%, transparent 80%);
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+
+  max-width: 900px;
+  margin: auto;
+  text-align: center;
+}
+
+.hero-badge {
+  display: inline-flex;
+
+  padding: 8px 14px;
+
+  border-radius: 999px;
+
+  background: rgba(0,217,255,.08);
+
+  border: 1px solid rgba(0,217,255,.18);
+
+  color: var(--cyan);
+
+  font-size: 12px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.hero-content h1 {
+  margin: 24px 0 12px;
+
+  font-size: 78px;
+  line-height: 1;
+
+  font-weight: 800;
+
+  font-family: Syne, sans-serif;
+}
+
+.hero-content h1 span {
+  color: var(--cyan);
+}
+
+.hero-content p {
+  max-width: 760px;
+
+  margin: auto;
+
+  color: var(--muted);
+
+  font-size: 18px;
+  line-height: 1.8;
+}
+
+.hero-actions {
+  margin-top: 34px;
+
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+}
+
+.hero-btn {
+  padding: 14px 22px;
+
+  border-radius: 14px;
+
+  text-decoration: none;
+
+  font-weight: 600;
+
+  transition: .25s ease;
+}
+
+.hero-btn.primary {
+  background: var(--cyan);
+  color: #000;
+
+  box-shadow:
+    0 0 25px rgba(0,217,255,.35);
+}
+
+.hero-btn.primary:hover {
+  transform: translateY(-2px);
+}
+
+.hero-btn.secondary {
+  border: 1px solid rgba(255,255,255,.08);
+
+  background: rgba(255,255,255,.03);
+
+  color: var(--text);
+}
+
+
     * { box-sizing: border-box; }
     body { margin: 0; background: #0d1117; font-family: 'Inter', 'JetBrains Mono', monospace; }
 
