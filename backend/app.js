@@ -44,7 +44,12 @@ app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
-      scriptSrc:  ["'self'", "https://cdnjs.cloudflare.com", "'sha256-xUfC0wkAtk0wNIS7KujZjrozjuhc4fYltSpwd1nHv6w='"],
+      scriptSrc: [
+  "'self'",
+  "https://cdnjs.cloudflare.com",
+  "'sha256-xUfC0wkAtk0wNIS7KujZjrozjuhc4fYltSpwd1nHv6w='",
+  "'sha256-55PYogfDdCtZwFKlzd3SwsSIEiZTQZ2nQyOi6SU1W/w='"
+],
       styleSrc:   ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://cdnjs.cloudflare.com"],
       fontSrc:    ["'self'", "https://fonts.gstatic.com"],
       imgSrc:     ["'self'", "data:", 
