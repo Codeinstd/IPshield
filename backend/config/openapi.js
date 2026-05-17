@@ -31,7 +31,7 @@ x-api-key: your_api_key_here
 | /report  | 10 requests / minute |
     `,
     version: "2.2.0",
-    contact: { name: "IPShield", url: "https://ipshield-nk0w.onrender.com" }
+    contact: { name: "IPShield", url: "https://ipshield.live/" }
   },
 
   servers: [
