@@ -113,7 +113,7 @@
       toggle.addEventListener("click", toggleTheme);
       headerRight.prepend(toggle);
 
-    // API version badge — clickable to show version panel
+    // API version badge — clickable to show version 
       const badge = document.createElement("button");
       badge.id          = "apiBadge";
       badge.textContent = apiVersion.toUpperCase();

@@ -1,10 +1,3 @@
-javascript
-/**
- * docs.routes.js
- * Place in: backend/routes/docs.routes.js
- * Replaces generic Swagger UI with a fully custom branded docs page
- */
-
 const express = require("express");
 const router  = express.Router();
 const spec    = require("../config/openapi");
@@ -32,7 +25,7 @@ function buildDocsHTML(spec) {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>IPShield API Docs</title>
+  <title>IPShield Docs</title>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -62,7 +55,7 @@ function buildDocsHTML(spec) {
     body {
       background: var(--bg);
       color: var(--text);
-      font-family: 'Inter', sans-serif;
+      font-family: 'JetBrains Mono', monospace;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
@@ -80,6 +73,7 @@ function buildDocsHTML(spec) {
       position: sticky;
       top: 0;
       z-index: 100;
+      font-family: 'Syne'
     }
 
     .logo { display: flex; align-items: center; gap: 12px; }
