@@ -408,10 +408,34 @@ window.addEventListener("load", () => {
   border: none;
 }
 
+.swagger-ui .scheme-container {
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, .15);
+    margin: 0 0 20px;
+]
+
+.swagger-ui section.models h4 {
+    align-items: center;
+    color: #bbc3d9;
+    cursor: pointer;
+    display: flex;
+    font-family: sans-serif;
+    font-size: 16px;
+    margin: 0;
+    padding: 10px 20px 10px 10px;
+    transition: all .2s;
+}
+
+.swagger-ui .model-title {
+    color: #ffffff;
+    font-family: sans-serif;
+    font-size: 16px;
+}
+
 .swagger-ui .opblock .opblock-summary {
     align-items: center;
     cursor: pointer;
     display: flex;
+    padding: 10px;
 }
 
 .swagger-ui section.models {
