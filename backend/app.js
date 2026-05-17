@@ -158,6 +158,7 @@ app.use("/api/v1/docs", require("./routes/docs.v1.routes"));
 app.use("/api/v2/docs", require("./routes/docs.v2.routes"));
 
 
+
 // ── Version info endpoints (public) 
 function versionInfoHandler(req, res) {
   const isV1 = req.path.startsWith("/v1") || req.baseUrl?.includes("/v1");
@@ -186,6 +187,8 @@ function versionInfoHandler(req, res) {
 app.get("/api/versions", versionInfoHandler);
 app.get("/api/v1",       versionInfoHandler);
 app.get("/api/v2",       versionInfoHandler);
+
+
 
 
 // ── Auth middleware 

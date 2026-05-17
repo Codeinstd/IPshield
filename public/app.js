@@ -72,10 +72,10 @@
 
   // update version label
   
+
   document.getElementById(
     "dashboard-version"
   ).textContent = `${version}.0.0`;
-
 
 
     // Show/hide v2-only features
