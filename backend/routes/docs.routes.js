@@ -58,7 +58,7 @@ body {
     radial-gradient(circle at bottom right, rgba(0,232,124,.05), transparent 25%),
     #050816;
 
-  font-family: Inter, sans-serif;
+  font-family: 'JetBrains Mono', monospace;
 }
 
 .docs-header {
@@ -218,11 +218,37 @@ body {
     border-color .2s ease;
 }
 
+.swagger-ui .info li, .swagger-ui .info p, .swagger-ui .info table {
+    color: #838fb0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+}
+
+.swagger-ui a.nostyle, .swagger-ui a.nostyle:visited {
+    color: inherit;
+    cursor: pointer;
+    text-decoration: inherit;
+    font-family: 'Syne';
+}
+
+
 .swagger-ui .opblock:hover {
   transform: translateY(-2px);
 
   border-color:
     rgba(0,217,255,.25);
+}
+
+.swagger-ui .info h1, .swagger-ui .info h2, .swagger-ui .info h3, .swagger-ui .info h4, .swagger-ui .info h5 {
+    color: #ffffff;
+    font-family: 'Syne';
+}
+
+.swagger-ui .info .title {
+    color: #ffffff;
+    font-family: 'Syne';
+    font-size: 36px;
+    margin: 0;
 }
 
 .swagger-ui .opblock-tag {
@@ -263,7 +289,11 @@ body {
 
 .swagger-ui .opblock-summary-description {
   color: #7f97b2;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  word-break: break-word;
 }
+
 
 .swagger-ui input[type=text],
 .swagger-ui textarea,
@@ -297,6 +327,23 @@ body {
 
   box-shadow:
     0 10px 25px rgba(0,217,255,.25);
+}
+
+.swagger-ui .model-box-control, .swagger-ui .models-control, .swagger-ui .opblock-summary-control {
+    all: inherit;
+    border-bottom: 0;
+    cursor: pointer;
+    flex: 1;
+}
+
+.docs-back {
+    color: #6a8fa8;
+    font-size: 12px;
+    text-decoration: none;
+    border: 1px solid #1e2d3d;
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-family: 'JetBrains Mono', monospace;
 }
 
 #swagger-ui {
@@ -343,6 +390,13 @@ window.addEventListener("load", () => {
 .swagger-ui .topbar {
   display: none;
 }
+
+.swagger-ui .model {
+    color: #a5adbd;
+    font-family: monospace;
+    font-size: 12px;
+    font-weight: 300;
+    font-weight: 600;
 
 .swagger-ui .info .title small {
   display: none;
