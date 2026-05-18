@@ -215,7 +215,12 @@ function buildSwaggerHTML(spec, version, accentColor) {
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.11.0/swagger-ui.min.css">
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&amp;family=Syne:wght@400;600;700;800&amp;display=swap" rel="stylesheet">
   <style>
-    body { margin:0; background:#0d1117; font-family: 'Syne','JetBrains Mono', monospace; }
+    body {
+    margin: 0;
+    color: var(--text);
+    background: radial-gradient(circle at top left, rgba(0, 217, 255, .08), transparent 25%), radial-gradient(circle at bottom right, rgba(0, 232, 124, .05), transparent 25%), #050816;
+    font-family: 'JetBrains Mono', monospace;
+}
     
 .docs-header {
     position: sticky;
