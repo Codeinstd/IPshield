@@ -489,7 +489,7 @@ function buildDocsHTML(spec) {
       <div class="logo-badge">API DOCS</div>
     </div>
     <div class="header-right">
-      <button data-action="copy-api-key">🔑 Copy API Key</button>
+      <button onclick="copyApiKey()">🔑 Copy API Key</button>
       <a href="/api/docs/openapi.json" target="_blank">↓ OpenAPI JSON</a>
       <a href="/" class="btn-primary">← Back to App</a>
     </div>
@@ -498,8 +498,8 @@ function buildDocsHTML(spec) {
   <!-- Version bar -->
   <div class="version-bar" id="versionBar">
     <span>API Version:</span>
-    <button class="ver-btn" id="vBtn1" data-version="v1">v1 Stable</button>
-    <button class="ver-btn active" id="vBtn2" data-version="v2">v2 Latest</button>
+    <button class="ver-btn" id="vBtn1" onclick="setVersion('v1')">v1 Stable</button>
+    <button class="ver-btn active" id="vBtn2" onclick="setVersion('v2')">v2 Latest</button>
     <span style="margin-left:8px;color:#4a6278;">|</span>
     <span style="margin-left:8px;" id="versionDesc">Full platform — Scoring, WHOIS, Watchlist, Audit, SIEM, Blacklist, Cases</span>
     <span style="margin-left:auto;">
@@ -514,15 +514,15 @@ function buildDocsHTML(spec) {
     <nav class="sidebar" id="sidebar">
       <div class="sidebar-section">
         <div class="sidebar-label">Overview</div>
-        <a class="sidebar-item" data-scroll-target="overview">
+        <a class="sidebar-item active" onclick="scrollTo('overview')">
           <span style="font-size:14px;">⬡</span>
           <span class="endpoint-name">Introduction</span>
         </a>
-        <a class="sidebar-item" data-scroll-target="auth">
+        <a class="sidebar-item" onclick="scrollTo('auth')">
           <span style="font-size:14px;">🔑</span>
           <span class="endpoint-name">Authentication</span>
         </a>
-        <a class="sidebar-item" data-scroll-target="rates">
+        <a class="sidebar-item" onclick="scrollTo('rates')">
           <span style="font-size:14px;">⏱</span>
           <span class="endpoint-name">Rate Limits</span>
         </a>
@@ -647,21 +647,7 @@ function buildDocsHTML(spec) {
       if (!key) return;
       localStorage.setItem("ipshield_api_key", key);
       navigator.clipboard.writeText(key).then(() => {
-        function copyApiKey(btnEl) {
-  const key = API_KEY || prompt("Paste your IPShield API key:");
-  if (!key) return;
-
-  localStorage.setItem("ipshield_api_key", key);
-
-  navigator.clipboard.writeText(key).then(() => {
-    const orig = btnEl.textContent;
-    btnEl.textContent = "✓ Copied!";
-
-    setTimeout(() => {
-      btnEl.textContent = orig;
-    }, 2000);
-  });
-}
+        const btn = event.target;
         const orig = btn.textContent;
         btn.textContent = "✓ Copied!";
         setTimeout(() => { btn.textContent = orig; }, 2000);
@@ -757,7 +743,7 @@ function buildDocsHTML(spec) {
           <div style="background:var(--bg1);border:1px solid var(--border);border-radius:8px;padding:16px;">
             <div class="try-form">\${inputsHTML}</div>
             <div style="margin-top:12px;display:flex;gap:10px;align-items:center;">
-              <button class="try-btn" data-run-request="\${idx}">▶ Execute</button>
+              <button class="try-btn" onclick="runRequest(\${idx})">▶ Execute</button>
               <span style="font-size:11px;color:var(--text3);">
                 <span class="base-url-display">/api/\${currentVersion}</span>\${ep.path}
               </span>
@@ -766,7 +752,7 @@ function buildDocsHTML(spec) {
               <div class="response-header">
                 <span class="response-status" id="rstatus_\${idx}"></span>
                 <span class="response-time" id="rtime_\${idx}"></span>
-                <button class="copy-btn" data-copy-response="\${idx}">Copy</button>
+                <button class="copy-btn" onclick="copyResponse(\${idx})">Copy</button>
               </div>
               <pre class="response-body" id="rbody_\${idx}"></pre>
             </div>
@@ -774,8 +760,9 @@ function buildDocsHTML(spec) {
         </div>\`;
     }
 
-    async function runRequest(idx, btn) {
+    async function runRequest(idx) {
       const ep    = endpoints[idx];
+      const btn   = document.querySelector(\`[onclick="runRequest(\${idx})"]\`);
       const apiKey = document.getElementById(\`key_\${idx}\`)?.value?.trim();
 
       if (apiKey) localStorage.setItem("ipshield_api_key", apiKey);
@@ -893,7 +880,7 @@ function buildDocsHTML(spec) {
 
             \${eps.map(ep => \`
               <div class="endpoint" id="ep_\${ep.idx}">
-                <div class="endpoint-header" data-toggle-endpoint="ep_\${ep.idx}">
+                <div class="endpoint-header" onclick="toggleEndpoint('ep_\${ep.idx}')">
                   <span class="method-badge method-\${ep.method}">\${ep.method}</span>
                   <span class="endpoint-path">\${formatPath(ep.path)}</span>
                   <span class="endpoint-summary">\${ep.summary || ""}</span>
@@ -960,50 +947,6 @@ function buildEndpoints(spec) {
 
   return endpoints;
 }
-
-// event delegation
-document.addEventListener("click", async (e) => {
-  // Copy API key
-  const copyApiBtn = e.target.closest("[data-action='copy-api-key']");
-  if (copyApiBtn) {
-    copyApiKey(copyApiBtn);
-    return;
-  }
-
-  // Version switch
-  const versionBtn = e.target.closest("[data-version]");
-  if (versionBtn) {
-    setVersion(versionBtn.dataset.version);
-    return;
-  }
-
-  // Scroll
-  const scrollEl = e.target.closest("[data-scroll-target]");
-  if (scrollEl) {
-    scrollTo(scrollEl.dataset.scrollTarget);
-    return;
-  }
-
-  // Toggle endpoint
-  const toggleEl = e.target.closest("[data-toggle-endpoint]");
-  if (toggleEl) {
-    toggleEndpoint(toggleEl.dataset.toggleEndpoint);
-    return;
-  }
-
-  // Run request
-  const runBtn = e.target.closest("[data-run-request]");
-  if (runBtn) {
-    runRequest(runBtn.dataset.runRequest, runBtn);
-    return;
-  }
-
-  // Copy response
-  const copyBtn = e.target.closest("[data-copy-response]");
-  if (copyBtn) {
-    copyResponse(copyBtn.dataset.copyResponse);
-  }
-});
 
 // Build example request body from JSON schema
 function buildExample(schema) {
