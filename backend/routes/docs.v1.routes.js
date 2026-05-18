@@ -1,4 +1,3 @@
-
 const express = require("express");
 const router  = express.Router();
 
@@ -8,8 +7,8 @@ const spec = {
     title:       "IPShield API — v1",
     description: `
 
-> **Note:** v2 is available at \`/api/v2\` and adds **Blacklist Management** and **Case Management**.
-> See [v2 docs](/api/v2/docs) to upgrade.
+Note: v2 is available at \`/api/v2\` and adds **Blacklist Management** and **Case Management**.
+See [v2 docs](/api/v2/docs) to upgrade.
 
 ## Authentication
 All endpoints require \`x-api-key\` header except \`/health\` and \`/docs\`.
@@ -215,10 +214,12 @@ function buildSwaggerHTML(spec, version, accentColor) {
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.11.0/swagger-ui.min.css">
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&amp;family=Syne:wght@400;600;700;800&amp;display=swap" rel="stylesheet">
   <style>
+
     body {
     margin: 0;
-    color: var(--text);
-    background: radial-gradient(circle at top left, rgba(0, 217, 255, .08), transparent 25%), radial-gradient(circle at bottom right, rgba(0, 232, 124, .05), transparent 25%), #050816;
+    color: #c9d8e8;
+    background: radial-gradient(circle at top left, rgba(0, 217, 255, .08), transparent 25%), 
+    radial-gradient(circle at bottom right, rgba(0, 232, 124, .05), transparent 25%), #050816;
     font-family: 'JetBrains Mono', monospace;
 }
     
@@ -234,7 +235,14 @@ function buildSwaggerHTML(spec, version, accentColor) {
     background: rgba(5, 8, 22, 0.75);
     border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
-    .docs-logo { color:#c9d8e8; font-size:18px; font-weight:700; font-family;'Syne'}
+
+    .docs-logo {
+    color: #c9d8e8;
+    font-size: 18px;
+    font-weight: 700;
+    font-family: 'Syne';
+    }
+
     .docs-logo span { color:${accentColor}; }
     .version-badge { background:rgba(0, 217, 255, 0.12); color:${accentColor}; border:1px solid ${accentColor}44; padding:3px 10px; border-radius:4px; font-size:11px; font-weight:700; }
     .docs-nav { display:flex; gap:10px; align-items:center; }
@@ -411,7 +419,7 @@ function buildSwaggerHTML(spec, version, accentColor) {
     border-radius: 999px;
     background: rgba(0, 217, 255, .08);
     border: 1px solid rgba(0, 217, 255, .18);
-    color: var(--info);
+    color: #00d9ff;
     font-size: 12px;
     letter-spacing: .08em;
     text-transform: uppercase;
@@ -423,18 +431,29 @@ function buildSwaggerHTML(spec, version, accentColor) {
     line-height: 1;
     font-weight: 800;
     font-family: Syne, sans-serif;
+    color: #fff;
+    }
+
+    .swagger-ui .markdown code, .swagger-ui .renderedMarkdown code {
+    background: rgba(0, 0, 0, .05);
+    border-radius: 4px;
+    color: #04d9ff;
+    font-family: monospace;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 5px 7px;
     }
 
     .hero-content p {
     max-width: 760px;
     margin: auto;
-    color: var(--text2);
+    color: #6a8fa8;
     font-size: 18px;
     line-height: 1.8;
     }
 
     .hero-content h1 span {
-    color: var(--info);
+    color: #00d9ff;
     }
 
     .docs-back {
@@ -495,7 +514,7 @@ function buildSwaggerHTML(spec, version, accentColor) {
         <div class="hero-grid"></div>
         <div class="hero-content">
       <div class="hero-badge">
-            v1.0 • Core Intelligence API
+            API DOCUMETATION
         </div>
 
         <h1>
@@ -503,7 +522,7 @@ function buildSwaggerHTML(spec, version, accentColor) {
         </h1>
 
         <p>
-            Real-time IP reputation, threat feeds, WHOIS intelligence workflows.
+             Real-time IP reputation, threat feeds, WHOIS intelligence, blacklist management and investigation workflows.
         </p>
       </div>
     </div>
