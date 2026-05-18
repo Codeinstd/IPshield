@@ -77,16 +77,28 @@ function buildDocsHTML(spec) {
     }
 
     .logo { display: flex; align-items: center; gap: 12px; }
-    .logo-mark {
-      width: 32px; height: 32px;
-      background: linear-gradient(135deg, var(--accent), #0055aa);
-      border-radius: 8px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 14px; font-weight: 800; color: #000;
-      font-family: 'JetBrains Mono', monospace;
+    .logo-icon {
+    width: 36px;
+    height: 36px;
+    border: 2px solid var(--accent);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--accent);
+    font-size: 18px;
+    font-weight: 700;
+    box-shadow: var(--glow-a);
+    animation: pulse-border 3s ease-in-out infinite;
+}
+    .logo-text {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 22px;
+    letter-spacing: -0.5px;
     }
+
     .logo-text { font-size: 16px; font-weight: 700; color: var(--text); }
-    .logo-text span { color: var(--accent); }
     .logo-badge {
       font-size: 10px; font-weight: 700; letter-spacing: 1px;
       padding: 2px 8px; border-radius: 3px;
@@ -100,16 +112,22 @@ function buildDocsHTML(spec) {
       font-size: 12px; color: var(--text2); text-decoration: none;
       padding: 6px 14px; border-radius: 6px;
       border: 1px solid var(--border); background: transparent;
-      cursor: pointer; font-family: inherit; transition: all 0.2s;
+      cursor: pointer; font-family: 'JetBrains Mono', monospace; transition: all 0.2s;
     }
     .header-right a:hover, .header-right button:hover {
       color: var(--accent); border-color: var(--accent);
     }
+
     .header-right .btn-primary {
-      background: var(--accent); color: #000; border-color: var(--accent);
-      font-weight: 700;
+    color: #b9beca;
+    font-size: 12px;
+    text-decoration: none;
+    border: 1px solid var(--border); background: transparent;
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-family: 'JetBrains Mono', monospace;
     }
-    .header-right .btn-primary:hover { background: #33e5ff; }
+    
 
     /* ── Layout ── */
     .layout {
@@ -484,7 +502,7 @@ function buildDocsHTML(spec) {
   <!-- Header -->
   <header class="header">
     <div class="logo">
-      <div class="logo-mark">IP</div>
+      <div class=logo-icon">⬡</div>
       <div class="logo-text">IP<span>Shield</span></div>
       <div class="logo-badge">API DOCS</div>
     </div>
