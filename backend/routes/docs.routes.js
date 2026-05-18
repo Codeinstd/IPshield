@@ -27,6 +27,17 @@ function buildDocsHTML(spec) {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>IPShield Docs</title>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Polyfill BEFORE ReDoc loads -->
+    <script>
+      const _nativeScrollTo = Element.prototype.scrollTo;
+      Element.prototype.scrollTo = function(x, y) {
+        if (typeof x === 'number' || typeof y === 'number') {
+          _nativeScrollTo.call(this, { top: y ?? x, left: 0, behavior: 'smooth' });
+        } else {
+          _nativeScrollTo.call(this, x);
+        }
+      };
+    </script>
   <style>
     :root {
       --bg:       #080c0f;
@@ -498,6 +509,8 @@ function buildDocsHTML(spec) {
   </style>
 </head>
 <body>
+<redoc spec-url='/api/docs/openapi.json'></redoc>
+    <script src="https://cdn.jsdelivr.net/npm/redoc@2.1.3/bundles/redoc.standalone.js"></script>
 
   <!-- Header -->
   <header class="header">
