@@ -474,36 +474,35 @@ function buildSwaggerHTML(spec, version, accentColor) {
 </head>
 <body>
   <div class="docs-header">
-    <div style="display:flex;align-items:center;gap:12px;">
-      <div class="docs-logo">IP<span>Shield</span></div>
-      <span class="version-badge">${version.toUpperCase()}</span>
+        <div style="display:flex;align-items:center;gap:12px;">
+            <div class="docs-logo">IP<span>Shield</span></div>
+            <span class="version-badge">${version.toUpperCase()}</span>
+        </div>
+        <div class="docs-nav">
+            <a href="/api/v1/docs" class="${version === "v1" ? "active" : ""}">v1 Stable</a>
+            <a href="/api/v2/docs" class="${version === "v2" ? "active" : ""}">v2 Latest</a>
+            <a href="/api/versions">All Versions</a>
+            <a href="/" class="docs-back">
+            ← Back to App
+                </a>
+        </div>
     </div>
-    <div class="docs-nav">
-      <a href="/api/v1/docs" class="${version === "v1" ? "active" : ""}">v1 Stable</a>
-      <a href="/api/v2/docs" class="${version === "v2" ? "active" : ""}">v2 Latest</a>
-      <a href="/api/versions">All Versions</a>
-      <a href="/" class="docs-back">
-      ← Back to App
-        </a>
-    </div>
-     </div>
     <div class="docs-hero">
-    <div class="hero-grid"></div>
-
-    <div class="hero-content">
+        <div class="hero-grid"></div>
+        <div class="hero-content">
       <div class="hero-badge">
-        v1.0 • Core Intelligence API
+            v1.0 • Core Intelligence API
+        </div>
+
+        <h1>
+            IP<span>Shield</span>
+        </h1>
+
+        <p>
+            Real-time IP reputation, threat feeds, WHOIS intelligence workflows.
+        </p>
       </div>
-
-      <h1>
-        IP<span>Shield</span>
-      </h1>
-
-      <p>
-        Real-time IP reputation, threat feeds, WHOIS intelligence workflows.
-      </p>
     </div>
-  </div>
   <div id="swagger-ui"></div>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.11.0/swagger-ui-bundle.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.11.0/swagger-ui-standalone-preset.min.js"></script>
