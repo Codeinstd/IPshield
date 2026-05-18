@@ -213,10 +213,23 @@ function buildSwaggerHTML(spec, version, accentColor) {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>IPShield API ${version.toUpperCase()} Docs</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.11.0/swagger-ui.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&amp;family=Syne:wght@400;600;700;800&amp;display=swap" rel="stylesheet">
   <style>
-    body { margin:0; background:#0d1117; font-family: 'Syne', sans-serif,'JetBrains Mono', monospace, ; }
-    .docs-header { background:#0d1117; border-bottom:1px solid #1e2d3d; padding:14px 32px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:1000; }
-    .docs-logo { color:#c9d8e8; font-size:18px; font-weight:700; font-family;'Syne', sans-serif, sans-serif}
+    body { margin:0; background:#0d1117; font-family: 'Syne','JetBrains Mono', monospace; }
+    
+.docs-header {
+    position: sticky;
+    top: 0;
+    z-index: 999;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 36px;
+    backdrop-filter: blur(16px);
+    background: rgba(5, 8, 22, 0.75);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+    .docs-logo { color:#c9d8e8; font-size:18px; font-weight:700; font-family;'Syne'}
     .docs-logo span { color:${accentColor}; }
     .version-badge { background:rgba(0, 217, 255, 0.12); color:${accentColor}; border:1px solid ${accentColor}44; padding:3px 10px; border-radius:4px; font-size:11px; font-weight:700; }
     .docs-nav { display:flex; gap:10px; align-items:center; }
@@ -229,9 +242,56 @@ function buildSwaggerHTML(spec, version, accentColor) {
 
     .swagger-ui .info .title {
     color: #ffffff;
-    font-family: 'Syne', sans-serif;
+    font-family: 'Syne';
     font-size: 36px;
     margin: 0;
+    }
+
+    .swagger-ui .info h1, .swagger-ui .info h2, .swagger-ui .info h3, .swagger-ui .info h4, .swagger-ui .info h5 {
+    color: #ffffff;
+    font-family: 'Syne';
+    }
+
+
+    .swagger-ui .model {
+    color: #c9d8e8;
+    margin-top: 24px;
+    }
+
+    .swagger-ui .model {
+    color: #c9d8e8;
+    font-family: monospace;
+    font-size: 12px;
+    font-weight: 300;
+    font-weight: 600;
+    }
+    .swagger-ui .opblock-body pre.microlight {
+    border-radius: 4px;
+    font-size: 12px;
+    hyphens: auto;
+    margin: 0;
+    padding: 10px;
+    white-space: pre-wrap;
+    word-break: break-word;
+    word-wrap: break-word;
+    font-family: 'JetBrains Mono', monospace;
+}
+
+    .swagger-ui section.models h4 {
+    align-items: center;
+    cursor: pointer;
+    display: flex;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 16px;
+    margin: 0;
+    padding: 10px 20px 10px 20px;
+    transition: all .2s;
+    }
+
+    .swagger-ui table thead tr th {
+    color: #c9d8e8;
+    border-bottom: 1px solid #1e2d3d;
+    font-family: 'JetBrains Mono', monospace;
     }
 
       
@@ -241,31 +301,28 @@ function buildSwaggerHTML(spec, version, accentColor) {
     font-size: 14px;
     }
 
-    .swagger-ui .info h1, .swagger-ui .info h2, .swagger-ui .info h3, .swagger-ui .info h4, .swagger-ui .info h5 {
-    color: #b7bed2;
-    }
 
     .swagger-ui .info p {
     color: #c0ccd4;
-    font-family:'JetBrains Mono', monospace,  ;
+    font-family:'JetBrains Mono', monospace ;
     }
 
     .swagger-ui a.nostyle, .swagger-ui a.nostyle:visited {
     color: inherit;
     cursor: pointer;
     text-decoration: inherit;
-    font-family: 'Syne', sans-serif;
+    font-family: 'Syne';
     }
 
     .swagger-ui .markdown p, .swagger-ui .markdown pre, .swagger-ui .renderedMarkdown p, .swagger-ui .renderedMarkdown pre {
     word-break: break-word;
-    font-family:'JetBrains Mono', monospace,  ;
+    font-family:'JetBrains Mono', monospace;
     }
 
     .swagger-ui table thead tr td, .swagger-ui table thead tr th {
     border-bottom: 1px solid rgba(59, 65, 81, .2);
     color: #71798d;
-    font-family:'JetBrains Mono', monospace,  ;
+    font-family:'JetBrains Mono', monospace ;
     font-size: 12px;
     font-weight: 700;
     padding: 12px 0;
@@ -288,7 +345,7 @@ function buildSwaggerHTML(spec, version, accentColor) {
 
     .swagger-ui .opblock-tag small {
     color: #60687b;
-    font-family:'JetBrains Mono', monospace,  ;
+    font-family:'JetBrains Mono', monospace ;
     font-size: 14px;
     font-weight: 400;
     }
@@ -310,7 +367,7 @@ function buildSwaggerHTML(spec, version, accentColor) {
 
     .swagger-ui .opblock .opblock-summary-description {
     color: #868da0;
-    font-family:'JetBrains Mono', monospace,  ;
+    font-family:'JetBrains Mono', monospace ;
     font-size: 13px;
     word-break: break-word;
     }
@@ -376,6 +433,16 @@ function buildSwaggerHTML(spec, version, accentColor) {
     color: var(--cyan);
     }
 
+    .docs-back {
+    color: #b9beca;
+    font-size: 12px;
+    text-decoration: none;
+    border: 1px solid #1e2d3d;
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-family: 'JetBrains Mono', monospace;
+}
+
     .swagger-ui .info p { color:#6a8fa8; }
     .swagger-ui .opblock-tag { color:#c9d8e8; border-bottom:1px solid #1e2d3d; }
     .swagger-ui .opblock { background:#0d1117; border:1px solid #1e2d3d; border-radius:8px; margin-bottom:8px; }
@@ -411,6 +478,14 @@ function buildSwaggerHTML(spec, version, accentColor) {
       <div class="docs-logo">IP<span>Shield</span></div>
       <span class="version-badge">${version.toUpperCase()}</span>
     </div>
+    <div class="docs-nav">
+      <a href="/api/v1/docs" class="${version === "v1" ? "active" : ""}">v1 Stable</a>
+      <a href="/api/v2/docs" class="${version === "v2" ? "active" : ""}">v2 Latest</a>
+      <a href="/api/versions">All Versions</a>
+      <a href="/" class="docs-back">
+      ← Back to App
+    </a>
+    </div>
     <div class="docs-hero">
     <div class="hero-grid"></div>
 
@@ -426,13 +501,6 @@ function buildSwaggerHTML(spec, version, accentColor) {
       <p>
         Real-time IP reputation, threat feeds, WHOIS intelligence workflows.
       </p>
-    </div>
-  </div>
-    <div class="docs-nav">
-      <a href="/api/v1/docs" class="${version === "v1" ? "active" : ""}">v1 Stable</a>
-      <a href="/api/v2/docs" class="${version === "v2" ? "active" : ""}">v2 Latest</a>
-      <a href="/api/versions">All Versions</a>
-      <a href="/">← App</a>
     </div>
   </div>
   <div id="swagger-ui"></div>
