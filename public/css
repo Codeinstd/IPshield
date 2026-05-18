@@ -98,3 +98,12 @@
   50% { opacity: 0.4; }
 }
 
+.close-btn {
+  background: none;
+  border: none;
+  color: #3d5a72;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 0;
+  flex-shrink: 0;
+}

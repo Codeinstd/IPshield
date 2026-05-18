@@ -663,6 +663,17 @@
       CRITICAL: "#ff3355", HIGH: "#ff7700", MEDIUM: "#ffcc00", LOW: "#00e87c"
     }[bl.severity] || "#ff7700";
 
+    document.querySelectorAll('.blacklist-btn')
+  .forEach(button => {
+
+    const color = button.dataset.severityColor;
+
+    button.style.border = `1px solid ${color}`;
+    button.style.color = color;
+
+    button.addEventListener('click', showBlacklistPanel);
+  });
+
     return `
       <div style="
         display:flex;align-items:flex-start;gap:12px;
@@ -702,12 +713,10 @@
             </div>
           </div>
         </div>
-        <button onclick="showBlacklistPanel()" style="
-          background:none;border:1px solid ${sevColor};color:${sevColor};
-          border-radius:4px;padding:4px 10px;font-size:10px;cursor:pointer;
-          font-family:inherit;flex-shrink:0;white-space:nowrap;">
-          View List
-        </button>
+        <button
+  class="blacklist-btn"
+  data-severity-color="${sevColor}">
+  View List
       </div>`;
   }
 
@@ -2099,6 +2108,15 @@ function resolveScoreColor(score) {
  // Rate Limit
   function showAPIStatus(apiStatus) {
 
+    document.querySelectorAll('.close-btn')
+  .forEach(button => {
+
+    button.addEventListener('click', () => {
+      button.parentElement.parentElement.remove();
+    });
+
+  });
+
   // Remove existing banner if any
   const existing = document.getElementById("apiStatusBanner");
   if (existing) existing.remove();
@@ -2124,8 +2142,10 @@ function resolveScoreColor(score) {
           </div>
           ${apiStatus.resetAt ? `<div style="font-size:10px;color:#3d5a72;margin-top:6px;">Resets: ${new Date(apiStatus.resetAt).toLocaleString()}</div>` : ""}
         </div>
-        <button onclick="this.parentElement.parentElement.remove()"
-          style="background:none;border:none;color:#3d5a72;cursor:pointer;font-size:16px;padding:0;flex-shrink:0;">✕</button>
+        <button class="close-btn">
+  ✕
+</button>
+       
       </div>`;
   } else if (apiStatus.abuseIPDB === "key_error") {
     banner.style.cssText = `
@@ -2141,8 +2161,9 @@ function resolveScoreColor(score) {
             API key is invalid or missing. Check ABUSE_IPDB_KEY in your environment variables.
           </div>
         </div>
-        <button onclick="this.parentElement.parentElement.remove()"
-          style="background:none;border:none;color:#3d5a72;cursor:pointer;font-size:16px;padding:0;flex-shrink:0;">✕</button>
+      <button class="close-btn">
+  ✕
+</button>
       </div>`;
   }
 
