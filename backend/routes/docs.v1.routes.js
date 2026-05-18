@@ -484,7 +484,7 @@ function buildSwaggerHTML(spec, version, accentColor) {
       <a href="/api/versions">All Versions</a>
       <a href="/" class="docs-back">
       ← Back to App
-    </a>
+        </a>
     </div>
     <div class="docs-hero">
     <div class="hero-grid"></div>
@@ -502,6 +502,7 @@ function buildSwaggerHTML(spec, version, accentColor) {
         Real-time IP reputation, threat feeds, WHOIS intelligence workflows.
       </p>
     </div>
+  </div>
   </div>
   <div id="swagger-ui"></div>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.11.0/swagger-ui-bundle.min.js"></script>
