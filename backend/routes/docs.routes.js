@@ -88,32 +88,27 @@ function buildDocsHTML(spec) {
     }
 
     .logo { display: flex; align-items: center; gap: 12px; }
+
     .logo-icon {
     width: 36px;
     height: 36px;
-    border: 2px solid var(--accent);
+    border: 2px solid #02bfe0;
     border-radius: 6px;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--accent);
+    color: #02bfe0;
     font-size: 18px;
     font-weight: 700;
     box-shadow: var(--glow-a);
-    animation: pulse-border 3s ease-in-out infinite;
-}
-    .logo-text {
-    font-family: 'Syne', sans-serif;
-    font-weight: 800;
-    font-size: 22px;
-    letter-spacing: -0.5px;
-    }
+    animation: pulse-border 3s ease-in-out infinite; }
 
-    .logo-text { font-size: 16px; font-weight: 700; color: var(--text); }
+    
+    .logo-text { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 22px; letter-spacing: -0.5px; }
     .logo-badge {
       font-size: 10px; font-weight: 700; letter-spacing: 1px;
       padding: 2px 8px; border-radius: 3px;
-      background: rgba(0,217,255,0.12); color: var(--accent);
+      color: var(--accent);
       border: 1px solid rgba(0,217,255,0.3);
       font-family: 'JetBrains Mono', monospace;
     }

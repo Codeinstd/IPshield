@@ -514,7 +514,7 @@ function buildSwaggerHTML(spec, version, accentColor) {
         <div class="hero-grid"></div>
         <div class="hero-content">
       <div class="hero-badge">
-            API DOCUMETATION
+            API DOCUMENTATION
         </div>
 
         <h1>
