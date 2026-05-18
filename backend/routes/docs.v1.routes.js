@@ -7,9 +7,6 @@ const spec = {
   info: {
     title:       "IPShield API — v1",
     description: `
-## IPShield API v1 — Core Intelligence
-
-v1 provides core IP risk scoring and intelligence features.
 
 > **Note:** v2 is available at \`/api/v2\` and adds **Blacklist Management** and **Case Management**.
 > See [v2 docs](/api/v2/docs) to upgrade.
@@ -205,7 +202,7 @@ router.get("/openapi.json", (req, res) => {
 // ── Swagger UI 
 router.get("/", (req, res) => {
   res.setHeader("Content-Type", "text/html");
-  res.send(buildSwaggerHTML(spec, "v1", "#3d7a6b"));
+  res.send(buildSwaggerHTML(spec, "v1", "#02bfe0"));
 });
 
 function buildSwaggerHTML(spec, version, accentColor) {
@@ -217,11 +214,11 @@ function buildSwaggerHTML(spec, version, accentColor) {
   <title>IPShield API ${version.toUpperCase()} Docs</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.11.0/swagger-ui.min.css">
   <style>
-    body { margin:0; background:#0d1117; font-family:'JetBrains Mono',monospace; }
+    body { margin:0; background:#0d1117; font-family: 'Syne', sans-serif,'JetBrains Mono', monospace, ; }
     .docs-header { background:#0d1117; border-bottom:1px solid #1e2d3d; padding:14px 32px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:1000; }
-    .docs-logo { color:#c9d8e8; font-size:18px; font-weight:700; }
+    .docs-logo { color:#c9d8e8; font-size:18px; font-weight:700; font-family;'Syne', sans-serif, sans-serif}
     .docs-logo span { color:${accentColor}; }
-    .version-badge { background:${accentColor}22; color:${accentColor}; border:1px solid ${accentColor}44; padding:3px 10px; border-radius:4px; font-size:11px; font-weight:700; }
+    .version-badge { background:rgba(0, 217, 255, 0.12); color:${accentColor}; border:1px solid ${accentColor}44; padding:3px 10px; border-radius:4px; font-size:11px; font-weight:700; }
     .docs-nav { display:flex; gap:10px; align-items:center; }
     .docs-nav a { color:#6a8fa8; font-size:11px; text-decoration:none; border:1px solid #1e2d3d; padding:5px 12px; border-radius:6px; }
     .docs-nav a:hover { color:#00d9ff; border-color:#00d9ff; }
@@ -229,6 +226,156 @@ function buildSwaggerHTML(spec, version, accentColor) {
     .swagger-ui { background:#080c0f; }
     .swagger-ui .topbar { display:none; }
     .swagger-ui .info .title { color:#c9d8e8; }
+
+    .swagger-ui .info .title {
+    color: #ffffff;
+    font-family: 'Syne', sans-serif;
+    font-size: 36px;
+    margin: 0;
+    }
+
+      
+    .swagger-ui .info li, .swagger-ui .info p, .swagger-ui .info table {
+    color: #838fb0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    }
+
+    .swagger-ui .info h1, .swagger-ui .info h2, .swagger-ui .info h3, .swagger-ui .info h4, .swagger-ui .info h5 {
+    color: #b7bed2;
+    }
+
+    .swagger-ui .info p {
+    color: #c0ccd4;
+    font-family:'JetBrains Mono', monospace,  ;
+    }
+
+    .swagger-ui a.nostyle, .swagger-ui a.nostyle:visited {
+    color: inherit;
+    cursor: pointer;
+    text-decoration: inherit;
+    font-family: 'Syne', sans-serif;
+    }
+
+    .swagger-ui .markdown p, .swagger-ui .markdown pre, .swagger-ui .renderedMarkdown p, .swagger-ui .renderedMarkdown pre {
+    word-break: break-word;
+    font-family:'JetBrains Mono', monospace,  ;
+    }
+
+    .swagger-ui table thead tr td, .swagger-ui table thead tr th {
+    border-bottom: 1px solid rgba(59, 65, 81, .2);
+    color: #71798d;
+    font-family:'JetBrains Mono', monospace,  ;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 12px 0;
+    text-align: left;
+    }
+
+    .swagger-ui .info li, .swagger-ui .info p, .swagger-ui .info table {
+    color: #b9beca;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    }
+
+    .swagger-ui .info a {
+    color: #02bfe0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    transition: all .4s;
+    padding: 10px;
+    }
+
+    .swagger-ui .opblock-tag small {
+    color: #60687b;
+    font-family:'JetBrains Mono', monospace,  ;
+    font-size: 14px;
+    font-weight: 400;
+    }
+
+    .swagger-ui .opblock-tag {
+    position: sticky;
+    top: 72px;
+    z-index: 5;
+    margin-top: 48px;
+    padding: 18px 20px;
+    background: rgba(5, 8, 22, .88);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, .04);
+    border-radius: 16px;
+    font-size: 28px;
+    font-weight: 700;
+    color: #fff;
+}
+
+    .swagger-ui .opblock .opblock-summary-description {
+    color: #868da0;
+    font-family:'JetBrains Mono', monospace,  ;
+    font-size: 13px;
+    word-break: break-word;
+    }
+
+    .swagger-ui .info li, .swagger-ui .info p, .swagger-ui .info table {
+    color: #838fb0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+}
+
+
+    .docs-hero {
+        position: relative;
+        padding: 90px 32px 70px;
+        overflow: hidden;
+    }
+    
+    .hero-grid {
+    position: absolute;
+    inset: 0;
+    background-image: linear-gradient(rgba(255, 255, 255, .03) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, .03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    mask-image: radial-gradient(circle at center, black 30%, transparent 80%);
+    }
+
+    .hero-content {
+    position: relative;
+    z-index: 2;
+    max-width: 900px;
+    margin: auto;
+    text-align: center;
+    }
+
+    .hero-badge {
+    display: inline-flex;
+    padding: 8px 14px;
+    border-radius: 999px;
+    background: rgba(0, 217, 255, .08);
+    border: 1px solid rgba(0, 217, 255, .18);
+    color: var(--cyan);
+    font-size: 12px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    }
+
+    .hero-content h1 {
+    margin: 24px 0 12px;
+    font-size: 78px;
+    line-height: 1;
+    font-weight: 800;
+    font-family: Syne, sans-serif;
+    }
+
+    .hero-content p {
+    max-width: 760px;
+    margin: auto;
+    color: var(--muted);
+    font-size: 18px;
+    line-height: 1.8;
+    }
+
+    .hero-content h1 span {
+    color: var(--cyan);
+    }
+
     .swagger-ui .info p { color:#6a8fa8; }
     .swagger-ui .opblock-tag { color:#c9d8e8; border-bottom:1px solid #1e2d3d; }
     .swagger-ui .opblock { background:#0d1117; border:1px solid #1e2d3d; border-radius:8px; margin-bottom:8px; }
@@ -243,7 +390,7 @@ function buildSwaggerHTML(spec, version, accentColor) {
     .swagger-ui .opblock.opblock-delete .opblock-summary-method { background:#ff3355; color:#fff; }
     .swagger-ui .scheme-container { background:#0d1117; box-shadow:none; border-bottom:1px solid #1e2d3d; }
     .swagger-ui input[type=text], .swagger-ui textarea { background:#111820; border:1px solid #1e2d3d; color:#c9d8e8; border-radius:4px; }
-    .swagger-ui .btn.execute { background:${accentColor}; color:#000; border:none; font-weight:700; }
+    .swagger-ui .btn.execute { background:${accentColor}; color:#000; border:none; font-weight:700; font-family: 'JetBrains Mono', monospace; }
     .swagger-ui .parameter__name { color:#00d9ff; }
     .swagger-ui .response-col_status { color:#00e87c; }
     .swagger-ui .microlight { background:#111820; border-radius:6px; padding:12px; }
@@ -264,6 +411,23 @@ function buildSwaggerHTML(spec, version, accentColor) {
       <div class="docs-logo">IP<span>Shield</span></div>
       <span class="version-badge">${version.toUpperCase()}</span>
     </div>
+    <div class="docs-hero">
+    <div class="hero-grid"></div>
+
+    <div class="hero-content">
+      <div class="hero-badge">
+        v1.0 • Core Intelligence API
+      </div>
+
+      <h1>
+        IP<span>Shield</span>
+      </h1>
+
+      <p>
+        Real-time IP reputation, threat feeds, WHOIS intelligence workflows.
+      </p>
+    </div>
+  </div>
     <div class="docs-nav">
       <a href="/api/v1/docs" class="${version === "v1" ? "active" : ""}">v1 Stable</a>
       <a href="/api/v2/docs" class="${version === "v2" ? "active" : ""}">v2 Latest</a>
