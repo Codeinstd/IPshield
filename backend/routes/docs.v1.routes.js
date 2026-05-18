@@ -241,7 +241,6 @@ function buildSwaggerHTML(spec, version, accentColor) {
     .docs-nav a { color:#6a8fa8; font-size:11px; text-decoration:none; border:1px solid #1e2d3d; padding:5px 12px; border-radius:6px; }
     .docs-nav a:hover { color:#00d9ff; border-color:#00d9ff; }
     .docs-nav a.active { color:${accentColor}; border-color:${accentColor}; }
-    .swagger-ui { background:#080c0f; }
     .swagger-ui .topbar { display:none; }
     .swagger-ui .info .title { color:#c9d8e8; }
 
@@ -412,7 +411,7 @@ function buildSwaggerHTML(spec, version, accentColor) {
     border-radius: 999px;
     background: rgba(0, 217, 255, .08);
     border: 1px solid rgba(0, 217, 255, .18);
-    color: var(--cyan);
+    color: var(--info);
     font-size: 12px;
     letter-spacing: .08em;
     text-transform: uppercase;
@@ -429,13 +428,13 @@ function buildSwaggerHTML(spec, version, accentColor) {
     .hero-content p {
     max-width: 760px;
     margin: auto;
-    color: var(--muted);
+    color: var(--text2);
     font-size: 18px;
     line-height: 1.8;
     }
 
     .hero-content h1 span {
-    color: var(--cyan);
+    color: var(--info);
     }
 
     .docs-back {
