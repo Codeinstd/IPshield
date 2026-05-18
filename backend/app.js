@@ -21,6 +21,7 @@ const errorMiddleware = require("./middleware/error.middleware");
 const logger          = require("./utils/logger");
 const reportRoutes    = require("./routes/report.routes");
 const timelineRoutes  = require("./routes/timeline.routes");
+const cspMiddleware     = require("./middleware/csp.middleware");
 
 // v2-only Routes
 const blacklistRoutes = require("./routes/blacklist.routes");
@@ -44,13 +45,7 @@ app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
-    scriptSrc: [
-  "'self'",
-  "https://cdnjs.cloudflare.com",
-  "'sha256-xUfC0wkAtk0wNIS7KujZjrozjuhc4fYltSpwd1nHv6w='",
-  "'sha256-55PYogfDdCtZwFKlzd3SwsSIEiZTQZ2nQyOi6SU1W/w='",
-  "'sha256-10//LldSvtu1iqUfmUWUav9hN2TPVJ7Oi02e+tcyvQw='"
-],
+    scriptSrc: ["'self'","https://cdnjs.cloudflare.com","'unsafe-inline'"],
       styleSrc:   ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://cdnjs.cloudflare.com"],
       fontSrc:    ["'self'", "https://fonts.gstatic.com"],
       imgSrc:     ["'self'", "data:", 
@@ -196,7 +191,8 @@ app.get("/api/v2",       versionInfoHandler);
 app.use("/api/",    authMiddleware);
 app.use("/api/v1/", authMiddleware);
 app.use("/api/v2/", authMiddleware);
- 
+app.use("/api/", cspMiddleware);
+
 // ── Helper: mount shared routes on multiple prefixes 
 function mountShared(prefixes, path, router) {
   prefixes.forEach(prefix => app.use(`${prefix}${path}`, router));
