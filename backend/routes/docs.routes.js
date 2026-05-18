@@ -508,10 +508,6 @@ function buildDocsHTML(spec) {
     }
   </style>
 </head>
-<body>
-<redoc spec-url='/api/docs/openapi.json'></redoc>
-    <script src="https://cdn.jsdelivr.net/npm/redoc@2.1.3/bundles/redoc.standalone.js"></script>
-
   <!-- Header -->
   <header class="header">
     <div class="logo">
