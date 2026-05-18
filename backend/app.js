@@ -44,19 +44,20 @@ if (process.env.SENTRY_DSN) {
 app.use(helmet({
   contentSecurityPolicy: {
     directives: {
-      defaultSrc: ["'self'"],
-    scriptSrc: ["'self'","https://cdnjs.cloudflare.com","'unsafe-inline'"],
-      styleSrc:   ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://cdnjs.cloudflare.com"],
-      fontSrc:    ["'self'", "https://fonts.gstatic.com"],
-      imgSrc:     ["'self'", "data:", 
-                    "https://*.basemaps.cartocdn.com", 
-                    "https://*.cartocdn.com",
-                    "https://*.tile.openstreetmap.org",  
-                    "https://*.openstreetmap.org"        
-                  ],
-      connectSrc: ["'self'", "https://api.ipify.org"],
-      workerSrc:  ["'self'", "blob:"],
-      objectSrc:  ["'none'"]
+      defaultSrc:    ["'self'"],
+      scriptSrc:     ["'self'", "https://cdnjs.cloudflare.com", "https://cdn.jsdelivr.net", "'unsafe-inline'"],
+      scriptSrcAttr: ["'unsafe-inline'"],  // ← fixes the inline event handler error
+      styleSrc:      ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://cdnjs.cloudflare.com"],
+      fontSrc:       ["'self'", "https://fonts.gstatic.com"],
+      imgSrc:        ["'self'", "data:",
+        "https://*.basemaps.cartocdn.com",
+        "https://*.cartocdn.com",
+        "https://*.tile.openstreetmap.org",
+        "https://*.openstreetmap.org"
+      ],
+      connectSrc:    ["'self'", "https://api.ipify.org"],
+      workerSrc:     ["'self'", "blob:"],
+      objectSrc:     ["'none'"]
     }
   },
   hsts: isProd ? { maxAge: 31536000, includeSubDomains: true } : false
