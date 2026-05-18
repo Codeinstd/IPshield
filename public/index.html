@@ -15,6 +15,18 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>IPShield — Real-Time Risk Scoring</title>
+ <!-- Polyfill BEFORE ReDoc loads -->
+    <script>
+      const _nativeScrollTo = Element.prototype.scrollTo;
+      Element.prototype.scrollTo = function(x, y) {
+        if (typeof x === 'number' || typeof y === 'number') {
+          _nativeScrollTo.call(this, { top: y ?? x, left: 0, behavior: 'smooth' });
+        } else {
+          _nativeScrollTo.call(this, x);
+        }
+      };
+    </script>
+
 <!-- Favicon metadata -->
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon.ico/favicon-32x32.png">
 <link rel="icon" type="image/png" sizes="96x96" href="/favicon.ico/favicon-96x96.png">
