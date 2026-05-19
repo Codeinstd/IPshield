@@ -94,72 +94,154 @@
       : "Switched to v1 — Core features only",
     "success"
   );
+
+  document.getElementById("mainMobileMenu").innerHTML = "";
+  buildHamburgerMenu;
 }
 
+  // responsive nav 
+  function buildHamburgerMenu() {
+  const hamburger = document.getElementById("mainHamburger");
+  const menu      = document.getElementById("mainMobileMenu");
+  const overlay   = document.getElementById("navOverlay");
+  const headerRight = document.getElementById("headerRight");
  
+  // Wipe any previous clones
+  menu.innerHTML = "";
+ 
+  // Clone every button from header-right into the mobile menu
+  const buttons = headerRight.querySelectorAll("button");
 
+  buttons.forEach(btn => {
+    if (btn.style.display === "inherit") return; // skip hidden v1 buttons
+ 
+    const clone = document.createElement("button");
+    clone.textContent = btn.textContent;
+    clone.className   = btn.className;
 
+    // Preserve V2 badge styles
+    if (btn.id === "apiBadge") {
+      clone.style.cssText = btn.style.cssText;
+    }
+ 
+    // Tap clone → fire original button → close menu
+    clone.addEventListener("click", () => {
+      btn.click();
+      menu.classList.remove("open");
+      menu.setAttribute("aria-hidden", "true");
+      hamburger.setAttribute("aria-expanded", "false");
+      if (overlay) overlay.classList.remove("open");
+    });
+ 
+    menu.appendChild(clone);
+  });
+ 
+  // Status row at the bottom
+  const statusRow = document.createElement("div");
+  statusRow.className = "mob-status";
+  statusRow.innerHTML = `<span class="mob-dot"></span><span>LIVE</span>`;
+  menu.appendChild(statusRow);
+ 
+  // ── Hamburger click — simple toggle ──
+  const freshHamburger = hamburger.cloneNode(true);
+  hamburger.parentNode.replaceChild(freshHamburger, hamburger);
+ 
+  freshHamburger.addEventListener("click", function(e) {
+    e.stopPropagation();
+    const isOpen = this.getAttribute("aria-expanded") === "true";
+ 
+    if (isOpen) {
+      this.setAttribute("aria-expanded", "false");
+      menu.classList.remove("open");
+      menu.setAttribute("aria-hidden", "true");
+      if (overlay) overlay.classList.remove("open");
+    } else {
+      this.setAttribute("aria-expanded", "true");
+      menu.classList.add("open");
+      menu.setAttribute("aria-hidden", "false");
+      if (overlay) overlay.classList.add("open");
+    }
+  });
+ 
+  // Close on overlay click
+  if (overlay) {
+    overlay.onclick = () => {
+      menu.classList.remove("open");
+      menu.setAttribute("aria-hidden", "true");
+      freshHamburger.setAttribute("aria-expanded", "false");
+      overlay.classList.remove("open");
+    };
+  }
+ 
+  // Close on outside click
+  document.addEventListener("click", (e) => {
+    if (!e.target.closest("header") && !e.target.closest(".nav-overlay")) {
+      menu.classList.remove("open");
+      menu.setAttribute("aria-hidden", "true");
+      freshHamburger.setAttribute("aria-expanded", "false");
+      if (overlay) overlay.classList.remove("open");
+    }
+  });
+
+}
   // ── Extra UI 
   function injectExtraUI() {
     const headerRight = document.querySelector(".header-right");
 
-    if (headerRight) {
-    // Theme toggle
-      const toggle = document.createElement("button");
-      toggle.className      = "btn btn-ghost";
-      toggle.id             = "themeToggle";
-      toggle.textContent    = isDark ? "☀ LIGHT" : "☾ DARK";
-      toggle.style.cssText  = "padding:6px 12px;font-size:11px;";
-      toggle.addEventListener("click", toggleTheme);
-      headerRight.prepend(toggle);
-
-    // API version badge — clickable to show version panel
-      const badge = document.createElement("button");
-      badge.id          = "apiBadge";
-      badge.textContent = apiVersion.toUpperCase();
-      badge.title       = "Click to switch API version";
-      badge.style.cssText = `
-        padding:4px 10px;font-size:10px;font-weight:700;font-family:inherit;
-        border-radius:4px;cursor:pointer;letter-spacing:1px;
-        color:${apiVersion === "v2" ? "var(--accent)" : "var(--accent2)"};
-        border:1px solid ${apiVersion === "v2" ? "var(--accent)" : "var(--accent2)"};
-        background:${apiVersion === "v2" ? "rgba(0,217,255,0.12)" : "rgba(0,217,255,0.12)"};`;
-      badge.addEventListener("click", showVersionPanel);
-      headerRight.prepend(badge);
-
-    
-     // SIEM button 
-      const siemBtn         = document.createElement("button");
-      siemBtn.className     = "btn btn-ghost";
-      siemBtn.id            = "siemBtn";
-      siemBtn.title         = "SIEM Webhook Settings";
-      siemBtn.textContent   = "📡 SIEM";
-      siemBtn.style.cssText = "padding:6px 12px;font-size:11px;";
-      // Show icon only on mobile, full label on desktop
-      // siemBtn.innerHTML     = `<span class="desktop-label">📡 SIEM</span><span class="mobile-label" style="display:none;">📡</span>`;
-      headerRight.prepend(siemBtn);
-    
-
-    // blacklist
-    const blBtn = document.createElement("button");
-    blBtn.className           = "btn btn-ghost v2-only";
-    blBtn.id                  = "blacklistBtn";
-    blBtn.textContent         = "🚫 Blacklist";
-    blBtn.style.cssText       = "padding:6px 12px;font-size:11px;";
-    if (apiVersion === "v1") blBtn.style.display = "none";
-    headerRight.prepend(blBtn);
-      
-
-    // Cases
-    const casesBtn              = document.createElement("button");
-    casesBtn.className          = "btn btn-ghost v2-only";
-    casesBtn.id                 = "casesBtn";
-    casesBtn.textContent        = "📁 Cases";
-    casesBtn.style.cssText      = "padding:6px 12px;font-size:11px;font-family:'JetBrains Mono', monospace;";
-    if (apiVersion === "v1") casesBtn.style.display = "none";
-    headerRight.prepend(casesBtn);
-    
-    }
+  if (headerRight) {
+ 
+  // Theme toggle
+  const toggle = document.createElement("button");
+  toggle.className     = "btn btn-ghost";
+  toggle.id            = "themeToggle";
+  toggle.textContent   = isDark ? "☀ LIGHT" : "☾ DARK";
+  toggle.style.cssText = "padding:6px 12px;font-size:11px;";
+  toggle.addEventListener("click", toggleTheme);
+  headerRight.prepend(toggle);
+ 
+  // API version badge
+  const badge = document.createElement("button");
+  badge.id          = "apiBadge";
+  badge.textContent = apiVersion.toUpperCase();
+  badge.title       = "Click to switch API version";
+  badge.style.cssText = `
+    padding:4px 10px; margin-left:16px; margin-top:4px; font-size:10px;font-weight:700;font-family:inherit;
+    border-radius:4px;cursor:pointer;letter-spacing:1px;
+    color:${apiVersion === "v2" ? "var(--accent)" : "var(--accent2)"};
+    border:1px solid ${apiVersion === "v2" ? "var(--accent)" : "var(--accent2)"};
+    background:rgba(0,217,255,0.12);`;
+  badge.addEventListener("click", showVersionPanel);
+  headerRight.prepend(badge);
+ 
+  // SIEM button
+  const siemBtn         = document.createElement("button");
+  siemBtn.className     = "btn btn-ghost";
+  siemBtn.id            = "siemBtn";
+  siemBtn.title         = "SIEM Webhook Settings";
+  siemBtn.textContent   = "📡 SIEM";
+  siemBtn.style.cssText = "padding:6px 12px;font-size:11px;";
+  headerRight.prepend(siemBtn);
+ 
+  // Blacklist button
+  const blBtn = document.createElement("button");
+  blBtn.className     = "btn btn-ghost v2-only";
+  blBtn.id            = "blacklistBtn";
+  blBtn.textContent   = "🚫 Blacklist";
+  blBtn.style.cssText = "padding:6px 12px;font-size:11px;";
+  if (apiVersion === "v1") blBtn.style.display = "none";
+  headerRight.prepend(blBtn);
+ 
+  // Cases button
+  const casesBtn = document.createElement("button");
+  casesBtn.className     = "btn btn-ghost v2-only";
+  casesBtn.id            = "casesBtn";
+  casesBtn.textContent   = "📁 Cases";
+  casesBtn.style.cssText = "padding:6px 12px;font-size:11px;font-family:'JetBrains Mono', monospace;";
+  if (apiVersion === "v1") casesBtn.style.display = "none";
+  headerRight.prepend(casesBtn);
+ 
+  buildHamburgerMenu();
+}
 
     // Quick Tests Btn - Bulk Section
     const searchSection = document.querySelector(".search-section");
@@ -238,8 +320,11 @@
     return window.innerWidth < 640 ? "200px" : "260px";
   }
 
+  buildHamburgerMenu(); 
+
 
   }
+
 
 
   // Versioning Panel

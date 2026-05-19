@@ -25,6 +25,10 @@ function buildDocsHTML(spec) {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Favicon metadata -->
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon.ico/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="96x96" href="/favicon.ico/favicon-96x96.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon.ico/favicon-16x16.png">
   <title>IPShield Docs</title>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <!-- Polyfill BEFORE ReDoc loads -->
@@ -90,18 +94,12 @@ function buildDocsHTML(spec) {
     .logo { display: flex; align-items: center; gap: 12px; }
 
     .logo-icon {
-    width: 36px;
-    height: 36px;
-    border: 2px solid #02bfe0;
-    border-radius: 6px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #02bfe0;
-    font-size: 18px;
-    font-weight: 700;
-    box-shadow: var(--glow-a);
-    animation: pulse-border 3s ease-in-out infinite; }
+    width: 36px; height: 36px;
+    border: 2px solid #00d9ff; border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    color: #00d9ff; box-shadow: var(--glow-a);
+    animation: pulse-border 3s ease-in-out infinite;
+  }
 
     
     .logo-text { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 22px; letter-spacing: -0.5px; }
@@ -515,7 +513,13 @@ function buildDocsHTML(spec) {
       <a href="/api/docs/openapi.json" target="_blank">↓ OpenAPI JSON</a>
       <a href="/" class="btn-primary">← Back to App</a>
     </div>
+    <nav class="nav-mobile-menu" aria-hidden="true" id="mainMobileMenu"></nav>
   </header>
+<div class="nav-overlay" id="navOverlay"></div>
+  <button class="nav-hamburger" aria-label="Open menu" aria-expanded="false" id="mainHamburger">
+  <span></span><span></span><span></span>
+</button>
+
 
   <!-- Version bar -->
   <div class="version-bar" id="versionBar">

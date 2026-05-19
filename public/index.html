@@ -16,7 +16,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>IPShield — Real-Time Risk Scoring</title>
  <!-- Polyfill BEFORE ReDoc loads -->
-    <script>
+<script>
       const _nativeScrollTo = Element.prototype.scrollTo;
       Element.prototype.scrollTo = function(x, y) {
         if (typeof x === 'number' || typeof y === 'number') {
@@ -25,8 +25,7 @@
           _nativeScrollTo.call(this, x);
         }
       };
-    </script>
-
+</script>
 <!-- Favicon metadata -->
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon.ico/favicon-32x32.png">
 <link rel="icon" type="image/png" sizes="96x96" href="/favicon.ico/favicon-96x96.png">
@@ -368,7 +367,7 @@
 <body>
  
 <div class="app">
-  <header>
+  <header id ="mainHeader">
     <div class="logo">
       <div class="logo-icon">⬡</div>
       <div>
@@ -376,14 +375,20 @@
         <div class="logo-sub">Risk Intelligence</div>
       </div>
     </div>
-    <div class="header-right">
-      <div class="status-dot">
+    <div class="header-right" id="headerRight">
+
+      <div class="status-dot" id="statusDot">
         <div class="dot"></div>
         <span>LIVE</span>
       </div>
       <div class="version" id="dashboard-version">v1.0.0</div>
     </div>
-  </header>
+     <button class="nav-hamburger" aria-label="Open menu" aria-expanded="false" id="mainHamburger">
+    <span></span><span></span><span></span>
+  </button>
+  <nav class="nav-mobile-menu" id="mainMobileMenu" aria-hidden="true"></nav>
+</header>
+ <div class="nav-overlay" id="navOverlay"></div>
 
   <main>
     <!-- Search -->
@@ -933,6 +938,130 @@
     left:   16px;
     max-width: unset;
   }
+}
+
+/* Hamburger button — hidden on desktop */
+.nav-hamburger {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 3px;
+  width: 28px;
+  height: 28px;
+  margin-left: auto;
+  flex-shrink: 0;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+  padding: 0;
+  transition: border-color .2s;
+  z-index: 201;
+}
+.nav-hamburger:hover,
+.nav-hamburger[aria-expanded="true"] { border-color: var(--accent); }
+
+.nav-hamburger span {
+  display: block;
+  width: 18px;
+  height: 2px;
+  background: var(--accent);
+  border-radius: 2px;
+  transition: transform .25s ease, opacity .2s ease;
+  transform-origin: center;
+}
+.nav-hamburger[aria-expanded="true"] span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.nav-hamburger[aria-expanded="true"] span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+.nav-hamburger[aria-expanded="true"] span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+/* Mobile dropdown panel */
+.nav-mobile-menu {
+  position: absolute;
+  top: 100%;
+  left: 0; right: 0;
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  z-index: 200;
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: max-height .3s cubic-bezier(.4,0,.2,1), opacity .25s ease;
+}
+.nav-mobile-menu.open {
+  max-height: 500px;
+  opacity: 1;
+  padding: 6px 0;
+}
+
+
+/* Items inside the mobile dropdown */
+.nav-mobile-menu .btn {
+  display: flex !important;
+  width: 100%;
+  padding: 14px 20px;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  border-radius: 0;
+  background: transparent;
+  color: var(--text2);
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  cursor: pointer;
+  transition: background .15s, color .15s;
+  text-align: left;
+  
+}
+.nav-mobile-menu .btn:last-child { border-bottom: none; }
+.nav-mobile-menu .btn:hover      { background: var(--bg3); color: var(--accent); }
+.nav-mobile-menu .btn.active,
+.nav-mobile-menu .btn-primary    { color: var(--accent) !important; background: var(--bg3) !important; }
+.nav-mobile-menu .btn-danger     { color: var(--danger) !important; }
+
+/* Status dot row in dropdown */
+.nav-mobile-menu .mob-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  font-size: 10px;
+  letter-spacing: 1px;
+  color: var(--text2);
+  pointer-events: none;
+  /* animation: blink 2s ease-in-out infinite; */
+
+}
+.nav-mobile-menu .mob-status::before {
+  content: '';
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 6px #22c55e;
+  flex-shrink: 0;
+  animation: blink 2s ease-in-out infinite;
+}
+
+/* Overlay backdrop */
+.nav-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  background: rgba(0,0,0,.45);
+  backdrop-filter: blur(1px);
+}
+.nav-overlay.open { display: block; }
+
+/* ── Mobile breakpoint ── */
+@media (max-width: 768px) {
+  /* header { position: relative; } anchor for dropdown */
+  .header-right   { display: none !important; }
+  .nav-hamburger  { display: flex !important; }
+}
+@media (min-width: 769px) {
+  .nav-mobile-menu { display: none !important; }
+  .nav-overlay     { display: none !important; }
+  .header-right    { display: flex !important; }
 }
 
 </style>
