@@ -625,15 +625,15 @@ function buildDocsHTML(spec) {
     <nav class="sidebar" id="sidebar">
       <div class="sidebar-section">
         <div class="sidebar-label">Overview</div>
-        <a class="sidebar-item active" onclick="scrollTo('overview')">
+        <a class="sidebar-item active" onclick="scrollToSection('overview')">
           <span style="font-size:14px;">⬡</span>
           <span class="endpoint-name">Introduction</span>
         </a>
-        <a class="sidebar-item" onclick="scrollTo('auth')">
+        <a class="sidebar-item" onclick="scrollToSection('auth')">
           <span style="font-size:14px;">🔑</span>
           <span class="endpoint-name">Authentication</span>
         </a>
-        <a class="sidebar-item" onclick="scrollTo('rates')">
+        <a class="sidebar-item" onclick="scrollToSection('rates')">
           <span style="font-size:14px;">⏱</span>
           <span class="endpoint-name">Rate Limits</span>
         </a>
@@ -931,7 +931,7 @@ function buildDocsHTML(spec) {
       document.getElementById(id).classList.toggle("open");
     }
 
-    function scrollTo(id) {
+    function scrollToSection(id) {
       document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
     }
 
@@ -962,7 +962,7 @@ function buildDocsHTML(spec) {
           <div class="sidebar-section" data-tag="\${tag}" style="\${isV2Only && currentVersion === "v1" ? "display:none;" : ""}">
             <div class="sidebar-label" style="color:\${meta.color};">\${meta.icon} \${tag}</div>
             \${eps.map(ep => \`
-              <a class="sidebar-item" onclick="toggleEndpoint('ep_\${ep.idx}');scrollTo('ep_\${ep.idx}')">
+              <a class="sidebar-item" onclick="toggleEndpoint('ep_\${ep.idx}');scrollToSection('ep_\${ep.idx}')">
                 <span class="method-dot" style="background:\${getMethodColor(ep.method)};"></span>
                 <span class="endpoint-name">\${ep.path}</span>
               </a>
