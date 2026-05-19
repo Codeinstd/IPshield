@@ -76,6 +76,89 @@ function buildDocsHTML(spec) {
       flex-direction: column;
     }
 
+    .nav-hamburger {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  width: 40px; height: 40px;
+  margin-left: auto;
+  flex-shrink: 0;
+  background: transparent;
+  border: 1px solid var(--border, #1e3a4a);
+  border-radius: 6px;
+  cursor: pointer;
+  padding: 0;
+  position: relative;
+  z-index: 1000;
+  transition: border-color .2s;
+}
+.nav-hamburger:hover,
+.nav-hamburger[aria-expanded="true"] { border-color: var(--accent, #00d4ff); }
+ 
+.nav-hamburger span {
+  display: block;
+  width: 18px; height: 2px;
+  background: var(--accent, #00d4ff);
+  border-radius: 2px;
+  transition: transform .25s ease, opacity .2s ease;
+  transform-origin: center;
+}
+.nav-hamburger[aria-expanded="true"] span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.nav-hamburger[aria-expanded="true"] span:nth-child(2) { opacity:0; transform:scaleX(0); }
+.nav-hamburger[aria-expanded="true"] span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+ 
+.nav-mobile-menu {
+  position: absolute;
+  top: 100%; left: 0; right: 0;
+  background: var(--bg2, #0a1a22);
+  border-bottom: 1px solid var(--border, #1e3a4a);
+  z-index: 999;
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: max-height .3s cubic-bezier(.4,0,.2,1), opacity .25s ease;
+}
+.nav-mobile-menu.open { max-height: 400px; opacity: 1; padding: 6px 0; }
+ 
+.nav-mobile-menu button,
+.nav-mobile-menu a {
+  display: flex !important;
+  align-items: center;
+  gap: 8px;
+  width: 100% !important;
+  padding: 14px 20px !important;
+  border: none !important;
+  border-bottom: 1px solid var(--border, #1e3a4a) !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  color: var(--text2, #6a8899) !important;
+  font-size: 11px !important;
+  letter-spacing: 1.5px;
+  font-family: inherit;
+  cursor: pointer;
+  text-decoration: none;
+  box-sizing: border-box;
+  transition: background .15s, color .15s;
+}
+.nav-mobile-menu button:last-child,
+.nav-mobile-menu a:last-child { border-bottom: none !important; }
+.nav-mobile-menu button:hover,
+.nav-mobile-menu a:hover { background: var(--bg3, #0f2535) !important; color: var(--accent, #00d4ff) !important; }
+.nav-mobile-menu .btn-primary { color: var(--accent, #00d4ff) !important; }
+ 
+@media (max-width: 768px) {
+  .header { position: relative !important; z-index: 1000; }
+  #docsHeaderRight  { display: none !important; }
+  .nav-hamburger    { display: flex !important; }
+}
+@media (min-width: 769px) {
+  .nav-mobile-menu { display: none !important; }
+  .nav-overlay     { display: none !important; }
+  #docsHeaderRight { display: flex !important; }
+}
+
     /* ── Header ── */
     .header {
       background: var(--bg1);
@@ -468,7 +551,7 @@ function buildDocsHTML(spec) {
 
     /* ── Version switcher ── */
     .version-bar {
-      display: flex; gap: 6px; align-items: center;
+      display: block; gap: 6px; align-items: center;
       padding: 12px 24px;
       background: var(--bg2); border-bottom: 1px solid var(--border);
       font-size: 12px;
@@ -502,23 +585,25 @@ function buildDocsHTML(spec) {
   </style>
 </head>
   <!-- Header -->
-  <header class="header">
+  <header class="header" id="docsHeader" style="position:relative;">
     <div class="logo">
       <div class=logo-icon">⬡</div>
       <div class="logo-text">IP<span>Shield</span></div>
       <div class="logo-badge">API DOCS</div>
     </div>
-    <div class="header-right">
+    <div class="header-right" id="docsHeaderRight">
       <button onclick="copyApiKey()">🔑 Copy API Key</button>
       <a href="/api/docs/openapi.json" target="_blank">↓ OpenAPI JSON</a>
       <a href="/" class="btn-primary">← Back to App</a>
     </div>
-    <nav class="nav-mobile-menu" aria-hidden="true" id="mainMobileMenu"></nav>
+     <button class="nav-hamburger" aria-label="Open menu" aria-expanded="false" id="mainHamburger">
+    <span></span><span></span><span></span>
+  </button>
+  <nav class="nav-mobile-menu" aria-hidden="true" id="mainMobileMenu"></nav>
   </header>
-<div class="nav-overlay" id="navOverlay"></div>
-  <button class="nav-hamburger" aria-label="Open menu" aria-expanded="false" id="mainHamburger">
-  <span></span><span></span><span></span>
-</button>
+
+  <div class="nav-overlay" id="navOverlay"></div>
+
 
 
   <!-- Version bar -->
@@ -935,6 +1020,99 @@ function buildDocsHTML(spec) {
     // Set initial version
     setVersion(currentVersion);
     render();
+
+    var _docsHamburgerReady = false;
+ 
+function buildDocsHamburger() {
+  const hamburger   = document.getElementById("mainHamburger");
+  const menu        = document.getElementById("mainMobileMenu");
+  const overlay     = document.getElementById("navOverlay");
+  const headerRight = document.getElementById("docsHeaderRight");
+ 
+  // Force overlay z-index inline so nothing overrides it
+  if (overlay) {
+    overlay.style.cssText = "position:fixed;inset:0;z-index:998;background:rgba(0,0,0,0.55);backdrop-filter:blur(1px);display:none;";
+  }
+ 
+  // Rebuild dropdown items
+  menu.innerHTML = "";
+ 
+  headerRight.querySelectorAll("button, a").forEach(el => {
+    const isAnchor = el.tagName === "A";
+    const clone    = document.createElement(isAnchor ? "a" : "button");
+ 
+    clone.textContent = el.textContent.trim();
+    clone.className   = el.className;
+ 
+    if (isAnchor) {
+      clone.href   = el.href;
+      clone.target = el.target || "";
+    }
+ 
+    clone.addEventListener("click", () => {
+      if (!isAnchor) el.click(); // fire original handler for buttons
+      _docsClose();
+    });
+ 
+    menu.appendChild(clone);
+  });
+ 
+  // Attach toggle listeners once only
+  if (!_docsHamburgerReady) {
+    _docsHamburgerReady = true;
+ 
+    hamburger.addEventListener("click", e => {
+      e.stopPropagation();
+      hamburger.getAttribute("aria-expanded") === "true"
+        ? _docsClose() : _docsOpen();
+    });
+ 
+    if (overlay) overlay.addEventListener("click", _docsClose);
+ 
+    document.addEventListener("keydown", e => {
+      if (e.key === "Escape") _docsClose();
+    });
+ 
+    document.addEventListener("click", e => {
+      if (!e.target.closest("#docsHeader") && !e.target.closest("#navOverlay")) {
+        _docsClose();
+      }
+    });
+ 
+    window.matchMedia("(min-width:769px)").addEventListener("change", e => {
+      if (e.matches) _docsClose();
+    });
+  }
+ 
+}
+ 
+function _docsOpen() {
+  const h = document.getElementById("mainHamburger");
+  const m = document.getElementById("mainMobileMenu");
+  const o = document.getElementById("navOverlay");
+  h.setAttribute("aria-expanded", "true");
+  m.classList.add("open");
+  m.removeAttribute("aria-hidden");
+  if (o) o.style.display = "block";
+}
+ 
+function _docsClose() {
+  const h = document.getElementById("mainHamburger");
+  const m = document.getElementById("mainMobileMenu");
+  const o = document.getElementById("navOverlay");
+  h.setAttribute("aria-expanded", "false");
+  m.classList.remove("open");
+  m.setAttribute("aria-hidden", "true");
+  h.focus();
+  if (o) o.style.display = "none";
+}
+ 
+// Call on DOM ready
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", buildDocsHamburger);
+} else {
+  buildDocsHamburger();
+}
   </script>
 </body>
 </html>`;

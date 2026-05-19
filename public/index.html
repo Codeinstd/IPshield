@@ -1064,5 +1064,37 @@
   .header-right    { display: flex !important; }
 }
 
+.nav-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 998;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(1px);
+}
+ 
+.nav-mobile-menu {
+  position: absolute;
+  top: 100%;
+  left: 0; right: 0;
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  z-index: 999;         
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: max-height .3s cubic-bezier(.4,0,.2,1), opacity .25s ease;
+}
+.nav-mobile-menu.open {
+  max-height: 500px;
+  opacity: 1;
+  padding: 6px 0;
+}
+ 
+header {
+  position: relative;
+  z-index: 1000;        
+}
+
 </style>
 </html>

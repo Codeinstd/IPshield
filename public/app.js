@@ -100,90 +100,128 @@
 }
 
   // responsive nav 
-  function buildHamburgerMenu() {
-  const hamburger = document.getElementById("mainHamburger");
-  const menu      = document.getElementById("mainMobileMenu");
-  const overlay   = document.getElementById("navOverlay");
+
+    var _hamburgerInitialized = false;
+    function buildHamburgerMenu() {
+  const hamburger   = document.getElementById("mainHamburger");
+  const menu        = document.getElementById("mainMobileMenu");
+  const overlay     = document.getElementById("navOverlay");
   const headerRight = document.getElementById("headerRight");
  
-  // Wipe any previous clones
+ 
+  // ── Force overlay styles so it always covers everything ──
+  if (overlay) {
+    overlay.style.cssText = `
+      position: fixed;
+      inset: 0;
+      z-index: 998;
+      background: rgba(0,0,0,0.55);
+      backdrop-filter: blur(1px);
+      display: none;
+    `;
+  }
+ 
+  // ── Force menu z-index above overlay ──
+  menu.style.zIndex = "999";
+ 
+  // ── Force hamburger button z-index ──
+  hamburger.style.zIndex   = "1000";
+  hamburger.style.position = "relative";
+ 
+  // ── Rebuild menu items (safe to call on v1/v2 switch) ──
   menu.innerHTML = "";
  
-  // Clone every button from header-right into the mobile menu
-  const buttons = headerRight.querySelectorAll("button");
-
-  buttons.forEach(btn => {
-    if (btn.style.display === "inherit") return; // skip hidden v1 buttons
+  headerRight.querySelectorAll("button").forEach(btn => {
+    if (btn.style.display === "none") return;
  
     const clone = document.createElement("button");
     clone.textContent = btn.textContent;
     clone.className   = btn.className;
-
-    // Preserve V2 badge styles
+ 
+    // Preserve V2 badge inline styles
     if (btn.id === "apiBadge") {
       clone.style.cssText = btn.style.cssText;
     }
  
-    // Tap clone → fire original button → close menu
     clone.addEventListener("click", () => {
       btn.click();
-      menu.classList.remove("open");
-      menu.setAttribute("aria-hidden", "true");
-      hamburger.setAttribute("aria-expanded", "false");
-      if (overlay) overlay.classList.remove("open");
+      _closeMenu();
     });
  
     menu.appendChild(clone);
   });
  
-  // Status row at the bottom
+  // Status row
   const statusRow = document.createElement("div");
   statusRow.className = "mob-status";
-  statusRow.innerHTML = `<span class="mob-dot"></span><span>LIVE</span>`;
+  statusRow.innerHTML = `<span class="mob-dot"></span><span>SYSTEM LIVE</span>`;
   menu.appendChild(statusRow);
  
-  // ── Hamburger click — simple toggle ──
-  const freshHamburger = hamburger.cloneNode(true);
-  hamburger.parentNode.replaceChild(freshHamburger, hamburger);
+  // ── Attach listeners ONCE only ──
+  if (!_hamburgerInitialized) {
+    _hamburgerInitialized = true;
  
-  freshHamburger.addEventListener("click", function(e) {
-    e.stopPropagation();
-    const isOpen = this.getAttribute("aria-expanded") === "true";
+    hamburger.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const isOpen = hamburger.getAttribute("aria-expanded") === "true";
+      isOpen ? _closeMenu() : _openMenu();
+    });
  
-    if (isOpen) {
-      this.setAttribute("aria-expanded", "false");
-      menu.classList.remove("open");
-      menu.setAttribute("aria-hidden", "true");
-      if (overlay) overlay.classList.remove("open");
-    } else {
-      this.setAttribute("aria-expanded", "true");
-      menu.classList.add("open");
-      menu.setAttribute("aria-hidden", "false");
-      if (overlay) overlay.classList.add("open");
+    if (overlay) {
+      overlay.addEventListener("click", _closeMenu);
     }
-  });
  
-  // Close on overlay click
-  if (overlay) {
-    overlay.onclick = () => {
-      menu.classList.remove("open");
-      menu.setAttribute("aria-hidden", "true");
-      freshHamburger.setAttribute("aria-expanded", "false");
-      overlay.classList.remove("open");
-    };
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") _closeMenu();
+    });
+ 
+    document.addEventListener("click", (e) => {
+      if (
+        !e.target.closest("header") &&
+        !e.target.closest("#navOverlay")
+      ) {
+        _closeMenu();
+      }
+    });
+ 
+    window.matchMedia("(min-width: 769px)").addEventListener("change", (e) => {
+      if (e.matches) _closeMenu();
+    });
   }
- 
-  // Close on outside click
-  document.addEventListener("click", (e) => {
-    if (!e.target.closest("header") && !e.target.closest(".nav-overlay")) {
-      menu.classList.remove("open");
-      menu.setAttribute("aria-hidden", "true");
-      freshHamburger.setAttribute("aria-expanded", "false");
-      if (overlay) overlay.classList.remove("open");
-    }
-  });
 
 }
+ 
+function _openMenu() {
+  const hamburger = document.getElementById("mainHamburger");
+  const menu      = document.getElementById("mainMobileMenu");
+  const overlay   = document.getElementById("navOverlay");
+  if (!hamburger || !menu) return;
+ 
+  hamburger.setAttribute("aria-expanded", "true");
+  menu.classList.add("open");
+  menu.removeAttribute("aria-hidden");
+ 
+  if (overlay) {
+    overlay.style.display = "block";   // show overlay
+  }
+}
+ 
+function _closeMenu() {
+  const hamburger = document.getElementById("mainHamburger");
+  const menu      = document.getElementById("mainMobileMenu");
+  const overlay   = document.getElementById("navOverlay");
+  if (!hamburger || !menu) return;
+ 
+  hamburger.setAttribute("aria-expanded", "false");
+  menu.classList.remove("open");
+  menu.setAttribute("aria-hidden", "true");
+  hamburger.focus(); // fixes aria-hidden focus warning
+ 
+  if (overlay) {
+    overlay.style.display = "none";    // hide overlay
+  }
+}
+  
   // ── Extra UI 
   function injectExtraUI() {
     const headerRight = document.querySelector(".header-right");
@@ -375,7 +413,7 @@
     </div>
  
     <!-- Version toggle cards -->
-    <div style="display:grid;grid-template-columns:1fr 1fr;flex-shrink:0;">
+    <div>
  
       <!-- v1 -->
       <div id="v1Card" style="padding:20px 24px;border-right:1px solid var(--border);border-bottom:1px solid var(--border);cursor:pointer;
