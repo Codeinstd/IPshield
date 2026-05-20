@@ -170,7 +170,6 @@ function buildDocsHTML(spec) {
       justify-content: space-between;
       position: sticky;
       top: 0;
-      z-index: 100;
       font-family: 'Syne'
     }
 

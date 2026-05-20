@@ -464,6 +464,222 @@ function buildSwaggerHTML(spec, version, accentColor) {
     padding: 6px 14px;
     border-radius: 6px;
     font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* ── Desktop nav (unchanged) ── */
+.docs-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 24px;
+    position: relative;
+    z-index: 100;
+}
+
+.docs-nav {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.docs-nav a {
+    white-space: nowrap;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 13px;
+    text-decoration: none;
+    color: var(--text3, #8ab);
+    border: 1px solid transparent;
+    transition: all 0.15s;
+}
+
+.docs-nav a:hover {
+    color: var(--accent, #00cfff);
+    border-color: var(--accent, #00cfff);
+}
+
+.docs-nav a.active {
+    color: var(--accent, #00cfff);
+    border-color: var(--accent, #00cfff);
+    background: rgba(0, 207, 255, 0.08);
+}
+
+.docs-nav .docs-back {
+    margin-left: 8px;
+    padding-left: 16px;
+    border-left: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* ── Hamburger button ── */
+.hamburger {
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    gap: 5px;
+    width: 36px;
+    height: 36px;
+    padding: 6px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.hamburger:hover {
+    background: rgba(0, 207, 255, 0.1);
+    border-color: var(--accent, #00cfff);
+}
+
+.hamburger span {
+    display: block;
+    width: 100%;
+    height: 2px;
+    background: var(--text3, #8ab);
+    border-radius: 2px;
+    transition: all 0.25s ease;
+    transform-origin: center;
+}
+
+/* Animate to X when open */
+.hamburger.open span:nth-child(1) {
+    transform: translateY(7px) rotate(45deg);
+}
+.hamburger.open span:nth-child(2) {
+    opacity: 0;
+    transform: scaleX(0);
+}
+.hamburger.open span:nth-child(3) {
+    transform: translateY(-7px) rotate(-45deg);
+}
+
+/* ── Overlay ── */
+.mobile-nav-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(2px);
+    z-index: 200;
+    opacity: 0;
+    transition: opacity 0.25s ease;
+}
+
+.mobile-nav-overlay.visible {
+    opacity: 1;
+}
+
+/* ── Drawer ── */
+.mobile-nav-drawer {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: min(280px, 85vw);
+    height: 100vh;
+    background: var(--bg2, #0d1b2a);
+    border-left: 1px solid rgba(255, 255, 255, 0.08);
+    z-index: 201;
+    transform: translateX(100%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    flex-direction: column;
+    box-shadow: -8px 0 32px rgba(0, 0, 0, 0.4);
+}
+
+.mobile-nav-drawer.open {
+    transform: translateX(0);
+}
+
+.mobile-nav-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.mobile-nav-close {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    color: var(--text3, #8ab);
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.mobile-nav-close:hover {
+    background: rgba(255, 80, 80, 0.1);
+    border-color: #ff5050;
+    color: #ff5050;
+}
+
+.mobile-nav-links {
+    display: flex;
+    flex-direction: column;
+    padding: 12px;
+    gap: 4px;
+}
+
+.mobile-nav-links a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    text-decoration: none;
+    color: var(--text3, #8ab);
+    font-size: 14px;
+    border: 1px solid transparent;
+    transition: all 0.15s;
+}
+
+.mobile-nav-links a:hover {
+    background: rgba(0, 207, 255, 0.06);
+    color: var(--accent, #00cfff);
+    border-color: rgba(0, 207, 255, 0.2);
+}
+
+.mobile-nav-links a.active {
+    background: rgba(0, 207, 255, 0.1);
+    color: var(--accent, #00cfff);
+    border-color: rgba(0, 207, 255, 0.3);
+}
+
+.mobile-nav-links a.docs-back {
+    margin-top: auto;
+    color: var(--text3, #8ab);
+}
+
+.mobile-nav-icon {
+    font-size: 12px;
+    font-weight: 700;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 6px;
+    flex-shrink: 0;
+}
+
+/* ── Mobile breakpoint ── */
+@media (max-width: 600px) {
+    .docs-nav {
+        display: none; /* hide desktop nav */
+    }
+
+    .hamburger {
+        display: flex; /* show hamburger */
+    }
+
+
 }
 
     .swagger-ui .info p { color:#6a8fa8; }
@@ -497,19 +713,48 @@ function buildSwaggerHTML(spec, version, accentColor) {
 </head>
 <body>
   <div class="docs-header">
-        <div style="display:flex;align-items:center;gap:12px;">
+    <div style="display:flex;align-items:center;gap:12px;">
+        <div class="docs-logo">IP<span>Shield</span></div>
+        <span class="version-badge">${version.toUpperCase()}</span>
+    </div>
+    <nav class="docs-nav" id="docsNav">
+        <a href="/api/v1/docs" class="${version === "v1" ? "active" : ""}">v1 Stable</a>
+        <a href="/api/v2/docs" class="${version === "v2" ? "active" : ""}">v2 Latest</a>
+        <a href="/api/versions">All Versions</a>
+        <a href="/" class="docs-back">← Back to App</a>
+    </nav>
+    <button class="hamburger" id="hamburger" onclick="toggleMobileNav()" aria-label="Toggle navigation">
+        <span></span>
+        <span></span>
+        <span></span>
+    </button>
+</div>
+
+<!-- Mobile nav modal -->
+<div class="mobile-nav-overlay" id="mobileNavOverlay" onclick="closeMobileNav()"></div>
+<div class="mobile-nav-drawer" id="mobileNavDrawer">
+    <div class="mobile-nav-header">
+        <div style="display:flex;align-items:center;gap:10px;">
             <div class="docs-logo">IP<span>Shield</span></div>
             <span class="version-badge">${version.toUpperCase()}</span>
         </div>
-        <div class="docs-nav">
-            <a href="/api/v1/docs" class="${version === "v1" ? "active" : ""}">v1 Stable</a>
-            <a href="/api/v2/docs" class="${version === "v2" ? "active" : ""}">v2 Latest</a>
-            <a href="/api/versions">All Versions</a>
-            <a href="/" class="docs-back">
-            ← Back to App
-                </a>
-        </div>
+        <button class="mobile-nav-close" onclick="closeMobileNav()">✕</button>
     </div>
+    <nav class="mobile-nav-links">
+        <a href="/api/v1/docs" class="${version === "v1" ? "active" : ""}">
+            <span class="mobile-nav-icon">v1</span> Stable
+        </a>
+        <a href="/api/v2/docs" class="${version === "v2" ? "active" : ""}">
+            <span class="mobile-nav-icon">v2</span> Latest
+        </a>
+        <a href="/api/versions">
+            <span class="mobile-nav-icon">⊞</span> All Versions
+        </a>
+        <a href="/" class="docs-back">
+            <span class="mobile-nav-icon">←</span> Back to App
+        </a>
+    </nav>
+</div>
     <div class="docs-hero">
         <div class="hero-grid"></div>
         <div class="hero-content">
@@ -546,6 +791,46 @@ function buildSwaggerHTML(spec, version, accentColor) {
         return req;
       }
     });
+
+    <script>
+  document.addEventListener('DOMContentLoaded', function () {
+    var hamburger = document.getElementById('hamburger');
+    var overlay = document.getElementById('mobileNavOverlay');
+    var drawer = document.getElementById('mobileNavDrawer');
+    var closeBtn = document.getElementById('mobileNavClose');
+
+    function openMobileNav() {
+      overlay.style.display = 'block';
+      requestAnimationFrame(function () {
+        overlay.classList.add('visible');
+        drawer.classList.add('open');
+        hamburger.classList.add('open');
+      });
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeMobileNav() {
+      overlay.classList.remove('visible');
+      drawer.classList.remove('open');
+      hamburger.classList.remove('open');
+      document.body.style.overflow = '';
+      setTimeout(function () { overlay.style.display = 'none'; }, 300);
+    }
+
+    hamburger.addEventListener('click', function () {
+      drawer.classList.contains('open') ? closeMobileNav() : openMobileNav();
+    });
+
+    overlay.addEventListener('click', closeMobileNav);
+    closeBtn.addEventListener('click', closeMobileNav);
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') closeMobileNav();
+    });
+  });
+</script>
+
+   
   </script>
 </body>
 </html>`;
