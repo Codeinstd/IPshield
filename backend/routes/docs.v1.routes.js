@@ -791,8 +791,6 @@ function buildSwaggerHTML(spec, version, accentColor) {
         return req;
       }
     });
-
-    <script>
   document.addEventListener('DOMContentLoaded', function () {
     var hamburger = document.getElementById('hamburger');
     var overlay = document.getElementById('mobileNavOverlay');
@@ -828,8 +826,6 @@ function buildSwaggerHTML(spec, version, accentColor) {
       if (e.key === 'Escape') closeMobileNav();
     });
   });
-</script>
-
    
   </script>
 </body>

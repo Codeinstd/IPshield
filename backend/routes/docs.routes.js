@@ -581,6 +581,14 @@ function buildDocsHTML(spec) {
       .hero { padding: 24px; }
       .hero h1 { font-size: 22px; }
     }
+
+    @media (max-width: 480px) {
+    .logo-icon {
+        width: 28px;
+        height: 28px;
+        font-size: 14px;
+    }
+}
   </style>
 </head>
   <!-- Header -->
