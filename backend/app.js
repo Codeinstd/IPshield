@@ -8,20 +8,21 @@ const path         = require("path");
 const rateLimit    = require("express-rate-limit");
 
 // ── Routes
-const scoreRoutes     = require("./routes/score.routes");
-const statsRoutes     = require("./routes/stats.routes");
-const auditRoutes     = require("./routes/audit.routes");
-const streamRoutes    = require("./routes/stream.routes");
-const watchlistRoutes = require("./routes/watchlist.routes");
-const whoisRoutes     = require("./routes/whois.routes");
-const siemRoutes      = require("./routes/siem.routes");
-const docsRoutes      = require("./routes/docs.routes");
-const authMiddleware  = require("./middleware/auth.middleware");
-const errorMiddleware = require("./middleware/error.middleware");
-const logger          = require("./utils/logger");
-const reportRoutes    = require("./routes/report.routes");
-const timelineRoutes  = require("./routes/timeline.routes");
-const cspMiddleware     = require("./middleware/csp.middleware");
+const scoreRoutes           = require("./routes/score.routes");
+const statsRoutes           = require("./routes/stats.routes");
+const auditRoutes           = require("./routes/audit.routes");
+const streamRoutes          = require("./routes/stream.routes");
+const watchlistRoutes       = require("./routes/watchlist.routes");
+const whoisRoutes           = require("./routes/whois.routes");
+const siemRoutes            = require("./routes/siem.routes");
+const docsRoutes            = require("./routes/docs.routes");
+const authMiddleware        = require("./middleware/auth.middleware");
+const errorMiddleware       = require("./middleware/error.middleware");
+const logger                = require("./utils/logger");
+const reportRoutes          = require("./routes/report.routes");
+const timelineRoutes        = require("./routes/timeline.routes");
+const cspMiddleware         = require("./middleware/csp.middleware");
+const {telemetryMiddleware}   = require("./middleware/telemetry.middleware");
 
 // v2-only Routes
 const blacklistRoutes = require("./routes/blacklist.routes");
@@ -193,6 +194,19 @@ app.use("/api/",    authMiddleware);
 app.use("/api/v1/", authMiddleware);
 app.use("/api/v2/", authMiddleware);
 app.use("/api/", cspMiddleware);
+app.use(telemetryMiddleware);
+
+// /metrics endpoint for internal use (not documented in public API)
+
+app.get('/api/metrics', authMiddleware, (req, res) => {
+  res.json({
+    generatedAt: new Date().toISOString(),
+    endpoints: getMetrics(),
+    rateLimitHits: Object.fromEntries(rateLimitHits)
+  });
+});
+
+
 
 // ── Helper: mount shared routes on multiple prefixes 
 function mountShared(prefixes, path, router) {

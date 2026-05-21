@@ -13,7 +13,7 @@
   const procTime   = document.getElementById("processingTime");
   const auditList  = document.getElementById("auditList");
   const auditCount = document.getElementById("auditCount");
-  // const apiDocsBtn = document.getElementById("apiDocsBtn");
+
   
 
   const sessionStats = { CRITICAL: 0, HIGH: 0, MEDIUM: 0, LOW: 0 };
@@ -101,8 +101,8 @@
 
   // responsive nav 
 
-    var _hamburgerInitialized = false;
-    function buildHamburgerMenu() {
+  var _hamburgerInitialized = false;
+  function buildHamburgerMenu() {
   const hamburger   = document.getElementById("mainHamburger");
   const menu        = document.getElementById("mainMobileMenu");
   const overlay     = document.getElementById("navOverlay");

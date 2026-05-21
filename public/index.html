@@ -26,6 +26,33 @@
         }
       };
 </script>
+<script>
+  async function initDocs() {
+  // load both in parallel
+  const [endpointMetrics, endpoints] = await Promise.all([
+    loadEndpointTelemetry(),
+    loadEndpoints()        // whatever your existing fetch is
+  ]);
+
+  renderEndpoints(endpoints, endpointMetrics); // ✅ pass both in
+}
+
+function renderEndpoints(endpoints, metrics) {
+  endpoints.forEach(endpoint => {
+    const routeKey = `${endpoint.method}:${endpoint.path}`;
+    const card = `
+      <div class="endpoint-card">
+        <div class="endpoint-header">
+          <span class="method ${endpoint.method}">${endpoint.method}</span>
+          <span class="path">${endpoint.path}</span>
+        </div>
+        ${renderEndpointBadge(routeKey, metrics)}
+      </div>
+    `;
+    document.getElementById('endpointList').insertAdjacentHTML('beforeend', card);
+  });
+}
+</script>
 <!-- Favicon metadata -->
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon.ico/favicon-32x32.png">
 <link rel="icon" type="image/png" sizes="96x96" href="/favicon.ico/favicon-96x96.png">
@@ -1094,6 +1121,25 @@
 header {
   position: relative;
   z-index: 1000;        
+}
+
+.endpoint-telemetry {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 6px;
+}
+.tele-badge {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 99px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: var(--text3, #8ab);
+}
+.tele-warn {
+  border-color: #f59e0b;
+  color: #f59e0b;
 }
 
 </style>
