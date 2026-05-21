@@ -75,30 +75,6 @@ function buildDashboard() {
     margin-top: 1px;
     }
 
-      body::before,
-      body::after {
-        content:'';
-        position:fixed;
-        width:500px;
-        height:500px;
-        border-radius:50%;
-        filter:blur(120px);
-        z-index:-1;
-        opacity:0.12;
-      }
-
-      body::before {
-        background:#00d9ff;
-        top:-200px;
-        right:-100px;
-      }
-
-      body::after {
-        background:#ff3355;
-        bottom:-250px;
-        left:-120px;
-      }
-
     .logo { display: flex; align-items: center; gap: 12px; }
 
     .logo-icon {
@@ -161,6 +137,59 @@ function buildDashboard() {
     tr:last-child td { border-bottom:none; }
     tr:hover td { background:rgba(0,217,255,0.02); }
 
+    /* Hide hamburger on desktop */
+    .hamburger {
+      display: none;
+      font-size: 26px;
+      cursor: pointer;
+    }
+
+    /* Mobile menu hidden by default */
+    .mobile-menu {
+      display: none;
+      flex-direction: column;
+      position: absolute;
+      top: 60px;
+      left: 0;
+      right: 0;
+      background: #111;
+      padding: 16px;
+      gap: 12px;
+      z-index: 999;
+    }
+
+    /* Links in mobile menu */
+    .mobile-menu a {
+      color: white;
+      text-decoration: none;
+      padding: 10px;
+      border-radius: 6px;
+      background: rgba(255,255,255,0.05);
+    }
+
+    /* Show hamburger on mobile */
+    @media (max-width: 768px) {
+      .header-right {
+        display: none; /* hide full header actions */
+      }
+
+      .hamburger {
+        display: block;
+      }
+    }
+
+    .mobile-menu {
+      display: none;
+    }
+
+    .mobile-menu.open {
+      display: flex;
+    }
+
+    .mobile-menu {
+      transition: all 0.2s ease;
+    }
+
     .mono { font-family:'JetBrains Mono',monospace; }
     .badge {
       display:inline-block; padding:2px 7px; border-radius:3px;
@@ -216,6 +245,20 @@ function buildDashboard() {
   <div>
   <div class="logo-text">IP<span>Shield</span></div>
   <div class="logo-sub">API Observability</div></div>
+</div>
+<div class="hamburger" onclick="toggleMenu()">
+  ☰
+</div>
+<div id="mobileMenu" class="mobile-menu">
+  <a href="/api/docs">Docs</a>
+  <a href="/">App</a>
+
+  <div class="mobile-status">
+    <div class="live-dot"></div>
+    <span>Live · refreshes every 10s</span>
+  </div>
+
+  <div id="lastUpdateMobile">14:11:32</div>
 </div>
   <div class="header-right">
     <div class="live-dot"></div>
@@ -363,6 +406,10 @@ function buildDashboard() {
       <div class="lat-bar-bg"><div class="lat-bar" style="width:\${pct}%;background:\${color};"></div></div>
       <span class="lat-val">\${val}ms</span>
     </div>\`;
+  }
+
+  function toggleMenu() {
+    document.getElementById("mobileMenu").classList.toggle("open");
   }
 
   function drawSparkline(hourly) {
