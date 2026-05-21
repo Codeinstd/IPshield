@@ -362,7 +362,6 @@ try {
       background: linear-gradient(135deg, var(--bg1) 0%, var(--bg2) 100%);
       border: 1px solid var(--border);
       border-radius: 16px;
-      position: relative;
       overflow: hidden;
     }
     .hero::before {
@@ -707,7 +706,7 @@ try {
   </style>
 </head>
   <!-- Header -->
-  <header class="header" id="docsHeader" style="position:relative;">
+  <header class="header" id="docsHeader">
     <div class="logo">
       <div class="logo-icon">⬡</div>
       <div class="logo-text">IP<span>Shield</span></div>
