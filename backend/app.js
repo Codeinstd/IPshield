@@ -21,8 +21,8 @@ const errorMiddleware       = require("./middleware/error.middleware");
 const logger                = require("./utils/logger");
 const reportRoutes          = require("./routes/report.routes");
 const timelineRoutes        = require("./routes/timeline.routes");
-const cspMiddleware         = require("./middleware/csp.middleware");
-const {telemetryMiddleware}   = require("./middleware/telemetry.middleware");
+const telemetryRoutes       = require("./routes/telemetry.routes");
+const telemetryMiddleware = require("./middleware/telemetry.middleware");
 
 // v2-only Routes
 const blacklistRoutes = require("./routes/blacklist.routes");
@@ -86,6 +86,8 @@ if (isProd) {
   app.use(morgan("dev"));
 }
 
+ app.use("/api", telemetryMiddleware);
+
 // ── Rate limiting with structured error body 
 const makeRateLimiter = (windowMs, max, message) => rateLimit({
   windowMs, max,
@@ -127,6 +129,10 @@ function healthHandler(req, res) {
   const db      = require("./store/db");
   const monitor = require("./jobs/monitor.job");
   const { getSIEMStatus } = require("./services/siem.service");
+  const telemetry  = require("./store/telemetry.store");   
+  const tel        = telemetry.getSummary();  
+
+  // const version = req.baseUrl?.includes("/v1") ? "v1" : "v2";
   // Detect which version is being called
   const version = req.path.includes("/v1/") ? "v1"
                 : req.path.includes("/v2/") ? "v2"
@@ -141,7 +147,20 @@ function healthHandler(req, res) {
     monitor:     monitor.getMonitorStatus?.() || {},
     siem:        getSIEMStatus(),
     memoryMB:    Math.round(process.memoryUsage().heapUsed / 1024 / 1024),
-    timestamp:   new Date().toISOString()
+    timestamp:   new Date().toISOString(),
+
+    telemetry: {
+        totalRequests: tel.requests.total,
+        errorRate:     tel.requests.errorRate,
+        rps:           tel.requests.rps,
+        uptime:        tel.uptime.human,
+        topEndpoints:  tel.topEndpoints.slice(0, 5).map(e => ({
+          route:    e.route,
+          count:    e.count,
+          avgMs:    e.avgMs,
+          errorRate:e.errorRate
+        }))
+      }
   });
 }
  
@@ -154,6 +173,9 @@ app.get("/api/v2/health", healthHandler);
 app.use("/api/docs",    docsRoutes);
 app.use("/api/v1/docs", require("./routes/docs.v1.routes"));
 app.use("/api/v2/docs", require("./routes/docs.v2.routes"));
+app.use("/api/telemetry",    telemetryRoutes);
+app.use("/api/v1/telemetry", telemetryRoutes);
+app.use("/api/v2/telemetry", telemetryRoutes);
 
 
 
@@ -193,20 +215,6 @@ app.get("/api/v2",       versionInfoHandler);
 app.use("/api/",    authMiddleware);
 app.use("/api/v1/", authMiddleware);
 app.use("/api/v2/", authMiddleware);
-app.use("/api/", cspMiddleware);
-app.use(telemetryMiddleware);
-
-// /metrics endpoint for internal use (not documented in public API)
-
-app.get('/api/metrics', authMiddleware, (req, res) => {
-  res.json({
-    generatedAt: new Date().toISOString(),
-    endpoints: getMetrics(),
-    rateLimitHits: Object.fromEntries(rateLimitHits)
-  });
-});
-
-
 
 // ── Helper: mount shared routes on multiple prefixes 
 function mountShared(prefixes, path, router) {

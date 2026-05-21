@@ -601,6 +601,7 @@ function buildDocsHTML(spec) {
     <div class="header-right" id="docsHeaderRight">
       <button onclick="copyApiKey()">🔑 Copy API Key</button>
       <a href="/api/docs/openapi.json" target="_blank">↓ OpenAPI JSON</a>
+      <a href="/api/telemetry/dashboard" target="_blank">📊 Telemetry</a>
       <a href="/" class="btn-primary">← Back to App</a>
     </div>
      <button class="nav-hamburger" aria-label="Open menu" aria-expanded="false" id="mainHamburger">
@@ -624,6 +625,10 @@ function buildDocsHTML(spec) {
       <a href="/api/v1/docs" style="color:var(--text3);font-size:11px;text-decoration:none;margin-right:12px;">v1 Swagger ↗</a>
       <a href="/api/v2/docs" style="color:var(--accent);font-size:11px;text-decoration:none;">v2 Swagger ↗</a>
     </span>
+    <a href="/api/telemetry/dashboard" target="_blank"
+    style="color:var(--low);font-size:11px;text-decoration:none;margin-left:8px;">
+    📊 Live Metrics ↗
+  </a>
   </div>
 
   <div class="layout">
@@ -710,6 +715,8 @@ function buildDocsHTML(spec) {
       <!-- Endpoints rendered by JS -->
       <div id="endpointsContainer"></div>
 
+      
+
     </main>
   </div>
 
@@ -718,7 +725,7 @@ function buildDocsHTML(spec) {
     let currentVersion = localStorage.getItem("ipshield_api_version") || "v2";
 
     const TAG_META = {
-      Scoring:      { icon: "⚡", color: "#00e87c", bg: "rgba(0,232,124,0.08)" },
+      Scoring:      { icon: "⚡",  color: "#00e87c", bg: "rgba(0,232,124,0.08)" },
       Intelligence: { icon: "🔍", color: "#00d9ff", bg: "rgba(0,217,255,0.08)" },
       Blacklist:    { icon: "🚫", color: "#ff3355", bg: "rgba(255,51,85,0.08)"  },
       Cases:        { icon: "📁", color: "#ff7700", bg: "rgba(255,119,0,0.08)"  },
@@ -857,6 +864,14 @@ function buildDocsHTML(spec) {
 
       return \`
         <div class="try-section">
+            <div class="section-label">Live Stats</div>
+        <div id="epctx_${idx}" style="
+          display:flex;gap:12px;flex-wrap:wrap;
+          padding:12px 14px;
+          background:var(--bg2);border:1px solid var(--border);
+          border-radius:8px;margin-bottom:12px;font-size:11px;">
+          <span style="color:var(--text3);">Loading stats…</span>
+        </div>
           <div class="section-label">Try It</div>
           <div style="background:var(--bg1);border:1px solid var(--border);border-radius:8px;padding:16px;">
             <div class="try-form">\${inputsHTML}</div>
@@ -930,17 +945,81 @@ function buildDocsHTML(spec) {
       btn.disabled = false; btn.textContent = "▶ Execute";
     }
 
+    async function loadEndpointContext(idx) {
+    const ep      = endpoints[idx];
+    const ctxEl   = document.getElementById("epctx_" + idx);
+    if (!ctxEl) return;
+ 
+    try {
+      const route = encodeURIComponent(ep.method + " " + ep.path);
+      const res   = await fetch(
+        "/api/telemetry/endpoint?route=" + route,
+        { headers: { "x-api-key": API_KEY } }
+      );
+      const ctx = await res.json();
+ 
+      if (!ctx.hasData || ctx.error) {
+        ctxEl.innerHTML = '<span style="color:var(--text3);">No data yet — execute a request to see live stats</span>';
+        return;
+      }
+ 
+      const healthColor =
+        ctx.health === "healthy"  ? "var(--low)" :
+        ctx.health === "warning"  ? "var(--medium)" : "var(--critical)";
+ 
+      const errColor = parseFloat(ctx.errorRate) > 10 ? "var(--critical)"
+                     : parseFloat(ctx.errorRate) > 2  ? "var(--medium)"
+                     : "var(--low)";
+ 
+      ctxEl.innerHTML = \`
+        <div style="display:flex;align-items:center;gap:6px;">
+          <span style="width:7px;height:7px;border-radius:50%;background:${healthColor};display:inline-block;"></span>
+          <span style="font-weight:600;color:${healthColor};text-transform:capitalize;">${ctx.health}</span>
+        </div>
+        <div style="color:var(--text3);">
+          Requests: <strong style="color:var(--text);">${ctx.count.toLocaleString()}</strong>
+        </div>
+        <div style="color:var(--text3);">
+          Error Rate: <strong style="color:${errColor};">${ctx.errorRate}</strong>
+        </div>
+        <div style="color:var(--text3);">
+          Avg: <strong style="color:var(--text);">${ctx.avgMs}ms</strong>
+        </div>
+        <div style="color:var(--text3);">
+          P50: <strong style="color:var(--low);">${ctx.p50}ms</strong>
+        </div>
+        <div style="color:var(--text3);">
+          P95: <strong style="color:var(--medium);">${ctx.p95}ms</strong>
+        </div>
+        <div style="color:var(--text3);">
+          P99: <strong style="color:var(--high);">${ctx.p99}ms</strong>
+        </div>\`;
+    } catch (_) {
+      ctxEl.innerHTML = '<span style="color:var(--text3);">Stats unavailable</span>';
+    }
+  }
+    
+    
+
     function copyResponse(idx) {
       navigator.clipboard.writeText(document.getElementById(\`rbody_\${idx}\`)?.textContent || "");
     }
-
+    
     function toggleEndpoint(id) {
-      document.getElementById(id).classList.toggle("open");
+    const el = document.getElementById(id);
+    el.classList.toggle("open");
+    if (el.classList.contains("open")) {
+      // Load live stats for this endpoint
+      const idx = parseInt(id.replace("ep_", ""));
+      loadEndpointContext(idx);
     }
+  }
 
     function scrollToSection(id) {
       document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
     }
+    
+    
 
     // ── Build sidebar and endpoint sections ────────────────────────────────────
     function render() {
@@ -1092,6 +1171,7 @@ function buildDocsHamburger() {
   }
  
 }
+
  
 function _docsOpen() {
   const h = document.getElementById("mainHamburger");

@@ -13,7 +13,7 @@
   const procTime   = document.getElementById("processingTime");
   const auditList  = document.getElementById("auditList");
   const auditCount = document.getElementById("auditCount");
-
+  // const apiDocsBtn = document.getElementById("apiDocsBtn");
   
 
   const sessionStats = { CRITICAL: 0, HIGH: 0, MEDIUM: 0, LOW: 0 };
@@ -1274,51 +1274,194 @@ function _closeMenu() {
   overlay.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:10000;display:flex;align-items:center;justify-content:center;padding:16px;";
  
   const modal = document.createElement("div");
-  modal.style.cssText = "background:var(--bg1);border:1px solid var(--border);border-radius:12px;width:100%;max-width:1000px;max-height:92vh;display:flex;flex-direction:column;overflow:hidden;";
- 
+  modal.style.cssText = "background:var(--bg1);border:1px solid var(--border);border-radius:12px;width:100%;max-width:1000px;max-height:92vh;display:flex;flex-direction:column;overflow:visible;";
+
   modal.innerHTML = `
-    <div style="padding:16px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
-      <div>
-        <div style="font-size:14px;font-weight:700;color:var(--text);">Manage Cases</div>
-        <div id="caseStats" style="font-size:11px;color:var(--text3);margin-top:2px;">Loading…</div>
-      </div>
-      <div style="display:flex;gap:8px;align-items:center;">
-        <button id="caseNewBtn" class="btn btn-primary" style="padding:6px 14px;font-size:11px;">+ New Case</button>
-        <button id="casesCloseBtn" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:20px;padding:4px;">✕</button>
+<style>
+  .cases-layout {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    overflow: visible;
+    min-height: 0;
+  }
+
+  .cases-sidebar {
+    border-right: 1px solid var(--border);
+    overflow-y: auto;
+    min-height: 0;
+  }
+
+  .cases-detail {
+    overflow-y: auto;
+    min-height: 0;
+  }
+
+  /* MOBILE */
+  @media (max-width: 768px) {
+
+    .cases-layout {
+      grid-template-columns: 1fr;
+      grid-template-rows: auto 1fr;
+    }
+
+    .cases-sidebar {
+      border-right: none;
+      border-bottom: 1px solid var(--border);
+      max-height: 220px;
+    }
+
+    .cases-header {
+      padding: 14px !important;
+      flex-direction: column;
+      align-items: stretch !important;
+    }
+
+    .cases-actions {
+      width: 100%;
+      justify-content: space-between;
+    }
+
+    .cases-filters {
+      padding: 12px 14px !important;
+      flex-direction: column;
+      align-items: stretch !important;
+    }
+
+    .cases-filters input,
+    .cases-filters select {
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    #caseDetail > div {
+      padding: 24px 16px !important;
+    }
+
+    #caseList > div {
+      padding: 18px 14px !important;
+    }
+
+     .cases-filters select,
+  #caseStatusChange,
+  #cfSeverity,
+  #cfStatus {
+    width: 100%;
+    font-size: 12px !important;
+    padding: 12px !important;
+  }
+
+    #casesModal,
+  #casesModal * {
+    transform: none !important;
+  }
+
+  .cases-layout {
+    overflow: visible !important;
+  }
+
+  .cases-sidebar,
+  .cases-detail {
+    overflow-y: auto;
+    overflow-x: visible !important;
+  }
+
+  select {
+    appearance: auto;
+    -webkit-appearance: menulist;
+    position: relative;
+    z-index: 99999;
+    min-height: 40px;
+  }
+
+  option {
+    font-size: 16px;
+  }
+
+  }
+</style>
+
+<div class="cases-header"
+  style="padding:16px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+
+  <div>
+    <div style="font-size:14px;font-weight:700;color:var(--text);">
+      Manage Cases
+    </div>
+
+    <div id="caseStats"
+      style="font-size:11px;color:var(--text3);margin-top:2px;">
+      Loading…
+    </div>
+  </div>
+
+  <div class="cases-actions"
+    style="display:flex;gap:8px;align-items:center;">
+
+    <button id="caseNewBtn"
+      class="btn btn-primary"
+      style="padding:6px 14px;font-size:11px;">
+      + New Case
+    </button>
+
+    <button id="casesCloseBtn"
+      style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:20px;padding:4px;">
+      ✕
+    </button>
+  </div>
+</div>
+
+<div class="cases-filters"
+  style="padding:10px 24px;border-bottom:1px solid var(--border);display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+
+  <input id="caseSearch"
+    type="text"
+    placeholder="Search cases…"
+    maxlength="100"
+    style="flex:1;min-width:140px;padding:7px 12px;background:var(--bg1);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:inherit;font-size:12px;outline:none;">
+
+  <select id="caseStatusFilter"
+    style="padding:7px 10px;background:var(--bg1);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:inherit;font-size:12px;">
+
+    <option value="">All Statuses</option>
+    <option value="Open">Open</option>
+    <option value="Investigating">Investigating</option>
+    <option value="Contained">Contained</option>
+    <option value="Resolved">Resolved</option>
+    <option value="Closed">Closed</option>
+  </select>
+
+  <select id="caseSevFilter"
+    style="padding:7px 10px;background:var(--bg1);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:inherit;font-size:12px;">
+
+    <option value="">All Severities</option>
+    <option value="CRITICAL">CRITICAL</option>
+    <option value="HIGH">HIGH</option>
+    <option value="MEDIUM">MEDIUM</option>
+    <option value="LOW">LOW</option>
+  </select>
+</div>
+
+<div class="cases-layout">
+
+  <div class="cases-sidebar" id="caseList">
+    <div style="padding:32px;text-align:center;color:var(--text3);">
+      <div class="spinner" style="margin:0 auto 12px;"></div>
+      Loading…
+    </div>
+  </div>
+
+  <div class="cases-detail" id="caseDetail">
+    <div style="padding:48px 32px;text-align:center;color:var(--text3);">
+      <div style="font-size:32px;margin-bottom:12px;">📁</div>
+      <div style="font-size:13px;">
+        Select a case to view details
       </div>
     </div>
-    <div style="padding:10px 24px;border-bottom:1px solid var(--border);display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
-      <input id="caseSearch" type="text" placeholder="Search cases…" maxlength="100"
-        style="flex:1;min-width:140px;padding:7px 12px;background:var(--bg1);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:inherit;font-size:12px;outline:none;">
-      <select id="caseStatusFilter" style="padding:7px 10px;background:var(--bg1);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:inherit;font-size:12px;">
-        <option value="">All Statuses</option>
-        <option value="Open">Open</option>
-        <option value="Investigating">Investigating</option>
-        <option value="Contained">Contained</option>
-        <option value="Resolved">Resolved</option>
-        <option value="Closed">Closed</option>
-      </select>
-      <select id="caseSevFilter" style="padding:7px 10px;background:var(--bg1);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:inherit;font-size:12px;">
-        <option value="">All Severities</option>
-        <option value="CRITICAL">CRITICAL</option>
-        <option value="HIGH">HIGH</option>
-        <option value="MEDIUM">MEDIUM</option>
-        <option value="LOW">LOW</option>
-      </select>
-    </div>
-    <div style="flex:1;display:grid;grid-template-columns:320px 1fr;overflow:hidden;min-height:0;">
-      <div style="border-right:1px solid var(--border);overflow-y:auto;min-height:0;" id="caseList">
-        <div style="padding:32px;text-align:center;color:var(--text3);">
-          <div class="spinner" style="margin:0 auto 12px;"></div>Loading…
-        </div>
-      </div>
-      <div style="overflow-y:auto;min-height:0;" id="caseDetail">
-        <div style="padding:48px 32px;text-align:center;color:var(--text3);">
-          <div style="font-size:32px;margin-bottom:12px;">📁</div>
-          <div style="font-size:13px;">Select a case to view details</div>
-        </div>
-      </div>
-    </div>`;
+  </div>
+
+</div>
+`;
  
   overlay.appendChild(modal);
   document.body.appendChild(overlay);
@@ -1535,7 +1678,7 @@ function _closeMenu() {
     detailEl.innerHTML = `
       <div style="padding:20px 24px;">
         <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:14px;flex-wrap:wrap;">
-          <div style="flex:1;min-width:0;">
+          <div style="flex:1;min-width:25%;">
             <div style="font-size:15px;font-weight:700;color:var(--text);line-height:1.3;margin-bottom:8px;">${escHtml(c.title)}</div>
             <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
               <span style="font-size:11px;font-weight:700;color:${sColor};border-radius:4px;background:${sColor}22;border:1px solid ${sColor}44;">● ${c.status}</span>
@@ -2894,7 +3037,7 @@ function applyTheme(dark) {
       <button id="siemClose" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:20px;padding:4px;">✕</button>
     </div>
  
-    <div style="background:var(--bg2);overflow-y:auto;flex:1;padding:24px;display:flex;flex-direction:column;gap:20px;">
+    <div style="background:var(--bg2);overflow-y:auto;flex:1;padding:16px;display:flex;flex-direction:column;gap:20px;">
  
       <!-- Config status -->
       <div class="detail-card">

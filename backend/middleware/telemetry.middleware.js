@@ -1,48 +1,75 @@
 
-const metrics = new Map();
+const telemetry = require("../store/telemetry.store");
+
+// Map Express route patterns from req.route.path + router stack
+function resolveRoute(req) {
+  // Try exact route match from express
+  if (req.route?.path) {
+    const base = req.baseUrl || "";
+    return `${req.method} ${base}${req.route.path}`;
+  }
+  // Fall back: normalize dynamic segments
+  const path = req.path
+    .replace(/\/\d+/g, "/:id")
+    .replace(/\/(\d{1,3}\.){3}\d{1,3}/g, "/:ip")
+    .replace(/\/[0-9a-fA-F:]{7,45}/g, "/:ip");
+  return `${req.method} ${path}`;
+}
+
+function getApiVersion(req) {
+  if (req.baseUrl?.includes("/v1")) return "v1";
+  if (req.baseUrl?.includes("/v2")) return "v2";
+  return "v2";
+}
+
+function getClientIp(req) {
+  return (
+    req.headers["cf-connecting-ip"] ||
+    req.headers["x-forwarded-for"]?.split(",")[0]?.trim() ||
+    req.socket?.remoteAddress ||
+    null
+  );
+}
 
 function telemetryMiddleware(req, res, next) {
-  const start = Date.now();
+  // Skip telemetry for docs, static files and health
+  const path = req.path || "";
+  if (
+    path.includes("/docs") ||
+    path.includes("/static") ||
+    path === "/health" ||
+    path.endsWith(".js") ||
+    path.endsWith(".css") ||
+    path.endsWith(".ico")
+  ) {
+    return next();
+  }
 
-  res.on('finish', () => {
-    const ms = Date.now() - start;
-    const status = res.statusCode;
-    const key = `${req.method}:${req.route?.path || req.path}`;
+  const startNs  = process.hrtime.bigint();
+  const reqBytes = parseInt(req.headers["content-length"] || "0");
 
-    const entry = metrics.get(key) || {
-      hits: 0, errors: 0, totalMs: 0, minMs: Infinity, maxMs: 0, p95Samples: []
-    };
+  res.on("finish", () => {
+    try {
+      const durationMs = Number(process.hrtime.bigint() - startNs) / 1e6;
+      const resBytes   = parseInt(res.getHeader("content-length") || "0");
 
-    entry.hits++;
-    entry.totalMs += ms;
-    entry.minMs = Math.min(entry.minMs, ms);
-    entry.maxMs = Math.max(entry.maxMs, ms);
-    entry.p95Samples.push(ms);
-    if (entry.p95Samples.length > 500) entry.p95Samples.shift();
-    if (status >= 400) entry.errors++;
-
-    metrics.set(key, entry);
+      telemetry.record({
+        method:      req.method,
+        path:        req.path,
+        route:       resolveRoute(req),
+        status:      res.statusCode,
+        durationMs:  Math.round(durationMs),
+        reqBytes,
+        resBytes,
+        apiKey:      req.headers["x-api-key"] || null,
+        apiVersion:  getApiVersion(req),
+        clientIp:    getClientIp(req),
+        error:       res.statusCode >= 400 ? res.locals?.errorMessage || null : null
+      });
+    } catch (_) {} // Never let telemetry break anything
   });
 
   next();
 }
 
-function getMetrics() {
-  const result = {};
-  for (const [key, m] of metrics.entries()) {
-    const sorted = [...m.p95Samples].sort((a, b) => a - b);
-    const p95idx = Math.floor(sorted.length * 0.95);
-    result[key] = {
-      hits: m.hits,
-      errors: m.errors,
-      errorRate: ((m.errors / m.hits) * 100).toFixed(1) + '%',
-      avgMs: Math.round(m.totalMs / m.hits),
-      minMs: m.minMs,
-      maxMs: m.maxMs,
-      p95Ms: sorted[p95idx] ?? null,
-    };
-  }
-  return result;
-}
-
-module.exports = { telemetryMiddleware, getMetrics };
+module.exports = telemetryMiddleware;
