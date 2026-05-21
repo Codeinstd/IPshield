@@ -77,6 +77,8 @@ app.use(cors({
 }));
 
 app.use(compression());
+app.use("/api", telemetryMiddleware);
+
 app.use(express.json({ limit: "50kb" }));
 app.use(express.urlencoded({ extended: false }));
 
@@ -86,7 +88,6 @@ if (isProd) {
   app.use(morgan("dev"));
 }
 
- app.use("/api", telemetryMiddleware);
 
 // ── Rate limiting with structured error body 
 const makeRateLimiter = (windowMs, max, message) => rateLimit({
@@ -132,11 +133,11 @@ function healthHandler(req, res) {
   const telemetry  = require("./store/telemetry.store");   
   const tel        = telemetry.getSummary();  
 
-  // const version = req.baseUrl?.includes("/v1") ? "v1" : "v2";
+  const version = req.baseUrl?.includes("/v1") ? "v1" : "v2";
   // Detect which version is being called
-  const version = req.path.includes("/v1/") ? "v1"
-                : req.path.includes("/v2/") ? "v2"
-                : "v1"; // default
+  // const version = req.path.includes("/v1/") ? "v1"
+  //                : req.path.includes("/v2/") ? "v2"
+  //                : "v1"; // default
   res.json({
     status:      "ok",
     version:     process.env.npm_package_version || "2.2.0",
@@ -176,6 +177,7 @@ app.use("/api/v2/docs", require("./routes/docs.v2.routes"));
 app.use("/api/telemetry",    telemetryRoutes);
 app.use("/api/v1/telemetry", telemetryRoutes);
 app.use("/api/v2/telemetry", telemetryRoutes);
+
 
 
 

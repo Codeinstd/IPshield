@@ -1,4 +1,3 @@
-
 const express = require("express");
 const router  = express.Router();
 const spec    = require("../config/openapi");
@@ -26,8 +25,23 @@ function buildDocsHTML(spec) {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>IPShield API Docs</title>
+  <!-- Favicon metadata -->
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon.ico/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="96x96" href="/favicon.ico/favicon-96x96.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon.ico/favicon-16x16.png">
+  <title>IPShield Docs</title>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Polyfill BEFORE ReDoc loads -->
+    <script>
+      const _nativeScrollTo = Element.prototype.scrollTo;
+      Element.prototype.scrollTo = function(x, y) {
+        if (typeof x === 'number' || typeof y === 'number') {
+          _nativeScrollTo.call(this, { top: y ?? x, left: 0, behavior: 'smooth' });
+        } else {
+          _nativeScrollTo.call(this, x);
+        }
+      };
+    </script>
   <style>
     :root {
       --bg:       #080c0f;
@@ -56,11 +70,94 @@ function buildDocsHTML(spec) {
     body {
       background: var(--bg);
       color: var(--text);
-      font-family: 'Inter', sans-serif;
+      font-family: 'JetBrains Mono', monospace;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
     }
+
+    .nav-hamburger {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  width: 40px; height: 40px;
+  margin-left: auto;
+  flex-shrink: 0;
+  background: transparent;
+  border: 1px solid var(--border, #1e3a4a);
+  border-radius: 6px;
+  cursor: pointer;
+  padding: 0;
+  position: relative;
+  z-index: 1000;
+  transition: border-color .2s;
+}
+.nav-hamburger:hover,
+.nav-hamburger[aria-expanded="true"] { border-color: var(--accent, #00d4ff); }
+ 
+.nav-hamburger span {
+  display: block;
+  width: 18px; height: 2px;
+  background: var(--accent, #00d4ff);
+  border-radius: 2px;
+  transition: transform .25s ease, opacity .2s ease;
+  transform-origin: center;
+}
+.nav-hamburger[aria-expanded="true"] span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.nav-hamburger[aria-expanded="true"] span:nth-child(2) { opacity:0; transform:scaleX(0); }
+.nav-hamburger[aria-expanded="true"] span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+ 
+.nav-mobile-menu {
+  position: absolute;
+  top: 100%; left: 0; right: 0;
+  background: var(--bg2, #0a1a22);
+  border-bottom: 1px solid var(--border, #1e3a4a);
+  z-index: 999;
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: max-height .3s cubic-bezier(.4,0,.2,1), opacity .25s ease;
+}
+.nav-mobile-menu.open { max-height: 400px; opacity: 1; padding: 6px 0; }
+ 
+.nav-mobile-menu button,
+.nav-mobile-menu a {
+  display: flex !important;
+  align-items: center;
+  gap: 8px;
+  width: 100% !important;
+  padding: 14px 20px !important;
+  border: none !important;
+  border-bottom: 1px solid var(--border, #1e3a4a) !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  color: var(--text2, #6a8899) !important;
+  font-size: 11px !important;
+  letter-spacing: 1.5px;
+  font-family: inherit;
+  cursor: pointer;
+  text-decoration: none;
+  box-sizing: border-box;
+  transition: background .15s, color .15s;
+}
+.nav-mobile-menu button:last-child,
+.nav-mobile-menu a:last-child { border-bottom: none !important; }
+.nav-mobile-menu button:hover,
+.nav-mobile-menu a:hover { background: var(--bg3, #0f2535) !important; color: var(--accent, #00d4ff) !important; }
+.nav-mobile-menu .btn-primary { color: var(--accent, #00d4ff) !important; }
+ 
+@media (max-width: 768px) {
+  .header { position: relative !important; z-index: 1000; }
+  #docsHeaderRight  { display: none !important; }
+  .nav-hamburger    { display: flex !important; }
+}
+@media (min-width: 769px) {
+  .nav-mobile-menu { display: none !important; }
+  .nav-overlay     { display: none !important; }
+  #docsHeaderRight { display: flex !important; }
+}
 
     /* ── Header ── */
     .header {
@@ -73,24 +170,25 @@ function buildDocsHTML(spec) {
       justify-content: space-between;
       position: sticky;
       top: 0;
-      z-index: 100;
+      font-family: 'Syne'
     }
 
     .logo { display: flex; align-items: center; gap: 12px; }
-    .logo-mark {
-      width: 32px; height: 32px;
-      background: linear-gradient(135deg, var(--accent), #0055aa);
-      border-radius: 8px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 14px; font-weight: 800; color: #000;
-      font-family: 'JetBrains Mono', monospace;
-    }
-    .logo-text { font-size: 16px; font-weight: 700; color: var(--text); }
-    .logo-text span { color: var(--accent); }
+
+    .logo-icon {
+    width: 36px; height: 36px;
+    border: 2px solid #00d9ff; border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    color: #00d9ff; box-shadow: var(--glow-a);
+    animation: pulse-border 3s ease-in-out infinite;
+  }
+
+    
+    .logo-text { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 22px; letter-spacing: -0.5px; }
     .logo-badge {
       font-size: 10px; font-weight: 700; letter-spacing: 1px;
       padding: 2px 8px; border-radius: 3px;
-      background: rgba(0,217,255,0.12); color: var(--accent);
+      color: var(--accent);
       border: 1px solid rgba(0,217,255,0.3);
       font-family: 'JetBrains Mono', monospace;
     }
@@ -100,16 +198,22 @@ function buildDocsHTML(spec) {
       font-size: 12px; color: var(--text2); text-decoration: none;
       padding: 6px 14px; border-radius: 6px;
       border: 1px solid var(--border); background: transparent;
-      cursor: pointer; font-family: inherit; transition: all 0.2s;
+      cursor: pointer; font-family: 'JetBrains Mono', monospace; transition: all 0.2s;
     }
     .header-right a:hover, .header-right button:hover {
       color: var(--accent); border-color: var(--accent);
     }
+
     .header-right .btn-primary {
-      background: var(--accent); color: #000; border-color: var(--accent);
-      font-weight: 700;
+    color: #b9beca;
+    font-size: 12px;
+    text-decoration: none;
+    border: 1px solid var(--border); background: transparent;
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-family: 'JetBrains Mono', monospace;
     }
-    .header-right .btn-primary:hover { background: #33e5ff; }
+    
 
     /* ── Layout ── */
     .layout {
@@ -446,7 +550,7 @@ function buildDocsHTML(spec) {
 
     /* ── Version switcher ── */
     .version-bar {
-      display: flex; gap: 6px; align-items: center;
+      display: block; gap: 6px; align-items: center;
       padding: 12px 24px;
       background: var(--bg2); border-bottom: 1px solid var(--border);
       font-size: 12px;
@@ -477,23 +581,38 @@ function buildDocsHTML(spec) {
       .hero { padding: 24px; }
       .hero h1 { font-size: 22px; }
     }
+
+    @media (max-width: 480px) {
+    .logo-icon {
+        width: 28px;
+        height: 28px;
+        font-size: 14px;
+    }
+}
   </style>
 </head>
-<body>
-
   <!-- Header -->
-  <header class="header">
+  <header class="header" id="docsHeader" style="position:relative;">
     <div class="logo">
-      <div class="logo-mark">IP</div>
+      <div class=logo-icon">⬡</div>
       <div class="logo-text">IP<span>Shield</span></div>
       <div class="logo-badge">API DOCS</div>
     </div>
-    <div class="header-right">
+    <div class="header-right" id="docsHeaderRight">
       <button onclick="copyApiKey()">🔑 Copy API Key</button>
       <a href="/api/docs/openapi.json" target="_blank">↓ OpenAPI JSON</a>
+      <a href="/api/telemetry/dashboard" target="_blank">📊 Telemetry</a>
       <a href="/" class="btn-primary">← Back to App</a>
     </div>
+     <button class="nav-hamburger" aria-label="Open menu" aria-expanded="false" id="mainHamburger">
+    <span></span><span></span><span></span>
+  </button>
+  <nav class="nav-mobile-menu" aria-hidden="true" id="mainMobileMenu"></nav>
   </header>
+
+  <div class="nav-overlay" id="navOverlay"></div>
+
+
 
   <!-- Version bar -->
   <div class="version-bar" id="versionBar">
@@ -506,6 +625,10 @@ function buildDocsHTML(spec) {
       <a href="/api/v1/docs" style="color:var(--text3);font-size:11px;text-decoration:none;margin-right:12px;">v1 Swagger ↗</a>
       <a href="/api/v2/docs" style="color:var(--accent);font-size:11px;text-decoration:none;">v2 Swagger ↗</a>
     </span>
+    <a href="/api/telemetry/dashboard" target="_blank"
+    style="color:var(--low);font-size:11px;text-decoration:none;margin-left:8px;">
+    📊 Live Metrics ↗
+  </a>
   </div>
 
   <div class="layout">
@@ -514,15 +637,15 @@ function buildDocsHTML(spec) {
     <nav class="sidebar" id="sidebar">
       <div class="sidebar-section">
         <div class="sidebar-label">Overview</div>
-        <a class="sidebar-item active" onclick="scrollTo('overview')">
+        <a class="sidebar-item active" onclick="scrollToSection('overview')">
           <span style="font-size:14px;">⬡</span>
           <span class="endpoint-name">Introduction</span>
         </a>
-        <a class="sidebar-item" onclick="scrollTo('auth')">
+        <a class="sidebar-item" onclick="scrollToSection('auth')">
           <span style="font-size:14px;">🔑</span>
           <span class="endpoint-name">Authentication</span>
         </a>
-        <a class="sidebar-item" onclick="scrollTo('rates')">
+        <a class="sidebar-item" onclick="scrollToSection('rates')">
           <span style="font-size:14px;">⏱</span>
           <span class="endpoint-name">Rate Limits</span>
         </a>
@@ -592,6 +715,8 @@ function buildDocsHTML(spec) {
       <!-- Endpoints rendered by JS -->
       <div id="endpointsContainer"></div>
 
+      
+
     </main>
   </div>
 
@@ -600,7 +725,7 @@ function buildDocsHTML(spec) {
     let currentVersion = localStorage.getItem("ipshield_api_version") || "v2";
 
     const TAG_META = {
-      Scoring:      { icon: "⚡", color: "#00e87c", bg: "rgba(0,232,124,0.08)" },
+      Scoring:      { icon: "⚡",  color: "#00e87c", bg: "rgba(0,232,124,0.08)" },
       Intelligence: { icon: "🔍", color: "#00d9ff", bg: "rgba(0,217,255,0.08)" },
       Blacklist:    { icon: "🚫", color: "#ff3355", bg: "rgba(255,51,85,0.08)"  },
       Cases:        { icon: "📁", color: "#ff7700", bg: "rgba(255,119,0,0.08)"  },
@@ -739,6 +864,16 @@ function buildDocsHTML(spec) {
 
       return \`
         <div class="try-section">
+        <!-- Live telemetry context for this endpoint -->
+            <div class="section-label">Live Stats</div>
+        <div id="epctx_${idx}" style="
+          display:flex;gap:12px;flex-wrap:wrap;
+          padding:12px 14px;
+          background:var(--bg2);border:1px solid var(--border);
+          border-radius:8px;margin-bottom:12px;font-size:11px;">
+          <span style="color:var(--text3);">Loading stats…</span>
+        </div>
+
           <div class="section-label">Try It</div>
           <div style="background:var(--bg1);border:1px solid var(--border);border-radius:8px;padding:16px;">
             <div class="try-form">\${inputsHTML}</div>
@@ -812,19 +947,82 @@ function buildDocsHTML(spec) {
       btn.disabled = false; btn.textContent = "▶ Execute";
     }
 
+    async function loadEndpointContext(idx) {
+    const ep      = endpoints[idx];
+    const ctxEl   = document.getElementById("epctx_" + idx);
+    if (!ctxEl) return;
+ 
+    try {
+      const route = encodeURIComponent(ep.method + " " + ep.path);
+      const res   = await fetch(
+        "/api/telemetry/endpoint?route=" + route,
+        { headers: { "x-api-key": API_KEY } }
+      );
+      const ctx = await res.json();
+ 
+      if (!ctx.hasData || ctx.error) {
+        ctxEl.innerHTML = '<span style="color:var(--text3);">No data yet — execute a request to see live stats</span>';
+        return;
+      }
+ 
+      const healthColor =
+        ctx.health === "healthy"  ? "var(--low)" :
+        ctx.health === "warning"  ? "var(--medium)" : "var(--critical)";
+ 
+      const errColor = parseFloat(ctx.errorRate) > 10 ? "var(--critical)"
+                     : parseFloat(ctx.errorRate) > 2  ? "var(--medium)"
+                     : "var(--low)";
+ 
+      ctxEl.innerHTML = \`
+        <div style="display:flex;align-items:center;gap:6px;">
+          <span style="width:7px;height:7px;border-radius:50%;background:${healthColor};display:inline-block;"></span>
+          <span style="font-weight:600;color:${healthColor};text-transform:capitalize;">${ctx.health}</span>
+        </div>
+        <div style="color:var(--text3);">
+          Requests: <strong style="color:var(--text);">${ctx.count.toLocaleString()}</strong>
+        </div>
+        <div style="color:var(--text3);">
+          Error Rate: <strong style="color:${errColor};">${ctx.errorRate}</strong>
+        </div>
+        <div style="color:var(--text3);">
+          Avg: <strong style="color:var(--text);">${ctx.avgMs}ms</strong>
+        </div>
+        <div style="color:var(--text3);">
+          P50: <strong style="color:var(--low);">${ctx.p50}ms</strong>
+        </div>
+        <div style="color:var(--text3);">
+          P95: <strong style="color:var(--medium);">${ctx.p95}ms</strong>
+        </div>
+        <div style="color:var(--text3);">
+          P99: <strong style="color:var(--high);">${ctx.p99}ms</strong>
+        </div>\`;
+    } catch (_) {
+      ctxEl.innerHTML = '<span style="color:var(--text3);">Stats unavailable</span>';
+    }
+  }
+    
+
     function copyResponse(idx) {
       navigator.clipboard.writeText(document.getElementById(\`rbody_\${idx}\`)?.textContent || "");
     }
-
+    
     function toggleEndpoint(id) {
-      document.getElementById(id).classList.toggle("open");
+      const el = document.getElementById(id);
+      el.classList.toggle("open");
+      if (el.classList.contains("open")) {
+        // Load live stats for this endpoint
+        const idx = parseInt(id.replace("ep_", ""));
+        loadEndpointContext(idx);
+      }
     }
 
-    function scrollTo(id) {
+    function scrollToSection(id) {
       document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
     }
+    
+    
 
-    // ── Build sidebar and endpoint sections ────────────────────────────────────
+    // ── Build sidebar and endpoint sections 
     function render() {
       const sidebar    = document.getElementById("sidebarEndpoints");
       const container  = document.getElementById("endpointsContainer");
@@ -851,7 +1049,7 @@ function buildDocsHTML(spec) {
           <div class="sidebar-section" data-tag="\${tag}" style="\${isV2Only && currentVersion === "v1" ? "display:none;" : ""}">
             <div class="sidebar-label" style="color:\${meta.color};">\${meta.icon} \${tag}</div>
             \${eps.map(ep => \`
-              <a class="sidebar-item" onclick="toggleEndpoint('ep_\${ep.idx}');scrollTo('ep_\${ep.idx}')">
+              <a class="sidebar-item" onclick="toggleEndpoint('ep_\${ep.idx}');scrollToSection('ep_\${ep.idx}')">
                 <span class="method-dot" style="background:\${getMethodColor(ep.method)};"></span>
                 <span class="endpoint-name">\${ep.path}</span>
               </a>
@@ -909,12 +1107,105 @@ function buildDocsHTML(spec) {
     // Set initial version
     setVersion(currentVersion);
     render();
+
+    var _docsHamburgerReady = false;
+ 
+function buildDocsHamburger() {
+  const hamburger   = document.getElementById("mainHamburger");
+  const menu        = document.getElementById("mainMobileMenu");
+  const overlay     = document.getElementById("navOverlay");
+  const headerRight = document.getElementById("docsHeaderRight");
+ 
+  // Force overlay z-index inline so nothing overrides it
+  if (overlay) {
+    overlay.style.cssText = "position:fixed;inset:0;z-index:998;background:rgba(0,0,0,0.55);backdrop-filter:blur(1px);display:none;";
+  }
+ 
+  // Rebuild dropdown items
+  menu.innerHTML = "";
+ 
+  headerRight.querySelectorAll("button, a").forEach(el => {
+    const isAnchor = el.tagName === "A";
+    const clone    = document.createElement(isAnchor ? "a" : "button");
+ 
+    clone.textContent = el.textContent.trim();
+    clone.className   = el.className;
+ 
+    if (isAnchor) {
+      clone.href   = el.href;
+      clone.target = el.target || "";
+    }
+ 
+    clone.addEventListener("click", () => {
+      if (!isAnchor) el.click(); // fire original handler for buttons
+      _docsClose();
+    });
+ 
+    menu.appendChild(clone);
+  });
+ 
+  // Attach toggle listeners once only
+  if (!_docsHamburgerReady) {
+    _docsHamburgerReady = true;
+ 
+    hamburger.addEventListener("click", e => {
+      e.stopPropagation();
+      hamburger.getAttribute("aria-expanded") === "true"
+        ? _docsClose() : _docsOpen();
+    });
+ 
+    if (overlay) overlay.addEventListener("click", _docsClose);
+ 
+    document.addEventListener("keydown", e => {
+      if (e.key === "Escape") _docsClose();
+    });
+ 
+    document.addEventListener("click", e => {
+      if (!e.target.closest("#docsHeader") && !e.target.closest("#navOverlay")) {
+        _docsClose();
+      }
+    });
+ 
+    window.matchMedia("(min-width:769px)").addEventListener("change", e => {
+      if (e.matches) _docsClose();
+    });
+  }
+ 
+}
+ 
+function _docsOpen() {
+  const h = document.getElementById("mainHamburger");
+  const m = document.getElementById("mainMobileMenu");
+  const o = document.getElementById("navOverlay");
+  h.setAttribute("aria-expanded", "true");
+  m.classList.add("open");
+  m.removeAttribute("aria-hidden");
+  if (o) o.style.display = "block";
+}
+ 
+function _docsClose() {
+  const h = document.getElementById("mainHamburger");
+  const m = document.getElementById("mainMobileMenu");
+  const o = document.getElementById("navOverlay");
+  h.setAttribute("aria-expanded", "false");
+  m.classList.remove("open");
+  m.setAttribute("aria-hidden", "true");
+  h.focus();
+  if (o) o.style.display = "none";
+}
+ 
+// Call on DOM ready
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", buildDocsHamburger);
+} else {
+  buildDocsHamburger();
+}
   </script>
 </body>
 </html>`;
 }
 
-// ── Build flat endpoint list from OpenAPI spec ────────────────────────────────
+// ── Build flat endpoint list from OpenAPI spec 
 function buildEndpoints(spec) {
   const endpoints = [];
   const METHOD_ORDER = ["GET","POST","PUT","DELETE","PATCH"];
