@@ -188,7 +188,7 @@ function getSummary() {
   };
 }
 
-// ── Get recent requests from ring buffer ──────────────────────────────────────
+// ── Get recent requests from ring buffer
 function getRecentRequests(limit = 50) {
   const result = [];
   const start  = ringCount < RING_SIZE ? 0 : ringHead;

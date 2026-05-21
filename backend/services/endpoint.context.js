@@ -1,5 +1,7 @@
+
+const telemetry = require("../store/telemetry.store");
+
 function getEndpointContext(method, path) {
-  const telemetry = require("../store/telemetry.store");
   const summary   = telemetry.getSummary();
  
   // Normalize path: /score/8.8.8.8 -> /score/:ip

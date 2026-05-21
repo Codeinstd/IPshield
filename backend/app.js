@@ -21,8 +21,8 @@ const errorMiddleware       = require("./middleware/error.middleware");
 const logger                = require("./utils/logger");
 const reportRoutes          = require("./routes/report.routes");
 const timelineRoutes        = require("./routes/timeline.routes");
+const telemetryMiddleware   = require("./middleware/telemetry.middleware");
 const telemetryRoutes       = require("./routes/telemetry.routes");
-const telemetryMiddleware = require("./middleware/telemetry.middleware");
 
 // v2-only Routes
 const blacklistRoutes = require("./routes/blacklist.routes");
@@ -43,24 +43,58 @@ if (process.env.SENTRY_DSN) {
 }
 
 app.use(helmet({
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc:    ["'self'"],
-      scriptSrc:     ["'self'", "https://cdnjs.cloudflare.com", "https://cdn.jsdelivr.net", "'unsafe-inline'"],
-      scriptSrcAttr: ["'unsafe-inline'"],  // ← fixes the inline event handler error
-      styleSrc:      ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://cdnjs.cloudflare.com"],
-      fontSrc:       ["'self'", "https://fonts.gstatic.com"],
-      imgSrc:        ["'self'", "data:",
-        "https://*.basemaps.cartocdn.com",
-        "https://*.cartocdn.com",
-        "https://*.tile.openstreetmap.org",
-        "https://*.openstreetmap.org"
-      ],
-      connectSrc:    ["'self'", "https://api.ipify.org"],
-      workerSrc:     ["'self'", "blob:"],
-      objectSrc:     ["'none'"]
-    }
-  },
+ contentSecurityPolicy: {
+  directives: {
+    defaultSrc: ["'self'"],
+
+    scriptSrc: [
+      "'self'",
+      "'unsafe-inline'",
+      "https://cdnjs.cloudflare.com",
+      "https://cdn.jsdelivr.net",
+      "https://www.googletagmanager.com",
+      "https://www.google-analytics.com"
+    ],
+
+    scriptSrcAttr: ["'unsafe-inline'"],
+
+    styleSrc: [
+      "'self'",
+      "'unsafe-inline'",
+      "https://fonts.googleapis.com",
+      "https://cdnjs.cloudflare.com"
+    ],
+
+    fontSrc: [
+      "'self'",
+      "https://fonts.gstatic.com"
+    ],
+
+    imgSrc: [
+      "'self'",
+      "data:",
+      "https://www.google-analytics.com",
+      "https://*.basemaps.cartocdn.com",
+      "https://*.cartocdn.com",
+      "https://*.tile.openstreetmap.org",
+      "https://*.openstreetmap.org"
+    ],
+
+    connectSrc: [
+      "'self'",
+      "https://api.ipify.org",
+      "https://www.google-analytics.com",
+      "https://region1.google-analytics.com"
+    ],
+
+    workerSrc: [
+      "'self'",
+      "blob:"
+    ],
+
+    objectSrc: ["'none'"]
+  }
+},
   hsts: isProd ? { maxAge: 31536000, includeSubDomains: true } : false
 }
 
@@ -77,8 +111,6 @@ app.use(cors({
 }));
 
 app.use(compression());
-app.use("/api", telemetryMiddleware);
-
 app.use(express.json({ limit: "50kb" }));
 app.use(express.urlencoded({ extended: false }));
 
@@ -120,6 +152,8 @@ const makeRateLimiter = (windowMs, max, message) => rateLimit({
   app.use(p, makeRateLimiter(60 * 1000, 20, "WHOIS rate limit: 20 requests per minute."));
 });
 
+// telemry checker
+app.use("/api", telemetryMiddleware);
 
 // ── Static files  
 app.use(express.static(path.join(__dirname, "../public"), { maxAge: isProd ? "1d" : 0, etag: true }));
@@ -127,17 +161,17 @@ app.use(express.static(path.join(__dirname, "../public"), { maxAge: isProd ? "1d
 
 // ── Health (public — all versions)
 function healthHandler(req, res) {
-  const db      = require("./store/db");
-  const monitor = require("./jobs/monitor.job");
-  const { getSIEMStatus } = require("./services/siem.service");
-  const telemetry  = require("./store/telemetry.store");   
-  const tel        = telemetry.getSummary();  
+  const db                  = require("./store/db");
+  const monitor             = require("./jobs/monitor.job");
+  const { getSIEMStatus }   = require("./services/siem.service");
+  const telemetry           = require("./store/telemetry.store");   
+  const tel                 = telemetry.getSummary();  
 
-  // const version = req.baseUrl?.includes("/v1") ? "v1" : "v2";
+  const version = req.baseUrl?.includes("/v1") ? "v1" : "v2";
   // Detect which version is being called
-  const version = req.path.includes("/v1/") ? "v1"
-                 : req.path.includes("/v2/") ? "v2"
-                 : "v1"; // default
+  // const version = req.path.includes("/v1/") ? "v1"
+  //                : req.path.includes("/v2/") ? "v2"
+  //                : "v1"; // default
   res.json({
     status:      "ok",
     version:     process.env.npm_package_version || "2.2.0",
@@ -149,7 +183,6 @@ function healthHandler(req, res) {
     siem:        getSIEMStatus(),
     memoryMB:    Math.round(process.memoryUsage().heapUsed / 1024 / 1024),
     timestamp:   new Date().toISOString(),
-
     telemetry: {
         totalRequests: tel.requests.total,
         errorRate:     tel.requests.errorRate,
@@ -174,6 +207,8 @@ app.get("/api/v2/health", healthHandler);
 app.use("/api/docs",    docsRoutes);
 app.use("/api/v1/docs", require("./routes/docs.v1.routes"));
 app.use("/api/v2/docs", require("./routes/docs.v2.routes"));
+
+// Telemetry (internal)
 app.use("/api/telemetry",    telemetryRoutes);
 app.use("/api/v1/telemetry", telemetryRoutes);
 app.use("/api/v2/telemetry", telemetryRoutes);

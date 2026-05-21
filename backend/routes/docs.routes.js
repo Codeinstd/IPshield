@@ -1,3 +1,4 @@
+
 const express = require("express");
 const router  = express.Router();
 const spec    = require("../config/openapi");
@@ -604,9 +605,9 @@ try {
       <div class="logo-badge">API DOCS</div>
     </div>
     <div class="header-right" id="docsHeaderRight">
+      <a href="/api/telemetry/dashboard" target="_blank">📊 Telemetry</a>
       <button onclick="copyApiKey()">🔑 Copy API Key</button>
       <a href="/api/docs/openapi.json" target="_blank">↓ OpenAPI JSON</a>
-      <a href="/api/telemetry/dashboard" target="_blank">📊 Telemetry</a>
       <a href="/" class="btn-primary">← Back to App</a>
     </div>
      <button class="nav-hamburger" aria-label="Open menu" aria-expanded="false" id="mainHamburger">
@@ -629,11 +630,8 @@ try {
     <span style="margin-left:auto;">
       <a href="/api/v1/docs" style="color:var(--text3);font-size:11px;text-decoration:none;margin-right:12px;">v1 Swagger ↗</a>
       <a href="/api/v2/docs" style="color:var(--accent);font-size:11px;text-decoration:none;">v2 Swagger ↗</a>
+      <a href="/api/telemetry/dashboard" target="_blank" style="color:var(--low);font-size:11px;text-decoration:none;margin-left:8px;">📊 Live Metrics ↗</a>
     </span>
-    <a href="/api/telemetry/dashboard" target="_blank"
-    style="color:var(--low);font-size:11px;text-decoration:none;margin-left:8px;">
-    📊 Live Metrics ↗
-  </a>
   </div>
 
   <div class="layout">
@@ -869,9 +867,10 @@ try {
 
       return \`
         <div class="try-section">
+
         <!-- Live telemetry context for this endpoint -->
             <div class="section-label">Live Stats</div>
-        <div id="epctx_${idx}" style="
+        <div id="epctx_\${idx}" style="
           display:flex;gap:12px;flex-wrap:wrap;
           padding:12px 14px;
           background:var(--bg2);border:1px solid var(--border);

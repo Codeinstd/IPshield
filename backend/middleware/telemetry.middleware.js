@@ -3,6 +3,7 @@ const telemetry = require("../store/telemetry.store");
 
 // Map Express route patterns from req.route.path + router stack
 function resolveRoute(req) {
+    
   // Try exact route match from express
   if (req.route?.path) {
     const base = req.baseUrl || "";
