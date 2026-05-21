@@ -31,10 +31,11 @@ try {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- Favicon metadata -->
-<link rel="icon" type="image/png" sizes="32x32" href="/favicon.ico/favicon-32x32.png">
-<link rel="icon" type="image/png" sizes="96x96" href="/favicon.ico/favicon-96x96.png">
-<link rel="icon" type="image/png" sizes="16x16" href="/favicon.ico/favicon-16x16.png">
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-W7LXC9M274"></script>
+  <meta name="google-site-verification" content="WhmK3MH3Co3Wu72eOPEMMp5B8vtkFiVcoCP7Js4HGkA" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon.ico/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="96x96" href="/favicon.ico/favicon-96x96.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon.ico/favicon-16x16.png">
   <title>IPShield Docs</title>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <!-- Polyfill BEFORE ReDoc loads -->
