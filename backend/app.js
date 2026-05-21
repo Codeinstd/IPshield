@@ -133,11 +133,11 @@ function healthHandler(req, res) {
   const telemetry  = require("./store/telemetry.store");   
   const tel        = telemetry.getSummary();  
 
-  const version = req.baseUrl?.includes("/v1") ? "v1" : "v2";
+  // const version = req.baseUrl?.includes("/v1") ? "v1" : "v2";
   // Detect which version is being called
-  // const version = req.path.includes("/v1/") ? "v1"
-  //                : req.path.includes("/v2/") ? "v2"
-  //                : "v1"; // default
+  const version = req.path.includes("/v1/") ? "v1"
+                 : req.path.includes("/v2/") ? "v2"
+                 : "v1"; // default
   res.json({
     status:      "ok",
     version:     process.env.npm_package_version || "2.2.0",

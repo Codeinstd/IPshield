@@ -17,8 +17,13 @@ router.get("/", (req, res) => {
 
 function buildDocsHTML(spec) {
   const endpoints = buildEndpoints(spec);
-  const endpointsJSON = JSON.stringify(endpoints);
-  const specJSON = JSON.stringify(spec);
+  let endpointsJSON = "[]";
+
+try {
+  endpointsJSON = JSON.stringify(endpoints);
+} catch (err) {
+  console.error("Failed to serialize endpoints:", err);
+}
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -594,7 +599,7 @@ function buildDocsHTML(spec) {
   <!-- Header -->
   <header class="header" id="docsHeader" style="position:relative;">
     <div class="logo">
-      <div class=logo-icon">⬡</div>
+      <div class="logo-icon">⬡</div>
       <div class="logo-text">IP<span>Shield</span></div>
       <div class="logo-badge">API DOCS</div>
     </div>
@@ -975,26 +980,26 @@ function buildDocsHTML(spec) {
  
       ctxEl.innerHTML = \`
         <div style="display:flex;align-items:center;gap:6px;">
-          <span style="width:7px;height:7px;border-radius:50%;background:${healthColor};display:inline-block;"></span>
-          <span style="font-weight:600;color:${healthColor};text-transform:capitalize;">${ctx.health}</span>
+          <span style="width:7px;height:7px;border-radius:50%;background:\${healthColor};display:inline-block;"></span>
+          <span style="font-weight:600;color:\${healthColor};text-transform:capitalize;">\${ctx.health}</span>
         </div>
         <div style="color:var(--text3);">
-          Requests: <strong style="color:var(--text);">${ctx.count.toLocaleString()}</strong>
+          Requests: <strong style="color:var(--text);">\${ctx.count.toLocaleString()}</strong>
         </div>
         <div style="color:var(--text3);">
-          Error Rate: <strong style="color:${errColor};">${ctx.errorRate}</strong>
+          Error Rate: <strong style="color:\${errColor};">\${ctx.errorRate}</strong>
         </div>
         <div style="color:var(--text3);">
-          Avg: <strong style="color:var(--text);">${ctx.avgMs}ms</strong>
+          Avg: <strong style="color:var(--text);">\${ctx.avgMs}ms</strong>
         </div>
         <div style="color:var(--text3);">
-          P50: <strong style="color:var(--low);">${ctx.p50}ms</strong>
+          P50: <strong style="color:var(--low);">\${ctx.p50}ms</strong>
         </div>
         <div style="color:var(--text3);">
-          P95: <strong style="color:var(--medium);">${ctx.p95}ms</strong>
+          P95: <strong style="color:var(--medium);">\${ctx.p95}ms</strong>
         </div>
         <div style="color:var(--text3);">
-          P99: <strong style="color:var(--high);">${ctx.p99}ms</strong>
+          P99: <strong style="color:var(--high);">\${ctx.p99}ms</strong>
         </div>\`;
     } catch (_) {
       ctxEl.innerHTML = '<span style="color:var(--text3);">Stats unavailable</span>';
