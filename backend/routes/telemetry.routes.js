@@ -35,24 +35,82 @@ function buildDashboard() {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>IPShield — API Telemetry</title>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <title>IPShield — API Observability </title>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-W7LXC9M274"></script>
+  <meta name="google-site-verification" content="WhmK3MH3Co3Wu72eOPEMMp5B8vtkFiVcoCP7Js4HGkA" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon.ico/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="96x96" href="/favicon.ico/favicon-96x96.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon.ico/favicon-16x16.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&amp;family=Syne:wght@400;600;700;800&amp;display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/leaflet.min.css">
   <style>
     :root {
       --bg:#080c0f;--bg1:#0d1117;--bg2:#111820;--bg3:#1a2535;
       --accent:#00d9ff;--low:#00e87c;--medium:#ffcc00;--high:#ff7700;--critical:#ff3355;
       --text:#c9d8e8;--text2:#8fa8bc;--text3:#4a6278;--border:#1e2d3d;
-    }
+      --surface: rgba(17,24,32,0.72); --surface-hover: rgba(24,32,44,0.9);
+      --shadow-lg: 0 10px 30px rgba(0,0,0,0.35),0 0 0 1px rgba(255,255,255,0.03); --blur: blur(14px); }
     * { box-sizing:border-box; margin:0; padding:0; }
     body { background:var(--bg); color:var(--text); font-family:'Inter',sans-serif; min-height:100vh; }
 
     .header {
       background:var(--bg1); border-bottom:1px solid var(--border);
-      padding:0 32px; height:56px; display:flex; align-items:center;
-      justify-content:space-between; position:sticky; top:0; z-index:100;
+      padding:0 42px; height:72px; display:flex; align-items:center;
+      justify-content:space-between; position:sticky; top:0; z-index:100;  backdrop-filter: blur(20px);;
     }
-    .logo { font-size:15px; font-weight:700; }
-    .logo span { color:var(--accent); }
+
+    .stat-card,
+    .sparkline-wrap,
+    .table-wrap {
+      background: var(--surface);
+      backdrop-filter: var(--blur);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .logo-sub {
+    font-size: 10px;
+    color: var(--text3);
+    letter-spacing: 3px;
+    margin-top: 1px;
+    }
+
+      body::before,
+      body::after {
+        content:'';
+        position:fixed;
+        width:500px;
+        height:500px;
+        border-radius:50%;
+        filter:blur(120px);
+        z-index:-1;
+        opacity:0.12;
+      }
+
+      body::before {
+        background:#00d9ff;
+        top:-200px;
+        right:-100px;
+      }
+
+      body::after {
+        background:#ff3355;
+        bottom:-250px;
+        left:-120px;
+      }
+
+    .logo { display: flex; align-items: center; gap: 12px; }
+
+    .logo-icon {
+    width: 30px; height: 30px;
+    border: 1.5px solid #00d9ff; border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    color: #00d9ff; box-shadow: var(--glow-a);
+    animation: pulse-border 3s ease-in-out infinite;
+    }
+    .logo-text { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 22px; letter-spacing: -0.5px; }
+    
+    .logo-text span { color: #00d9ff }
     .header-right { display:flex; align-items:center; gap:12px; font-size:12px; }
     .live-dot {
       width:8px; height:8px; border-radius:50%; background:var(--low);
@@ -88,7 +146,7 @@ function buildDashboard() {
       display:flex; align-items:center; justify-content:space-between;
       margin-bottom:14px;
     }
-    .section-title { font-size:13px; font-weight:700; color:var(--text); letter-spacing:0.5px; }
+    .section-title {font-weight:700; color:var(--text); letter-spacing:0.5px; }
     .section-sub { font-size:11px; color:var(--text3); }
 
     /* Table */
@@ -153,7 +211,12 @@ function buildDashboard() {
 <body>
 
 <div class="header">
-  <div class="logo">IP<span>Shield</span> <span style="color:var(--text3);font-size:12px;font-weight:400;">API Telemetry</span></div>
+  <div class="logo">
+  <div class="logo-icon">⬡</div>
+  <div>
+  <div class="logo-text">IP<span>Shield</span></div>
+  <div class="logo-sub">API Observability</div></div>
+</div>
   <div class="header-right">
     <div class="live-dot"></div>
     <span class="refresh-info">Live · refreshes every 10s</span>

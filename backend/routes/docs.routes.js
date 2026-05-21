@@ -37,7 +37,7 @@ try {
   <link rel="icon" type="image/png" sizes="96x96" href="/favicon.ico/favicon-96x96.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/favicon.ico/favicon-16x16.png">
   <title>IPShield Docs</title>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&amp;family=Syne:wght@400;600;700;800&amp;display=swap" rel="stylesheet">
   <!-- Polyfill BEFORE ReDoc loads -->
     <script>
       const _nativeScrollTo = Element.prototype.scrollTo;
@@ -83,24 +83,51 @@ try {
       flex-direction: column;
     }
 
+    stat-card {
+      transition:
+      transform .25s ease,
+      border-color .25s ease,
+      background .25s ease;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(0,217,255,0.35);
+      background: var(--surface-hover);
+    }
+
+    thead th {
+      position:sticky;
+      top:0;
+      z-index:5;
+      backdrop-filter:blur(10px);
+    }
+
+    .table-wrap {
+      max-height:520px;
+      overflow:auto;
+    }
+
+    .logo-text span { color: var(--accent); }
+
     .nav-hamburger {
-  display: none;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  gap: 5px;
-  width: 40px; height: 40px;
-  margin-left: auto;
-  flex-shrink: 0;
-  background: transparent;
-  border: 1px solid var(--border, #1e3a4a);
-  border-radius: 6px;
-  cursor: pointer;
-  padding: 0;
-  position: relative;
-  z-index: 1000;
-  transition: border-color .2s;
-}
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+    width: 40px; height: 40px;
+    margin-left: auto;
+    flex-shrink: 0;
+    background: transparent;
+    border: 1px solid var(--border, #1e3a4a);
+    border-radius: 6px;
+    cursor: pointer;
+    padding: 0;
+    position: relative;
+    z-index: 1000;
+    transition: border-color .2s;
+  }
 .nav-hamburger:hover,
 .nav-hamburger[aria-expanded="true"] { border-color: var(--accent, #00d4ff); }
  
@@ -116,6 +143,32 @@ try {
 .nav-hamburger[aria-expanded="true"] span:nth-child(2) { opacity:0; transform:scaleX(0); }
 .nav-hamburger[aria-expanded="true"] span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
  
+@media(max-width:768px) {
+  table,
+  thead,
+  tbody,
+  th,
+  td,
+  tr {
+    display:block;
+  }
+
+  thead {
+    display:none;
+  }
+
+  tr {
+    padding:14px;
+    border-bottom:1px solid var(--border);
+  }
+
+  td {
+    display:flex;
+    justify-content:space-between;
+    padding:8px 0;
+  }
+}
+
 .nav-mobile-menu {
   position: absolute;
   top: 100%; left: 0; right: 0;
@@ -149,6 +202,34 @@ try {
   box-sizing: border-box;
   transition: background .15s, color .15s;
 }
+
+.stat-card {
+  animation:fadeUp .5s ease;
+}
+
+@keyframes fadeUp {
+  from {
+    opacity:0;
+    transform:translateY(10px);
+  }
+  to {
+    opacity:1;
+    transform:none;
+  }
+}
+
+* {
+  transition:
+    background .2s ease,
+    border-color .2s ease,
+    color .2s ease;
+}
+
+.row-critical td {
+  background:rgba(255,51,85,0.04);
+}
+  
+
 .nav-mobile-menu button:last-child,
 .nav-mobile-menu a:last-child { border-bottom: none !important; }
 .nav-mobile-menu button:hover,
@@ -183,14 +264,12 @@ try {
     .logo { display: flex; align-items: center; gap: 12px; }
 
     .logo-icon {
-    width: 36px; height: 36px;
-    border: 2px solid #00d9ff; border-radius: 6px;
+    width: 30px; height: 30px;
+    border: 1.5px solid #00d9ff; border-radius: 6px;
     display: flex; align-items: center; justify-content: center;
     color: #00d9ff; box-shadow: var(--glow-a);
     animation: pulse-border 3s ease-in-out infinite;
-  }
-
-    
+    }
     .logo-text { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 22px; letter-spacing: -0.5px; }
     .logo-badge {
       font-size: 10px; font-weight: 700; letter-spacing: 1px;
@@ -429,7 +508,36 @@ try {
       color: var(--text3); text-transform: uppercase;
       margin-bottom: 10px; margin-top: 16px;
     }
+
+    .section-title {
+      font-size:18px;
+      font-weight:700;
+    }
+
+    .section-sub {
+      margin-top:4px;
+      font-size:12px;
+    }
     .section-label:first-child { margin-top: 0; }
+
+    .stat-value {
+      font-size:34px;
+      letter-spacing:-1px;
+    }
+
+    ::-webkit-scrollbar {
+      width:10px;
+      height:10px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background:#1f3348;
+      border-radius:20px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background:#2c4a68;
+    }
 
     /* Description */
     .endpoint-desc { font-size: 13px; color: var(--text2); line-height: 1.7; }
