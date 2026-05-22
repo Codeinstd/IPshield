@@ -1582,8 +1582,24 @@ function _closeMenu() {
   function updateIPList(ips, caseId) {
     const container = document.getElementById("caseIPList");
     const label     = document.getElementById("ipCountLabel");
+    const attachBtn = document.getElementById("caseAttachIPBtn");
+
     if (!container) return;
     if (label) label.textContent = `ATTACHED IPs (${ips.length})`;
+
+     if (attachBtn && currentIP) {
+    const alreadyAttached = ips.some(ip => ip.ip === currentIP);
+    if (alreadyAttached) {
+      attachBtn.textContent       = "✓ Current IP Attached";
+      attachBtn.style.color    = "var(--low)";
+      attachBtn.style.borderColor = "var(--low)";
+      attachBtn.disabled       = false; // still allow opening form for other IPs
+    } else {
+      attachBtn.textContent    = "+ Attach IP";
+      attachBtn.style.color    = "";
+      attachBtn.style.borderColor = "";
+    }
+  }
  
     container.innerHTML = ips.length
       ? `<div style="border:1px solid var(--border);border-radius:8px;overflow:hidden;">
@@ -1815,6 +1831,26 @@ function _closeMenu() {
  
       if (r.status === 409) { errEl.textContent = `${ipVal} is already attached.`; errEl.style.display = "block"; return; }
       if (!r.ok)            { errEl.textContent = r.data?.error || "Failed.";       errEl.style.display = "block"; return; }
+
+      //highlight existing IP
+       document.querySelectorAll(".ci-score").forEach(span => {
+    if (span.dataset.ip === ipVal) {
+      const row = span.closest(".ci-row");
+      if (row) {
+        row.style.background  = "rgba(255,204,0,0.08)";
+        row.style.borderLeft  = "3px solid var(--medium)";
+        row.style.transition  = "all 0.3s";
+        // Scroll it into view
+        row.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        // Fade back after 3 seconds
+        setTimeout(() => {
+          row.style.background = "";
+          row.style.borderLeft = "";
+        }, 3000);
+      }
+    }
+  });
+  return;
  
       // - Clear form
       document.getElementById("attachIPInput").value = "";
@@ -2027,9 +2063,12 @@ function _closeMenu() {
           body:JSON.stringify({ ip, score:result?.score??null, risk_level:result?.riskLevel??null, note:`From score result — ${result?.riskLevel||""} risk` })
         });
         const d = await r.json();
-        if (r.status === 409) { toast(`${ip} already in this case`, "warning"); return; }
-        if (!r.ok)            { toast(d.error || "Failed to attach", "error");  return; }
-        toast(`${ip} attached to case #${caseId}`, "success");
+         if (r.status === 409) {
+            toast(`${ip} is already in case #${caseId}`, "warning");
+              return;
+            }
+          if (!r.ok) { toast(d.error || "Failed to attach", "error"); return; }
+          toast(`${ip} attached to case #${caseId}`, "success");
       });
     });
   } catch (err) {

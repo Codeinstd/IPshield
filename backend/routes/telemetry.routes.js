@@ -137,57 +137,101 @@ function buildDashboard() {
     tr:last-child td { border-bottom:none; }
     tr:hover td { background:rgba(0,217,255,0.02); }
 
-    /* Hide hamburger on desktop */
-    .hamburger {
-      display: none;
-      font-size: 26px;
-      cursor: pointer;
-    }
-
-    /* Mobile menu hidden by default */
-    .mobile-menu {
-      display: none;
-      flex-direction: column;
-      position: absolute;
-      top: 60px;
-      left: 0;
-      right: 0;
-      background: #111;
-      padding: 16px;
-      gap: 12px;
-      z-index: 999;
-    }
-
-    /* Links in mobile menu */
-    .mobile-menu a {
-      color: white;
-      text-decoration: none;
-      padding: 10px;
-      border-radius: 6px;
-      background: rgba(255,255,255,0.05);
-    }
-
-    /* Show hamburger on mobile */
-    @media (max-width: 768px) {
-      .header-right {
-        display: none; /* hide full header actions */
-      }
-
+        /* ── Hamburger ── */
       .hamburger {
-        display: block;
+        display: none;
+        flex-direction: column;
+        justify-content: center;
+        gap: 5px;
+        width: 36px; height: 36px;
+        padding: 6px;
+        background: rgba(255,255,255,0.05);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background 0.2s;
+        flex-shrink: 0;
       }
+      .hamburger:hover { background: rgba(0,217,255,0.1); border-color: var(--accent); }
+      .hamburger span {
+        display: block; width: 100%; height: 2px;
+        background: var(--text2); border-radius: 2px;
+        transition: all 0.25s ease; transform-origin: center;
+      }
+      .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+      .hamburger.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+      .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+      /* ── Overlay ── */
+      .mobile-overlay {
+        display: none; position: fixed; inset: 0;
+        background: rgba(0,0,0,0.6); backdrop-filter: blur(2px);
+        z-index: 200; opacity: 0; transition: opacity 0.25s ease;
+      }
+      .mobile-overlay.visible { opacity: 1; }
+
+      /* ── Drawer ── */
+      .mobile-drawer {
+        position: fixed; top: 0; right: 0;
+        width: min(280px, 85vw); height: 100vh;
+        background: var(--bg1);
+        border-left: 1px solid var(--border);
+        z-index: 201;
+        transform: translateX(100%);
+        transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+        display: flex; flex-direction: column;
+        box-shadow: -8px 0 32px rgba(0,0,0,0.4);
+      }
+      .mobile-drawer.open { transform: translateX(0); }
+
+      .mobile-drawer-header {
+        display: flex; align-items: center;
+        justify-content: space-between;
+        padding: 16px 20px;
+        border-bottom: 1px solid var(--border);
+      }
+      .mobile-close {
+        width: 32px; height: 32px;
+        display: flex; align-items: center; justify-content: center;
+        background: rgba(255,255,255,0.05);
+        border: 1px solid var(--border);
+        border-radius: 6px; color: var(--text2);
+        font-size: 14px; cursor: pointer; transition: all 0.15s;
+      }
+    .mobile-close:hover { background: rgba(255,51,85,0.1); border-color: #ff3355; color: #ff3355; }
+
+    .mobile-drawer-body {
+      display: flex; flex-direction: column;
+      padding: 16px; gap: 8px;
+    }
+    .mobile-status {
+      display: flex; align-items: center; gap: 8px;
+      padding: 10px 14px;
+      background: rgba(0,232,124,0.06);
+      border: 1px solid rgba(0,232,124,0.15);
+      border-radius: 8px;
+      font-size: 12px; color: var(--text2);
+      margin-bottom: 4px;
+    }
+    .mobile-link {
+      display: flex; align-items: center;
+      padding: 12px 14px; border-radius: 8px;
+      text-decoration: none; color: var(--text2);
+      font-size: 14px;
+      border: 1px solid transparent;
+      transition: all 0.15s;
+    }
+    .mobile-link:hover {
+      background: rgba(0,217,255,0.06);
+      color: var(--accent);
+      border-color: rgba(0,217,255,0.2);
     }
 
-    .mobile-menu {
-      display: none;
-    }
-
-    .mobile-menu.open {
-      display: flex;
-    }
-
-    .mobile-menu {
-      transition: all 0.2s ease;
+    /* ── Responsive ── */
+    @media (max-width: 768px) {
+      .header { padding: 0 16px; }
+      .header-right { display: none; }
+      .hamburger { display: flex; }
     }
 
     .mono { font-family:'JetBrains Mono',monospace; }
@@ -241,31 +285,47 @@ function buildDashboard() {
 
 <div class="header">
   <div class="logo">
-  <div class="logo-icon">⬡</div>
-  <div>
-  <div class="logo-text">IP<span>Shield</span></div>
-  <div class="logo-sub">API Observability</div></div>
-</div>
-<div class="hamburger" onclick="toggleMenu()">
-  ☰
-</div>
-<div id="mobileMenu" class="mobile-menu">
-  <a href="/api/docs">Docs</a>
-  <a href="/">App</a>
-
-  <div class="mobile-status">
-    <div class="live-dot"></div>
-    <span>Live · refreshes every 10s</span>
+    <div class="logo-icon">⬡</div>
+    <div>
+      <div class="logo-text">IP<span>Shield</span></div>
+      <div class="logo-sub">API Observability</div>
+    </div>
   </div>
 
-  <div id="lastUpdateMobile">14:11:32</div>
-</div>
   <div class="header-right">
     <div class="live-dot"></div>
     <span class="refresh-info">Live · refreshes every 10s</span>
     <span id="lastUpdate"></span>
     <a href="/api/docs" class="back-link">← Docs</a>
     <a href="/" class="back-link">← App</a>
+  </div>
+
+  <button class="hamburger" id="hamburger" aria-label="Toggle menu">
+    <span></span><span></span><span></span>
+  </button>
+</div>
+
+<!-- Mobile drawer -->
+<div class="mobile-overlay" id="mobileOverlay"></div>
+<div class="mobile-drawer" id="mobileDrawer">
+  <div class="mobile-drawer-header">
+    <div class="logo">
+      <div class="logo-icon">⬡</div>
+      <div>
+        <div class="logo-text">IP<span>Shield</span></div>
+        <div class="logo-sub">API Observability</div>
+      </div>
+    </div>
+    <button class="mobile-close" id="mobileClose">✕</button>
+  </div>
+  <div class="mobile-drawer-body">
+    <div class="mobile-status">
+      <div class="live-dot"></div>
+      <span>Live · refreshes every 10s</span>
+      <span id="lastUpdateMobile" style="font-size:11px;color:var(--text3);font-family:'JetBrains Mono',monospace;margin-left:6px;"></span>
+    </div>
+    <a href="/api/docs" class="mobile-link">← Docs</a>
+    <a href="/" class="mobile-link">← App</a>
   </div>
 </div>
 
@@ -408,9 +468,46 @@ function buildDashboard() {
     </div>\`;
   }
 
-  function toggleMenu() {
-    document.getElementById("mobileMenu").classList.toggle("open");
+  (function () {
+  const hamburger   = document.getElementById('hamburger');
+  const overlay     = document.getElementById('mobileOverlay');
+  const drawer      = document.getElementById('mobileDrawer');
+  const closeBtn    = document.getElementById('mobileClose');
+
+  function openDrawer() {
+    overlay.style.display = 'block';
+    requestAnimationFrame(() => {
+      overlay.classList.add('visible');
+      drawer.classList.add('open');
+      hamburger.classList.add('open');
+    });
+    document.body.style.overflow = 'hidden';
   }
+
+  function closeDrawer() {
+    overlay.classList.remove('visible');
+    drawer.classList.remove('open');
+    hamburger.classList.add('open');
+    hamburger.classList.remove('open');
+    document.body.style.overflow = '';
+    setTimeout(() => { overlay.style.display = 'none'; }, 300);
+  }
+
+  hamburger.addEventListener('click', () =>
+    drawer.classList.contains('open') ? closeDrawer() : openDrawer()
+  );
+  overlay.addEventListener('click', closeDrawer);
+  closeBtn.addEventListener('click', closeDrawer);
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(); });
+
+  // keep mobile last update in sync
+  const origRefresh = window.refresh;
+  window.refresh = async function () {
+    await origRefresh?.();
+    const mob = document.getElementById('lastUpdateMobile');
+    if (mob) mob.textContent = new Date().toLocaleTimeString();
+  };
+})();
 
   function drawSparkline(hourly) {
     const canvas = document.getElementById("trafficCanvas");

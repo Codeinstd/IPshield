@@ -156,15 +156,26 @@ function addCaseIP(caseId, { ip, score, risk_level, note = "" }) {
   caseId = Number(caseId);
   if (db.isAvailable()) {
     try {
-      // Check if IP already attached
-      const existing = db.getDb().prepare("SELECT id FROM case_ips WHERE case_id = ? AND ip = ?").get(caseId, ip);
-      if (existing) return { duplicate: true };
+      // Check duplicate — ANY existing entry for this IP in this case
+      const existing = db.getDb().prepare(
+        "SELECT id FROM case_ips WHERE case_id = ? AND ip = ? LIMIT 1"
+      ).get(caseId, ip);
+
+      if (existing) return { duplicate: true, ipId: existing.id };
+
       db.getDb().prepare(
         "INSERT INTO case_ips (case_id, ip, score, risk_level, note) VALUES (?, ?, ?, ?, ?)"
       ).run(caseId, ip, score || null, risk_level || null, note);
-      db.getDb().prepare("UPDATE cases SET updated_at = datetime('now') WHERE id = ?").run(caseId);
+
+      db.getDb().prepare(
+        "UPDATE cases SET updated_at = datetime('now') WHERE id = ?"
+      ).run(caseId);
+
       return { success: true };
-    } catch (err) { console.error("Add case IP error:", err.message); return { error: err.message }; }
+    } catch (err) {
+      console.error("Add case IP error:", err.message);
+      return { error: err.message };
+    }
   }
   return { success: true };
 }

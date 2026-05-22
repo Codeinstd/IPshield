@@ -102,9 +102,14 @@ router.post("/:id/ips", [
   body("score").optional().isInt({ min: 0, max: 100 }),
   body("risk_level").optional().isIn(["CRITICAL","HIGH","MEDIUM","LOW"])
 ], validate, (req, res) => {
+  
   const result = addCaseIP(parseInt(req.params.id), req.body);
-  if (result.duplicate) return res.status(409).json({ error: "IP already attached to this case" });
-  if (result.error)     return res.status(500).json({ error: result.error });
+  if (result.duplicate) return res.status(409).json({
+    error:   `${req.body.ip} is already attached to this case`,
+    ip:      req.body.ip,
+    case_id: parseInt(req.params.id)
+  });
+if (result.error) return res.status(500).json({ error: result.error });
   res.status(201).json({ message: "IP attached to case" });
 });
 
