@@ -113,7 +113,7 @@ function buildDashboard() {
       background:var(--card-color, var(--accent));
     }
     .stat-label { font-size:10px; color:var(--text3); letter-spacing:1.5px; text-transform:uppercase; margin-bottom:10px; }
-    .stat-value { font-size:28px; font-weight:800; font-family:'JetBrains Mono',monospace; color:var(--card-color,var(--text)); }
+    .stat-value { font-size:28px; font-weight:800; font-family:'Syne', sans-serif; color:var(--card-color,var(--text)); }
     .stat-sub { font-size:11px; color:var(--text3); margin-top:4px; }
 
     /* Section */
@@ -122,7 +122,7 @@ function buildDashboard() {
       display:flex; align-items:center; justify-content:space-between;
       margin-bottom:14px;
     }
-    .section-title {font-weight:700; color:var(--text); letter-spacing:0.5px; }
+    .section-title {font-weight:700; color:var(--text); letter-spacing:0.5px;font-family: 'JetBrains Mono', monospace;}
     .section-sub { font-size:11px; color:var(--text3); }
 
     /* Table */
@@ -212,6 +212,7 @@ function buildDashboard() {
       border-radius: 8px;
       font-size: 12px; color: var(--text2);
       margin-bottom: 4px;
+      font-family: 'JetBrains Mono', monospace;
     }
     .mobile-link {
       display: flex; align-items: center;
@@ -220,6 +221,7 @@ function buildDashboard() {
       font-size: 14px;
       border: 1px solid transparent;
       transition: all 0.15s;
+      font-family: 'JetBrains Mono', monospace;
     }
     .mobile-link:hover {
       background: rgba(0,217,255,0.06);

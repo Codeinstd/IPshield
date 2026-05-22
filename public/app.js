@@ -95,132 +95,89 @@
     "success"
   );
 
-  document.getElementById("mainMobileMenu").innerHTML = "";
-  buildHamburgerMenu;
+  buildHamburgerMenu();
 }
 
   // responsive nav 
+      var _drawerInitialized = false;
 
-  var _hamburgerInitialized = false;
-  function buildHamburgerMenu() {
+    function buildHamburgerMenu() {
   const hamburger   = document.getElementById("mainHamburger");
-  const menu        = document.getElementById("mainMobileMenu");
+  const drawer      = document.getElementById("navDrawer");
   const overlay     = document.getElementById("navOverlay");
+  const drawerBody  = document.getElementById("navDrawerBody");
   const headerRight = document.getElementById("headerRight");
- 
- 
-  // ── Force overlay styles so it always covers everything ──
-  if (overlay) {
-    overlay.style.cssText = `
-      position: fixed;
-      inset: 0;
-      z-index: 998;
-      background: rgba(0,0,0,0.55);
-      backdrop-filter: blur(1px);
-      display: none;
-    `;
-  }
- 
-  // ── Force menu z-index above overlay ──
-  menu.style.zIndex = "999";
- 
-  // ── Force hamburger button z-index ──
-  hamburger.style.zIndex   = "1000";
-  hamburger.style.position = "relative";
- 
-  // ── Rebuild menu items (safe to call on v1/v2 switch) ──
-  menu.innerHTML = "";
- 
+  const drawerVer   = document.getElementById("drawer-version");
+
+  if (!hamburger || !drawer || !drawerBody) return;
+
+  // Sync version label into drawer
+  const ver = document.getElementById("dashboard-version");
+  if (drawerVer && ver) drawerVer.textContent = ver.textContent;
+
+  // ── Rebuild buttons every time ──
+  drawerBody.innerHTML = "";
   headerRight.querySelectorAll("button").forEach(btn => {
     if (btn.style.display === "none") return;
- 
     const clone = document.createElement("button");
     clone.textContent = btn.textContent;
     clone.className   = btn.className;
- 
-    // Preserve V2 badge inline styles
-    if (btn.id === "apiBadge") {
-      clone.style.cssText = btn.style.cssText;
-    }
- 
-    clone.addEventListener("click", () => {
-      btn.click();
-      _closeMenu();
-    });
- 
-    menu.appendChild(clone);
-  });
- 
-  // Status row
-  const statusRow = document.createElement("div");
-  statusRow.className = "mob-status";
-  statusRow.innerHTML = `<span class="mob-dot"></span><span>SYSTEM LIVE</span>`;
-  menu.appendChild(statusRow);
- 
-  // ── Attach listeners ONCE only ──
-  if (!_hamburgerInitialized) {
-    _hamburgerInitialized = true;
- 
-    hamburger.addEventListener("click", (e) => {
-      e.stopPropagation();
-      const isOpen = hamburger.getAttribute("aria-expanded") === "true";
-      isOpen ? _closeMenu() : _openMenu();
-    });
- 
-    if (overlay) {
-      overlay.addEventListener("click", _closeMenu);
-    }
- 
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape") _closeMenu();
-    });
- 
-    document.addEventListener("click", (e) => {
-      if (
-        !e.target.closest("header") &&
-        !e.target.closest("#navOverlay")
-      ) {
-        _closeMenu();
-      }
-    });
- 
-    window.matchMedia("(min-width: 769px)").addEventListener("change", (e) => {
-      if (e.matches) _closeMenu();
-    });
-  }
+    if (btn.id === "apiBadge") clone.style.cssText = btn.style.cssText;
 
+    clone.addEventListener("click", () => {
+      _closeDrawer();                          // close drawer first
+      setTimeout(() => btn.click(), 320);      // fire after drawer finishes closing
+    });
+
+    drawerBody.appendChild(clone);
+  });
+
+  // ── One-time listeners ──
+  if (_drawerInitialized) return;
+  _drawerInitialized = true;
+
+  hamburger.addEventListener("click", (e) => {
+    e.stopPropagation();
+    drawer.classList.contains("open") ? _closeDrawer() : _openDrawer();
+  });
+
+  document.getElementById("navDrawerClose")
+    .addEventListener("click", _closeDrawer);
+  overlay.addEventListener("click", _closeDrawer);
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") _closeDrawer();
+  });
+  window.matchMedia("(min-width: 769px)")
+    .addEventListener("change", (e) => { if (e.matches) _closeDrawer(); });
 }
+
+    function _openDrawer() {
+      const hamburger = document.getElementById("mainHamburger");
+      const drawer    = document.getElementById("navDrawer");
+      const overlay   = document.getElementById("navOverlay");
+      if (!hamburger || !drawer) return;
+
+      hamburger.setAttribute("aria-expanded", "true");
+      drawer.classList.add("open");
+      drawer.removeAttribute("aria-hidden");
+      overlay.classList.add("open");
+      document.body.style.overflow = "hidden";
+    }
+
+    function _closeDrawer() {
+      const hamburger = document.getElementById("mainHamburger");
+      const drawer    = document.getElementById("navDrawer");
+      const overlay   = document.getElementById("navOverlay");
+      if (!hamburger || !drawer) return;
+
+      hamburger.setAttribute("aria-expanded", "false");
+      drawer.classList.remove("open");
+      drawer.setAttribute("aria-hidden", "true");
+      overlay.classList.remove("open");
+      document.body.style.overflow = "";
+      hamburger.focus();
+    }
  
-function _openMenu() {
-  const hamburger = document.getElementById("mainHamburger");
-  const menu      = document.getElementById("mainMobileMenu");
-  const overlay   = document.getElementById("navOverlay");
-  if (!hamburger || !menu) return;
- 
-  hamburger.setAttribute("aria-expanded", "true");
-  menu.classList.add("open");
-  menu.removeAttribute("aria-hidden");
- 
-  if (overlay) {
-    overlay.style.display = "block";   // show overlay
-  }
-}
- 
-function _closeMenu() {
-  const hamburger = document.getElementById("mainHamburger");
-  const menu      = document.getElementById("mainMobileMenu");
-  const overlay   = document.getElementById("navOverlay");
-  if (!hamburger || !menu) return;
- 
-  hamburger.setAttribute("aria-expanded", "false");
-  menu.classList.remove("open");
-  menu.setAttribute("aria-hidden", "true");
-  hamburger.focus(); // fixes aria-hidden focus warning
- 
-  if (overlay) {
-    overlay.style.display = "none";    // hide overlay
-  }
-}
   
   // ── Extra UI 
   function injectExtraUI() {

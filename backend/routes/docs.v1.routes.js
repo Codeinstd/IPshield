@@ -212,6 +212,10 @@ function buildSwaggerHTML(spec, version, accentColor) {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>IPShield API ${version.toUpperCase()} Docs</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.11.0/swagger-ui.min.css">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon.ico/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="96x96" href="/favicon.ico/favicon-96x96.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon.ico/favicon-16x16.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&amp;family=Syne:wght@400;600;700;800&amp;display=swap" rel="stylesheet">
   <style>
 
@@ -374,7 +378,9 @@ function buildSwaggerHTML(spec, version, accentColor) {
     border-radius: 16px;
     font-size: 28px;
     font-weight: 700;
-    color: #fff;
+    display: flex;
+    align-items: flex-start;
+    flex-direction: column;
 }
 
     .swagger-ui .opblock .opblock-summary-description {
@@ -427,7 +433,7 @@ function buildSwaggerHTML(spec, version, accentColor) {
 
     .hero-content h1 {
     margin: 24px 0 12px;
-    font-size: 78px;
+    font-size: 56px;
     line-height: 1;
     font-weight: 800;
     font-family: Syne, sans-serif;
@@ -723,7 +729,7 @@ function buildSwaggerHTML(spec, version, accentColor) {
         <a href="/api/versions">All Versions</a>
         <a href="/" class="docs-back">← Back to App</a>
     </nav>
-    <button class="hamburger" id="hamburger" onclick="toggleMobileNav()" aria-label="Toggle navigation">
+    <button class="hamburger" id="hamburger" aria-label="Toggle navigation">
         <span></span>
         <span></span>
         <span></span>
@@ -731,14 +737,14 @@ function buildSwaggerHTML(spec, version, accentColor) {
 </div>
 
 <!-- Mobile nav modal -->
-<div class="mobile-nav-overlay" id="mobileNavOverlay" onclick="closeMobileNav()"></div>
+<div class="mobile-nav-overlay" id="mobileNavOverlay"></div>
 <div class="mobile-nav-drawer" id="mobileNavDrawer">
     <div class="mobile-nav-header">
         <div style="display:flex;align-items:center;gap:10px;">
             <div class="docs-logo">IP<span>Shield</span></div>
             <span class="version-badge">${version.toUpperCase()}</span>
         </div>
-        <button class="mobile-nav-close" onclick="closeMobileNav()">✕</button>
+        <button class="mobile-nav-close" id="mobileNavClose">✕</button>
     </div>
     <nav class="mobile-nav-links">
         <a href="/api/v1/docs" class="${version === "v1" ? "active" : ""}">
@@ -776,56 +782,62 @@ function buildSwaggerHTML(spec, version, accentColor) {
   <script src="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.11.0/swagger-ui-standalone-preset.min.js"></script>
   <script>
     SwaggerUIBundle({
-      spec: ${JSON.stringify(spec)},
-      dom_id: "#swagger-ui",
-      deepLinking: true,
-      presets: [SwaggerUIBundle.presets.apis, SwaggerUIStandalonePreset],
-      layout: "StandaloneLayout",
-      persistAuthorization: true,
-      displayRequestDuration: true,
-      tryItOutEnabled: true,
-      defaultModelsExpandDepth: 1,
-      requestInterceptor: req => {
-        const key = localStorage.getItem("ipshield_api_key");
-        if (key && !req.headers["x-api-key"]) req.headers["x-api-key"] = key;
-        return req;
-      }
+  spec: ${JSON.stringify(spec)},
+  dom_id: "#swagger-ui",
+  deepLinking: true,
+  presets: [SwaggerUIBundle.presets.apis, SwaggerUIStandalonePreset],
+  layout: "StandaloneLayout",
+  persistAuthorization: true,
+  displayRequestDuration: true,
+  tryItOutEnabled: true,
+  defaultModelsExpandDepth: 1,
+  requestInterceptor: req => {
+    const key = localStorage.getItem("ipshield_api_key");
+    if (key && !req.headers["x-api-key"]) req.headers["x-api-key"] = key;
+    return req;
+  }
+});
+
+(function () {
+  var hamburger = document.getElementById('hamburger');
+  var overlay   = document.getElementById('mobileNavOverlay');
+  var drawer    = document.getElementById('mobileNavDrawer');
+  var closeBtn  = document.getElementById('mobileNavClose');
+
+  if (!hamburger || !overlay || !drawer || !closeBtn) {
+    console.warn('Mobile nav: missing element', { hamburger, overlay, drawer, closeBtn });
+    return;
+  }
+
+  function openMobileNav() {
+    overlay.style.display = 'block';
+    requestAnimationFrame(function () {
+      overlay.classList.add('visible');
+      drawer.classList.add('open');
+      hamburger.classList.add('open');
     });
-  document.addEventListener('DOMContentLoaded', function () {
-    var hamburger = document.getElementById('hamburger');
-    var overlay = document.getElementById('mobileNavOverlay');
-    var drawer = document.getElementById('mobileNavDrawer');
-    var closeBtn = document.getElementById('mobileNavClose');
+    document.body.style.overflow = 'hidden';
+  }
 
-    function openMobileNav() {
-      overlay.style.display = 'block';
-      requestAnimationFrame(function () {
-        overlay.classList.add('visible');
-        drawer.classList.add('open');
-        hamburger.classList.add('open');
-      });
-      document.body.style.overflow = 'hidden';
-    }
+  function closeMobileNav() {
+    overlay.classList.remove('visible');
+    drawer.classList.remove('open');
+    hamburger.classList.remove('open');
+    document.body.style.overflow = '';
+    setTimeout(function () { overlay.style.display = 'none'; }, 300);
+  }
 
-    function closeMobileNav() {
-      overlay.classList.remove('visible');
-      drawer.classList.remove('open');
-      hamburger.classList.remove('open');
-      document.body.style.overflow = '';
-      setTimeout(function () { overlay.style.display = 'none'; }, 300);
-    }
-
-    hamburger.addEventListener('click', function () {
-      drawer.classList.contains('open') ? closeMobileNav() : openMobileNav();
-    });
-
-    overlay.addEventListener('click', closeMobileNav);
-    closeBtn.addEventListener('click', closeMobileNav);
-
-    document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape') closeMobileNav();
-    });
+  hamburger.addEventListener('click', function () {
+    drawer.classList.contains('open') ? closeMobileNav() : openMobileNav();
   });
+
+  overlay.addEventListener('click', closeMobileNav);
+  closeBtn.addEventListener('click', closeMobileNav);
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') closeMobileNav();
+  });
+})();
    
   </script>
 </body>
