@@ -99,7 +99,6 @@ function buildDashboard() {
 
     .container { padding:28px 32px; max-width:1400px; margin:0 auto; }
 
-    /* Stat cards */
     .stats-grid {
       display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
       gap:16px; margin-bottom:28px;
@@ -116,7 +115,6 @@ function buildDashboard() {
     .stat-value { font-size:28px; font-weight:800; font-family:'Syne', sans-serif; color:var(--card-color,var(--text)); }
     .stat-sub { font-size:11px; color:var(--text3); margin-top:4px; }
 
-    /* Section */
     .section { margin-bottom:28px; }
     .section-header {
       display:flex; align-items:center; justify-content:space-between;
@@ -125,7 +123,6 @@ function buildDashboard() {
     .section-title {font-weight:700; color:var(--text); letter-spacing:0.5px;font-family: 'JetBrains Mono', monospace;}
     .section-sub { font-size:11px; color:var(--text3); }
 
-    /* Table */
     .table-wrap {
       background:var(--bg1); border:1px solid var(--border);
       border-radius:10px; overflow:hidden;
@@ -136,59 +133,6 @@ function buildDashboard() {
     td { padding:10px 14px; border-bottom:1px solid var(--border); color:var(--text2); }
     tr:last-child td { border-bottom:none; }
     tr:hover td { background:rgba(0,217,255,0.02); }
-
-    /* Hide hamburger on desktop */
-    .hamburger {
-      display: none;
-      font-size: 26px;
-      cursor: pointer;
-    }
-
-    /* Mobile menu hidden by default */
-    .mobile-menu {
-      display: none;
-      flex-direction: column;
-      position: absolute;
-      top: 60px;
-      left: 0;
-      right: 0;
-      background: #111;
-      padding: 16px;
-      gap: 12px;
-      z-index: 999;
-    }
-
-    /* Links in mobile menu */
-    .mobile-menu a {
-      color: white;
-      text-decoration: none;
-      padding: 10px;
-      border-radius: 6px;
-      background: rgba(255,255,255,0.05);
-    }
-
-    /* Show hamburger on mobile */
-    @media (max-width: 768px) {
-      .header-right {
-        display: none; /* hide full header actions */
-      }
-
-      .hamburger {
-        display: block;
-      }
-    }
-
-    .mobile-menu {
-      display: none;
-    }
-
-    .mobile-menu.open {
-      display: flex;
-    }
-
-    .mobile-menu {
-      transition: all 0.2s ease;
-    }
 
     .mono { font-family:'JetBrains Mono',monospace; }
     .badge {
@@ -204,26 +148,84 @@ function buildDashboard() {
     .status-err { color:var(--critical); font-weight:700; }
     .status-warn{ color:var(--medium); font-weight:700; }
 
-    /* Latency bar */
     .lat-bar-wrap { display:flex; align-items:center; gap:8px; }
     .lat-bar-bg { flex:1; height:4px; background:var(--bg3); border-radius:2px; }
     .lat-bar { height:4px; border-radius:2px; background:var(--accent); min-width:2px; }
     .lat-val { font-size:11px; font-family:'JetBrains Mono',monospace; color:var(--text2); width:50px; text-align:right; }
 
-    /* Sparkline */
     .sparkline-wrap { background:var(--bg1); border:1px solid var(--border); border-radius:10px; padding:18px 20px; }
     .sparkline-title { font-size:12px; color:var(--text2); margin-bottom:12px; }
     canvas { display:block; width:100%; }
 
-    /* Two col grid */
     .two-col { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
     @media(max-width:900px) { .two-col { grid-template-columns:1fr; } }
 
-    /* Error rate bar */
+    .hamburger {
+        display: none;
+        font-size: 26px;
+        cursor: pointer;
+      }
+
+      .drawer-backdrop {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 998;
+        opacity: 0;
+        transition: opacity 0.25s ease;
+      }
+      .drawer-backdrop.open {
+        display: block;
+        opacity: 1;
+      }
+
+      .mobile-menu {
+        display: flex;
+        flex-direction: column;
+        position: fixed;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        width: 260px;
+        background: #111;
+        padding: 20px 16px;
+        gap: 12px;
+        z-index: 999;
+        transform: translateX(100%);
+        transition: transform 0.25s ease;
+      }
+      .mobile-menu.open {
+        transform: translateX(0);
+      }
+   
+      .drawer-close {
+        align-self: flex-end;
+        background: none;
+        border: none;
+        color: white;
+        font-size: 20px;
+        cursor: pointer;
+        padding: 4px 8px;
+        margin-bottom: 8px;
+      }
+
+      .mobile-menu a {
+        color: white;
+        text-decoration: none;
+        padding: 10px;
+        border-radius: 6px;
+        background: rgba(255, 255, 255, 0.05);
+      }
+
+      @media (max-width: 768px) {
+        .header-right { display: none; }
+        .hamburger { display: block; }
+      }
+
     .err-rate-bar-bg { height:6px; background:var(--bg3); border-radius:3px; overflow:hidden; }
     .err-rate-bar { height:6px; border-radius:3px; background:var(--critical); transition:width 0.3s; }
 
-    /* Status code pills */
     .status-pills { display:flex; gap:8px; flex-wrap:wrap; }
     .status-pill {
       padding:5px 12px; border-radius:20px;
@@ -241,25 +243,27 @@ function buildDashboard() {
 
 <div class="header">
   <div class="logo">
-  <div class="logo-icon">⬡</div>
-  <div>
-  <div class="logo-text">IP<span>Shield</span></div>
-  <div class="logo-sub">API Observability</div></div>
-</div>
-<div class="hamburger" onclick="toggleMenu()">
-  ☰
-</div>
-<div id="mobileMenu" class="mobile-menu">
-  <a href="/api/docs">Docs</a>
-  <a href="/">App</a>
+    <div class="logo-icon">⬡</div>
+    <div>
+      <div class="logo-text">IP<span>Shield</span></div>
+      <div class="logo-sub">API Observability</div>
+    </div>
+  </div>
+  <div class="hamburger" onclick="toggleMenu()" aria-label="Open menu">☰</div>
 
-  <div class="mobile-status">
-    <div class="live-dot"></div>
-    <span>Live · refreshes every 10s</span>
+  <div id="drawerBackdrop" class="drawer-backdrop" onclick="toggleMenu()"></div>
+
+  <div id="mobileMenu" class="mobile-menu" role="dialog" aria-label="Navigation">
+    <button class="drawer-close" onclick="toggleMenu()" aria-label="Close menu">✕</button>
+    <a href="/api/docs">Docs</a>
+    <a href="/">App</a>
+    <div class="mobile-status">
+      <div class="live-dot"></div>
+      <span>Live · refreshes every 10s</span>
+    </div>
+    <div id="lastUpdateMobile">14:11:32</div>
   </div>
 
-  <div id="lastUpdateMobile">14:11:32</div>
-</div>
   <div class="header-right">
     <div class="live-dot"></div>
     <span class="refresh-info">Live · refreshes every 10s</span>
@@ -409,8 +413,12 @@ function buildDashboard() {
   }
 
   function toggleMenu() {
-    document.getElementById("mobileMenu").classList.toggle("open");
-  }
+  const menu = document.getElementById("mobileMenu");
+  const backdrop = document.getElementById("drawerBackdrop");
+  const isOpen = menu.classList.toggle("open");
+  backdrop.classList.toggle("open", isOpen);
+  document.body.style.overflow = isOpen ? "hidden" : "";
+}
 
   function drawSparkline(hourly) {
     const canvas = document.getElementById("trafficCanvas");
