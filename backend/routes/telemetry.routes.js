@@ -160,99 +160,170 @@ function buildDashboard() {
     .two-col { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
     @media(max-width:900px) { .two-col { grid-template-columns:1fr; } }
 
-      /* ── Hamburger ── */
-      .hamburger {
-        display: none;
-        flex-direction: column;
-        justify-content: center;
-        gap: 5px;
-        width: 36px; height: 36px;
-        padding: 6px;
-        background: rgba(255,255,255,0.05);
-        border: 1px solid var(--border);
-        border-radius: 8px;
-        cursor: pointer;
-        transition: background 0.2s;
-        flex-shrink: 0;
-      }
-      .hamburger:hover { background: rgba(0,217,255,0.1); border-color: var(--accent); }
-      .hamburger span {
-        display: block; width: 100%; height: 2px;
-        background: var(--text2); border-radius: 2px;
-        transition: all 0.25s ease; transform-origin: center;
-      }
-      .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
-      .hamburger.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
-      .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
-
-      /* ── Overlay ── */
-      .mobile-overlay {
-        display: none; position: fixed; inset: 0;
-        background: rgba(0,0,0,0.6); backdrop-filter: blur(2px);
-        z-index: 200; opacity: 0; transition: opacity 0.25s ease;
-      }
-      .mobile-overlay.visible { opacity: 1; }
-
-      /* ── Drawer ── */
-      .mobile-drawer {
-        position: fixed; top: 0; right: 0;
-        width: min(280px, 85vw); height: 100vh;
-        background: var(--bg1);
-        border-left: 1px solid var(--border);
-        z-index: 201;
-        transform: translateX(100%);
-        transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
-        display: flex; flex-direction: column;
-        box-shadow: -8px 0 32px rgba(0,0,0,0.4);
-      }
-      .mobile-drawer.open { transform: translateX(0); }
-      .mobile-drawer-header {
-        display: flex; align-items: center;
-        justify-content: space-between;
-        padding: 16px 20px;
-        border-bottom: 1px solid var(--border);
-      }
-      .mobile-close {
-        width: 32px; height: 32px;
-        display: flex; align-items: center; justify-content: center;
-        background: rgba(255,255,255,0.05);
-        border: 1px solid var(--border);
-        border-radius: 6px; color: var(--text2);
-        font-size: 14px; cursor: pointer; transition: all 0.15s;
-      }
-      .mobile-close:hover { background: rgba(255,51,85,0.1); border-color: #ff3355; color: #ff3355; }
-      .mobile-drawer-body {
-      display: flex; flex-direction: column;
-      padding: 16px; gap: 8px;
+    
+     
+    .hamburger {
+      display: none;
+      font-size: 26px;
+      cursor: pointer;
+      color: #00e5cc;
+      background: none;
+      border: none;
+      line-height: 1;
     }
-      .mobile-status {
-      display: flex; align-items: center; gap: 8px;
-      padding: 10px 14px;
-      background: rgba(0,232,124,0.06);
-      border: 1px solid rgba(0,232,124,0.15);
-      border-radius: 8px;
-      font-size: 12px; color: var(--text2);
-      margin-bottom: 4px;
+
+    .drawer-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.55);
+      z-index: 998;
+      opacity: 0;
+      transition: opacity 0.25s ease;
     }
-    .mobile-link {
-      display: flex; align-items: center;
-      padding: 12px 14px; border-radius: 8px;
-      text-decoration: none; color: var(--text2);
+    .drawer-backdrop.open {
+      display: block;
+      opacity: 1;
+    }
+
+    
+    .mobile-menu {
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      width: 260px;
+      background: #0e1f2a;
+      border-left: 1px solid #1a3a4a;
+      z-index: 999;
+      transform: translateX(100%);
+      transition: transform 0.25s ease;
+    }
+    .mobile-menu.open {
+      transform: translateX(0);
+    }
+    
+    .drawer-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px;
+      border-bottom: 1px solid #1a3a4a;
+    }
+
+    .drawer-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    
+    .drawer-close {
+      background: none;
+      border: none;
+      color: #4a7a8a;
+      font-size: 18px;
+      cursor: pointer;
+      padding: 4px;
+      line-height: 1;
+    }
+    .drawer-close:hover {
+      color: #00e5cc;
+    }
+
+    .drawer-badge {
+      display: inline-block;
+      margin: 14px 16px 4px;
+      padding: 3px 10px;
+      font-size: 10px;
+      letter-spacing: 0.8px;
+      color: #00e5cc;
+      background: #0a2a3a;
+      border: 1px solid #00e5cc;
+      border-radius: 4px;
+      font-family: monospace;
+    }
+
+   
+    .drawer-nav {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      margin-top: 4px;
+    }
+
+    .drawer-nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 15px 20px;
+      color: #a0c8d8;
       font-size: 14px;
-      border: 1px solid transparent;
-      transition: all 0.15s;
-    }
-    .mobile-link:hover {
-      background: rgba(0,217,255,0.06);
-      color: var(--accent);
-      border-color: rgba(0,217,255,0.2);
+      font-weight: 500;
+      text-decoration: none;
+      border-bottom: 1px solid #0f2535;
+      letter-spacing: 0.3px;
+      transition: background 0.15s, color 0.15s;
     }
 
-     @media (max-width: 768px) {
-      .header { padding: 0 16px; }
-      .header-right { display: none; }
-      .hamburger { display: flex; }
+    .drawer-nav-item:hover,
+    .drawer-nav-item.active {
+      background: #0f2a3a;
+      color: #00e5cc;
+      border-left: 2px solid #00e5cc;
+      padding-left: 18px;
     }
+    .drawer-nav-icon {
+      font-size: 15px;
+    }
+
+   
+    .drawer-footer {
+      border-top: 1px solid #1a3a4a;
+      padding: 12px 0;
+      display: flex;
+      flex-direction: column;
+    }
+    .mobile-status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 20px;
+      color: #4a7a8a;
+      font-size: 12px;
+    }
+
+    #lastUpdateMobile {
+      padding: 2px 20px 10px;
+      color: #3a6a7a;
+      font-size: 12px;
+      font-family: monospace;
+    }
+
+    .drawer-back-item {
+      display: flex;
+      align-items: center;
+      padding: 13px 20px;
+      color: #4a8a9a;
+      font-size: 13px;
+      text-decoration: none;
+      border-top: 1px solid #0f2535;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .drawer-back-item:hover {
+      background: #0f2535;
+      color: #00e5cc;
+    }
+
+    @media (max-width: 768px) {
+      .header-right { display: none; }
+      .hamburger { display: block; }
+    }
+
+
     .err-rate-bar-bg { height:6px; background:var(--bg3); border-radius:3px; overflow:hidden; }
     .err-rate-bar { height:6px; border-radius:3px; background:var(--critical); transition:width 0.3s; }
 
@@ -270,40 +341,49 @@ function buildDashboard() {
   </style>
 </head>
 <body>
-<div class="header-right">
+<div class="header">
+  <div class="logo">
+    <div class="logo-icon">⬡</div>
+    <div>
+      <div class="logo-text">IP<span>Shield</span></div>
+      <div class="logo-sub">API Observability</div>
+    </div>
+  </div>
+  <div class="hamburger" onclick="toggleMenu()" aria-label="Open menu">☰</div>
+
+  <div id="drawerBackdrop" class="drawer-backdrop" onclick="toggleMenu()"></div>
+
+  <div id="mobileMenu" class="mobile-menu" role="dialog" aria-label="Navigation">
+    <div class="drawer-header">
+      <div class="drawer-logo">
+        <div class="logo-icon">⬡</div>
+        <div class="logo-text">IP<span>Shield</span></div>
+      </div>
+      <button class="drawer-close" onclick="toggleMenu()" aria-label="Close menu">✕</button>
+    </div>
+
+    <nav class="drawer-nav">
+      <a href="/api/docs" class="drawer-nav-item">
+      ← Docs
+      </a>
+    </nav>
+
+    <div class="drawer-footer">
+      <div class="mobile-status">
+        <div class="live-dot"></div>
+        <span>Live · refreshes every 10s</span>
+      </div>
+      <div id="lastUpdateMobile">14:11:32</div>
+      <a href="/" class="drawer-back-item">← Back to App</a>
+    </div>
+  </div>
+
+  <div class="header-right">
     <div class="live-dot"></div>
     <span class="refresh-info">Live · refreshes every 10s</span>
     <span id="lastUpdate"></span>
     <a href="/api/docs" class="back-link">← Docs</a>
     <a href="/" class="back-link">← App</a>
-  </div>
-
-  <button class="hamburger" id="hamburger" aria-label="Toggle menu">
-    <span></span><span></span><span></span>
-  </button>
-</div>
-
-<!-- Mobile drawer -->
-<div class="mobile-overlay" id="mobileOverlay"></div>
-<div class="mobile-drawer" id="mobileDrawer">
-  <div class="mobile-drawer-header">
-    <div class="logo">
-      <div class="logo-icon">⬡</div>
-      <div>
-        <div class="logo-text">IP<span>Shield</span></div>
-        <div class="logo-sub">API Observability</div>
-      </div>
-    </div>
-    <button class="mobile-close" id="mobileClose">✕</button>
-  </div>
-  <div class="mobile-drawer-body">
-    <div class="mobile-status">
-      <div class="live-dot"></div>
-      <span>Live · refreshes every 10s</span>
-      <span id="lastUpdateMobile" style="font-size:11px;color:var(--text3);font-family:'JetBrains Mono',monospace;margin-left:6px;"></span>
-    </div>
-    <a href="/api/docs" class="mobile-link">← Docs</a>
-    <a href="/" class="mobile-link">← App</a>
   </div>
 </div>
 
@@ -446,48 +526,21 @@ function buildDashboard() {
     </div>\`;
   }
 
-  function toggleMenu() {
-    document.getElementById("mobileMenu").classList.toggle("open");
-  (function () {
-  const hamburger   = document.getElementById('hamburger');
-  const overlay     = document.getElementById('mobileOverlay');
-  const drawer      = document.getElementById('mobileDrawer');
-  const closeBtn    = document.getElementById('mobileClose');
+    function toggleMenu() {
+  const menu = document.getElementById("mobileMenu");
+  const backdrop = document.getElementById("drawerBackdrop");
+  const isOpen = menu.classList.toggle("open");
+  backdrop.classList.toggle("open", isOpen);
+  document.body.style.overflow = isOpen ? "hidden" : "";
+    }
 
-  function openDrawer() {
-    overlay.style.display = 'block';
-    requestAnimationFrame(() => {
-      overlay.classList.add('visible');
-      drawer.classList.add('open');
-      hamburger.classList.add('open');
+    // Close on Escape key
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        const menu = document.getElementById("mobileMenu");
+        if (menu.classList.contains("open")) toggleMenu();
+      }
     });
-    document.body.style.overflow = 'hidden';
-  }
-
-  function closeDrawer() {
-    overlay.classList.remove('visible');
-    drawer.classList.remove('open');
-    hamburger.classList.add('open');
-    hamburger.classList.remove('open');
-    document.body.style.overflow = '';
-    setTimeout(() => { overlay.style.display = 'none'; }, 300);
-  }
-
-  hamburger.addEventListener('click', () =>
-    drawer.classList.contains('open') ? closeDrawer() : openDrawer()
-  );
-  overlay.addEventListener('click', closeDrawer);
-  closeBtn.addEventListener('click', closeDrawer);
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(); });
-
-  // keep mobile last update in sync
-  const origRefresh = window.refresh;
-  window.refresh = async function () {
-    await origRefresh?.();
-    const mob = document.getElementById('lastUpdateMobile');
-    if (mob) mob.textContent = new Date().toLocaleTimeString();
-  };
-})();
 
   function drawSparkline(hourly) {
     const canvas = document.getElementById("trafficCanvas");
