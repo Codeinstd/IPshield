@@ -358,6 +358,13 @@ function buildDashboard() {
       <div class="logo-sub">API Observability</div>
     </div>
   </div>
+    <div class="header-right">
+    <div class="live-dot"></div>
+    <span class="refresh-info">Live · refreshes every 10s</span>
+    <span id="lastUpdate"></span>
+    <a href="/api/docs" class="back-link">← Docs</a>
+    <a href="/" class="back-link">← App</a>
+  </div>
   <div class="hamburger" onclick="toggleMenu()" aria-label="Open menu">☰</div>
 
   <div id="drawerBackdrop" class="drawer-backdrop" onclick="toggleMenu()"></div>
@@ -385,14 +392,6 @@ function buildDashboard() {
       <a href="/" class="drawer-back-item">← Back to App</a>
     </div>
     </nav>
-  </div>
-
-  <div class="header-right">
-    <div class="live-dot"></div>
-    <span class="refresh-info">Live · refreshes every 10s</span>
-    <span id="lastUpdate"></span>
-    <a href="/api/docs" class="back-link">← Docs</a>
-    <a href="/" class="back-link">← App</a>
   </div>
 </div>
 
