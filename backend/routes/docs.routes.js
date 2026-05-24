@@ -548,7 +548,7 @@ try {
       transform: translateY(-2px);
     }
     .oc-icon { font-size: 22px; margin-bottom: 8px; }
-    .oc-name { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+    .oc-name { font-size: 13px; font-weight: 800; color: var(--text); margin-bottom: 4px;font-family: 'Syne', sans-serif; }
     .oc-count { font-size: 11px; color: var(--text3); }
 
     .copy-btn {
@@ -734,7 +734,7 @@ try {
       .sidebar { display: none; }
       .main { padding: 20px; }
       .hero { padding: 24px; }
-      .hero h1 { font-size: 22px; }
+      .hero h1 { font-size: 22px;font-family: 'Syne', sans-serif;}
     }
 
     @media (max-width: 480px) {
@@ -777,7 +777,6 @@ try {
       <button class="nav-drawer-close" id="docsDrawerClose" aria-label="Close menu">✕</button>
     </div>
     <div class="nav-drawer-body" id="docsDrawerBody">
-      <!-- cloned links/buttons injected by JS -->
     </div>
   </div>
 

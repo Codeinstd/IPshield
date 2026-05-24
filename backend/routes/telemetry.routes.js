@@ -56,7 +56,7 @@ function buildDashboard() {
 
     .header {
       background:var(--bg1); border-bottom:1px solid var(--border);
-      padding:0 42px; height:72px; display:flex; align-items:center;
+      padding:0 32px; height:72px; display:flex; align-items:center;
       justify-content:space-between; position:sticky; top:0; z-index:100;  backdrop-filter: blur(20px);;
     }
 
@@ -166,10 +166,14 @@ function buildDashboard() {
       display: none;
       font-size: 26px;
       cursor: pointer;
-      color: #00e5cc;
-      background: none;
-      border: none;
+      color: #00d4ff;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border, #1e3a4a);
+      border-radius: 8px;
       line-height: 1;
+      height: 32px;
+      width: 32px;
+      padding-left: 3px;
     }
 
     .drawer-backdrop {
@@ -200,6 +204,7 @@ function buildDashboard() {
       z-index: 999;
       transform: translateX(100%);
       transition: transform 0.25s ease;
+      height:100vh
     }
     .mobile-menu.open {
       transform: translateX(0);
@@ -252,6 +257,8 @@ function buildDashboard() {
       flex-direction: column;
       flex: 1;
       margin-top: 4px;
+      gap: 16px;
+      font-family: 'JetBrains Mono', monospace;
     }
 
     .drawer-nav-item {
@@ -266,6 +273,7 @@ function buildDashboard() {
       border-bottom: 1px solid #0f2535;
       letter-spacing: 0.3px;
       transition: background 0.15s, color 0.15s;
+      font-family: 'JetBrains Mono', monospace;
     }
 
     .drawer-nav-item:hover,
@@ -293,13 +301,14 @@ function buildDashboard() {
       padding: 6px 20px;
       color: #4a7a8a;
       font-size: 12px;
+      font-family: 'JetBrains Mono', monospace;
     }
 
     #lastUpdateMobile {
       padding: 2px 20px 10px;
       color: #3a6a7a;
       font-size: 12px;
-      font-family: monospace;
+      font-family: 'JetBrains Mono', monospace;
     }
 
     .drawer-back-item {
@@ -366,16 +375,16 @@ function buildDashboard() {
       <a href="/api/docs" class="drawer-nav-item">
       ← Docs
       </a>
-    </nav>
-
-    <div class="drawer-footer">
+      <div style="display: flex;gap: 16px;flex-direction: column;">
       <div class="mobile-status">
         <div class="live-dot"></div>
         <span>Live · refreshes every 10s</span>
       </div>
       <div id="lastUpdateMobile">14:11:32</div>
+      </div>
       <a href="/" class="drawer-back-item">← Back to App</a>
     </div>
+    </nav>
   </div>
 
   <div class="header-right">
