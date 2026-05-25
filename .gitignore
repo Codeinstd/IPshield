@@ -29,4 +29,4 @@ Thumbs.db
 
 # Build
 dist/
-build/
+build/logs/*.log
