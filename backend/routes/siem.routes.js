@@ -3,6 +3,7 @@ const router  = express.Router();
 const { body, param, validationResult } = require("express-validator");
 const { sendToSIEM, testSIEM, getSIEMStatus, buildGenericPayload } = require("../services/siem.service");
 const logger = require("../utils/logger");
+const { requireAuth, requireRole } = require("../middleware/auth.js");
 
 const FORMATS = [
   { id:"splunk",   label:"Splunk HEC",            description:"Splunk HTTP Event Collector format. Set SIEM_TOKEN to your HEC token." },
@@ -13,12 +14,12 @@ const FORMATS = [
 ];
 
 // GET /api/siem/status
-router.get("/status", (req, res) => {
+router.get("/status", requireAuth, requireRole('readonly'), (req, res) => {
   res.json({ siem: getSIEMStatus() });
 });
 
 // GET /api/siem/formats
-router.get("/formats", (req, res) => {
+router.get("/formats", requireAuth, requireRole('readonly'), (req, res) => {
   res.json({ formats: FORMATS });
 });
 

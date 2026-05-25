@@ -4,8 +4,9 @@ const router  = express.Router();
 const { param, query, validationResult } = require("express-validator");
 const db      = require("../store/db");
 const { getAuditLog } = require("../store/memory.store");
+const { requireAuth, requireRole } = require("../middleware/auth.js");
 
-router.get("/:ip",
+router.get("/:ip", requireAuth, requireRole('readonly'),
   [
     param("ip").trim().notEmpty().custom(ip => {
       if (!/^(\d{1,3}\.){3}\d{1,3}$/.test(ip) && !/^[0-9a-fA-F:]{2,45}$/.test(ip))

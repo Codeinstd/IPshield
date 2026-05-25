@@ -2,6 +2,8 @@
 const express = require("express");
 const router  = express.Router();
 const { body, param, query, validationResult } = require("express-validator");
+const { requireAuth, requireRole } = require("../middleware/auth.js");
+
 const {
   listCases, getCase, createCase, updateCase, deleteCase,
   addCaseIP, removeCaseIP, addCaseNote, deleteCaseNote, getCaseStats

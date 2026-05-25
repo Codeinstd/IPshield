@@ -1,9 +1,10 @@
 const express = require("express");
 const router = express.Router();
+const { requireAuth, requireRole } = require("../middleware/auth.js");
 
 const { getAbuseData } = require("../services/ipIntel.service");
 
-router.get("/:ip", async (req, res) => {
+router.get("/:ip", requireAuth, requireRole('readonly'), async (req, res) => {
   const ip = req.params.ip;
 
   res.setHeader("Content-Type", "text/event-stream");

@@ -2,6 +2,8 @@
 const express = require("express");
 const router  = express.Router();
 const { body, param, query, validationResult } = require("express-validator");
+const { requireAuth, requireRole } = require("../middleware/auth.js");
+
 const {
   listBlacklist, addToBlacklist, updateBlacklist,
   deleteFromBlacklist, bulkDelete, getAllActiveIPs, getStats
@@ -27,7 +29,7 @@ function handleValidation(req, res, next) {
 }
 
 // ── GET /api/blacklist 
-router.get("/", [
+router.get("/", requireAuth, requireRole('readonly'), [
   query("severity").optional().isIn(SEVERITIES),
   query("status").optional().isIn(["active","expired","all"]),
   query("q").optional().trim().isLength({ max: 100 }),
@@ -45,12 +47,12 @@ router.get("/", [
 });
 
 // ── GET /api/blacklist/stats 
-router.get("/stats", (req, res) => {
+router.get("/stats", requireAuth, requireRole('readonly'), (req, res) => {
   res.json(getStats());
 });
 
 // ── GET /api/blacklist/export 
-router.get("/export", [
+router.get("/export", requireAuth, requireRole('readonly'), [
   query("fmt").optional().isIn(["txt","csv","json","nginx","iptables","cisco","paloalto","windows"])
 ], (req, res) => {
   const fmt     = req.query.fmt || "txt";
@@ -144,7 +146,7 @@ router.get("/export", [
 });
 
 // ── POST /api/blacklist 
-router.post("/", [
+router.post("/", requireAuth, requireRole('admin'), [
   ipValidation,
   body("severity").optional().isIn(SEVERITIES),
   body("category").optional().trim().isLength({ max: 100 }),
@@ -163,7 +165,7 @@ router.post("/", [
 });
 
 // ── PUT /api/blacklist/:id 
-router.put("/:id", [
+router.put("/:id",requireAuth, requireRole('admin'), handler [
   param("id").isInt({ min: 1 }),
   body("severity").optional().isIn(SEVERITIES),
   body("category").optional().trim().isLength({ max: 100 }),
@@ -179,7 +181,7 @@ router.put("/:id", [
 });
 
 // ── DELETE /api/blacklist/bulk 
-router.delete("/bulk", [
+router.delete("/bulk", requireAuth, requireRole('admin'), [
   body("ids").isArray({ min: 1 }).withMessage("ids array required"),
   body("ids.*").isInt({ min: 1 })
 ], handleValidation, (req, res) => {
@@ -189,7 +191,7 @@ router.delete("/bulk", [
 });
 
 // ── DELETE /api/blacklist/:id
-router.delete("/:id", [
+router.delete("/:id", requireAuth, requireRole('admin'), [
   param("id").isInt({ min: 1 })
 ], handleValidation, (req, res) => {
   const ok = deleteFromBlacklist(parseInt(req.params.id));

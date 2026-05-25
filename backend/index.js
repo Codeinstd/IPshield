@@ -20,6 +20,7 @@ app.listen(PORT, () => {
 });
 const input = document.getElementById("ipInput");
 const button = document.getElementById("searchBtn");
+const {applyAuth} = require("../middleware/auth.js");
 
 button.addEventListener("click", () => {
   searchIP(input.value);
@@ -35,3 +36,5 @@ function searchIP(ip) {
   console.log("Searching IP:", ip);
   // your API call here
 }
+
+applyAuth(app);

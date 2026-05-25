@@ -3,9 +3,10 @@ const router  = express.Router();
 const { param, validationResult } = require("express-validator");
 const { getFullIntel } = require("../services/ipIntel.service");
 const logger = require("../utils/logger");
+const { requireAuth, requireRole } = require("../middleware/auth.js");
 
 
-router.get("/:ip",
+router.get("/:ip", requireAuth, requireRole('readonly'), 
   [
     param("ip").trim().notEmpty().custom(ip => {
       if (!/^(\d{1,3}\.){3}\d{1,3}$/.test(ip) && !/^[0-9a-fA-F:]{2,45}$/.test(ip))
@@ -188,13 +189,6 @@ function buildPDF(doc, d) {
 
   doc.fontSize(22).font("Helvetica-Bold").fillColor("#ffffff")
      .text(safe(d.ip), M, 70, { align: "right", width: W });
-
-  // doc.fontSize(8).font("Helvetica").fillColor("rgba(255,255,255,0.7)")
-  //    .text(
-  //      `Generated: ${d.meta?.scoredAt ? new Date(d.meta.scoredAt).toUTCString() : new Date().toUTCString()}` +
-  //      (d.meta?.processingMs ? `   |   ${d.meta.processingMs}ms${d.meta.cached ? " (cached)" : ""}` : ""),
-  //      M, 95, { width: W }
-  //    );
 
   // ── Score strip — white background 
   let y = 126;

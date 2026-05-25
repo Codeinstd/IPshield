@@ -19,7 +19,7 @@ function bootstrap() {
         alert_on_change  INTEGER DEFAULT 1
       );
     `);
-    const rows = db.getDb().prepare("SELECT * FROM watchlist").all();
+    const {rows} = await db.query("SELECT * FROM watchlist");
     rows.forEach(r => watchlist.set(r.ip, r));
     console.log(`✓ Watchlist loaded: ${watchlist.size} IPs`);
   } catch (err) {
@@ -43,12 +43,12 @@ function addToWatchlist({ ip, label = "", threshold = 30, alertOnChange = true }
 
   if (db.isAvailable()) {
     try {
-      db.getDb().prepare(`
+      await db.query(`
         INSERT OR REPLACE INTO watchlist
           (ip, label, threshold, last_score, last_risk, last_checked, added_at, alert_on_change)
         VALUES
           (@ip, @label, @threshold, @last_score, @last_risk, @last_checked, @added_at, @alert_on_change)
-      `).run(entry);
+      `, entry);
     } catch (err) {
       console.error("Watchlist insert error:", err.message);
     }
@@ -60,7 +60,7 @@ function removeFromWatchlist(ip) {
   watchlist.delete(ip);
   if (db.isAvailable()) {
     try {
-      db.getDb().prepare("DELETE FROM watchlist WHERE ip = ?").run(ip);
+      await db.query("DELETE FROM watchlist WHERE ip = ?", [ip]);
     } catch (err) {
       console.error("Watchlist delete error:", err.message);
     }
@@ -74,11 +74,11 @@ function updateWatchlistEntry(ip, updates) {
   watchlist.set(ip, entry);
   if (db.isAvailable()) {
     try {
-      db.getDb().prepare(`
+      await db.query(`
         UPDATE watchlist
         SET last_score = @last_score, last_risk = @last_risk, last_checked = @last_checked
         WHERE ip = @ip
-      `).run({ ip, ...updates });
+      `, { ip, ...updates });
     } catch (err) {
       console.error("Watchlist update error:", err.message);
     }

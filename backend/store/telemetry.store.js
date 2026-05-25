@@ -106,13 +106,13 @@ function record({ method, path, route, status, durationMs, reqBytes = 0, resByte
   // ── Persist to SQLite (async, non-blocking) 
   if (db.isAvailable()) {
     try {
-      db.getDb().prepare(`
+      await db.query(`
         INSERT INTO telemetry_requests
           (ts, method, path, route, status, duration_ms, req_bytes, res_bytes, api_key, api_version, ip, error)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-      `).run(ts, method, path, route || path, status, durationMs, reqBytes, resBytes,
+      `, [ts, method, path, route || path, status, durationMs, reqBytes, resBytes,
              apiKey ? apiKey.slice(0, 16) : null, apiVersion || null,
-             clientIp || null, error || null);
+             clientIp || null, error || null]);
     } catch (_) {} // Never let telemetry break the app
   }
 }
@@ -210,7 +210,7 @@ function getHistory({ route, status, limit = 100, from, to } = {}) {
     if (from)   { conds.push("ts >= ?");     params.push(Number(from)); }
     if (to)     { conds.push("ts <= ?");     params.push(Number(to)); }
     const where = conds.length ? `WHERE ${conds.join(" AND ")}` : "";
-    return db.getDb().prepare(
+    return await db.query(
       `SELECT * FROM telemetry_requests ${where} ORDER BY ts DESC LIMIT ?`
     ).all(...params, limit);
   } catch { return []; }

@@ -160,7 +160,7 @@ app.use(express.static(path.join(__dirname, "../public"), { maxAge: isProd ? "1d
 
 
 // ── Health (public — all versions)
-function healthHandler(req, res) {
+async function healthHandler(req, res) {
   const db                  = require("./store/db");
   const monitor             = require("./jobs/monitor.job");
   const { getSIEMStatus }   = require("./services/siem.service");
@@ -178,7 +178,7 @@ function healthHandler(req, res) {
     api_version: version,
     environment: process.env.NODE_ENV || "development",
     uptime:      Math.floor(process.uptime()),
-    db:          db.isAvailable() ? "connected" : "memory-only",
+    db:          await db.isHealthy() ? "connected" : "memory-only",
     monitor:     monitor.getMonitorStatus?.() || {},
     siem:        getSIEMStatus(),
     memoryMB:    Math.round(process.memoryUsage().heapUsed / 1024 / 1024),

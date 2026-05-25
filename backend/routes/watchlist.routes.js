@@ -3,6 +3,7 @@
 const express = require("express");
 const router  = express.Router();
 const { body, param, validationResult } = require("express-validator");
+const { requireAuth, requireRole } = require("../middleware/auth.js");
 
 const {
   addToWatchlist, removeFromWatchlist,
@@ -15,17 +16,17 @@ const { updateWatchlistEntry } = require("../store/watchlist.store");
 const logger                  = require("../utils/logger");
 
 // GET /api/watchlist
-router.get("/", (req, res) => {
+router.get("/", requireAuth, requireRole('readonly'), (req, res) => {
   res.json({ total: getWatchlist().length, monitor: getMonitorStatus(), watchlist: getWatchlist() });
 });
 
 // GET /api/watchlist/status
-router.get("/status", (req, res) => {
+router.get("/status", requireAuth, requireRole('readonly'), (req, res) => {
   res.json(getMonitorStatus());
 });
 
 // POST /api/watchlist
-router.post("/",
+router.post("/", requireAuth, requireRole('admin'),
   [
     body("ip").trim().notEmpty().custom(ip => {
       if (!/^(\d{1,3}\.){3}\d{1,3}$/.test(ip) && !/^[0-9a-fA-F:]{2,45}$/.test(ip))
@@ -57,7 +58,7 @@ router.post("/",
 );
 
 // DELETE /api/watchlist/:ip
-router.delete("/:ip",
+router.delete("/:ip", requireAuth, requireRole('admin'),
   [param("ip").trim().notEmpty()],
   (req, res) => {
     const ip = decodeURIComponent(req.params.ip);
@@ -69,7 +70,7 @@ router.delete("/:ip",
 );
 
 // POST /api/watchlist/poll
-router.post("/poll", async (req, res) => {
+router.post("/poll", requireAuth, requireRole('admin'), async (req, res) => {
   res.json({ message: "Poll triggered" });
   pollWatchlist().catch(err => logger.error("Manual poll error:", err.message));
 });

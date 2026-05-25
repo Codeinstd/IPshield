@@ -55,9 +55,8 @@ function listBlacklist({ severity, status, q, limit = 200, offset = 0 } = {}) {
       if (status === "expired") { conds.push("expires_at IS NOT NULL AND expires_at <= datetime('now')"); }
 
       const where = conds.length ? `WHERE ${conds.join(" AND ")}` : "";
-      const total = db.getDb().prepare(`SELECT COUNT(*) as c FROM blacklist ${where}`).get(...params).c;
-      const rows  = db.getDb().prepare(`SELECT * FROM blacklist ${where} ORDER BY added_at DESC LIMIT ? OFFSET ?`)
-                      .all(...params, limit, offset);
+      const {total} = await db.query(`SELECT COUNT(*) as c FROM blacklist ${where}`, params);const row = rows[0];
+      const {rows}  = await db.query(`SELECT * FROM blacklist ${where} ORDER BY added_at DESC LIMIT ? OFFSET ?`, [...params, limit, offset]);const row = rows[0];
 
       return { total, entries: rows.map(formatEntry) };
     } catch (err) {
@@ -79,9 +78,9 @@ function addToBlacklist({ ip, severity = "HIGH", category = "", reason = "", add
 
    // ── Duplicate check 
   if (db.isAvailable()) {
-    const existing = db.getDb().prepare(
+    const {existing} = await db.query(
       "SELECT id FROM blacklist WHERE ip = ? AND (expires_at IS NULL OR expires_at > datetime('now')) LIMIT 1"
-    ).get(ip);
+    , [ip]    );const row = rows[0];
     if (existing) return { duplicate: true, id: existing.id };
   } else {
     const existing = memStore.find(e => e.ip === ip && (!e.expires_at || new Date(e.expires_at) > new Date()));
@@ -90,12 +89,12 @@ function addToBlacklist({ ip, severity = "HIGH", category = "", reason = "", add
 
   if (db.isAvailable()) {
     try {
-      const result = db.getDb().prepare(`
+      const {result} = await db.query(`
         INSERT INTO blacklist (ip, severity, category, reason, added_by, expires_at, tags)
         VALUES (?, ?, ?, ?, ?, ?, ?)
-      `).run(ip, severity, category, reason, added_by, expires_at || null, tagsJson);
+      `).run(ip, severity, category, reason, added_by, expires_at || null, tagsJson);const row = rows[0];
 
-      return formatEntry(db.getDb().prepare("SELECT * FROM blacklist WHERE id = ?").get(result.lastInsertRowid));
+      return formatEntry(await db.query("SELECT * FROM blacklist WHERE id = ?", [result.lastInsertRowid]));const row = rows[0];
     } catch (err) {
       console.error("Blacklist insert error:", err.message);
       return null;
@@ -119,8 +118,8 @@ function updateBlacklist(id, { severity, category, reason, expires_at, tags }) {
       if (tags       !== undefined) { fields.push("tags = ?");       params.push(JSON.stringify(tags)); }
       if (!fields.length) return null;
 
-      db.getDb().prepare(`UPDATE blacklist SET ${fields.join(", ")} WHERE id = ?`).run(...params, id);
-      const row = db.getDb().prepare("SELECT * FROM blacklist WHERE id = ?").get(id);
+      await db.query(`UPDATE blacklist SET ${fields.join(", ")} WHERE id = ?`, [...params, id]);const row = rows[0];
+      const row = await db.query("SELECT * FROM blacklist WHERE id = ?", [id]);const row = rows[0];
       return row ? formatEntry(row) : null;
     } catch (err) {
       console.error("Blacklist update error:", err.message);
@@ -135,7 +134,7 @@ function updateBlacklist(id, { severity, category, reason, expires_at, tags }) {
 
 function deleteFromBlacklist(id) {
   if (db.isAvailable()) {
-    try { db.getDb().prepare("DELETE FROM blacklist WHERE id = ?").run(id); return true; }
+    try { await db.query("DELETE FROM blacklist WHERE id = ?", [id]); return true; }
     catch (err) { console.error("Blacklist delete error:", err.message); return false; }
   }
   memStore = memStore.filter(e => e.id !== id);
@@ -147,7 +146,7 @@ function bulkDelete(ids) {
   if (db.isAvailable()) {
     try {
       const placeholders = ids.map(() => "?").join(",");
-      const info = db.getDb().prepare(`DELETE FROM blacklist WHERE id IN (${placeholders})`).run(...ids);
+      const {info} = await db.query(`DELETE FROM blacklist WHERE id IN (${placeholders})`, ...ids);const row = rows[0];
       return info.changes;
     } catch (err) { console.error("Blacklist bulk delete error:", err.message); return 0; }
   }
@@ -159,9 +158,10 @@ function bulkDelete(ids) {
 function isBlacklisted(ip) {
   if (db.isAvailable()) {
     try {
-      const row = db.getDb().prepare(
-        "SELECT id FROM blacklist WHERE ip = ? AND (expires_at IS NULL OR expires_at > datetime('now')) LIMIT 1"
-      ).get(ip);
+      const {row} = await db.query(
+        "SELECT id FROM blacklist WHERE ip = ? AND (expires_at IS NULL OR expires_at > datetime('now')) LIMIT 1",
+        [ip]
+      );const row = rows[0];
       return !!row;
     } catch { return false; }
   }
@@ -171,9 +171,9 @@ function isBlacklisted(ip) {
 function getAllActiveIPs() {
   if (db.isAvailable()) {
     try {
-      return db.getDb().prepare(
+      return await db.query(
         "SELECT ip, severity FROM blacklist WHERE expires_at IS NULL OR expires_at > datetime('now') ORDER BY severity DESC"
-      ).all();
+      ).rows.map(r => ({ ip: r.ip, severity: r.severity }));const row = rows[0];
     } catch { return []; }
   }
   return memStore.filter(e => !e.expires_at || new Date(e.expires_at) > new Date());
@@ -182,11 +182,14 @@ function getAllActiveIPs() {
 function getStats() {
   if (db.isAvailable()) {
     try {
-      const total   = db.getDb().prepare("SELECT COUNT(*) as c FROM blacklist").get().c;
-      const active  = db.getDb().prepare("SELECT COUNT(*) as c FROM blacklist WHERE expires_at IS NULL OR expires_at > datetime('now')").get().c;
-      const expired = db.getDb().prepare("SELECT COUNT(*) as c FROM blacklist WHERE expires_at IS NOT NULL AND expires_at <= datetime('now')").get().c;
-      const bySev   = db.getDb().prepare("SELECT severity, COUNT(*) as count FROM blacklist GROUP BY severity").all();
-      return { total, active, expired, bySeverity: Object.fromEntries(bySev.map(r => [r.severity, r.count])) };
+      const {row: totalRow} = await db.query("SELECT COUNT(*) as c FROM blacklist");
+      const total = totalRow.c;
+      const {row: activeRow} = await db.query("SELECT COUNT(*) as c FROM blacklist WHERE expires_at IS NULL OR expires_at > datetime('now')");
+      const active = activeRow.c;
+      const {row: expiredRow} = await db.query("SELECT COUNT(*) as c FROM blacklist WHERE expires_at IS NOT NULL AND expires_at <= datetime('now')");
+      const expired = expiredRow.c;
+      const {rows: bySevRows} = await db.query("SELECT severity, COUNT(*) as count FROM blacklist GROUP BY severity");
+      return { total, active, expired, bySeverity: Object.fromEntries(bySevRows.map(r => [r.severity, r.count])) };
     } catch { return { total: 0, active: 0, expired: 0, bySeverity: {} }; }
   }
   return { total: memStore.length, active: memStore.length, expired: 0, bySeverity: {} };

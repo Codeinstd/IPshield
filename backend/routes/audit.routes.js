@@ -3,9 +3,10 @@ const router          = express.Router();
 const { query, validationResult } = require("express-validator");
 const { getAuditLog } = require("../store/memory.store");
 const db              = require("../store/db");
+const { requireAuth, requireRole } = require("../middleware/auth.js");
 
 // ── GET /api/audit 
-router.get("/", (req, res) => {
+router.get("/", requireAuth, requireRole('readonly'), (req, res) => {
   const limit  = Math.min(parseInt(req.query.limit) || 50, 200);
   const offset = parseInt(req.query.offset) || 0;
 
@@ -25,7 +26,7 @@ router.get("/", (req, res) => {
 });
 
 // ── GET /api/audit/search
-router.get("/search",
+router.get("/search", requireAuth, requireRole('readonly'), 
   [
     query("q").optional().trim().isLength({ max: 100 }),
     query("risk").optional().isIn(["CRITICAL","HIGH","MEDIUM","LOW"]),
@@ -90,14 +91,14 @@ router.get("/search",
 );
 
 // ── GET /api/audit/threats 
-router.get("/threats", (req, res) => {
+router.get("/threats", requireAuth, requireRole('readonly'), (req, res) => {
   const limit   = Math.min(parseInt(req.query.limit) || 20, 100);
   const threats = db.isAvailable() ? db.getTopThreats(limit) : [];
   res.json({ total: threats.length, threats });
 });
 
 // ── GET /api/audit/breakdown 
-router.get("/breakdown", (req, res) => {
+router.get("/breakdown", requireAuth, requireRole('readonly'), (req, res) => {
   if (!db.isAvailable()) {
     const log  = getAuditLog();
     const dist = { CRITICAL: 0, HIGH: 0, MEDIUM: 0, LOW: 0 };

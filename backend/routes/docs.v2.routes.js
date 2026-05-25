@@ -2,6 +2,7 @@
 const express = require("express");
 const router  = express.Router();
 const spec    = require("../config/openapi"); // reuse the full spec
+const { requireAuth, requireRole } = require("../middleware/auth.js");
 const { buildSwaggerHTML } = require("./docs.v1.routes");
 
 // Override servers to point to v2
@@ -34,15 +35,15 @@ const v2spec = {
   ]
 };
 
-// ── Raw spec ──────────────────────────────────────────────────────────────────
-router.get("/openapi.json", (req, res) => {
+// ── Raw spec 
+router.get("/openapi.json", requireAuth, requireRole('readonly'), (req, res) => {
   res.setHeader("Content-Type", "application/json");
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.json(v2spec);
 });
 
-// ── Swagger UI ────────────────────────────────────────────────────────────────
-router.get("/", (req, res) => {
+// ── Swagger UI 
+router.get("/", requireAuth, requireRole('readonly'), (req, res) => {
   res.setHeader("Content-Type", "text/html");
   res.send(buildSwaggerHTML(v2spec, "v2", "#00d9ff"));
 });

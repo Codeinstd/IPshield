@@ -1,138 +1,65 @@
-const path = require("path");
-let db;
+const pg = require('pg');
+const { Pool } = pg;
 
-try {
-  const Database = require("better-sqlite3");
-  const dbPath   = process.env.DB_PATH || path.join(__dirname, "../../ipshield.db");
-  db = new Database(dbPath, { verbose: null });
-  db.pragma("journal_mode = WAL");
-  db.pragma("synchronous = NORMAL");
-  bootstrap();
-  console.log("✓ SQLite connected");
-} catch (err) { db = null; }
-
-function bootstrap() {
-  db.exec(`
-    CREATE TABLE IF NOT EXISTS scores (
-      id          INTEGER PRIMARY KEY AUTOINCREMENT,
-      ip          TEXT    NOT NULL,
-      score       INTEGER NOT NULL,
-      risk_level  TEXT    NOT NULL,
-      action      TEXT    NOT NULL,
-      country     TEXT,
-      city        TEXT,
-      isp         TEXT,
-      is_proxy    INTEGER DEFAULT 0,
-      is_tor      INTEGER DEFAULT 0,
-      is_dc       INTEGER DEFAULT 0,
-      velocity    TEXT,
-      scored_at   INTEGER NOT NULL
-    );
-    CREATE INDEX IF NOT EXISTS idx_scores_ip      ON scores(ip);
-    CREATE INDEX IF NOT EXISTS idx_scores_risk    ON scores(risk_level);
-    CREATE INDEX IF NOT EXISTS idx_scores_at      ON scores(scored_at);
-    CREATE INDEX IF NOT EXISTS idx_scores_score   ON scores(score);
-    CREATE INDEX IF NOT EXISTS idx_scores_country ON scores(country);
-  `);
+if (!process.env.DATABASE_URL) {
+  throw new Error('DATABASE_URL environment variable is required');
 }
 
-function insertScore(result) {
-  if (!db) return;
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  max: 10,
+  idleTimeoutMillis: 30_000,
+  connectionTimeoutMillis: 5_000,
+  ssl: process.env.NODE_ENV === 'production'
+    ? { rejectUnauthorized: false }
+    : false,
+});
+
+pool.on('error', (err) => {
+  console.error('[db] Unexpected pool error:', err.message);
+});
+
+async function query(text, params) {
+  const start = Date.now();
   try {
-    db.prepare(`
-      INSERT INTO scores (ip,score,risk_level,action,country,city,isp,is_proxy,is_tor,is_dc,velocity,scored_at)
-      VALUES (@ip,@score,@riskLevel,@action,@country,@city,@isp,@isProxy,@isTor,@isDc,@velocity,@scoredAt)
-    `).run({
-      ip: result.ip, score: result.score, riskLevel: result.riskLevel,
-      action: result.action, country: result.geo?.country||null, city: result.geo?.city||null,
-      isp: result.network?.isp||null,
-      isProxy: result.intelligence?.isProxy    ? 1 : 0,
-      isTor:   result.intelligence?.isTor      ? 1 : 0,
-      isDc:    result.intelligence?.isDatacenter ? 1 : 0,
-      velocity: result.intelligence?.velocity||null, scoredAt: Date.now()
-    });
-  } catch (err) { console.error("DB insert error:", err.message); }
-}
-
-function getHistory(limit = 100, offset = 0) {
-  if (!db) return [];
-  try { return db.prepare("SELECT * FROM scores ORDER BY scored_at DESC LIMIT ? OFFSET ?").all(limit, offset); }
-  catch { return []; }
-}
-
-function searchHistory(filters = {}, limit = 50, offset = 0, sort = "date_desc") {
-  if (!db) return { total: 0, entries: [] };
-  const conds = [], params = [];
-
-  if (filters.q) {
-    conds.push("(ip LIKE ? OR country LIKE ? OR isp LIKE ?)");
-    const q = `%${filters.q}%`;
-    params.push(q, q, q);
+    const result = await pool.query(text, params);
+    const duration = Date.now() - start;
+    if (process.env.LOG_QUERIES === 'true') {
+      console.debug('[db]', { text, duration, rows: result.rowCount });
+    }
+    return result;
+  } catch (err) {
+    console.error('[db] Query error:', { text, params, error: err.message });
+    throw err;
   }
-  if (filters.risk)            { conds.push("risk_level = ?");  params.push(filters.risk); }
-  if (filters.action)          { conds.push("action = ?");       params.push(filters.action); }
-  if (filters.country)         { conds.push("country LIKE ?");   params.push(`%${filters.country}%`); }
-  if (filters.minScore != null){ conds.push("score >= ?");        params.push(filters.minScore); }
-  if (filters.maxScore != null){ conds.push("score <= ?");        params.push(filters.maxScore); }
-  if (filters.proxy    != null){ conds.push("is_proxy = ?");     params.push(filters.proxy ? 1 : 0); }
-  if (filters.tor      != null){ conds.push("is_tor = ?");       params.push(filters.tor ? 1 : 0); }
-  if (filters.datacenter!=null){ conds.push("is_dc = ?");        params.push(filters.datacenter ? 1 : 0); }
-  if (filters.from)            { conds.push("scored_at >= ?");    params.push(filters.from); }
-  if (filters.to)              { conds.push("scored_at <= ?");    params.push(filters.to); }
+}
 
-  const where   = conds.length ? `WHERE ${conds.join(" AND ")}` : "";
-  const orderBy = { score_desc:"ORDER BY score DESC, scored_at DESC", score_asc:"ORDER BY score ASC", date_asc:"ORDER BY scored_at ASC", date_desc:"ORDER BY scored_at DESC" }[sort] || "ORDER BY scored_at DESC";
+async function getClient() {
+  return pool.connect();
+}
 
+async function transaction(fn) {
+  const client = await pool.connect();
   try {
-    const total   = db.prepare(`SELECT COUNT(*) as c FROM scores ${where}`).get(...params).c;
-    const entries = db.prepare(`SELECT * FROM scores ${where} ${orderBy} LIMIT ? OFFSET ?`).all(...params, limit, offset);
-    return { total, entries };
-  } catch (err) { console.error("DB search error:", err.message); return { total: 0, entries: [] }; }
+    await client.query('BEGIN');
+    const result = await fn(client);
+    await client.query('COMMIT');
+    return result;
+  } catch (err) {
+    await client.query('ROLLBACK');
+    throw err;
+  } finally {
+    client.release();
+  }
 }
 
-function getRiskDistribution() {
-  if (!db) return { CRITICAL:0, HIGH:0, MEDIUM:0, LOW:0 };
+async function isHealthy() {
   try {
-    const rows = db.prepare("SELECT risk_level, COUNT(*) as count FROM scores GROUP BY risk_level").all();
-    const dist = { CRITICAL:0, HIGH:0, MEDIUM:0, LOW:0 };
-    rows.forEach(r => { if (r.risk_level in dist) dist[r.risk_level] = r.count; });
-    return dist;
-  } catch { return { CRITICAL:0, HIGH:0, MEDIUM:0, LOW:0 }; }
+    await pool.query('SELECT 1');
+    return true;
+  } catch {
+    return false;
+  }
 }
 
-function getTotalScored() {
-  if (!db) return 0;
-  try { return db.prepare("SELECT COUNT(*) as c FROM scores").get().c; } catch { return 0; }
-}
-
-function getTopThreats(limit = 10) {
-  if (!db) return [];
-  try {
-    return db.prepare(`SELECT ip,score,risk_level,country,city,scored_at FROM scores WHERE risk_level IN ('CRITICAL','HIGH') ORDER BY score DESC, scored_at DESC LIMIT ?`).all(limit);
-  } catch { return []; }
-}
-
-function getTopCountries(limit = 10) {
-  if (!db) return [];
-  try {
-    return db.prepare(`SELECT country, COUNT(*) as count, ROUND(AVG(score),1) as avg_score FROM scores WHERE country IS NOT NULL AND country != '' GROUP BY country ORDER BY count DESC LIMIT ?`).all(limit);
-  } catch { return []; }
-}
-
-function getTopISPs(limit = 10) {
-  if (!db) return [];
-  try {
-    return db.prepare(`SELECT isp, COUNT(*) as count, ROUND(AVG(score),1) as avg_score FROM scores WHERE isp IS NOT NULL AND isp != '' GROUP BY isp ORDER BY count DESC LIMIT ?`).all(limit);
-  } catch { return []; }
-}
-
-function getDb()       { return db; }
-function isAvailable() { return !!db; }
-function close()       { if (db) { db.close(); db = null; } }
-
-module.exports = {
-  insertScore, getHistory, searchHistory,
-  getRiskDistribution, getTotalScored,
-  getTopThreats, getTopCountries, getTopISPs,
-  isAvailable, close, getDb
-};
+module.exports = { query, getClient, transaction, isHealthy };

@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "start": "node backend/server.js",
-    "build": "npm rebuild better-sqlite3"
+    "build": "npm rebuild better-sqlite3",
+    "migrate": "psql postgresql://ipshield_user:Y0CFPEcwPVxVvb2F00WQd4dfT1ghJ28d@dpg-d8a32828qa3s73eg8a30-a/ipshield -f migrations/001_initial_schema.sql"
   },
   "engines": {
     "node": ">=18.0.0"
@@ -30,10 +31,10 @@
     "node-cache": "^5.1.2",
     "pdf-lib": "^1.17.1",
     "pdfkit": "^0.18.0",
+    "pg": "^8.21.0",
     "winston": "^3.19.0"
   },
   "optionalDependencies": {
-    "@sentry/node": "^10.50.0",
-    "better-sqlite3": "^9.4.3"
+    "@sentry/node": "^10.50.0"
   }
 }

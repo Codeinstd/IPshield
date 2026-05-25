@@ -70,10 +70,10 @@ function listCases({ status, severity, q, limit = 100, offset = 0 } = {}) {
       if (q)        { conds.push("(title LIKE ? OR description LIKE ?)"); params.push(`%${q}%`, `%${q}%`); }
 
       const where = conds.length ? `WHERE ${conds.join(" AND ")}` : "";
-      const total = db.getDb().prepare(
+      const {total} = await db.query(
         `SELECT COUNT(*) as c FROM cases ${where}`
-      ).get(...params).c;
-      const rows = db.getDb().prepare(`
+      , ...params);
+      const {rows} = await db.query(`
         SELECT c.*,
           (SELECT COUNT(*) FROM case_ips   ci WHERE ci.case_id = c.id) as ip_count,
           (SELECT COUNT(*) FROM case_notes cn WHERE cn.case_id = c.id) as note_count
@@ -96,11 +96,11 @@ function getCase(id) {
     id = Number(id);
   if (db.isAvailable()) {
     try {
-      const row   = db.getDb().prepare("SELECT * FROM cases WHERE id = ?").get(id);
+      const {row}   = await db.query("SELECT * FROM cases WHERE id = ?", [id]);
       if (!row) return null;
-      const ips   = db.getDb().prepare("SELECT * FROM case_ips   WHERE case_id = ? ORDER BY added_at DESC").all(id);
-      const notes = db.getDb().prepare("SELECT * FROM case_notes WHERE case_id = ? ORDER BY created_at ASC").all(id);
-      return formatCase(row, ips, notes);
+      const ips   = await db.query("SELECT * FROM case_ips   WHERE case_id = ? ORDER BY added_at DESC", [id]);
+      const notes = await db.query("SELECT * FROM case_notes WHERE case_id = ? ORDER BY created_at ASC", [id]);
+      return formatCase(row, ips.rows, notes.rows);
     } catch (err) { console.error("Get case error:", err.message); return null; }
   }
   return memCases.find(c => c.id === id) || null;
@@ -110,9 +110,9 @@ function createCase({ title, description = "", severity = "MEDIUM", status = "Op
   const tagsJson = JSON.stringify(Array.isArray(tags) ? tags : []);
   if (db.isAvailable()) {
     try {
-      const result = db.getDb().prepare(
+      const {result} = await db.query(
         "INSERT INTO cases (title, description, severity, status, assigned_to, tags) VALUES (?, ?, ?, ?, ?, ?)"
-      ).run(title, description, severity, status, assigned_to, tagsJson);
+      , [title, description, severity, status, assigned_to, tagsJson]);const row = rows[0];
       return getCase(result.lastInsertRowid);
     } catch (err) { console.error("Create case error:", err.message); return null; }
   }
@@ -133,7 +133,7 @@ function updateCase(id, fields) {
       }
       if (!sets.length) return getCase(id);
       sets.push("updated_at = datetime('now')");
-      db.getDb().prepare(`UPDATE cases SET ${sets.join(", ")} WHERE id = ?`).run(...params, id);
+      await db.query(`UPDATE cases SET ${sets.join(", ")} WHERE id = ?`, [...params, id]);
       return getCase(id);
     } catch (err) { console.error("Update case error:", err.message); return null; }
   }
@@ -144,7 +144,7 @@ function updateCase(id, fields) {
 
 function deleteCase(id) {
   if (db.isAvailable()) {
-    try { db.getDb().prepare("DELETE FROM cases WHERE id = ?").run(id); return true; }
+    try { await db.query("DELETE FROM cases WHERE id = ?", [id]); return true; }
     catch (err) { console.error("Delete case error:", err.message); return false; }
   }
   memCases = memCases.filter(c => c.id !== id);
@@ -157,12 +157,12 @@ function addCaseIP(caseId, { ip, score, risk_level, note = "" }) {
   if (db.isAvailable()) {
     try {
       // Check if IP already attached
-      const existing = db.getDb().prepare("SELECT id FROM case_ips WHERE case_id = ? AND ip = ?").get(caseId, ip);
-      if (existing) return { duplicate: true };
-      db.getDb().prepare(
+      const {existing} = await db.query("SELECT id FROM case_ips WHERE case_id = ? AND ip = ?", [caseId, ip]);
+      if (existing.rows[0]) return { duplicate: true };
+      await db.query(
         "INSERT INTO case_ips (case_id, ip, score, risk_level, note) VALUES (?, ?, ?, ?, ?)"
-      ).run(caseId, ip, score || null, risk_level || null, note);
-      db.getDb().prepare("UPDATE cases SET updated_at = datetime('now') WHERE id = ?").run(caseId);
+      , [caseId, ip, score || null, risk_level || null, note]);
+      await db.query("UPDATE cases SET updated_at = datetime('now') WHERE id = ?", [caseId]);const row = rows[0];
       return { success: true };
     } catch (err) { console.error("Add case IP error:", err.message); return { error: err.message }; }
   }
@@ -174,8 +174,8 @@ function removeCaseIP(caseId, ipId) {
   ipId = Number(ipId);
   if (db.isAvailable()) {
     try {
-      db.getDb().prepare("DELETE FROM case_ips WHERE id = ? AND case_id = ?").run(ipId, caseId);
-      db.getDb().prepare("UPDATE cases SET updated_at = datetime('now') WHERE id = ?").run(caseId);
+      await db.query("DELETE FROM case_ips WHERE id = ? AND case_id = ?", [ipId, caseId]);const row = rows[0];
+      await db.query("UPDATE cases SET updated_at = datetime('now') WHERE id = ?", [caseId]);const row = rows[0];
       return true;
     } catch { return false; }
   }
@@ -187,11 +187,11 @@ function addCaseNote(caseId, { note, author = "analyst" }) {
   caseId = Number(caseId);
   if (db.isAvailable()) {
     try {
-      const result = db.getDb().prepare(
+      const {result} = await db.query(
         "INSERT INTO case_notes (case_id, note, author) VALUES (?, ?, ?)"
-      ).run(caseId, note, author);
-      db.getDb().prepare("UPDATE cases SET updated_at = datetime('now') WHERE id = ?").run(caseId);
-      return db.getDb().prepare("SELECT * FROM case_notes WHERE id = ?").get(result.lastInsertRowid);
+      , [caseId, note, author]);const row = rows[0];
+      await db.query("UPDATE cases SET updated_at = datetime('now') WHERE id = ?", [caseId]);
+      return await db.query("SELECT * FROM case_notes WHERE id = ?", [result.lastInsertRowid]).then(res => res.rows[0]);
     } catch (err) { console.error("Add note error:", err.message); return null; }
   }
   return { id: Date.now(), case_id: caseId, note, author, created_at: new Date().toISOString() };
@@ -201,7 +201,7 @@ function deleteCaseNote(caseId, noteId) {
   caseId = Number(caseId);
   noteId = Number(noteId);
   if (db.isAvailable()) {
-    try { db.getDb().prepare("DELETE FROM case_notes WHERE id = ? AND case_id = ?").run(noteId, caseId); return true; }
+    try { await db.query("DELETE FROM case_notes WHERE id = ? AND case_id = ?", [noteId, caseId]); return true; }
     catch { return false; }
   }
   return true;
@@ -211,13 +211,13 @@ function deleteCaseNote(caseId, noteId) {
 function getCaseStats() {
   if (db.isAvailable()) {
     try {
-      const total      = db.getDb().prepare("SELECT COUNT(*) as c FROM cases").get().c;
-      const byStatus   = db.getDb().prepare(
+      const {total}      = await db.query("SELECT COUNT(*) as c FROM cases").then(res => res.rows[0].c);
+      const {byStatus}   = await db.query(
         "SELECT status, COUNT(*) as count FROM cases GROUP BY status"
-      ).all();
-      const bySeverity = db.getDb().prepare(
+      ).then(res => res.rows);
+      const {bySeverity} = await db.query(
         "SELECT severity, COUNT(*) as count FROM cases GROUP BY severity"
-      ).all();
+      ).then(res => res.rows);
       return {
         total,
         byStatus:   Object.fromEntries(byStatus.map(r   => [r.status,   r.count])),

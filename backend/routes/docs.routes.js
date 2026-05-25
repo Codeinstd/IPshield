@@ -2,16 +2,17 @@
 const express = require("express");
 const router  = express.Router();
 const spec    = require("../config/openapi");
+const { requireAuth, requireRole } = require("../middleware/auth.js");
 
 // Raw spec for Postman/external tools
-router.get("/openapi.json", (req, res) => {
+router.get("/openapi.json", requireAuth, requireRole('readonly'), (req, res) => {
   res.setHeader("Content-Type", "application/json");
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.json(spec);
 });
 
 // Custom docs UI
-router.get("/", (req, res) => {
+router.get("/", requireAuth, requireRole('readonly'), (req, res) => {
   res.setHeader("Content-Type", "text/html");
   res.send(buildDocsHTML(spec));
 });
