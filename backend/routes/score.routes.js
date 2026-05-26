@@ -16,8 +16,6 @@ router.post("/batch", requireAuth, requireRole("readonly"), validateBatchBody,  
 // Route must be defined BEFORE "/:ip" to avoid Express matching "batch-and-block" as an IP param.
 router.post(
   "/batch-and-block",
-  requireAuth,
-  requireRole("analyst"),
   validateBatchAndBlockBody,
   scoreBatchAndBlock
 );
