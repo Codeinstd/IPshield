@@ -245,9 +245,6 @@ app.get("/api/versions", versionInfoHandler);
 app.get("/api/v1",       versionInfoHandler);
 app.get("/api/v2",       versionInfoHandler);
 
-
-
-
 // ── Auth middleware 
 app.use("/api/",    authMiddleware);
 app.use("/api/v1/", authMiddleware);

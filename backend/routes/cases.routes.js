@@ -1,7 +1,7 @@
 const express = require("express");
 const router  = express.Router();
 const { body, param, query, validationResult } = require("express-validator");
-const { requireAuth, requireRole } = require("../middleware/auth.js");
+
 
 const {
   listCases, getCase, createCase, updateCase, deleteCase,
@@ -29,7 +29,7 @@ router.get("/stats", requireAuth, requireRole("readonly"), async (req, res) => {
 });
 
 // ── GET /api/cases
-router.get("/", requireAuth, requireRole("readonly"), [
+router.get("/", [
   query("status").optional().isIn(STATUSES),
   query("severity").optional().isIn(SEVERITIES),
   query("q").optional().trim().isLength({ max: 100 }),
@@ -46,7 +46,7 @@ router.get("/", requireAuth, requireRole("readonly"), [
 });
 
 // ── GET /api/cases/:id
-router.get("/:id", requireAuth, requireRole("readonly"), [
+router.get("/:id", [
   param("id").isInt({ min: 1 }),
 ], validate, async (req, res) => {
   try {
@@ -59,7 +59,7 @@ router.get("/:id", requireAuth, requireRole("readonly"), [
 });
 
 // ── POST /api/cases
-router.post("/", requireAuth, requireRole("analyst"), [
+router.post("/",  [
   body("title").trim().notEmpty().isLength({ max: 200 }),
   body("description").optional().trim().isLength({ max: 2000 }),
   body("severity").optional().isIn(SEVERITIES),
@@ -79,7 +79,7 @@ router.post("/", requireAuth, requireRole("analyst"), [
 });
 
 // ── PUT /api/cases/:id
-router.put("/:id", requireAuth, requireRole("analyst"), [
+router.put("/:id", [
   param("id").isInt({ min: 1 }),
   body("title").optional().trim().isLength({ max: 200 }),
   body("description").optional().trim().isLength({ max: 2000 }),
@@ -108,7 +108,7 @@ router.put("/:id", requireAuth, requireRole("analyst"), [
 });
 
 // ── DELETE /api/cases/:id
-router.delete("/:id", requireAuth, requireRole("admin"), [
+router.delete("/:id", [
   param("id").isInt({ min: 1 }),
 ], validate, async (req, res) => {
   try {
@@ -122,7 +122,7 @@ router.delete("/:id", requireAuth, requireRole("admin"), [
 });
 
 // ── POST /api/cases/:id/ips
-router.post("/:id/ips", requireAuth, requireRole("analyst"), [
+router.post("/:id/ips",  [
   param("id").isInt({ min: 1 }),
   body("ip").trim().notEmpty().custom(ip => {
     if (!/^(\d{1,3}\.){3}\d{1,3}$/.test(ip) && !/^[0-9a-fA-F:]{2,45}$/.test(ip))
@@ -144,7 +144,7 @@ router.post("/:id/ips", requireAuth, requireRole("analyst"), [
 });
 
 // ── DELETE /api/cases/:id/ips/:ipId
-router.delete("/:id/ips/:ipId", requireAuth, requireRole("analyst"), [
+router.delete("/:id/ips/:ipId",[
   param("id").isInt({ min: 1 }),
   param("ipId").isInt({ min: 1 }),
 ], validate, async (req, res) => {
@@ -157,7 +157,7 @@ router.delete("/:id/ips/:ipId", requireAuth, requireRole("analyst"), [
 });
 
 // ── POST /api/cases/:id/notes
-router.post("/:id/notes", requireAuth, requireRole("analyst"), [
+router.post("/:id/notes", [
   param("id").isInt({ min: 1 }),
   body("note").trim().notEmpty().isLength({ max: 2000 }),
   body("author").optional().trim().isLength({ max: 100 }),
@@ -173,7 +173,7 @@ router.post("/:id/notes", requireAuth, requireRole("analyst"), [
 });
 
 // ── DELETE /api/cases/:id/notes/:noteId
-router.delete("/:id/notes/:noteId", requireAuth, requireRole("analyst"), [
+router.delete("/:id/notes/:noteId",  [
   param("id").isInt({ min: 1 }),
   param("noteId").isInt({ min: 1 }),
 ], validate, async (req, res) => {
