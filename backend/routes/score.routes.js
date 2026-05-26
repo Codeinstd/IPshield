@@ -4,7 +4,7 @@ const router   = express.Router();
 const { scoreIP, scoreBatch }              = require("../controllers/score.controller");
 const { scoreBatchandBlock }              = require("../controllers/scoreBatchandBlock.controller");
 const { validateIPParam, validateBatchBody } = require("../middleware/validateIP.middleware");
-const { validateBatchAndBlockBody }        = require("../middleware/validateBatchAndBlock.middleware");
+const { validateBatchAndBlockBody }        = require("../middleware/validateBatchAndBlock.middleware.js");
 const { requireAuth, requireRole }         = require("../middleware/auth.js");
 
 // Existing routes (unchanged)
@@ -16,7 +16,7 @@ router.post("/batch", requireAuth, requireRole("readonly"), validateBatchBody,  
 // Route must be defined BEFORE "/:ip" to avoid Express matching "batch-and-block" as an IP param.
 router.post(
   "/batch-and-block",
-  validateBatchandBlockBody,
+  validateBatchAndBlockBody,
   scoreBatchandBlock
 );
 
