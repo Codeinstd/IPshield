@@ -109,7 +109,7 @@ async function insertBlacklist({ ip, severity, reason, added_by, tags, expires_a
 
 // ─── controller 
 
-exports.scoreBatchAndBlock = async (req, res, next) => {
+exports.scoreBatchandBlock = async (req, res, next) => {
   try {
     const {
       ips,

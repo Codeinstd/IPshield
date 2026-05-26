@@ -11,7 +11,7 @@ function isValidIP(ip) {
   return typeof ip === "string" && net.isIP(ip) !== 0;
 }
 
-exports.validateBatchAndBlockBody = (req, res, next) => {
+exports.validateBatchandBlockBody = (req, res, next) => {
   const {
     ips,
     auto_block_threshold,
