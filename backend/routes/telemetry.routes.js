@@ -109,8 +109,7 @@ function buildDashboard() {
       padding:18px 20px; position:relative; overflow:hidden;
     }
     .stat-card::before {
-      content:''; position:absolute; top:0; left:0; right:0; height:2px;
-      background:var(--card-color, var(--accent));
+      content:''; position:absolute; top:0; left:0; right:0; height:2px; 
     }
     .stat-label { font-size:10px; color:var(--text3); letter-spacing:1.5px; text-transform:uppercase; margin-bottom:10px; }
     .stat-value { font-size:28px; font-weight:800; font-family:'Syne', sans-serif; color:var(--card-color,var(--text)); }

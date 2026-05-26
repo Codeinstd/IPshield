@@ -1,4 +1,3 @@
-
 const express = require("express");
 const router  = express.Router();
 const { body, param, query, validationResult } = require("express-validator");
@@ -19,81 +18,111 @@ function validate(req, res, next) {
   next();
 }
 
-// ── GET /api/cases/stats 
-router.get("/stats", (req, res) => res.json(getCaseStats()));
+// ── GET /api/cases/stats
+router.get("/stats", requireAuth, requireRole("readonly"), async (req, res) => {
+  try {
+    const stats = await getCaseStats();
+    res.json(stats);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to load stats" });
+  }
+});
 
-// ── GET /api/cases 
-router.get("/", [
+// ── GET /api/cases
+router.get("/", requireAuth, requireRole("readonly"), [
   query("status").optional().isIn(STATUSES),
   query("severity").optional().isIn(SEVERITIES),
   query("q").optional().trim().isLength({ max: 100 }),
   query("limit").optional().isInt({ min: 1, max: 200 }),
-  query("offset").optional().isInt({ min: 0 })
-], validate, (req, res) => {
-  const { status, severity, q, limit = 100, offset = 0 } = req.query;
-  const result = listCases({ status, severity, q, limit: parseInt(limit), offset: parseInt(offset) });
-  res.json(result);
+  query("offset").optional().isInt({ min: 0 }),
+], validate, async (req, res) => {
+  try {
+    const { status, severity, q, limit = 100, offset = 0 } = req.query;
+    const result = await listCases({ status, severity, q, limit: parseInt(limit), offset: parseInt(offset) });
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to load cases" });
+  }
 });
 
-// ── GET /api/cases/:id 
-router.get("/:id", [param("id").isInt({ min: 1 })], validate, (req, res) => {
-  const c = getCase(parseInt(req.params.id));
-  if (!c) return res.status(404).json({ error: "Case not found" });
-  res.json(c);
+// ── GET /api/cases/:id
+router.get("/:id", requireAuth, requireRole("readonly"), [
+  param("id").isInt({ min: 1 }),
+], validate, async (req, res) => {
+  try {
+    const c = await getCase(parseInt(req.params.id));
+    if (!c) return res.status(404).json({ error: "Case not found" });
+    res.json(c);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to load case" });
+  }
 });
 
-// ── POST /api/cases 
-router.post("/", [
+// ── POST /api/cases
+router.post("/", requireAuth, requireRole("analyst"), [
   body("title").trim().notEmpty().isLength({ max: 200 }),
   body("description").optional().trim().isLength({ max: 2000 }),
   body("severity").optional().isIn(SEVERITIES),
   body("status").optional().isIn(STATUSES),
   body("assigned_to").optional().trim().isLength({ max: 100 }),
-  body("tags").optional().isArray()
-], validate, (req, res) => {
-  const { title, description, severity, status, assigned_to, tags } = req.body;
-  const c = createCase({ title, description, severity, status, assigned_to, tags });
-  if (!c) return res.status(500).json({ error: "Failed to create case" });
-  logger.info(`Case created: #${c.id} — ${title}`);
-  res.status(201).json(c);
+  body("tags").optional().isArray(),
+], validate, async (req, res) => {
+  try {
+    const { title, description, severity, status, assigned_to, tags } = req.body;
+    const c = await createCase({ title, description, severity, status, assigned_to, tags });
+    if (!c) return res.status(500).json({ error: "Failed to create case" });
+    logger.info(`Case created: #${c.id} — ${title}`);
+    res.status(201).json(c);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to create case" });
+  }
 });
 
-// ── PUT /api/cases/:id 
-router.put("/:id", [
+// ── PUT /api/cases/:id
+router.put("/:id", requireAuth, requireRole("analyst"), [
   param("id").isInt({ min: 1 }),
   body("title").optional().trim().isLength({ max: 200 }),
   body("description").optional().trim().isLength({ max: 2000 }),
   body("severity").optional().isIn(SEVERITIES),
   body("status").optional().isIn(STATUSES),
   body("assigned_to").optional().trim().isLength({ max: 100 }),
-  body("tags").optional().isArray()
-], validate, (req, res) => {
-  const id = parseInt(req.params.id);
-  const fields = { ...req.body };
+  body("tags").optional().isArray(),
+], validate, async (req, res) => {
+  try {
+    const id     = parseInt(req.params.id);
+    const fields = { ...req.body };
 
-  // Auto set closed_at when status becomes Closed/Resolved
-  if (["Closed","Resolved"].includes(fields.status)) {
-    fields.closed_at = new Date().toISOString();
-  } else if (fields.status && !["Closed","Resolved"].includes(fields.status)) {
-    fields.closed_at = null;
+    if (["Closed","Resolved"].includes(fields.status)) {
+      fields.closed_at = new Date().toISOString();
+    } else if (fields.status && !["Closed","Resolved"].includes(fields.status)) {
+      fields.closed_at = null;
+    }
+
+    const c = await updateCase(id, fields);
+    if (!c) return res.status(404).json({ error: "Case not found" });
+    logger.info(`Case updated: #${id}`);
+    res.json(c);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to update case" });
   }
-
-  const c = updateCase(id, fields);
-  if (!c) return res.status(404).json({ error: "Case not found" });
-  logger.info(`Case updated: #${id}`);
-  res.json(c);
 });
 
-// ── DELETE /api/cases/:id 
-router.delete("/:id", [param("id").isInt({ min: 1 })], validate, (req, res) => {
-  const ok = deleteCase(parseInt(req.params.id));
-  if (!ok) return res.status(404).json({ error: "Case not found" });
-  logger.info(`Case deleted: #${req.params.id}`);
-  res.json({ message: "Case deleted" });
+// ── DELETE /api/cases/:id
+router.delete("/:id", requireAuth, requireRole("admin"), [
+  param("id").isInt({ min: 1 }),
+], validate, async (req, res) => {
+  try {
+    const ok = await deleteCase(parseInt(req.params.id));
+    if (!ok) return res.status(404).json({ error: "Case not found" });
+    logger.info(`Case deleted: #${req.params.id}`);
+    res.json({ message: "Case deleted" });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to delete case" });
+  }
 });
 
 // ── POST /api/cases/:id/ips
-router.post("/:id/ips", [
+router.post("/:id/ips", requireAuth, requireRole("analyst"), [
   param("id").isInt({ min: 1 }),
   body("ip").trim().notEmpty().custom(ip => {
     if (!/^(\d{1,3}\.){3}\d{1,3}$/.test(ip) && !/^[0-9a-fA-F:]{2,45}$/.test(ip))
@@ -102,42 +131,58 @@ router.post("/:id/ips", [
   }),
   body("note").optional().trim().isLength({ max: 500 }),
   body("score").optional().isInt({ min: 0, max: 100 }),
-  body("risk_level").optional().isIn(["CRITICAL","HIGH","MEDIUM","LOW"])
-], validate, (req, res) => {
-  const result = addCaseIP(parseInt(req.params.id), req.body);
-  if (result.duplicate) return res.status(409).json({ error: "IP already attached to this case" });
-  if (result.error)     return res.status(500).json({ error: result.error });
-  res.status(201).json({ message: "IP attached to case" });
+  body("risk_level").optional().isIn(["CRITICAL","HIGH","MEDIUM","LOW"]),
+], validate, async (req, res) => {
+  try {
+    const result = await addCaseIP(parseInt(req.params.id), req.body);
+    if (result.duplicate) return res.status(409).json({ error: "IP already attached to this case" });
+    if (result.error)     return res.status(500).json({ error: result.error });
+    res.status(201).json({ message: "IP attached to case" });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to attach IP" });
+  }
 });
 
-// ── DELETE /api/cases/:id/ips/:ipId 
-router.delete("/:id/ips/:ipId", [
+// ── DELETE /api/cases/:id/ips/:ipId
+router.delete("/:id/ips/:ipId", requireAuth, requireRole("analyst"), [
   param("id").isInt({ min: 1 }),
-  param("ipId").isInt({ min: 1 })
-], validate, (req, res) => {
-  removeCaseIP(parseInt(req.params.id), parseInt(req.params.ipId));
-  res.json({ message: "IP removed from case" });
+  param("ipId").isInt({ min: 1 }),
+], validate, async (req, res) => {
+  try {
+    await removeCaseIP(parseInt(req.params.id), parseInt(req.params.ipId));
+    res.json({ message: "IP removed from case" });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to remove IP" });
+  }
 });
 
-// ── POST /api/cases/:id/notes 
-router.post("/:id/notes", [
+// ── POST /api/cases/:id/notes
+router.post("/:id/notes", requireAuth, requireRole("analyst"), [
   param("id").isInt({ min: 1 }),
   body("note").trim().notEmpty().isLength({ max: 2000 }),
-  body("author").optional().trim().isLength({ max: 100 })
-], validate, (req, res) => {
-  const { note, author } = req.body;
-  const result = addCaseNote(parseInt(req.params.id), { note, author });
-  if (!result) return res.status(500).json({ error: "Failed to add note" });
-  res.status(201).json(result);
+  body("author").optional().trim().isLength({ max: 100 }),
+], validate, async (req, res) => {
+  try {
+    const { note, author } = req.body;
+    const result = await addCaseNote(parseInt(req.params.id), { note, author });
+    if (!result) return res.status(500).json({ error: "Failed to add note" });
+    res.status(201).json(result);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to add note" });
+  }
 });
 
-// ── DELETE /api/cases/:id/notes/:noteId 
-router.delete("/:id/notes/:noteId", [
+// ── DELETE /api/cases/:id/notes/:noteId
+router.delete("/:id/notes/:noteId", requireAuth, requireRole("analyst"), [
   param("id").isInt({ min: 1 }),
-  param("noteId").isInt({ min: 1 })
-], validate, (req, res) => {
-  deleteCaseNote(parseInt(req.params.id), parseInt(req.params.noteId));
-  res.json({ message: "Note deleted" });
+  param("noteId").isInt({ min: 1 }),
+], validate, async (req, res) => {
+  try {
+    await deleteCaseNote(parseInt(req.params.id), parseInt(req.params.noteId));
+    res.json({ message: "Note deleted" });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to delete note" });
+  }
 });
 
 module.exports = router;

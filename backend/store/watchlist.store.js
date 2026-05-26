@@ -1,87 +1,93 @@
-
 const db = require("./db");
 
 // In-memory map — always in sync with DB
 const watchlist = new Map();
 
-function bootstrap() {
-  if (!db.isAvailable()) return;
+async function bootstrap() {
   try {
-    db.getDb().exec(`
+    await db.query(`
       CREATE TABLE IF NOT EXISTS watchlist (
-        ip               TEXT    PRIMARY KEY,
-        label            TEXT,
-        threshold        INTEGER DEFAULT 30,
-        last_score       INTEGER DEFAULT 0,
-        last_risk        TEXT    DEFAULT 'UNKNOWN',
-        last_checked     INTEGER DEFAULT 0,
-        added_at         INTEGER NOT NULL,
-        alert_on_change  INTEGER DEFAULT 1
-      );
+        ip              TEXT PRIMARY KEY,
+        label           TEXT,
+        threshold       INTEGER DEFAULT 30,
+        last_score      INTEGER DEFAULT 0,
+        last_risk       TEXT    DEFAULT 'UNKNOWN',
+        last_checked    BIGINT  DEFAULT 0,
+        added_at        BIGINT  NOT NULL,
+        alert_on_change BOOLEAN DEFAULT TRUE
+      )
     `);
-    const {rows} = await db.query("SELECT * FROM watchlist");
-    rows.forEach(r => watchlist.set(r.ip, r));
+
+    const result = await db.query("SELECT * FROM watchlist");
+    result.rows.forEach((r) => {
+      watchlist.set(r.ip, { ...r, alert_on_change: !!r.alert_on_change });
+    });
     console.log(`✓ Watchlist loaded: ${watchlist.size} IPs`);
   } catch (err) {
     console.error("Watchlist bootstrap error:", err.message);
   }
 }
 
-function addToWatchlist({ ip, label = "", threshold = 30, alertOnChange = true }) {
+async function addToWatchlist({ ip, label = "", threshold = 30, alertOnChange = true }) {
   const entry = {
     ip,
-    label:           label || ip,
-    threshold:       parseInt(threshold),
-    last_score:      0,
-    last_risk:       "UNKNOWN",
-    last_checked:    0,
-    added_at:        Date.now(),
-    alert_on_change: alertOnChange ? 1 : 0
+    label:          label || ip,
+    threshold:      parseInt(threshold, 10),
+    last_score:     0,
+    last_risk:      "UNKNOWN",
+    last_checked:   0,
+    added_at:       Date.now(),
+    alert_on_change: alertOnChange
   };
 
   watchlist.set(ip, entry);
 
-  if (db.isAvailable()) {
-    try {
-      await db.query(`
-        INSERT OR REPLACE INTO watchlist
-          (ip, label, threshold, last_score, last_risk, last_checked, added_at, alert_on_change)
-        VALUES
-          (@ip, @label, @threshold, @last_score, @last_risk, @last_checked, @added_at, @alert_on_change)
-      `, entry);
-    } catch (err) {
-      console.error("Watchlist insert error:", err.message);
-    }
+  try {
+    await db.query(
+      `INSERT INTO watchlist
+         (ip, label, threshold, last_score, last_risk, last_checked, added_at, alert_on_change)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
+       ON CONFLICT (ip) DO UPDATE SET
+         label           = EXCLUDED.label,
+         threshold       = EXCLUDED.threshold,
+         last_score      = EXCLUDED.last_score,
+         last_risk       = EXCLUDED.last_risk,
+         last_checked    = EXCLUDED.last_checked,
+         added_at        = EXCLUDED.added_at,
+         alert_on_change = EXCLUDED.alert_on_change`,
+      [entry.ip, entry.label, entry.threshold, entry.last_score,
+       entry.last_risk, entry.last_checked, entry.added_at, entry.alert_on_change]
+    );
+  } catch (err) {
+    console.error("Watchlist insert error:", err.message);
   }
+
   return entry;
 }
 
-function removeFromWatchlist(ip) {
+async function removeFromWatchlist(ip) {
   watchlist.delete(ip);
-  if (db.isAvailable()) {
-    try {
-      await db.query("DELETE FROM watchlist WHERE ip = ?", [ip]);
-    } catch (err) {
-      console.error("Watchlist delete error:", err.message);
-    }
+  try {
+    await db.query("DELETE FROM watchlist WHERE ip = $1", [ip]);
+  } catch (err) {
+    console.error("Watchlist delete error:", err.message);
   }
 }
 
-function updateWatchlistEntry(ip, updates) {
+async function updateWatchlistEntry(ip, updates) {
   const entry = watchlist.get(ip);
   if (!entry) return;
   Object.assign(entry, updates);
   watchlist.set(ip, entry);
-  if (db.isAvailable()) {
-    try {
-      await db.query(`
-        UPDATE watchlist
-        SET last_score = @last_score, last_risk = @last_risk, last_checked = @last_checked
-        WHERE ip = @ip
-      `, { ip, ...updates });
-    } catch (err) {
-      console.error("Watchlist update error:", err.message);
-    }
+  try {
+    await db.query(
+      `UPDATE watchlist
+       SET last_score = $1, last_risk = $2, last_checked = $3
+       WHERE ip = $4`,
+      [entry.last_score, entry.last_risk, entry.last_checked, ip]
+    );
+  } catch (err) {
+    console.error("Watchlist update error:", err.message);
   }
 }
 
@@ -93,7 +99,7 @@ function isWatched(ip)    { return watchlist.has(ip); }
 function getWatchedIP(ip) { return watchlist.get(ip) || null; }
 function watchlistSize()  { return watchlist.size; }
 
-try { bootstrap(); } catch (_) {}
+bootstrap().catch(() => {});
 
 module.exports = {
   addToWatchlist, removeFromWatchlist, updateWatchlistEntry,

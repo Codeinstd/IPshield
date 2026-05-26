@@ -4,7 +4,7 @@ const { sendToSIEM }      = require("../services/siem.service");
 const { addAudit }        = require("../store/memory.store");
 const db                  = require("../store/db");
 const logger              = require("../utils/logger");
-const { isBlacklisted, getDb} = require("../store/blacklist.store");
+const { isBlacklisted }   = require("../store/blacklist.store");
 
 exports.scoreIP = async (req, res, next) => {
   try {
@@ -13,36 +13,62 @@ exports.scoreIP = async (req, res, next) => {
 
     const result = await getFullIntel(ip);
 
-    // Check blacklist
-    let blacklistEntry = null;
+    // Check blacklist via Postgres
     try {
-      const db = require("../store/db");
-      if (db.isAvailable()) {
-        blacklistEntry = db.getDb().prepare(
-          "SELECT * FROM blacklist WHERE ip = ? AND (expires_at IS NULL OR expires_at > datetime('now')) LIMIT 1"
-        ).get(ip);
+      const blRes = await db.query(
+        `SELECT * FROM blacklist
+         WHERE ip = $1
+           AND (expires_at IS NULL OR expires_at > NOW())
+         LIMIT 1`,
+        [ip]
+      );
+      if (blRes.rows.length) {
+        const bl = blRes.rows[0];
+        result.blacklisted = {
+          id:         bl.id,
+          severity:   bl.severity,
+          category:   bl.category   || null,
+          reason:     bl.reason     || null,
+          added_by:   bl.added_by   || null,
+          added_at:   bl.added_at   || null,
+          expires_at: bl.expires_at || null,
+          tags:       Array.isArray(bl.tags) ? bl.tags : [],
+        };
+      } else {
+        result.blacklisted = null;
       }
-    } catch (_) {}
-
-    if (blacklistEntry) {
-      result.blacklisted = {
-        id:        blacklistEntry.id,
-        severity:  blacklistEntry.severity,
-        category:  blacklistEntry.category  || null,
-        reason:    blacklistEntry.reason    || null,
-        added_by:  blacklistEntry.added_by  || null,
-        added_at:  blacklistEntry.added_at  || null,
-        expires_at:blacklistEntry.expires_at|| null,
-        tags:      JSON.parse(blacklistEntry.tags || "[]")
-      };
-    } else {
+    } catch (_) {
       result.blacklisted = null;
     }
 
-    addAudit(result);
-    db.insertScore(result);
+    // Persist to audit_log
+    try {
+      await db.query(
+        `INSERT INTO audit_log
+           (ip, score, risk_level, action, is_proxy, is_tor, is_datacenter,
+            country, isp, asn, cached, scored_at)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,NOW())`,
+        [
+          result.ip,
+          result.score,
+          result.riskLevel,
+          result.action      || null,
+          result.intelligence?.isProxy      || false,
+          result.intelligence?.isTor        || false,
+          result.intelligence?.isDatacenter || false,
+          result.geo?.country  || null,
+          result.network?.isp  || null,
+          result.network?.asn  || null,
+          result.meta?.cached  || false,
+        ]
+      );
+    } catch (dbErr) {
+      logger.error("audit_log insert error:", dbErr.message);
+    }
 
-    // Fire-and-forget — never block the response
+    addAudit(result);
+
+    // Fire-and-forget
     alertIfCritical(result).catch(() => {});
     sendToSIEM(result).catch(() => {});
 
@@ -59,22 +85,46 @@ exports.scoreBatch = async (req, res, next) => {
 
     const results = await Promise.allSettled(ips.map(ip => getFullIntel(ip)));
 
-    const output = results.map((r, i) => {
+    const output = await Promise.all(results.map(async (r, i) => {
       if (r.status === "fulfilled") {
-        addAudit(r.value);
-        db.insertScore(r.value);
-        alertIfCritical(r.value).catch(() => {});
-        sendToSIEM(r.value).catch(() => {});
-        return r.value;
+        const result = r.value;
+
+        // Persist to audit_log
+        try {
+          await db.query(
+            `INSERT INTO audit_log
+               (ip, score, risk_level, action, is_proxy, is_tor, is_datacenter,
+                country, isp, asn, cached, scored_at)
+             VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,NOW())`,
+            [
+              result.ip,
+              result.score,
+              result.riskLevel,
+              result.action      || null,
+              result.intelligence?.isProxy      || false,
+              result.intelligence?.isTor        || false,
+              result.intelligence?.isDatacenter || false,
+              result.geo?.country  || null,
+              result.network?.isp  || null,
+              result.network?.asn  || null,
+              result.meta?.cached  || false,
+            ]
+          );
+        } catch (_) {}
+
+        addAudit(result);
+        alertIfCritical(result).catch(() => {});
+        sendToSIEM(result).catch(() => {});
+        return result;
       }
       return { ip: ips[i], error: r.reason?.message || "Failed", score: null };
-    });
+    }));
 
     res.json({
       total:   output.length,
       scored:  output.filter(r => r.score != null).length,
       failed:  output.filter(r => r.error).length,
-      results: output
+      results: output,
     });
   } catch (err) {
     next(err);

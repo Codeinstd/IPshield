@@ -1,4 +1,3 @@
-
 const express = require("express");
 const router  = express.Router();
 const { param, query, validationResult } = require("express-validator");
@@ -13,9 +12,9 @@ router.get("/:ip", requireAuth, requireRole('readonly'),
         throw new Error("Invalid IP address");
       return true;
     }),
-    query("limit").optional().isInt({ min: 5, max: 200 })
+    query("limit").optional().isInt({ min: 5, max: 200 }),
   ],
-  (req, res) => {
+  async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) return res.status(400).json({ error: "Invalid request" });
 
@@ -24,29 +23,26 @@ router.get("/:ip", requireAuth, requireRole('readonly'),
 
     let history = [];
 
-    if (db.isAvailable()) {
-      try {
-        history = db.getDb()
-          .prepare(`
-            SELECT score, risk_level, action, scored_at
-            FROM scores
-            WHERE ip = ?
-            ORDER BY scored_at ASC
-            LIMIT ?
-          `)
-          .all(ip, limit);
-      } catch (err) {
-        console.error("Timeline DB error:", err.message);
-      }
-    } else {
-      // Fallback — filter in-memory audit log
+    try {
+      const result = await db.query(
+        `SELECT score, risk_level, action, scored_at
+         FROM audit_log
+         WHERE ip = $1
+         ORDER BY scored_at ASC
+         LIMIT $2`,
+        [ip, limit]
+      );
+      history = result.rows;
+    } catch (err) {
+      console.error("Timeline DB error:", err.message);
+      // Fallback to memory
       history = getAuditLog()
         .filter(e => e.ip === ip)
         .map(e => ({
           score:      e.score,
           risk_level: e.riskLevel,
           action:     e.action,
-          scored_at:  e.meta?.scoredAt ? new Date(e.meta.scoredAt).getTime() : Date.now()
+          scored_at:  e.meta?.scoredAt ? new Date(e.meta.scoredAt) : new Date(),
         }))
         .reverse()
         .slice(0, limit);
@@ -56,18 +52,17 @@ router.get("/:ip", requireAuth, requireRole('readonly'),
       return res.json({ ip, total: 0, history: [], stats: null });
     }
 
-    // Compute stats
     const scores = history.map(h => h.score);
     const stats  = {
-      min:     Math.min(...scores),
-      max:     Math.max(...scores),
-      avg:     Math.round(scores.reduce((a, b) => a + b, 0) / scores.length),
-      latest:  scores[scores.length - 1],
-      first:   scores[0],
-      trend:   scores[scores.length - 1] > scores[0] ? "increasing"
-             : scores[scores.length - 1] < scores[0] ? "decreasing"
-             : "stable",
-      change:  scores[scores.length - 1] - scores[0]
+      min:    Math.min(...scores),
+      max:    Math.max(...scores),
+      avg:    Math.round(scores.reduce((a, b) => a + b, 0) / scores.length),
+      latest: scores[scores.length - 1],
+      first:  scores[0],
+      trend:  scores[scores.length - 1] > scores[0] ? "increasing"
+            : scores[scores.length - 1] < scores[0] ? "decreasing"
+            : "stable",
+      change: scores[scores.length - 1] - scores[0],
     };
 
     res.json({ ip, total: history.length, history, stats });
