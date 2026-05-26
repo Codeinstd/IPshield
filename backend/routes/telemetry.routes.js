@@ -2,19 +2,18 @@
 const express    = require("express");
 const router     = express.Router();
 const telemetry  = require("../store/telemetry.store");
-const { requireAuth, requireRole } = require("../middleware/auth.js");
 
 // ── JSON endpoints 
-router.get("/", (req, res) => {
+router.get("/", async (req, res) => {
   res.json(telemetry.getSummary());
 });
 
-router.get("/history", requireAuth, requireRole('readonly'), (req, res) => {
+router.get("/history", async (req, res) => {
   const { route, status, limit, from, to } = req.query;
   res.json(telemetry.getHistory({ route, status, limit: parseInt(limit) || 100, from, to }));
 });
 
-router.get("/endpoint", requireAuth, requireRole('readonly'), (req, res) => {
+router.get("/endpoint", async (req, res) => {
   const { route } = req.query;
   const summary   = telemetry.getSummary();
   if (route) {
@@ -664,7 +663,7 @@ function buildDashboard() {
         </tr>\`).join("") || '<tr><td colspan="4" style="text-align:center;color:var(--text3);padding:16px;">No consumer data yet</td></tr>';
 
       // Recent requests
-      const rows = Array.isArray(recent) ? recent : (recent.results || recent);
+      const rows = Array.isArray(recent?.results) ? recent.results : Array.isArray(recent)? recent : [];
       document.getElementById("recentTable").innerHTML =
         rows.slice(0,20).map(r => \`<tr>
           <td>\${methodBadge(r.method)}</td>
