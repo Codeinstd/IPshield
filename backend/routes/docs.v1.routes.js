@@ -1,6 +1,5 @@
 const express = require("express");
 const router  = express.Router();
-const { requireAuth, requireRole } = require("../middleware/auth.js");
 
 const spec = {
   openapi: "3.0.3",
@@ -193,14 +192,14 @@ All endpoints require \`x-api-key\` header except \`/health\` and \`/docs\`.
 };
 
 // ── Raw Spec 
-router.get("/openapi.json", requireAuth, requireRole('readonly'), (req, res) => {
+router.get("/openapi.json", (req, res) => {
   res.setHeader("Content-Type", "application/json");
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.json(spec);
 });
 
 // ── Swagger UI 
-router.get("/", requireAuth, requireRole('readonly'), (req, res) => {
+router.get("/", requireAuth, (req, res) => {
   res.setHeader("Content-Type", "text/html");
   res.send(buildSwaggerHTML(spec, "v1", "#02bfe0"));
 });
