@@ -19,7 +19,7 @@ function validate(req, res, next) {
 }
 
 // ── GET /api/cases/stats
-router.get("/stats", requireAuth, requireRole("readonly"), async (req, res) => {
+router.get("/stats", async (req, res) => {
   try {
     const stats = await getCaseStats();
     res.json(stats);
