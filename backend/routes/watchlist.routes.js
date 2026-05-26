@@ -28,8 +28,6 @@ const logger = require("../utils/logger");
 // GET /api/watchlist
 router.get(
   "/",
-  requireAuth,
-  requireRole("readonly"),
   async (req, res) => {
     try {
       const watchlist = await getWatchlist();
@@ -53,9 +51,7 @@ router.get(
 // GET /api/watchlist/status
 router.get(
   "/status",
-  requireAuth,
-  requireRole("readonly"),
-  (req, res) => {
+  async (req, res) => {
     res.json(getMonitorStatus());
   }
 );
@@ -63,9 +59,6 @@ router.get(
 // POST /api/watchlist
 router.post(
   "/",
-  requireAuth,
-  requireRole("admin"),
-
   [
     body("ip")
       .trim()
@@ -174,8 +167,6 @@ router.post(
 // DELETE /api/watchlist/:ip
 router.delete(
   "/:ip",
-  requireAuth,
-  requireRole("admin"),
 
   [
     param("ip")
@@ -216,9 +207,6 @@ router.delete(
 // POST /api/watchlist/poll
 router.post(
   "/poll",
-  requireAuth,
-  requireRole("admin"),
-
   async (req, res) => {
     res.json({
       message: "Poll triggered"
