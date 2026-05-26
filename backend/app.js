@@ -23,7 +23,7 @@ const reportRoutes          = require("./routes/report.routes");
 const timelineRoutes        = require("./routes/timeline.routes");
 const telemetryMiddleware   = require("./middleware/telemetry.middleware");
 const telemetryRoutes       = require("./routes/telemetry.routes");
-const scoreBatchAndBlockController = require("./controllers/scoreBatchandBlock.controller");
+const scoreBatchAndBlockController = require("./controllers/scoreBatchAndBlock.controller");
 
 // v2-only Routes
 const blacklistRoutes = require("./routes/blacklist.routes");

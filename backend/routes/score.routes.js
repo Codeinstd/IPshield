@@ -2,7 +2,7 @@ const express  = require("express");
 const router   = express.Router();
 
 const { scoreIP, scoreBatch }              = require("../controllers/score.controller");
-const { scoreBatchAndBlock }               = require("../controllers/scoreBatchandBlock.controller.js");
+const { scoreBatchAndBlock }               = require("../controllers/scoreBatchAndBlock.controller.js");
 const { validateIPParam, validateBatchBody } = require("../middleware/validateIP.middleware");
 const { validateBatchAndBlockBody }        = require("../middleware/validateBatchAndBlock.middleware");
 const { requireAuth, requireRole }         = require("../middleware/auth.js");
