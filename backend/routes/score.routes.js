@@ -2,7 +2,7 @@ const express  = require("express");
 const router   = express.Router();
 
 const { scoreIP, scoreBatch }              = require("../controllers/score.controller");
-const { scoreBatchandBlock }              = require("../controllers/scoreBatchandBlock.controller");
+const { scoreBatchAndBlock }              = require("../controllers/scorebatchandblock.controller");
 const { validateIPParam, validateBatchBody } = require("../middleware/validateIP.middleware");
 const { validateBatchAndBlockBody }        = require("../middleware/validateBatchAndBlock.middleware.js");
 const { requireAuth, requireRole }         = require("../middleware/auth.js");
@@ -17,7 +17,7 @@ router.post("/batch", requireAuth, requireRole("readonly"), validateBatchBody,  
 router.post(
   "/batch-and-block",
   validateBatchAndBlockBody,
-  scoreBatchandBlock
+  scoreBatchAndBlock
 );
 
 module.exports = router;

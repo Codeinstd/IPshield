@@ -1,4 +1,3 @@
-
 const { getFullIntel }    = require("../services/ipIntel.service");
 const { alertIfCritical } = require("../services/alerts.service");
 const { sendToSIEM }      = require("../services/siem.service");
@@ -109,7 +108,7 @@ async function insertBlacklist({ ip, severity, reason, added_by, tags, expires_a
 
 // ─── controller 
 
-exports.scoreBatchandBlock = async (req, res, next) => {
+exports.scoreBatchAndBlock = async (req, res, next) => {
   try {
     const {
       ips,
@@ -131,7 +130,7 @@ exports.scoreBatchandBlock = async (req, res, next) => {
       `batch-and-block: ${uniqueIPs.length} IPs, threshold=${auto_block_threshold}, dry_run=${dry_run}`
     );
 
-    // ── 1. Score all IPs in parallel 
+    // ── 1. Score all IPs in parallel
     const settled = await Promise.allSettled(uniqueIPs.map(ip => getFullIntel(ip)));
 
     // ── 2. Process results 
@@ -172,7 +171,7 @@ exports.scoreBatchandBlock = async (req, res, next) => {
         alertIfCritical(result).catch(() => {});
         sendToSIEM(result).catch(() => {});
 
-        // ── Decision: should this IP be blocked? ──────────────────────────────
+        // ── Decision: should this IP be blocked? 
         const meetsThreshold = result.score >= auto_block_threshold;
         const alreadyBlocked = !!result.blacklisted;
 
@@ -216,7 +215,7 @@ exports.scoreBatchandBlock = async (req, res, next) => {
       })
     );
 
-    // ── 3. Respond 207
+    // ── 3. Respond 207 
     return res.status(207).json({
       summary: {
         total:         uniqueIPs.length,
