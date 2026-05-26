@@ -4,8 +4,8 @@ const router   = express.Router();
 const { scoreIP, scoreBatch }              = require("../controllers/score.controller");
 const { scoreBatchAndBlock }              = require("../controllers/scorebatchandblock.controller");
 const { validateIPParam, validateBatchBody } = require("../middleware/validateIP.middleware");
-const { validateBatchAndBlockBody }        = require("../middleware/validateBatchAndBlock.middleware.js");
 const { requireAuth, requireRole }         = require("../middleware/auth.js");
+const { validateBatchAndBlockBody }        = require("../middleware/validateBatchAndBlockBody.middleware");
 
 // Existing routes (unchanged)
 router.get("/:ip",    requireAuth, requireRole("readonly"), validateIPParam,    scoreIP);
