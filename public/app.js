@@ -1027,14 +1027,28 @@
  
     // Delete buttons
     document.querySelectorAll(".bl-del-btn").forEach(btn => {
-      btn.addEventListener("click", async () => {
-        if (!confirm("Delete this entry?")) return;
-        await fetch(`${API}/blacklist/${btn.dataset.id}`, {
-          method: "DELETE", headers: { "x-api-key": API_KEY }
-        });
-        loadBlacklist();
+  btn.addEventListener("click", async () => {
+    if (!confirm("Delete this entry?")) return;
+
+    try {
+      const res = await fetch(`${API}/blacklist/${btn.dataset.id}`, {
+        method: "DELETE",
+        headers: { "x-api-key": API_KEY }
       });
-    });
+
+      if (!res.ok) {
+        throw new Error("Delete failed");
+      }
+
+      toast("Blacklist IP deleted", "success");
+      loadBlacklist();
+
+    } catch (err) {
+      console.error(err);
+      toast("Failed to delete blacklist IP", "error");
+    }
+  });
+});
  
     // Click IP to score it
     document.querySelectorAll(".bl-row").forEach(row => {
