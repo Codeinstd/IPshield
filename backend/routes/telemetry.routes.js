@@ -5,7 +5,7 @@ const telemetry  = require("../store/telemetry.store");
 const { requireAuth, requireRole } = require("../middleware/auth.js");
 
 // ── JSON endpoints 
-router.get("/", requireAuth, requireRole('readonly'), (req, res) => {
+router.get("/", (req, res) => {
   res.json(telemetry.getSummary());
 });
 
@@ -25,7 +25,7 @@ router.get("/endpoint", requireAuth, requireRole('readonly'), (req, res) => {
 });
 
 // ── Live dashboard 
-router.get("/dashboard", requireAuth, requireRole('admin'), async (req, res) => {
+router.get("/dashboard", async (req, res) => {
   res.setHeader("Content-Type", "text/html");
   res.send(buildDashboard());
 });
