@@ -199,7 +199,7 @@ router.get("/openapi.json", (req, res) => {
 });
 
 // ── Swagger UI 
-router.get("/", requireAuth, (req, res) => {
+router.get("/",(req, res) => {
   res.setHeader("Content-Type", "text/html");
   res.send(buildSwaggerHTML(spec, "v1", "#02bfe0"));
 });
