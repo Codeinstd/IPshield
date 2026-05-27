@@ -23,6 +23,8 @@ const reportRoutes          = require("./routes/report.routes");
 const timelineRoutes        = require("./routes/timeline.routes");
 const telemetryMiddleware   = require("./middleware/telemetry.middleware");
 const telemetryRoutes       = require("./routes/telemetry.routes");
+const batchAsyncRoutes      = require("./routes/batchAsync.routes");
+const threatRoutes          = require("./routes/threat.routes");
 
 // v2-only Routes
 const blacklistRoutes = require("./routes/blacklist.routes");
@@ -259,6 +261,7 @@ function mountShared(prefixes, path, router) {
 const SHARED_PREFIXES = ["/api", "/api/v1", "/api/v2"];
  
 mountShared(SHARED_PREFIXES, "/score",     scoreRoutes);
+mountShared(SHARED_PREFIXES, "/score", batchAsyncRoutes);
 mountShared(SHARED_PREFIXES, "/stats",     statsRoutes);
 mountShared(SHARED_PREFIXES, "/audit",     auditRoutes);
 mountShared(SHARED_PREFIXES, "/watchlist", watchlistRoutes);
@@ -266,6 +269,7 @@ mountShared(SHARED_PREFIXES, "/whois",     whoisRoutes);
 mountShared(SHARED_PREFIXES, "/siem",      siemRoutes);
 mountShared(SHARED_PREFIXES, "/report",    reportRoutes);
 mountShared(SHARED_PREFIXES, "/timeline",  timelineRoutes);
+mountShared(SHARED_PREFIXES, "/threat", threatRoutes);
 
 // ── v2-only routes 
 const V2_PREFIXES = ["/api", "/api/v2"]; // /api defaults to v2

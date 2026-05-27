@@ -5,6 +5,8 @@ require("./utils/validateEnv")();
 
 const app    = require("./app");
 const logger = require("./utils/logger");
+const { startWorkers } = require("./jobs/workers");
+const { startWatchlistCron } = require("./jobs/watchlistCron");
 
 const PORT   = parseInt(process.env.PORT || "8080", 10);
 const server = app.listen(PORT, "0.0.0.0", () => {
@@ -35,3 +37,6 @@ process.on("uncaughtException", (err) => {
   logger.error(`Uncaught exception: ${err.message}`, { stack: err.stack });
   process.exit(1);
 });
+
+startWorkers();
+startWatchlistCron();

@@ -13,6 +13,7 @@
   const procTime   = document.getElementById("processingTime");
   const auditList  = document.getElementById("auditList");
   const auditCount = document.getElementById("auditCount");
+  
   // const apiDocsBtn = document.getElementById("apiDocsBtn");
   
 

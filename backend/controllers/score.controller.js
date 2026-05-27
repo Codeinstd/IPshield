@@ -5,6 +5,8 @@ const { addAudit }        = require("../store/memory.store");
 const db                  = require("../store/db");
 const logger              = require("../utils/logger");
 const { isBlacklisted }   = require("../store/blacklist.store");
+const { checkAndAutoCase } = require("../services/autoCase.service");
+
 
 exports.scoreIP = async (req, res, next) => {
   try {
@@ -67,7 +69,7 @@ exports.scoreIP = async (req, res, next) => {
     }
 
     addAudit(result);
-
+    checkAndAutoCase(result).catch(() => {});
     // Fire-and-forget
     alertIfCritical(result).catch(() => {});
     sendToSIEM(result).catch(() => {});
@@ -113,6 +115,7 @@ exports.scoreBatch = async (req, res, next) => {
         } catch (_) {}
 
         addAudit(result);
+        checkAndAutoCase(result).catch(() => {});
         alertIfCritical(result).catch(() => {});
         sendToSIEM(result).catch(() => {});
         return result;
