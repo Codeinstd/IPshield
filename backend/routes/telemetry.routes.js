@@ -2,18 +2,19 @@
 const express    = require("express");
 const router     = express.Router();
 const telemetry  = require("../store/telemetry.store");
+const { requireAuth, requireRole }         = require("../middleware/auth.js");
 
 // ── JSON endpoints 
-router.get("/", async (req, res) => {
+router.get("/", requireAuth, requireRole("admin"), async (req, res) => {
   res.json(telemetry.getSummary());
 });
 
-router.get("/history", async (req, res) => {
+router.get("/history", requireAuth, requireRole("admin"), async (req, res) => {
   const { route, status, limit, from, to } = req.query;
   res.json(telemetry.getHistory({ route, status, limit: parseInt(limit) || 100, from, to }));
 });
 
-router.get("/endpoint", async (req, res) => {
+router.get("/endpoint", requireAuth, requireRole("admin"), async (req, res) => {
   const { route } = req.query;
   const summary   = telemetry.getSummary();
   if (route) {
@@ -24,7 +25,7 @@ router.get("/endpoint", async (req, res) => {
 });
 
 // ── Live dashboard 
-router.get("/dashboard", async (req, res) => {
+router.get("/dashboard", requireAuth, requireRole("admin"), async (req, res) => {
   res.setHeader("Content-Type", "text/html");
   res.send(buildDashboard());
 });
