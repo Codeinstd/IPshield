@@ -4,7 +4,7 @@ const nodemailer = require("nodemailer");
 
 const THRESHOLD = parseInt(process.env.ALERT_THRESHOLD || "80");
 
-// ── Slack ─────────────────────────────────────────────────────────────────────
+// ── Slack 
 
 async function sendSlackAlert({ title, message, ip, score, riskLevel, caseId, type, color, fields }) {
   const webhookUrl = process.env.SLACK_WEBHOOK || process.env.SLACK_WEBHOOK_URL;
@@ -32,7 +32,7 @@ async function sendSlackAlert({ title, message, ip, score, riskLevel, caseId, ty
   return { delivered: true, channel: "slack" };
 }
 
-// ── Discord ───────────────────────────────────────────────────────────────────
+// ── Discord 
 
 async function sendDiscordAlert({ title, message, ip, score, riskLevel, caseId, type, color }) {
   if (!process.env.DISCORD_WEBHOOK) return { skipped: true, reason: "DISCORD_WEBHOOK not set" };
@@ -58,7 +58,7 @@ async function sendDiscordAlert({ title, message, ip, score, riskLevel, caseId, 
   return { delivered: true, channel: "discord" };
 }
 
-// ── Email ─────────────────────────────────────────────────────────────────────
+// ── Email 
 
 let _transporter = null;
 
@@ -184,7 +184,7 @@ async function alertIfCritical(result) {
   ]);
 }
 
-// ── sendAlert — called from BullMQ alert worker ───────────────────────────────
+// ── sendAlert — called from BullMQ alert worker 
 
 async function sendAlert(payload) {
   const results = await Promise.allSettled([
