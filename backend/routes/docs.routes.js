@@ -171,9 +171,9 @@ try {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      position: sticky;
       top: 0;
       font-family: 'Syne'
+      position: sticky;
     }
 
     .logo { display: flex; align-items: center; gap: 12px; }
@@ -703,7 +703,7 @@ try {
 
     @media (max-width: 768px) {
       .nav-hamburger   { display: flex !important; }
-      .header { position: relative !important; z-index: 1000; }
+      .header {z-index: 1000; }
       #docsHeaderRight { display: none !important; }
 
       table, thead, tbody, th, td, tr { display: block; }
