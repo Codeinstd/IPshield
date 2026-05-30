@@ -185,4 +185,7 @@ router.delete("/:id/notes/:noteId",  [
   }
 });
 
+const caseAccountsRouter = require("./caseAccounts.routes");
+router.use("/:id/accounts", caseAccountsRouter);
+
 module.exports = router;

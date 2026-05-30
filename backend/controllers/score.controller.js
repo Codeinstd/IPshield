@@ -1,11 +1,13 @@
-const { getFullIntel }    = require("../services/ipIntel.service");
-const { alertIfCritical } = require("../services/alerts.service");
-const { sendToSIEM }      = require("../services/siem.service");
-const { addAudit }        = require("../store/memory.store");
-const db                  = require("../store/db");
-const logger              = require("../utils/logger");
-const { isBlacklisted }   = require("../store/blacklist.store");
-const { checkAndAutoCase } = require("../services/autoCase.service");
+const { getFullIntel }          = require("../services/ipIntel.service");
+const { alertIfCritical }       = require("../services/alerts.service");
+const { sendToSIEM }            = require("../services/siem.service");
+const { addAudit }              = require("../store/memory.store");
+const db                        = require("../store/db");
+const logger                    = require("../utils/logger");
+const { isBlacklisted }         = require("../store/blacklist.store");
+const { checkAndAutoCase }      = require("../services/autoCase.service");
+const { detectClusters }        = require("../services/cluster.service");
+const { sendToAllSIEMTargets }  = require("../services/siemTargets.service");
 
 
 exports.scoreIP = async (req, res, next) => {
@@ -70,6 +72,8 @@ exports.scoreIP = async (req, res, next) => {
 
     addAudit(result);
     checkAndAutoCase(result).catch(() => {});
+    detectClusters(result).catch(() => {});     
+    sendToAllSIEMTargets(result).catch(() => {}); 
     // Fire-and-forget
     alertIfCritical(result).catch(() => {});
     sendToSIEM(result).catch(() => {});
@@ -116,6 +120,8 @@ exports.scoreBatch = async (req, res, next) => {
 
         addAudit(result);
         checkAndAutoCase(result).catch(() => {});
+        detectClusters(result).catch(() => {});  
+        sendToAllSIEMTargets(result).catch(() => {}); 
         alertIfCritical(result).catch(() => {});
         sendToSIEM(result).catch(() => {});
         return result;

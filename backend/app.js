@@ -25,6 +25,10 @@ const telemetryMiddleware   = require("./middleware/telemetry.middleware");
 const telemetryRoutes       = require("./routes/telemetry.routes");
 const batchAsyncRoutes      = require("./routes/batchAsync.routes");
 const threatRoutes          = require("./routes/threat.routes");
+const cidrRoutes          = require("./routes/cidr.routes");
+const siemTargetsRoutes   = require("./routes/siemTargets.routes");
+const caseAccountsRoutes  = require("./routes/caseAccounts.routes");
+const clusterRoutes       = require("./routes/clusters.routes");
 
 // v2-only Routes
 const blacklistRoutes = require("./routes/blacklist.routes");
@@ -271,11 +275,21 @@ mountShared(SHARED_PREFIXES, "/report",    reportRoutes);
 mountShared(SHARED_PREFIXES, "/timeline",  timelineRoutes);
 mountShared(SHARED_PREFIXES, "/threat", threatRoutes);
 
+// SIEM targets — extend existing siem routes
+mountShared(SHARED_PREFIXES, "/siem",          siemTargetsRoutes);
+// Clusters — under threat prefix (alongside Phase 2 threat dashboard)
+mountShared(SHARED_PREFIXES, "/threat/clusters", clusterRoutes);
+
+
 // ── v2-only routes 
 const V2_PREFIXES = ["/api", "/api/v2"]; // /api defaults to v2
  
 mountShared(V2_PREFIXES, "/blacklist", blacklistRoutes);
 mountShared(V2_PREFIXES, "/cases",     casesRoutes);
+// CIDR blocking — under blacklist prefix
+mountShared(V2_PREFIXES, "/blacklist/cidr",    cidrRoutes);
+// Case accounts — nested under cases
+mountShared(V2_PREFIXES, "/cases",             caseAccountsRoutes);
 
 
 // ── v1 — explicit 404 for v2-only features 
