@@ -253,13 +253,13 @@
   headerRight.prepend(rateLimitBtn);
 
   // Mgr Btn
-  const btn = document.createElement("button");
-  btn.className     = "btn btn-ghost";
-  btn.id            = "keyMgrBtn";
-  btn.style.display = "none"; 
-  btn.textContent   = "🔑 Keys";
-  btn.style.cssText = "padding:6px 12px;font-size:11px;";
-  headerRight.prepend(btn);
+  // const btn = document.createElement("button");
+  // btn.className     = "btn btn-ghost";
+  // btn.id            = "keyMgrBtn";
+  // btn.style.display = "none"; 
+  // btn.textContent   = "🔑 Keys";
+  // btn.style.cssText = "padding:6px 12px;font-size:11px;";
+  // headerRight.prepend(btn);
  
   buildHamburgerMenu();
 }
