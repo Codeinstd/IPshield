@@ -16,7 +16,6 @@ const limiter = rateLimit({
   }
 });
 
-app.use("/api", authMiddleware);
 app.use("/api", limiter); 
 
 app.get("/", (req, res) => {

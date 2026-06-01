@@ -110,7 +110,7 @@
   .logo-text span { color: var(--accent); }
   .logo-sub { font-size: 10px; color: var(--text3); letter-spacing: 3px; margin-top: 1px; }
 
-  .header-right { display: flex; align-items: center; gap: 20px; }
+  .header-right { display: flex; align-items: center; gap: 14px; }
   .status-dot {
     display: flex; align-items: center; gap: 8px;
     font-size: 11px; color: var(--text2); letter-spacing: 1px;
@@ -1113,6 +1113,55 @@
 .nav-drawer-body .btn-danger:hover { background: rgba(255,51,85,0.08) !important; border-color: rgba(255,51,85,0.2) !important; }
 
 /* ── Breakpoints ── */
+
+/* @media (max-width: 1309px) {
+  header {
+    padding: 14px 18px;
+  }
+
+
+  .logo-text {
+    font-size: 1.1rem;
+  }
+
+  .logo-sub {
+    font-size: 0.65rem;
+  }
+
+  
+  .header-right {
+    gap: 6px;
+  }
+
+  .header-right .btn {
+    padding: 5px 8px !important;
+    font-size: 10px !important;
+  }
+
+  #apiBadge {
+    margin-left: 8px !important;
+    padding: 3px 8px !important;
+    font-size: 9px !important;
+  }
+
+  .version,
+  .status-dot span {
+    font-size: 9px;
+  }
+} */
+
+@media (max-width: 1309px) {
+  /* #threatBtn, */
+  /* #casesBtn, */
+  #rateLimitBtn,
+  #blacklistBtn,
+  #siemBtn
+   {
+    display: none !important;
+  }
+}
+
+
 @media (max-width: 768px) {
   .header-right  { display: none !important; }
   .nav-hamburger { display: flex !important; }
@@ -1128,6 +1177,5 @@ header {
   /* position: relative; */
   z-index: 1000;        
 }
-
 </style>
 </html>

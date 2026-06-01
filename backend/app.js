@@ -25,18 +25,23 @@ const telemetryMiddleware   = require("./middleware/telemetry.middleware");
 const telemetryRoutes       = require("./routes/telemetry.routes");
 const batchAsyncRoutes      = require("./routes/batchAsync.routes");
 const threatRoutes          = require("./routes/threat.routes");
-const cidrRoutes          = require("./routes/cidr.routes");
-const siemTargetsRoutes   = require("./routes/siemTargets.routes");
-const caseAccountsRoutes  = require("./routes/caseAccounts.routes");
-const clusterRoutes       = require("./routes/clusters.routes");
+const cidrRoutes            = require("./routes/cidr.routes");
+const siemTargetsRoutes     = require("./routes/siemTargets.routes");
+const caseAccountsRoutes    = require("./routes/caseAccounts.routes");
+const clusterRoutes         = require("./routes/clusters.routes");
+const keysRoutes            = require("./routes/keys.routes");
 
 // v2-only Routes
 const blacklistRoutes = require("./routes/blacklist.routes");
 const casesRoutes     = require("./routes/cases.routes");
 
-
 const isProd = process.env.NODE_ENV === "production";
 const app    = express();
+
+app.use((req, res, next) => {
+  console.log("REQ:", req.originalUrl);
+  next();
+});
 
 
 // ── Security & middleware 
@@ -126,7 +131,6 @@ if (isProd) {
   app.use(morgan("dev"));
 }
 
-
 // ── Rate limiting with structured error body 
 const makeRateLimiter = (windowMs, max, message) => rateLimit({
   windowMs, max,
@@ -146,7 +150,6 @@ const makeRateLimiter = (windowMs, max, message) => rateLimit({
   }
 });
 
-
 // Apply to all /api/* variants
 ["/api/", "/api/v1/", "/api/v2/"].forEach(prefix => {
   app.use(prefix, makeRateLimiter(15 * 60 * 1000, 200, "Too many requests. Try again in 15 minutes."));
@@ -158,7 +161,7 @@ const makeRateLimiter = (windowMs, max, message) => rateLimit({
   app.use(p, makeRateLimiter(60 * 1000, 20, "WHOIS rate limit: 20 requests per minute."));
 });
 
-// telemry checker
+// telemetry checker
 app.use("/api", telemetryMiddleware);
 
 // ── Static files  
@@ -219,9 +222,6 @@ app.use("/api/telemetry",    telemetryRoutes);
 app.use("/api/v1/telemetry", telemetryRoutes);
 app.use("/api/v2/telemetry", telemetryRoutes);
 
-
-
-
 // ── Version info endpoints (public) 
 function versionInfoHandler(req, res) {
   const isV1 = req.path.startsWith("/v1") || req.baseUrl?.includes("/v1");
@@ -251,10 +251,18 @@ app.get("/api/versions", versionInfoHandler);
 app.get("/api/v1",       versionInfoHandler);
 app.get("/api/v2",       versionInfoHandler);
 
-// ── Auth middleware 
-app.use("/api/",    authMiddleware);
+// ── Public key activation (no auth — must be before authMiddleware) ──
+app.get("/api/keys/activate/:token",    keysRoutes);
+app.post("/api/keys/activate/:token",   keysRoutes);
+app.get("/api/v1/keys/activate/:token", keysRoutes);
+app.post("/api/v1/keys/activate/:token",keysRoutes);
+app.get("/api/v2/keys/activate/:token", keysRoutes);
+app.post("/api/v2/keys/activate/:token",keysRoutes);
+
+// Then auth middleware
 app.use("/api/v1/", authMiddleware);
 app.use("/api/v2/", authMiddleware);
+
 
 // ── Helper: mount shared routes on multiple prefixes 
 function mountShared(prefixes, path, router) {
@@ -265,7 +273,7 @@ function mountShared(prefixes, path, router) {
 const SHARED_PREFIXES = ["/api", "/api/v1", "/api/v2"];
  
 mountShared(SHARED_PREFIXES, "/score",     scoreRoutes);
-mountShared(SHARED_PREFIXES, "/score", batchAsyncRoutes);
+mountShared(SHARED_PREFIXES, "/score",     batchAsyncRoutes);
 mountShared(SHARED_PREFIXES, "/stats",     statsRoutes);
 mountShared(SHARED_PREFIXES, "/audit",     auditRoutes);
 mountShared(SHARED_PREFIXES, "/watchlist", watchlistRoutes);
@@ -273,13 +281,7 @@ mountShared(SHARED_PREFIXES, "/whois",     whoisRoutes);
 mountShared(SHARED_PREFIXES, "/siem",      siemRoutes);
 mountShared(SHARED_PREFIXES, "/report",    reportRoutes);
 mountShared(SHARED_PREFIXES, "/timeline",  timelineRoutes);
-mountShared(SHARED_PREFIXES, "/threat", threatRoutes);
-
-// SIEM targets — extend existing siem routes
-mountShared(SHARED_PREFIXES, "/siem",          siemTargetsRoutes);
-// Clusters — under threat prefix (alongside Phase 2 threat dashboard)
-mountShared(SHARED_PREFIXES, "/threat/clusters", clusterRoutes);
-
+mountShared(SHARED_PREFIXES, "/threat",    threatRoutes);
 
 // ── v2-only routes 
 const V2_PREFIXES = ["/api", "/api/v2"]; // /api defaults to v2
@@ -290,6 +292,12 @@ mountShared(V2_PREFIXES, "/cases",     casesRoutes);
 mountShared(V2_PREFIXES, "/blacklist/cidr",    cidrRoutes);
 // Case accounts — nested under cases
 mountShared(V2_PREFIXES, "/cases",             caseAccountsRoutes);
+// SIEM targets — extend existing siem routes
+mountShared(SHARED_PREFIXES, "/siem",          siemTargetsRoutes);
+// Clusters — under threat prefix (alongside Phase 2 threat dashboard)
+mountShared(SHARED_PREFIXES, "/threat/clusters", clusterRoutes);
+// Key management — all versions
+mountShared(SHARED_PREFIXES, "/keys", keysRoutes);
 
 
 // ── v1 — explicit 404 for v2-only features 

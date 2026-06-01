@@ -201,7 +201,7 @@
   badge.textContent = apiVersion.toUpperCase();
   badge.title       = "Click to switch API version";
   badge.style.cssText = `
-    padding:4px 10px; margin-left:16px; margin-top:4px; font-size:10px;font-weight:700;font-family:inherit;
+    padding:4px 10px; margin-left:16px; font-size:10px;font-weight:700;font-family:inherit;
     border-radius:4px;cursor:pointer;letter-spacing:1px;
     color:${apiVersion === "v2" ? "var(--accent)" : "var(--accent2)"};
     border:1px solid ${apiVersion === "v2" ? "var(--accent)" : "var(--accent2)"};
@@ -235,6 +235,30 @@
   casesBtn.style.cssText = "padding:6px 12px;font-size:11px;font-family:'JetBrains Mono', monospace;";
   if (apiVersion === "v1") casesBtn.style.display = "none";
   headerRight.prepend(casesBtn);
+
+  // Threat
+  const threatBtn         = document.createElement("button");
+  threatBtn.className     = "btn btn-ghost";
+  threatBtn.id            = "threatBtn";
+  threatBtn.textContent   = "🌐 Threat";
+  threatBtn.style.cssText = "padding:6px 12px;font-size:11px;";
+  headerRight.prepend(threatBtn);
+
+  // Rate Limits
+  const rateLimitBtn          = document.createElement("button");
+  rateLimitBtn.className     = "btn btn-ghost";
+  rateLimitBtn.id            = "rateLimitBtn";
+  rateLimitBtn.textContent   = "⚡ Rate Limits";
+  rateLimitBtn.style.cssText = "padding:6px 12px;font-size:11px;";
+  headerRight.prepend(rateLimitBtn);
+
+  // Mgr Btn
+  const btn = document.createElement("button");
+  btn.className     = "btn btn-ghost";
+  btn.id            = "keyMgrBtn";
+  btn.textContent   = "🔑 Keys";
+  btn.style.cssText = "padding:6px 12px;font-size:11px;";
+  headerRight.prepend(btn);
  
   buildHamburgerMenu();
 }
@@ -317,11 +341,7 @@
   }
 
   buildHamburgerMenu(); 
-
-
   }
-
-
 
   // Versioning Panel
   async function showVersionPanel() {
@@ -2835,7 +2855,7 @@ function renderAuditEntries(entries, total) {
 
     document.addEventListener("click", e => {
       if (e.target.id === "apiBadge")      showVersionPanel();
-      if (e.target.id === "siemBtn")       showSIEMPanel();
+      if (e.target.id === "siemBtn")       showUnifiedSIEMPanel();
       if (e.target.id === "blacklistBtn")  showBlacklistPanel();
       if (e.target.id === "casesBtn")      showCasesPanel();
       if (e.target.id === "firewallBtn")   showFirewallExport();
@@ -2845,13 +2865,15 @@ function renderAuditEntries(entries, total) {
       if (e.target.id === "pollBtn")       triggerPoll();
       if (e.target.id === "addToCaseBtn")  addIPToCase(currentIP, lastResult);
       if (e.target.id === "versionBtn")    showVersionPanel();
+      if (e.target.id === "threatBtn")     showClustersPanel();
+      if (e.target.id === "rateLimitBtn")  showRateLimitPanel();
+      if (e.target.id === "keyMgrBtn")     showKeyManagerPanel();
+      
     });
 
     document.addEventListener("change", e => {
       if (e.target.id === "csvUpload") handleCSVUpload(e.target.files[0]);
     });
-
-   
 
     // Single unified click handler on resultBody — no inline onclick needed
     resultBody.addEventListener("click", e => {
@@ -3010,196 +3032,6 @@ function applyTheme(dark) {
     }
   }
 
-  // Show Rate Limiting
-  async function showSIEMPanel() {
-
-  // Fetch current status
-  let status = null;
-  let formats = [];
-  try {
-    const [sRes, fRes] = await Promise.all([
-      fetch(`${API}/siem/status`, { headers: { "x-api-key": API_KEY } }),
-      fetch(`${API}/siem/formats`, { headers: { "x-api-key": API_KEY } })
-    ]);
-    const sData = await sRes.json();
-    const fData = await fRes.json();
-    status  = sData.siem;
-    formats = fData.formats || [];
-  } catch (_) {}
- 
-  const overlay = document.createElement("div");
-  overlay.id = "siemModal";
-  overlay.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:10000;display:flex;align-items:center;justify-content:center;padding:24px;";
- 
-  const modal = document.createElement("div");
-  modal.style.cssText = "background:var(--bg1);border:1px solid var(--border);border-radius:12px;width:100%;max-width:700px;max-height:85vh;display:flex;flex-direction:column;overflow:hidden;";
- 
-  const statusColor  = status?.enabled ? "var(--low)" : "var(--text3)";
-  const statusLabel  = status?.enabled ? "● ACTIVE" : "○ INACTIVE";
- 
-  modal.innerHTML = `
-    <div style="padding:20px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
-      <div>
-        <div style="font-size:13px;font-weight:700;color:var(--text);">SIEM Webhook Integration</div>
-        <div style="font-size:11px;margin-top:3px;color:${statusColor};">${statusLabel}${status?.type ? ` — ${status.type.toUpperCase()}` : ""}</div>
-      </div>
-      <button id="siemClose" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:20px;padding:4px;">✕</button>
-    </div>
- 
-    <div style="background:var(--bg2);overflow-y:auto;flex:1;padding:16px;display:flex;flex-direction:column;gap:20px;">
- 
-      <!-- Config status -->
-      <div class="detail-card">
-        <div class="detail-card-title" style="color:var(--text);font-size:11px;font-weight:400;">Current Configuration</div>
-        ${kv("Status",        status?.enabled ? "Enabled" : "Disabled")}
-        ${kv("Type",          status?.type?.toUpperCase() || "Not set")}
-        ${kv("Webhook URL",   status?.url || "Not configured")}
-        ${kv("Token",         status?.hasToken ? "Set ✓" : "Not set")}
-        ${kv("Min Score",     status?.minScore ?? 0)}
-        ${kv("Min Risk",      status?.minRisk  || "LOW")}
-      </div>
- 
-      <!-- Env var instructions -->
-      <div class="detail-card">
-        <div class="detail-card-title" style="color:var(--text);font-size:11px;font-weight:400;">Setup — Add to Render Environment Variables</div>
-        <div style="background:var(--bg1);border-radius:6px;font-size:11px;line-height:2;color:var(--text2);font-family:'JetBrains Mono',monospace;overflow-x:auto;">
-          SIEM_ENABLED=true<br>
-          SIEM_TYPE=<span style="color:var(--accent)">splunk|elastic|sentinel|qradar|generic</span><br>
-          SIEM_WEBHOOK_URL=<span style="color:var(--accent)">https://your-siem-endpoint</span><br>
-          SIEM_TOKEN=<span style="color:var(--accent)">your_token_or_api_key</span><br>
-          SIEM_MIN_SCORE=<span style="color:var(--accent)">0</span>     <span style="color:var(--text3)"># 0–100, only forward above this</span><br>
-          SIEM_MIN_RISK=<span style="color:var(--accent)">LOW</span>    <span style="color:var(--text3)"># LOW|MEDIUM|HIGH|CRITICAL</span>
-          </div>
-      </div>
- 
-      <!-- Supported formats -->
-      <div class="detail-card">
-        <div class="detail-card-title" style="color:var(--text);font-size:11px;font-weight:400;">Supported Platforms</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;">
-          ${formats.map(f => `
-            <div style="padding:10px 12px;background:var(--bg1);border-radius:6px;border:0.9px solid var(--border);">
-              <div style="font-size:11px;font-weight:700;color:var(--accent);margin-bottom:3px;">${escHtml(f.label)}</div>
-              <div style="font-size:10px;color:var(--text3);line-height:1.5;">${escHtml(f.description)}</div>
-            </div>`).join("")}
-        </div>
-      </div>
- 
-      <!-- Test webhook -->
-      <div class="detail-card">
-        <div class="detail-card-title" style="color:var(--text);font-size:11px;font-weight:400;">Test Webhook</div>
-        <div style="font-size:11px;color:var(--text3);margin-bottom:12px;">
-          Send a sample CRITICAL IP event to your configured SIEM. Uses current env var settings.
-        </div>
-        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-          <button id="siemTestBtn" class="btn btn-primary" style="padding:8px 20px;font-size:12px;">
-            Send Test Event
-          </button>
-          <span id="siemTestResult" style="font-size:12px;color:var(--text2);"></span>
-        </div>
-        <div id="siemTestDetail" style="margin-top:12px;font-size:11px;color:var(--text3);display:none;"></div>
-      </div>
- 
-      <!-- Sample payload viewer -->
-      <div class="detail-card">
-        <div class="detail-card-title" style="color:var(--text);font-size:11px;font-weight:400;">Sample Payload</div>
-        <div style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;">
-          ${formats.map((f, i) => `
-            <button class="siem-format-tab" data-format="${f.id}"
-              style="padding:4px 12px;border-radius:4px;border:1px solid ${i===0?"var(--accent)":"var(--border)"};
-                     background:${i===0?"rgba(0,217,255,0.1)":"transparent"};
-                     color:${i===0?"var(--accent)":"var(--text3)"};
-                     font-size:10px;cursor:pointer;font-family:inherit;">${f.label}</button>`).join("")}
-        </div>
-        <pre id="siemSamplePayload" style="background:var(--bg);border-radius:6px;padding:12px;font-size:10px;line-height:1.6;color:var(--text2);overflow:auto;max-height:200px;white-space:pre-wrap;word-break:break-all;">Loading…</pre>
-        <button id="siemCopySample" class="btn btn-ghost" style="margin-top:8px;padding:5px 14px;font-size:11px;">Copy Sample</button>
-      </div>
-    </div>`;
- 
-  overlay.appendChild(modal);
-  document.body.appendChild(overlay);
- 
-  // Close
-  document.getElementById("siemClose").addEventListener("click", () => overlay.remove());
-  overlay.addEventListener("click", e => { if (e.target === overlay) overlay.remove(); });
- 
-  // Load first sample
-  loadSIEMSample(formats[0]?.id || "generic");
- 
-  // Format tabs
-  modal.querySelectorAll(".siem-format-tab").forEach(btn => {
-    btn.addEventListener("click", () => {
-      modal.querySelectorAll(".siem-format-tab").forEach(b => {
-        b.style.borderColor = "var(--border)"; b.style.background = "transparent"; b.style.color = "var(--text3)";
-      });
-      btn.style.borderColor = "var(--accent)"; btn.style.background = "rgba(0,217,255,0.1)"; btn.style.color = "var(--accent)";
-      loadSIEMSample(btn.dataset.format);
-    });
-  });
- 
-  // Test button
-  document.getElementById("siemTestBtn").addEventListener("click", async () => {
-    const btn    = document.getElementById("siemTestBtn");
-    const result = document.getElementById("siemTestResult");
-    const detail = document.getElementById("siemTestDetail");
-    btn.disabled = true; btn.textContent = "Sending…";
-    result.textContent = ""; detail.style.display = "none";
-    try {
-      const res  = await fetch(`${API}/siem/test`, {
-        method: "POST", headers: { "Content-Type": "application/json", "x-api-key": API_KEY },
-        body: JSON.stringify({})
-      });
-      const data = await res.json();
-      result.textContent = data.message;
-      result.style.color = data.success ? "var(--low)" : "var(--critical)";
-      if (!data.success && data.reason) {
-        detail.textContent = `Reason: ${data.reason}`;
-        detail.style.display = "block";
-        detail.style.color = "var(--text3)";
-      }
-    } catch (err) {
-      result.textContent = `Error: ${err.message}`;
-      result.style.color = "var(--critical)";
-    } finally {
-      btn.disabled = false; btn.textContent = "Send Test Event";
-    }
-  });
- 
-  // Copy sample
-  document.getElementById("siemCopySample").addEventListener("click", () => {
-    const text = document.getElementById("siemSamplePayload").textContent;
-    navigator.clipboard.writeText(text).then(() => {
-      const btn = document.getElementById("siemCopySample");
-      btn.textContent = "✓ Copied!";
-      setTimeout(() => { btn.textContent = "Copy Sample"; }, 2000);
-    });
-  });
- 
-  async function loadSIEMSample(format) {
-    const pre = document.getElementById("siemSamplePayload");
-    pre.textContent = "Loading…";
-    try {
-      const res  = await fetch(`${API}/siem/sample/${format}`, { headers: { "x-api-key": API_KEY } });
-      const data = await res.json();
-      pre.textContent = JSON.stringify(data.sample, null, 2);
-    } catch (err) {
-      pre.textContent = `Error: ${err.message}`;
-    }
-  }
-
-  // mobile responsive 
-  const MODAL_OVERLAY_STYLE = `
-  position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:10000;
-  display:flex;align-items:${window.innerWidth < 640 ? "flex-end" : "center"};
-  justify-content:center;padding:${window.innerWidth < 640 ? "0" : "24px"};`;
- 
-const MODAL_STYLE = `
-  background:var(--bg1);border:1px solid var(--border);
-  border-radius:${window.innerWidth < 640 ? "12px 12px 0 0" : "12px"};
-  width:100%;max-width:${window.innerWidth < 640 ? "100%" : "700px"};
-  max-height:${window.innerWidth < 640 ? "92vh" : "85vh"};
-  display:flex;flex-direction:column;overflow:hidden;`;
-  }
-
   // rdnsCard Function
   function rdnsCard(rdns) {
   if (!rdns) return "";
@@ -3254,8 +3086,6 @@ const MODAL_STYLE = `
         <div style="margin-top:6px;font-size:10px;color:var(--text3);">Forward-confirmed reverse DNS verified</div>` : ""}
     </div>`;
 }
-
-
 
   // ── Watchlist 
   async function loadWatchlist() {
@@ -3421,7 +3251,6 @@ const MODAL_STYLE = `
         </div>` : ""}`;
   }
 
-
   // ── Render result 
   function renderResult(d) {
     const score     = d.score        ?? 0;
@@ -3554,8 +3383,6 @@ const MODAL_STYLE = `
         </div>
       </div>`;
   }
-
-
 
   // ── Helpers 
   function threatFeedBadges(tf) {
@@ -3773,4 +3600,1379 @@ const MODAL_STYLE = `
   }
 
   setInterval(loadWatchlist, 1000 * 60 * 2);
+
+    // recent update
+    // 1. CLUSTER VISUALIZATION MODAL
+    async function showClustersPanel() {
+      document.getElementById("clustersModal")?.remove();
+
+      const overlay = document.createElement("div");
+      overlay.id = "clustersModal";
+      overlay.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:10000;display:flex;align-items:center;justify-content:center;padding:16px;";
+
+      const modal = document.createElement("div");
+      modal.style.cssText = "background:var(--bg1);border:1px solid var(--border);border-radius:12px;width:100%;max-width:960px;max-height:92vh;display:flex;flex-direction:column;overflow:hidden;";
+
+      modal.innerHTML = `
+        <div style="padding:16px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+          <div>
+            <div style="font-size:14px;font-weight:700;color:var(--text);">🌐 Threat Clusters</div>
+            <div id="clusterSummary" style="font-size:11px;color:var(--text3);margin-top:2px;">Loading…</div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <button id="refreshClustersBtn" class="btn btn-ghost" style="padding:6px 14px;font-size:11px;">Refresh</button>
+            <button id="closeClustersBtn" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:20px;padding:4px;">✕</button>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:320px 1fr;flex:1;overflow:hidden;min-height:0;" id="clusterLayout">
+          <!-- Left: cluster list -->
+          <div style="border-right:1px solid var(--border);overflow-y:auto;" id="clusterList">
+            <div style="padding:32px;text-align:center;color:var(--text3);font-size:12px;">
+              <div class="spinner" style="margin:0 auto 12px;"></div>Loading clusters…
+            </div>
+          </div>
+
+          <!-- Right: cluster detail -->
+          <div style="overflow-y:auto;" id="clusterDetail">
+            <div style="padding:48px;text-align:center;color:var(--text3);">
+              <div style="font-size:32px;margin-bottom:12px;">🌐</div>
+              <div style="font-size:13px;">Select a cluster to see its IPs</div>
+            </div>
+          </div>
+        </div>`;
+
+      overlay.appendChild(modal);
+      document.body.appendChild(overlay);
+
+      document.getElementById("closeClustersBtn").addEventListener("click", () => overlay.remove());
+      overlay.addEventListener("click", e => { if (e.target === overlay) overlay.remove(); });
+      document.getElementById("refreshClustersBtn").addEventListener("click", loadClusters);
+
+      let activeClustersData = [];
+
+      async function loadClusters() {
+        try {
+          const res  = await fetch(`${API}/threat/clusters?limit=50`, { headers: { "x-api-key": API_KEY } });
+          const data = await res.json();
+          activeClustersData = data.clusters || [];
+
+          const summary = document.getElementById("clusterSummary");
+          if (summary) summary.textContent = `${activeClustersData.length} active campaign${activeClustersData.length !== 1 ? "s" : ""} detected`;
+
+          renderClusterList(activeClustersData);
+        } catch (err) {
+          document.getElementById("clusterList").innerHTML =
+            `<div style="padding:24px;color:var(--critical);font-size:12px;">⚠ ${escHtml(err.message)}</div>`;
+        }
+      }
+
+      function renderClusterList(clusters) {
+        const el = document.getElementById("clusterList");
+        if (!clusters.length) {
+          el.innerHTML = `<div style="padding:32px;text-align:center;color:var(--text3);font-size:12px;">
+            No active clusters.<br><br>
+            <span style="font-size:10px;">Clusters form when ${3}+ IPs from the same subnet or ASN appear within 30 minutes.</span>
+          </div>`;
+          return;
+        }
+
+        const typeIcon = { subnet: "🔷", asn: "🏢", country: "🌍" };
+        const sevColor = { CRITICAL: "var(--critical)", HIGH: "var(--high)", MEDIUM: "var(--medium)", LOW: "var(--low)" };
+
+        el.innerHTML = clusters.map((c, i) => {
+          const details = typeof c.details === "string" ? JSON.parse(c.details || "{}") : (c.details || {});
+          const label   = details.subnet || details.asn || details.country || c.cluster_key;
+          const color   = sevColor[c.severity] || "var(--text2)";
+          const age     = timeSince(c.last_seen);
+
+          return `<div class="cluster-item" data-idx="${i}"
+            style="padding:14px 16px;border-bottom:1px solid var(--border);cursor:pointer;border-left:3px solid transparent;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+              <span style="font-size:14px;">${typeIcon[c.cluster_type] || "🔷"}</span>
+              <span style="font-size:12px;font-weight:600;color:var(--text);font-family:monospace;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml(label)}</span>
+              <span style="font-size:10px;font-weight:700;color:${color};padding:2px 7px;border-radius:3px;background:${color}22;">${c.severity}</span>
+            </div>
+            <div style="display:flex;gap:10px;font-size:10px;color:var(--text3);">
+              <span>🔗 ${c.ip_count} IPs</span>
+              <span>⚡ Max ${c.max_score}</span>
+              <span>🕐 ${age}</span>
+              <span style="text-transform:capitalize;color:var(--accent);">${c.cluster_type}</span>
+            </div>
+          </div>`;
+        }).join("");
+
+        el.querySelectorAll(".cluster-item").forEach(item => {
+          item.addEventListener("mouseover", () => { item.style.background = "rgba(0,217,255,0.03)"; });
+          item.addEventListener("mouseout",  () => { item.style.background = ""; });
+          item.addEventListener("click", () => {
+            el.querySelectorAll(".cluster-item").forEach(i => {
+              i.style.borderLeftColor = "transparent";
+              i.style.background = "";
+            });
+            item.style.borderLeftColor = "var(--accent)";
+            item.style.background = "rgba(0,217,255,0.04)";
+            loadClusterDetail(activeClustersData[parseInt(item.dataset.idx)]);
+          });
+        });
+
+        // Auto-select first
+        el.querySelector(".cluster-item")?.click();
+      }
+
+      async function loadClusterDetail(cluster) {
+        const el = document.getElementById("clusterDetail");
+        el.innerHTML = `<div style="padding:32px;text-align:center;color:var(--text3);"><div class="spinner" style="margin:0 auto 12px;"></div>Loading IPs…</div>`;
+
+        const details  = typeof cluster.details === "string" ? JSON.parse(cluster.details || "{}") : (cluster.details || {});
+        const label    = details.subnet || details.asn || details.country || cluster.cluster_key;
+        const sevColor = { CRITICAL: "var(--critical)", HIGH: "var(--high)", MEDIUM: "var(--medium)", LOW: "var(--low)" };
+        const color    = sevColor[cluster.severity] || "var(--text2)";
+        const typeIcon = { subnet: "🔷", asn: "🏢", country: "🌍" };
+
+        try {
+          const res  = await fetch(`${API}/threat/clusters/${cluster.id}/ips`, { headers: { "x-api-key": API_KEY } });
+          const data = await res.json();
+          const ips  = data.ips || [];
+
+          el.innerHTML = `
+            <div style="padding:20px 24px;">
+              <!-- Header -->
+              <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:16px;flex-wrap:wrap;">
+                <div style="flex:1;">
+                  <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap;">
+                    <span style="font-size:18px;">${typeIcon[cluster.cluster_type] || "🔷"}</span>
+                    <span style="font-size:14px;font-weight:700;color:var(--text);font-family:monospace;">${escHtml(label)}</span>
+                    <span style="font-size:10px;font-weight:700;color:${color};padding:3px 8px;border-radius:4px;background:${color}22;">${cluster.severity}</span>
+                    <span style="font-size:10px;color:var(--text3);text-transform:capitalize;">${cluster.cluster_type} cluster</span>
+                  </div>
+                  <div style="display:flex;gap:14px;font-size:11px;color:var(--text3);">
+                    <span>🔗 ${cluster.ip_count} IPs</span>
+                    <span>⚡ Max score: <strong style="color:${color};">${cluster.max_score}</strong></span>
+                    <span>First seen: ${new Date(cluster.first_seen).toLocaleString()}</span>
+                    <span>Last seen: ${timeSince(cluster.last_seen)} ago</span>
+                  </div>
+                </div>
+                <div style="display:flex;gap:8px;flex-shrink:0;flex-wrap:wrap;">
+                  ${details.subnet ? `
+                    <button class="btn btn-ghost" id="blockSubnetBtn"
+                      style="padding:6px 14px;font-size:11px;color:var(--critical);border-color:var(--critical);">
+                      🚫 Block /24
+                    </button>` : ""}
+                  <button class="btn btn-ghost" id="resolveClusterBtn"
+                    style="padding:6px 14px;font-size:11px;color:var(--low);border-color:var(--low);">
+                    ✓ Resolve
+                  </button>
+                </div>
+              </div>
+
+              <!-- IP table -->
+              <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;overflow:hidden;">
+                <div style="padding:10px 14px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
+                  <span style="font-size:10px;color:var(--text3);letter-spacing:2px;">IPs IN CLUSTER</span>
+                  <span style="font-size:11px;color:var(--text3);">${ips.length} found</span>
+                </div>
+                ${ips.length ? `
+                  <div style="max-height:340px;overflow-y:auto;">
+                    <table style="width:100%;border-collapse:collapse;font-size:12px;">
+                      <thead>
+                        <tr style="background:var(--bg1);">
+                          <th style="padding:8px 12px;text-align:left;color:var(--text3);font-size:10px;letter-spacing:1px;">IP</th>
+                          <th style="padding:8px 12px;text-align:center;color:var(--text3);font-size:10px;letter-spacing:1px;">SCORE</th>
+                          <th style="padding:8px 12px;text-align:center;color:var(--text3);font-size:10px;letter-spacing:1px;">RISK</th>
+                          <th style="padding:8px 12px;text-align:left;color:var(--text3);font-size:10px;letter-spacing:1px;">ISP</th>
+                          <th style="padding:8px 12px;text-align:left;color:var(--text3);font-size:10px;letter-spacing:1px;">SEEN</th>
+                          <th style="padding:8px 12px;text-align:center;color:var(--text3);font-size:10px;letter-spacing:1px;">ACTION</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        ${ips.map((ip, i) => {
+                          const rc = { CRITICAL: "var(--critical)", HIGH: "var(--high)", MEDIUM: "var(--medium)", LOW: "var(--low)" }[ip.risk_level] || "var(--text2)";
+                          return `<tr style="border-top:1px solid var(--border);${i % 2 === 0 ? "" : "background:var(--bg1);"}">
+                            <td style="padding:8px 12px;">
+                              <span class="cluster-ip-score" data-ip="${escHtml(ip.ip)}"
+                                style="font-family:monospace;color:var(--accent);cursor:pointer;font-size:12px;"
+                                title="Click to score">${escHtml(ip.ip)}</span>
+                            </td>
+                            <td style="padding:8px 12px;text-align:center;font-weight:700;color:${rc};">${ip.score}</td>
+                            <td style="padding:8px 12px;text-align:center;">
+                              <span style="font-size:9px;font-weight:700;color:${rc};padding:2px 6px;border-radius:3px;background:${rc}22;">${ip.risk_level}</span>
+                            </td>
+                            <td style="padding:8px 12px;color:var(--text2);font-size:11px;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml(ip.isp || "—")}</td>
+                            <td style="padding:8px 12px;color:var(--text3);white-space:nowrap;font-size:11px;">${timeSince(ip.scored_at)} ago</td>
+                            <td style="padding:8px 12px;text-align:center;">
+                              <button class="cluster-block-ip btn btn-ghost" data-ip="${escHtml(ip.ip)}"
+                                style="padding:2px 8px;font-size:10px;color:var(--critical);border-color:var(--critical);">Block</button>
+                            </td>
+                          </tr>`;
+                        }).join("")}
+                      </tbody>
+                    </table>
+                  </div>` : `<div style="padding:24px;text-align:center;color:var(--text3);font-size:12px;">No IPs found in window</div>`}
+              </div>
+            </div>`;
+
+          // Block individual IPs
+          el.querySelectorAll(".cluster-block-ip").forEach(btn => {
+            btn.addEventListener("click", async () => {
+              if (btn._busy) return;
+              btn._busy = true; btn.textContent = "…";
+              const r = await fetch(`${API}/blacklist`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json", "x-api-key": API_KEY },
+                body: JSON.stringify({ ip: btn.dataset.ip, severity: "HIGH", reason: `Cluster: ${label}`, category: "Cluster", added_by: "analyst" }),
+              });
+              if (r.ok) { btn.textContent = "✓"; btn.style.color = "var(--low)"; toast(`${btn.dataset.ip} blocked`, "success"); }
+              else { btn._busy = false; btn.textContent = "Block"; toast("Block failed", "error"); }
+            });
+          });
+
+          // Score IP on click
+          el.querySelectorAll(".cluster-ip-score").forEach(span => {
+            span.addEventListener("click", () => {
+              ipInput.value = span.dataset.ip;
+              overlay.remove();
+              scoreIP();
+            });
+          });
+
+          // Block entire subnet
+          document.getElementById("blockSubnetBtn")?.addEventListener("click", async () => {
+            const btn = document.getElementById("blockSubnetBtn");
+            if (!confirm(`Block entire subnet ${details.subnet}?`)) return;
+            btn.disabled = true; btn.textContent = "Blocking…";
+            const r = await fetch(`${API}/blacklist/cidr`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json", "x-api-key": API_KEY },
+              body: JSON.stringify({ cidr: details.subnet, severity: cluster.severity, reason: `Cluster block: ${cluster.ip_count} IPs detected`, tags: ["cluster", "auto"] }),
+            });
+            if (r.ok) { toast(`Subnet ${details.subnet} blocked`, "success"); btn.textContent = "✓ Blocked"; }
+            else { btn.disabled = false; btn.textContent = "🚫 Block /24"; toast("Block failed", "error"); }
+          });
+
+          // Resolve cluster
+          document.getElementById("resolveClusterBtn")?.addEventListener("click", async () => {
+            if (!confirm("Mark this cluster as resolved?")) return;
+            const btn = document.getElementById("resolveClusterBtn");
+            btn.disabled = true; btn.textContent = "Resolving…";
+            const r = await fetch(`${API}/threat/clusters/${cluster.id}/resolve`, {
+              method: "POST", headers: { "x-api-key": API_KEY },
+            });
+            if (r.ok) {
+              toast("Cluster resolved", "success");
+              activeClustersData = activeClustersData.filter(c => c.id !== cluster.id);
+              renderClusterList(activeClustersData);
+              document.getElementById("clusterDetail").innerHTML = `
+                <div style="padding:48px;text-align:center;color:var(--text3);">
+                  <div style="font-size:32px;margin-bottom:12px;">✓</div>
+                  <div>Cluster resolved</div>
+                </div>`;
+            } else { btn.disabled = false; btn.textContent = "✓ Resolve"; }
+          });
+
+        } catch (err) {
+          el.innerHTML = `<div style="padding:24px;color:var(--critical);font-size:12px;">⚠ ${escHtml(err.message)}</div>`;
+        }
+      }
+
+      loadClusters();
+    }
+
+    // 2. SIEM TARGETS CONFIGURATION PANEL
+    async function showUnifiedSIEMPanel() {
+      document.getElementById("siemUnifiedModal")?.remove();
+
+      const SIEM_TYPES = [
+        { id:"splunk",   label:"Splunk HEC",          hint:"Authorization: Splunk {token}" },
+        { id:"elastic",  label:"Elastic / OpenSearch", hint:"Authorization: ApiKey {token}" },
+        { id:"sentinel", label:"Microsoft Sentinel",   hint:"SharedKey authentication" },
+        { id:"qradar",   label:"IBM QRadar",           hint:"CEF format, SEC: {token}" },
+        { id:"generic",  label:"Generic Webhook",      hint:"Bearer {token} or no auth" },
+      ];
+
+      // ── Fetch both webhook status and targets in parallel ──────────────────────
+      let status = null, formats = [], targets = [];
+      try {
+        const [sRes, fRes, tRes] = await Promise.all([
+          fetch(`${API}/siem/status`,  { headers: { "x-api-key": API_KEY } }),
+          fetch(`${API}/siem/formats`, { headers: { "x-api-key": API_KEY } }),
+          fetch(`${API}/siem/targets`, { headers: { "x-api-key": API_KEY } }),
+        ]);
+        status  = (await sRes.json()).siem;
+        formats = (await fRes.json()).formats || [];
+        targets = (await tRes.json()).targets || [];
+      } catch (_) {}
+
+      const statusColor = status?.enabled ? "var(--low)" : "var(--text3)";
+      const statusLabel = status?.enabled ? "● ACTIVE" : "○ INACTIVE";
+      const activeCount = targets.filter(t => t.enabled).length;
+
+      const overlay = document.createElement("div");
+      overlay.id = "siemUnifiedModal";
+      overlay.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:10000;display:flex;align-items:center;justify-content:center;padding:16px;";
+
+      const modal = document.createElement("div");
+      modal.style.cssText = "background:var(--bg1);border:1px solid var(--border);border-radius:12px;width:100%;max-width:820px;max-height:92vh;display:flex;flex-direction:column;overflow:hidden;";
+
+      modal.innerHTML = `
+        <!-- Header -->
+        <div style="padding:16px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+          <div>
+            <div style="font-size:14px;font-weight:700;color:var(--text);">📡 SIEM Integration</div>
+            <div style="font-size:11px;color:var(--text3);margin-top:2px;">
+              Env webhook: <span style="color:${statusColor};">${statusLabel}${status?.type ? ` — ${status.type.toUpperCase()}` : ""}</span>
+              &nbsp;·&nbsp;
+              Managed targets: <span style="color:${activeCount > 0 ? "var(--low)" : "var(--text3)"};">${activeCount} active</span>
+            </div>
+          </div>
+          <button id="siemUnifiedClose" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:20px;padding:4px;">✕</button>
+        </div>
+
+        <!-- Tabs -->
+        <div style="display:flex;border-bottom:1px solid var(--border);background:var(--bg);">
+          <button class="siem-tab active" data-tab="webhook"
+            style="padding:10px 20px;border:none;background:none;color:var(--accent);font-size:12px;font-weight:600;cursor:pointer;border-bottom:2px solid var(--accent);font-family:inherit;letter-spacing:0.5px;">
+            Webhook Config
+          </button>
+          <button class="siem-tab" data-tab="targets"
+            style="padding:10px 20px;border:none;background:none;color:var(--text3);font-size:12px;font-weight:600;cursor:pointer;border-bottom:2px solid transparent;font-family:inherit;letter-spacing:0.5px;">
+            Managed Targets ${activeCount > 0 ? `<span style="font-size:10px;padding:1px 6px;border-radius:10px;background:rgba(0,232,124,0.15);color:var(--low);margin-left:4px;">${activeCount}</span>` : ""}
+          </button>
+        </div>
+
+        <!-- Tab content -->
+        <div style="flex:1;overflow-y:auto;">
+
+          <!-- ── WEBHOOK TAB  -->
+          <div id="siemTab-webhook" style="padding:20px 24px;display:flex;flex-direction:column;gap:20px;">
+
+            <!-- Status card -->
+            <div style="background:var(--bg);border:0.5px solid var(--border);border-radius:10px;padding:16px 20px;">
+              <div style="font-size:10px; font-weight:700; color:var(--text1);letter-spacing:2px;margin-bottom:10px;">CURRENT CONFIGURATION</div>
+              ${[
+                ["Status",      status?.enabled ? "Enabled" : "Disabled"],
+                ["Type",        status?.type?.toUpperCase() || "Not set"],
+                ["Webhook URL", status?.url || "Not configured"],
+                ["Token",       status?.hasToken ? "Set ✓" : "Not set"],
+                ["Min Score",   status?.minScore ?? 0],
+                ["Min Risk",    status?.minRisk  || "LOW"],
+              ].map(([k,v]) => `
+                <div style="display:flex;gap:12px;padding:5px 0;border-bottom:1px solid var(--border);">
+                  <span style="font-size:11px;color:var(--text3);min-width:110px;">${k}</span>
+                  <span style="font-size:11px;color:var(--text2);">${escHtml(String(v))}</span>
+                </div>`).join("")}
+            </div>
+
+            <!-- Env var setup -->
+            <div style="background:var(--bg);border:0.5px solid var(--border);border-radius:10px;padding:16px 20px;">
+              <div style="font-size:10px; font-weight:700; color:var(--text1);letter-spacing:2px;margin-bottom:10px;">SETUP — RENDER ENVIRONMENT VARIABLES</div>
+              <div style="background:var(--bg1);border-radius:6px;padding:12px 14px;font-size:11px;line-height:2;color:var(--text2);font-family:'JetBrains Mono',monospace;overflow-x:auto;">
+                SIEM_ENABLED=true<br>
+                SIEM_TYPE=<span style="color:var(--accent);">splunk|elastic|sentinel|qradar|generic</span><br>
+                SIEM_WEBHOOK_URL=<span style="color:var(--accent);">https://your-siem-endpoint</span><br>
+                SIEM_TOKEN=<span style="color:var(--accent);">your_token_or_api_key</span><br>
+                SIEM_MIN_SCORE=<span style="color:var(--accent);">0</span><br>
+                SIEM_MIN_RISK=<span style="color:var(--accent);">LOW</span>
+              </div>
+            </div>
+
+            <!-- Supported formats -->
+            <div style="background:var(--bg);border:0.5px solid var(--border);border-radius:10px;padding:16px 20px;">
+              <div style="font-size:10px;font-weight:700;color:var(--text1);letter-spacing:2px;margin-bottom:12px;">SUPPORTED PLATFORMS</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+                ${formats.map(f => `
+                  <div style="padding:10px 12px;background:var(--bg1);border-radius:6px;border:0.9px solid var(--border);">
+                    <div style="font-size:11px;font-weight:700;color:var(--accent);margin-bottom:3px;">${escHtml(f.label)}</div>
+                    <div style="font-size:10px;color:var(--text3);line-height:1.5;">${escHtml(f.description)}</div>
+                  </div>`).join("")}
+              </div>
+            </div>
+
+            <!-- Test + sample -->
+            <div style="background:var(--bg);border:0.5px solid var(--border);border-radius:10px;padding:16px 20px;">
+              <div style="font-size:10px;font-weight:700;color:var(--text1);letter-spacing:2px;margin-bottom:8px;">TEST WEBHOOK</div>
+              <div style="font-size:11px;color:var(--text3);margin-bottom:12px;">Send a sample CRITICAL event to your configured env-var webhook.</div>
+              <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+                <button id="siemTestBtn" class="btn btn-primary" style="padding:8px 20px;font-size:12px;">Send Test Event</button>
+                <span id="siemTestResult" style="font-size:12px;color:var(--text2);"></span>
+              </div>
+              <div id="siemTestDetail" style="margin-top:10px;font-size:11px;color:var(--text3);display:none;"></div>
+            </div>
+
+            <!-- Sample payload -->
+            <div style="background:var(--bg);border:0.5px solid var(--border);border-radius:10px;padding:16px 20px;">
+              <div style="font-size:10px;font-weight:700;color:var(--text1);letter-spacing:2px;margin-bottom:10px;">SAMPLE PAYLOAD</div>
+              <div style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;">
+                ${formats.map((f, i) => `
+                  <button class="siem-fmt-tab" data-format="${f.id}"
+                    style="padding:4px 12px;border-radius:4px;border:1px solid ${i===0?"var(--accent)":"var(--border)"};
+                          background:${i===0?"rgba(0,217,255,0.1)":"transparent"};
+                          color:${i===0?"var(--accent)":"var(--text3)"};
+                          font-size:10px;cursor:pointer;font-family:inherit;">${f.label}</button>`).join("")}
+              </div>
+              <pre id="siemSamplePayload" style="background:var(--bg1);border-radius:6px;padding:12px;font-size:10px;line-height:1.6;color:var(--text2);overflow:auto;max-height:180px;white-space:pre-wrap;word-break:break-all;">Loading…</pre>
+              <button id="siemCopySample" class="btn btn-ghost" style="margin-top:8px;padding:5px 14px;font-size:11px;">Copy Sample</button>
+            </div>
+          </div>
+
+          <!-- ── TARGETS TAB ─────────────────────────────────────────────────── -->
+          <div id="siemTab-targets" style="display:none;flex-direction:column;">
+            <div style="padding:12px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
+              <span style="font-size:11px;color:var(--text3);">All enabled targets receive every qualifying event simultaneously</span>
+              <button id="addSIEMTargetBtn" class="btn btn-primary" style="padding:6px 14px;font-size:11px;">+ Add Target</button>
+            </div>
+            <div id="siemTargetsList" style="flex:1;overflow-y:auto;">
+              <div style="padding:32px;text-align:center;color:var(--text3);"><div class="spinner" style="margin:0 auto 12px;"></div>Loading…</div>
+            </div>
+            <!-- Add/Edit form -->
+            <div id="siemTargetForm" style="display:none;padding:20px 24px;border-top:1px solid var(--border);background:var(--bg2);">
+              <div style="font-size:11px;font-weight:600;color:var(--text);letter-spacing:2px;margin-bottom:14px;" id="siemFormTitle">ADD SIEM TARGET</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                <div>
+                  <label style="font-size:10px;color:var(--text3);display:block;margin-bottom:4px;">NAME *</label>
+                  <input id="stName" type="text" maxlength="100" placeholder="e.g. Splunk Production"
+                    style="width:100%;padding:8px 12px;background:var(--bg1);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:inherit;font-size:12px;outline:none;box-sizing:border-box;">
+                </div>
+                <div>
+                  <label style="font-size:10px;color:var(--text3);display:block;margin-bottom:4px;">TYPE *</label>
+                  <select id="stType" style="width:100%;padding:8px 12px;background:var(--bg1);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:inherit;font-size:12px;">
+                    ${SIEM_TYPES.map(t => `<option value="${t.id}">${t.label}</option>`).join("")}
+                  </select>
+                </div>
+                <div style="grid-column:1/-1;">
+                  <label style="font-size:10px;color:var(--text3);display:block;margin-bottom:4px;">WEBHOOK URL *</label>
+                  <input id="stUrl" type="url" maxlength="500" placeholder="https://your-siem-endpoint"
+                    style="width:100%;padding:8px 12px;background:var(--bg1);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:inherit;font-size:12px;outline:none;box-sizing:border-box;">
+                  <div id="stTypeHint" style="font-size:10px;color:var(--text3);margin-top:4px;"></div>
+                </div>
+                <div style="grid-column:1/-1;">
+                  <label style="font-size:10px;color:var(--text3);display:block;margin-bottom:4px;">TOKEN / API KEY</label>
+                  <input id="stToken" type="password" maxlength="500" placeholder="Leave blank if not required"
+                    style="width:100%;padding:8px 12px;background:var(--bg1);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:inherit;font-size:12px;outline:none;box-sizing:border-box;">
+                </div>
+                <div>
+                  <label style="font-size:10px;color:var(--text3);display:block;margin-bottom:4px;">MIN SCORE (0–100)</label>
+                  <input id="stMinScore" type="number" min="0" max="100" value="0"
+                    style="width:100%;padding:8px 12px;background:var(--bg1);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:inherit;font-size:12px;outline:none;box-sizing:border-box;">
+                </div>
+                <div>
+                  <label style="font-size:10px;color:var(--text3);display:block;margin-bottom:4px;">MIN RISK LEVEL</label>
+                  <select id="stMinRisk" style="width:100%;padding:8px 12px;background:var(--bg1);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:inherit;font-size:12px;">
+                    <option value="LOW">LOW</option>
+                    <option value="MEDIUM">MEDIUM</option>
+                    <option value="HIGH">HIGH</option>
+                    <option value="CRITICAL">CRITICAL</option>
+                  </select>
+                </div>
+                <div style="display:flex;align-items:center;gap:10px;">
+                  <input type="checkbox" id="stEnabled" checked style="cursor:pointer;">
+                  <label for="stEnabled" style="font-size:12px;color:var(--text2);cursor:pointer;">Enabled</label>
+                </div>
+                <div style="display:flex;align-items:center;gap:10px;">
+                  <input type="checkbox" id="stVerifySsl" checked style="cursor:pointer;">
+                  <label for="stVerifySsl" style="font-size:12px;color:var(--text2);cursor:pointer;">Verify SSL</label>
+                </div>
+              </div>
+              <div id="stError" style="font-size:11px;color:var(--critical);margin-top:10px;display:none;"></div>
+              <div style="display:flex;gap:8px;margin-top:14px;justify-content:flex-end;">
+                <button id="stCancel" class="btn btn-ghost" style="padding:7px 16px;font-size:12px;">Cancel</button>
+                <button id="stSave" class="btn btn-primary" style="padding:7px 16px;font-size:12px;">Save Target</button>
+              </div>
+            </div>
+          </div>
+        </div>`;
+
+      overlay.appendChild(modal);
+      document.body.appendChild(overlay);
+
+      // ── Close ──────────────────────────────────────────────────────────────────
+      document.getElementById("siemUnifiedClose").addEventListener("click", () => overlay.remove());
+      overlay.addEventListener("click", e => { if (e.target === overlay) overlay.remove(); });
+
+      // ── Tab switching ──────────────────────────────────────────────────────────
+      modal.querySelectorAll(".siem-tab").forEach(tab => {
+        tab.addEventListener("click", () => {
+          modal.querySelectorAll(".siem-tab").forEach(t => {
+            t.style.color            = "var(--text3)";
+            t.style.borderBottomColor = "transparent";
+            t.classList.remove("active");
+          });
+          tab.style.color             = "var(--accent)";
+          tab.style.borderBottomColor = "var(--accent)";
+          tab.classList.add("active");
+
+          modal.querySelectorAll("[id^='siemTab-']").forEach(el => {
+            el.style.display = "none";
+          });
+          const target = document.getElementById(`siemTab-${tab.dataset.tab}`);
+          if (target) {
+            target.style.display = tab.dataset.tab === "targets" ? "flex" : "block";
+            if (tab.dataset.tab === "targets") loadTargets();
+          }
+        });
+      });
+
+      // ── Webhook tab: test ──────────────────────────────────────────────────────
+      document.getElementById("siemTestBtn").addEventListener("click", async () => {
+        const btn    = document.getElementById("siemTestBtn");
+        const result = document.getElementById("siemTestResult");
+        const detail = document.getElementById("siemTestDetail");
+        btn.disabled = true; btn.textContent = "Sending…";
+        result.textContent = ""; detail.style.display = "none";
+        try {
+          const res  = await fetch(`${API}/siem/test`, {
+            method: "POST", headers: { "Content-Type": "application/json", "x-api-key": API_KEY }, body: JSON.stringify({})
+          });
+          const data = await res.json();
+          result.textContent = data.message;
+          result.style.color = data.success ? "var(--low)" : "var(--critical)";
+          if (!data.success && data.reason) {
+            detail.textContent = `Reason: ${data.reason}`;
+            detail.style.display = "block";
+          }
+        } catch (err) {
+          result.textContent = `Error: ${err.message}`;
+          result.style.color = "var(--critical)";
+        } finally {
+          btn.disabled = false; btn.textContent = "Send Test Event";
+        }
+      });
+
+      // ── Webhook tab: sample payload ────────────────────────────────────────────
+      async function loadSIEMSample(format) {
+        const pre = document.getElementById("siemSamplePayload");
+        pre.textContent = "Loading…";
+        try {
+          const res  = await fetch(`${API}/siem/sample/${format}`, { headers: { "x-api-key": API_KEY } });
+          const data = await res.json();
+          pre.textContent = JSON.stringify(data.sample, null, 2);
+        } catch (err) {
+          pre.textContent = `Error: ${err.message}`;
+        }
+      }
+
+      modal.querySelectorAll(".siem-fmt-tab").forEach(btn => {
+        btn.addEventListener("click", () => {
+          modal.querySelectorAll(".siem-fmt-tab").forEach(b => {
+            b.style.borderColor = "var(--border)"; b.style.background = "transparent"; b.style.color = "var(--text3)";
+          });
+          btn.style.borderColor = "var(--accent)"; btn.style.background = "rgba(0,217,255,0.1)"; btn.style.color = "var(--accent)";
+          loadSIEMSample(btn.dataset.format);
+        });
+      });
+
+      document.getElementById("siemCopySample").addEventListener("click", () => {
+        const text = document.getElementById("siemSamplePayload").textContent;
+        navigator.clipboard.writeText(text).then(() => {
+          const btn = document.getElementById("siemCopySample");
+          btn.textContent = "✓ Copied!";
+          setTimeout(() => { btn.textContent = "Copy Sample"; }, 2000);
+        });
+      });
+
+      if (formats.length) loadSIEMSample(formats[0].id);
+
+      // ── Targets tab ────────────────────────────────────────────────────────────
+      const typeSelect = document.getElementById("stType");
+      typeSelect.addEventListener("change", () => {
+        document.getElementById("stTypeHint").textContent =
+          SIEM_TYPES.find(t => t.id === typeSelect.value)?.hint || "";
+      });
+      document.getElementById("stTypeHint").textContent = SIEM_TYPES[0].hint;
+
+      let editingId = null;
+
+      async function loadTargets() {
+        const el = document.getElementById("siemTargetsList");
+        try {
+          const res  = await fetch(`${API}/siem/targets`, { headers: { "x-api-key": API_KEY } });
+          const data = await res.json();
+          renderTargets(data.targets || []);
+        } catch (err) {
+          el.innerHTML = `<div style="padding:24px;color:var(--critical);font-size:12px;">⚠ ${escHtml(err.message)}</div>`;
+        }
+      }
+
+      function renderTargets(targets) {
+        const el = document.getElementById("siemTargetsList");
+        if (!targets.length) {
+          el.innerHTML = `<div style="padding:40px;text-align:center;color:var(--text3);font-size:12px;">
+            No managed targets yet.<br><br>
+            <span style="font-size:11px;">Add targets to fan out events to multiple SIEMs simultaneously.</span><br><br>
+            <button id="firstTargetBtn" class="btn btn-primary" style="padding:8px 18px;font-size:12px;">+ Add First Target</button>
+          </div>`;
+          document.getElementById("firstTargetBtn")?.addEventListener("click", openAddForm);
+          return;
+        }
+
+        el.innerHTML = `
+          <table style="width:100%;border-collapse:collapse;font-size:12px;">
+            <thead>
+              <tr style="background:var(--bg2);border-bottom:1px solid var(--border);">
+                <th style="padding:10px 16px;text-align:left;color:var(--text3);font-size:10px;letter-spacing:1px;">NAME</th>
+                <th style="padding:10px 8px;text-align:left;color:var(--text3);font-size:10px;">TYPE</th>
+                <th style="padding:10px 8px;text-align:center;color:var(--text3);font-size:10px;">STATUS</th>
+                <th style="padding:10px 8px;text-align:left;color:var(--text3);font-size:10px;">MIN</th>
+                <th style="padding:10px 8px;text-align:left;color:var(--text3);font-size:10px;">LAST SENT</th>
+                <th style="padding:10px 16px;text-align:right;color:var(--text3);font-size:10px;">ACTIONS</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${targets.map((t, i) => `
+                <tr style="border-bottom:1px solid var(--border);${i%2===0?"":"background:var(--bg);"}">
+                  <td style="padding:10px 16px;">
+                    <div style="font-weight:600;color:var(--text);">${escHtml(t.name)}</div>
+                    <div style="font-size:10px;color:var(--text3);margin-top:2px;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${escHtml(t.url)}">${escHtml(t.url)}</div>
+                  </td>
+                  <td style="padding:10px 8px;color:var(--accent);font-size:11px;text-transform:uppercase;">${t.type}</td>
+                  <td style="padding:10px 8px;text-align:center;">
+                    <span style="font-size:10px;font-weight:700;color:${t.enabled?"var(--low)":"var(--text3)"};padding:2px 8px;border-radius:3px;background:${t.enabled?"rgba(0,232,124,0.1)":"var(--bg2)"};">
+                      ${t.enabled ? "● ACTIVE" : "○ OFF"}
+                    </span>
+                  </td>
+                  <td style="padding:10px 8px;color:var(--text3);font-size:11px;">${t.min_risk} ≥ ${t.min_score}</td>
+                  <td style="padding:10px 8px;color:var(--text3);font-size:11px;">
+                    ${t.last_sent ? timeSince(t.last_sent) + " ago" : "Never"}
+                    ${t.last_error ? `<div style="color:var(--critical);font-size:10px;margin-top:2px;" title="${escHtml(t.last_error)}">⚠ Error</div>` : ""}
+                  </td>
+                  <td style="padding:10px 16px;text-align:right;white-space:nowrap;">
+                    <button class="st-test btn btn-ghost" data-id="${t.id}" style="padding:3px 10px;font-size:10px;margin-right:4px;">Test</button>
+                    <button class="st-edit btn btn-ghost" data-id="${t.id}" data-idx="${i}" style="padding:3px 10px;font-size:10px;margin-right:4px;">Edit</button>
+                    <button class="st-del btn btn-ghost" data-id="${t.id}" style="padding:3px 10px;font-size:10px;color:var(--critical);border-color:var(--critical);">Del</button>
+                  </td>
+                </tr>`).join("")}
+            </tbody>
+          </table>`;
+
+        el.querySelectorAll(".st-test").forEach(btn => {
+          btn.addEventListener("click", async () => {
+            btn.disabled = true; btn.textContent = "Testing…";
+            const r    = await fetch(`${API}/siem/targets/${btn.dataset.id}/test`, { method: "POST", headers: { "x-api-key": API_KEY } });
+            const data = await r.json();
+            btn.disabled = false; btn.textContent = "Test";
+            toast(data.message || (data.success ? "✓ Delivered" : "✗ Failed"), data.success ? "success" : "error");
+            loadTargets();
+          });
+        });
+
+        el.querySelectorAll(".st-edit").forEach(btn => {
+          btn.addEventListener("click", () => openEditForm(targets[parseInt(btn.dataset.idx)]));
+        });
+
+        el.querySelectorAll(".st-del").forEach(btn => {
+          btn.addEventListener("click", async () => {
+            if (!confirm("Delete this SIEM target?")) return;
+            await fetch(`${API}/siem/targets/${btn.dataset.id}`, { method: "DELETE", headers: { "x-api-key": API_KEY } });
+            toast("Target deleted", "success");
+            loadTargets();
+          });
+        });
+      }
+
+      function openAddForm() {
+        editingId = null;
+        document.getElementById("siemFormTitle").textContent    = "ADD SIEM TARGET";
+        document.getElementById("stName").value                 = "";
+        document.getElementById("stUrl").value                  = "";
+        document.getElementById("stToken").value                = "";
+        document.getElementById("stMinScore").value             = "0";
+        document.getElementById("stMinRisk").value              = "LOW";
+        document.getElementById("stEnabled").checked            = true;
+        document.getElementById("stVerifySsl").checked          = true;
+        document.getElementById("stError").style.display        = "none";
+        document.getElementById("siemTargetForm").style.display = "block";
+        document.getElementById("stName").focus();
+      }
+
+      function openEditForm(t) {
+        editingId = t.id;
+        document.getElementById("siemFormTitle").textContent    = "EDIT SIEM TARGET";
+        document.getElementById("stName").value                 = t.name;
+        document.getElementById("stType").value                 = t.type;
+        document.getElementById("stUrl").value                  = t.url;
+        document.getElementById("stToken").value                = "";
+        document.getElementById("stMinScore").value             = t.min_score;
+        document.getElementById("stMinRisk").value              = t.min_risk;
+        document.getElementById("stEnabled").checked            = t.enabled;
+        document.getElementById("stVerifySsl").checked          = t.verify_ssl;
+        document.getElementById("stError").style.display        = "none";
+        document.getElementById("siemTargetForm").style.display = "block";
+        document.getElementById("stTypeHint").textContent       = SIEM_TYPES.find(s => s.id === t.type)?.hint || "";
+        document.getElementById("stName").focus();
+      }
+
+      async function saveTarget() {
+        const errEl = document.getElementById("stError");
+        const name  = document.getElementById("stName").value.trim();
+        const url   = document.getElementById("stUrl").value.trim();
+        if (!name) { errEl.textContent = "Name is required"; errEl.style.display = "block"; return; }
+        if (!url)  { errEl.textContent = "URL is required";  errEl.style.display = "block"; return; }
+
+        const body = {
+          name, url,
+          type:      document.getElementById("stType").value,
+          token:     document.getElementById("stToken").value || undefined,
+          minScore:  parseInt(document.getElementById("stMinScore").value) || 0,
+          minRisk:   document.getElementById("stMinRisk").value,
+          enabled:   document.getElementById("stEnabled").checked,
+          verifySsl: document.getElementById("stVerifySsl").checked,
+        };
+
+        const method = editingId ? "PUT"  : "POST";
+        const path   = editingId ? `${API}/siem/targets/${editingId}` : `${API}/siem/targets`;
+        const r      = await fetch(path, { method, headers: { "Content-Type": "application/json", "x-api-key": API_KEY }, body: JSON.stringify(body) });
+        const data   = await r.json();
+
+        if (!r.ok) { errEl.textContent = data.error || "Save failed"; errEl.style.display = "block"; return; }
+        document.getElementById("siemTargetForm").style.display = "none";
+        toast(editingId ? "Target updated" : "Target added", "success");
+        loadTargets();
+      }
+
+      document.getElementById("addSIEMTargetBtn").addEventListener("click", openAddForm);
+      document.getElementById("stSave").addEventListener("click", saveTarget);
+      document.getElementById("stCancel").addEventListener("click", () => {
+        document.getElementById("siemTargetForm").style.display = "none";
+      });
+    }
+
+    // 3. RATE LIMIT TUNING PANEL
+    async function showRateLimitPanel() {
+      document.getElementById("rateLimitModal")?.remove();
+
+      const overlay = document.createElement("div");
+      overlay.id = "rateLimitModal";
+      overlay.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:10000;display:flex;align-items:center;justify-content:center;padding:16px;";
+
+      const modal = document.createElement("div");
+      modal.style.cssText = "background:var(--bg1);border:1px solid var(--border);border-radius:12px;width:100%;max-width:860px;max-height:92vh;display:flex;flex-direction:column;overflow:hidden;";
+
+      modal.innerHTML = `
+        <div style="padding:16px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+          <div>
+            <div style="font-size:14px;font-weight:700;color:var(--text);">⚡ Rate Limit Tuning</div>
+            <div style="font-size:11px;color:var(--text3);margin-top:2px;">Based on live telemetry — current limits vs actual usage</div>
+          </div>
+          <div style="display:flex;gap:8px;">
+            <button id="refreshRLBtn" class="btn btn-ghost" style="padding:6px 14px;font-size:11px;">Refresh</button>
+            <button id="closeRLBtn" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:20px;padding:4px;">✕</button>
+          </div>
+        </div>
+        <div style="flex:1;overflow-y:auto;padding:24px;" id="rateLimitContent">
+          <div style="text-align:center;color:var(--text3);padding:40px 0;">
+            <div class="spinner" style="margin:0 auto 12px;"></div>Loading telemetry…
+          </div>
+        </div>`;
+
+      overlay.appendChild(modal);
+      document.body.appendChild(overlay);
+
+      document.getElementById("closeRLBtn").addEventListener("click",   () => overlay.remove());
+      document.getElementById("refreshRLBtn").addEventListener("click", loadRateLimitData);
+      overlay.addEventListener("click", e => { if (e.target === overlay) overlay.remove(); });
+
+      // Current limits from app.js (mirrors what's in your Express config)
+      const CURRENT_LIMITS = [
+        { route: "All /api/*",     limit: 200, windowMins: 15, key: "" },
+        { route: "/api/score/*",   limit: 30,  windowMins: 1,  key: "score" },
+        { route: "/api/whois/*",   limit: 20,  windowMins: 1,  key: "whois" },
+        { route: "/api/report/*",  limit: 10,  windowMins: 1,  key: "report" },
+      ];
+
+      async function loadRateLimitData() {
+        const el = document.getElementById("rateLimitContent");
+        try {
+          const res  = await fetch(`${API}/telemetry/dashboard`, { headers: { "x-api-key": API_KEY } });
+          const data = await res.json();
+          const tel  = data.summary || data;
+          renderRateLimits(tel);
+        } catch (err) {
+          el.innerHTML = `<div style="color:var(--critical);font-size:12px;">⚠ ${escHtml(err.message)}<br><span style="color:var(--text3);">Make sure your admin API key is set correctly.</span></div>`;
+        }
+      }
+
+      function renderRateLimits(tel) {
+        const el        = document.getElementById("rateLimitContent");
+        const endpoints = tel.topEndpoints || [];
+        const uptime    = tel.uptime || {};
+        const requests  = tel.requests || {};
+
+        // Group by route prefix to match against rate limit buckets
+        function getRouteStats(prefix) {
+          const matching = endpoints.filter(e => !prefix || e.route?.includes(prefix));
+          if (!matching.length) return null;
+          const totalCount = matching.reduce((a, b) => a + (b.count || 0), 0);
+          const maxRPS     = Math.max(...matching.map(e => {
+            const secs = (uptime.seconds || 1);
+            return (e.count || 0) / secs;
+          }));
+          const avgMs      = matching.reduce((a, b) => a + (b.avgMs || 0), 0) / matching.length;
+          const maxP99     = Math.max(...matching.map(e => e.p99 || 0));
+          return { totalCount, maxRPS, avgMs: Math.round(avgMs), maxP99, endpoints: matching };
+        }
+
+        // Overall stats
+        const overallRPS     = requests.rps || 0;
+        const totalRequests  = requests.total || 0;
+        const errorRate      = requests.errorRate || "0%";
+        const uptimeHuman    = uptime.human || "—";
+
+        el.innerHTML = `
+          <!-- Overall health -->
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px;">
+            ${[
+              { label: "Total Requests",  val: totalRequests.toLocaleString(), color: "var(--accent)" },
+              { label: "Requests/sec",    val: parseFloat(overallRPS).toFixed(2), color: "var(--low)" },
+              { label: "Error Rate",      val: errorRate, color: parseFloat(errorRate) > 5 ? "var(--critical)" : "var(--low)" },
+              { label: "Uptime",          val: uptimeHuman, color: "var(--text2)" },
+            ].map(s => `
+              <div style="background:var(--bg1);border:1px solid var(--border);border-radius:8px;padding:14px;text-align:center;">
+                <div style="font-size:20px;font-weight:700;color:${s.color};">${escHtml(String(s.val))}</div>
+                <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-top:4px;">${s.label}</div>
+              </div>`).join("")}
+          </div>
+
+          <!-- Rate limit analysis -->
+          <div style="font-size:12px;font-weight:600;color:var(--text);letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;">Rate Limit Analysis</div>
+          <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:24px;">
+            ${CURRENT_LIMITS.map(cfg => {
+              const stats  = getRouteStats(cfg.key);
+              const peakRPS = stats?.maxRPS || 0;
+              const limitRPS = cfg.limit / (cfg.windowMins * 60);
+              const usage  = limitRPS > 0 ? Math.min((peakRPS / limitRPS) * 100, 100) : 0;
+              const color  = usage > 80 ? "var(--critical)" : usage > 50 ? "var(--high)" : usage > 20 ? "var(--medium)" : "var(--low)";
+
+              const recommendation = usage > 80
+                ? `⚠ Near limit — consider raising to ${Math.ceil(cfg.limit * 1.5)}/window`
+                : usage > 50
+                ? `ℹ Moderate usage — current limit looks appropriate`
+                : usage > 5
+                ? `✓ Healthy headroom — limit could be tightened to ${Math.ceil(cfg.limit * 0.7)} if needed`
+                : `✓ Very low usage — limit is generous`;
+
+              return `
+                <div style="background:var(--bg1);border:1px solid var(--border);border-radius:8px;padding:14px 16px;">
+                  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:8px;">
+                    <span style="font-size:12px;font-weight:600;color:var(--text);font-family:monospace;">${cfg.route}</span>
+                    <div style="display:flex;gap:12px;font-size:11px;color:var(--text3);">
+                      <span>Limit: <strong style="color:var(--text);">${cfg.limit} / ${cfg.windowMins}min</strong></span>
+                      <span>Peak RPS: <strong style="color:${color};">${peakRPS.toFixed(3)}</strong></span>
+                      ${stats ? `<span>Avg: <strong style="color:var(--text);">${stats.avgMs}ms</strong></span>` : ""}
+                    </div>
+                  </div>
+                  <div style="height:6px;background:var(--bg);border-radius:3px;overflow:hidden;margin-bottom:8px;">
+                    <div style="height:6px;width:${usage.toFixed(1)}%;background:${color};border-radius:3px;transition:width 0.5s;"></div>
+                  </div>
+                  <div style="font-size:11px;color:var(--text3);">${recommendation}</div>
+                </div>`;
+            }).join("")}
+          </div>
+
+          <!-- Top endpoints by volume -->
+          ${endpoints.length ? `
+            <div style="font-size:12px;font-weight:600;color:var(--text);letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;">Top Endpoints</div>
+            <div style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;overflow:hidden;">
+              <table style="width:100%;border-collapse:collapse;font-size:11px;">
+                <thead>
+                  <tr style="background:var(--bg1);border-bottom:1px solid var(--border);">
+                    <th style="padding:8px 12px;text-align:left;color:var(--text3);font-size:10px;letter-spacing:1px;">ROUTE</th>
+                    <th style="padding:8px 12px;text-align:right;color:var(--text3);font-size:10px;letter-spacing:1px;">REQUESTS</th>
+                    <th style="padding:8px 12px;text-align:right;color:var(--text3);font-size:10px;letter-spacing:1px;">AVG</th>
+                    <th style="padding:8px 12px;text-align:right;color:var(--text3);font-size:10px;letter-spacing:1px;">P95</th>
+                    <th style="padding:8px 12px;text-align:right;color:var(--text3);font-size:10px;letter-spacing:1px;">P99</th>
+                    <th style="padding:8px 12px;text-align:right;color:var(--text3);font-size:10px;letter-spacing:1px;">ERRORS</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${endpoints.slice(0, 15).map((e, i) => {
+                    const errColor = parseFloat(e.errorRate) > 10 ? "var(--critical)"
+                                  : parseFloat(e.errorRate) > 2  ? "var(--high)"
+                                  : "var(--low)";
+                    return `<tr style="border-top:1px solid var(--border);${i%2===0?"":"background:var(--bg1)"}">
+                      <td style="padding:8px 12px;font-family:monospace;color:var(--accent);">${escHtml(e.route || "—")}</td>
+                      <td style="padding:8px 12px;text-align:right;color:var(--text);">${(e.count||0).toLocaleString()}</td>
+                      <td style="padding:8px 12px;text-align:right;color:var(--text2);">${e.avgMs||0}ms</td>
+                      <td style="padding:8px 12px;text-align:right;color:var(--text2);">${e.p95||0}ms</td>
+                      <td style="padding:8px 12px;text-align:right;color:${(e.p99||0) > 2000 ? "var(--critical)" : "var(--text2)"};">${e.p99||0}ms</td>
+                      <td style="padding:8px 12px;text-align:right;color:${errColor};">${e.errorRate||"0%"}</td>
+                    </tr>`;
+                  }).join("")}
+                </tbody>
+              </table>
+            </div>
+
+            <div style="margin-top:14px;padding:12px 14px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;font-size:11px;color:var(--text3);line-height:1.6;">
+              <strong style="color:var(--text);">How to change rate limits:</strong><br>
+              Edit the <code style="color:var(--accent);">makeRateLimiter</code> calls in <code style="color:var(--accent);">backend/app.js</code>.
+              Redeploy after changes. These values are set at server start time and cannot be changed at runtime.
+            </div>` : ""}`;
+      }
+
+      loadRateLimitData();
+    }
+
+    // ── Shared utility: human-readable time since
+    function timeSince(dateStr) {
+      if (!dateStr) return "never";
+      const secs = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000);
+      if (secs < 60)   return `${secs}s`;
+      if (secs < 3600) return `${Math.floor(secs / 60)}m`;
+      if (secs < 86400)return `${Math.floor(secs / 3600)}h`;
+      return `${Math.floor(secs / 86400)}d`;
+    }
+
+    // KEY MANAGEMENT PANEL 
+    async function showKeyManagerPanel() {
+      document.getElementById("keyMgrModal")?.remove();
+      const overlay = document.createElement("div");
+      overlay.id = "keyMgrModal";
+      overlay.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:10000;display:flex;align-items:center;justify-content:center;padding:16px;";
+    
+      const modal = document.createElement("div");
+      modal.style.cssText = "background:var(--bg1);border:1px solid var(--border);border-radius:12px;width:100%;max-width:960px;max-height:92vh;display:flex;flex-direction:column;overflow:hidden;";
+    
+      modal.innerHTML = `
+        <div style="padding:16px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+          <div>
+            <div style="font-size:14px;font-weight:700;color:var(--text);">🔑 API Key Management</div>
+            <div id="keyMgrSummary" style="font-size:11px;color:var(--text3);margin-top:2px;">Loading…</div>
+          </div>
+          <div style="display:flex;gap:8px;">
+            <button id="createInviteBtn" class="btn btn-primary" style="padding:6px 14px;font-size:11px;">+ Create Invite</button>
+            <button id="keyMgrClose" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:20px;padding:4px;">✕</button>
+          </div>
+        </div>
+    
+        <!-- Stats bar -->
+        <div id="keyStatsBar" style="display:flex;gap:0;border-bottom:1px solid var(--border);"></div>
+    
+        <!-- Filter bar -->
+        <div style="padding:10px 20px;border-bottom:1px solid var(--border);display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+          <input id="keySearch" type="text" placeholder="Search name or email…" maxlength="100"
+            style="flex:1;min-width:160px;padding:7px 12px;background:var(--bg1);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:inherit;font-size:12px;outline:none;">
+          ${["All","active","pending","suspended","revoked"].map((s,i) => `
+            <button class="key-status-filter ${i===0?"kf-active":""}" data-status="${s==="All"?"":s}"
+              style="padding:4px 12px;border-radius:4px;border:1px solid ${i===0?"var(--accent)":"var(--border)"};
+                    background:${i===0?"rgba(0,217,255,0.1)":"transparent"};
+                    color:${i===0?"var(--accent)":"var(--text3)"};
+                    font-size:11px;cursor:pointer;font-family:inherit;">${s}</button>`).join("")}
+        </div>
+    
+        <!-- Key list -->
+        <div style="flex:1;overflow-y:auto;" id="keyList">
+          <div style="padding:32px;text-align:center;color:var(--text3);"><div class="spinner" style="margin:0 auto 12px;"></div>Loading keys…</div>
+        </div>
+    
+        <!-- Invite / edit form -->
+        <div id="keyForm" style="display:none;padding:20px 24px;border-top:1px solid var(--border);background:var(--bg2);">
+          <div style="font-size:11px;font-weight:600;color:var(--text);letter-spacing:2px;margin-bottom:14px;" id="keyFormTitle">CREATE INVITE</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div>
+              <label style="font-size:10px;color:var(--text3);display:block;margin-bottom:4px;">NAME *</label>
+              <input id="kfName" type="text" maxlength="100" placeholder="e.g. Acme Corp SOC Team"
+                style="width:100%;padding:8px 12px;background:var(--bg1);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:inherit;font-size:12px;outline:none;box-sizing:border-box;">
+            </div>
+            <div>
+              <label style="font-size:10px;color:var(--text3);display:block;margin-bottom:4px;">EMAIL</label>
+              <input id="kfEmail" type="email" maxlength="200" placeholder="recipient@company.com"
+                style="width:100%;padding:8px 12px;background:var(--bg1);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:inherit;font-size:12px;outline:none;box-sizing:border-box;">
+            </div>
+            <div>
+              <label style="font-size:10px;color:var(--text3);display:block;margin-bottom:4px;">ROLE</label>
+              <select id="kfRole" style="width:100%;padding:8px 12px;background:var(--bg1);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:inherit;font-size:12px;">
+                <option value="readonly">readonly — read-only access</option>
+                <option value="analyst" selected>analyst — score, blacklist, cases</option>
+                <option value="admin">admin — full access</option>
+              </select>
+            </div>
+            <div>
+              <label style="font-size:10px;color:var(--text3);display:block;margin-bottom:4px;">DAILY LIMIT</label>
+              <input id="kfDailyLimit" type="number" min="1" max="1000000" value="1000"
+                style="width:100%;padding:8px 12px;background:var(--bg1);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:inherit;font-size:12px;outline:none;box-sizing:border-box;">
+            </div>
+            <div style="grid-column:1/-1;">
+              <label style="font-size:10px;color:var(--text3);display:block;margin-bottom:4px;">NOTES (internal)</label>
+              <input id="kfNotes" type="text" maxlength="500" placeholder="e.g. Trial for Acme Corp evaluation"
+                style="width:100%;padding:8px 12px;background:var(--bg1);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:inherit;font-size:12px;outline:none;box-sizing:border-box;">
+            </div>
+          </div>
+          <div id="kfResult" style="display:none;margin-top:14px;padding:14px;background:var(--bg1);border:1px solid var(--low);border-radius:8px;"></div>
+          <div id="kfError" style="font-size:11px;color:var(--critical);margin-top:10px;display:none;"></div>
+          <div style="display:flex;gap:8px;margin-top:14px;justify-content:flex-end;">
+            <button id="kfCancel" class="btn btn-ghost" style="padding:7px 16px;font-size:12px;">Cancel</button>
+            <button id="kfSave" class="btn btn-primary" style="padding:7px 16px;font-size:12px;">Create Invite</button>
+          </div>
+        </div>`;
+    
+      overlay.appendChild(modal);
+      document.body.appendChild(overlay);
+    
+      document.getElementById("keyMgrClose").addEventListener("click", () => overlay.remove());
+      overlay.addEventListener("click", e => { if (e.target === overlay) overlay.remove(); });
+    
+      let currentStatus = "";
+      let searchTimer;
+    
+      // ── Stats bar 
+      async function loadStats() {
+        try {
+          const res  = await fetch(`${API}/keys/stats`, { headers: { "x-api-key": API_KEY } });
+          if (res.status === 403) {
+            document.getElementById("keyMgrSummary").textContent = "Admin access required";
+            document.getElementById("keyList").innerHTML =
+              `<div style="padding:32px;text-align:center;color:var(--text3);font-size:12px;">
+                ⚠ This panel requires an admin API key.
+              </div>`;
+            return false;
+          }
+          const data = await res.json();
+          const bar  = document.getElementById("keyStatsBar");
+          bar.innerHTML = [
+            { label: "Active",    val: data.active,        color: "var(--low)" },
+            { label: "Pending",   val: data.pending,       color: "var(--medium)" },
+            { label: "Suspended", val: data.suspended,     color: "var(--high)" },
+            { label: "Revoked",   val: data.revoked,       color: "var(--critical)" },
+            { label: "Today",     val: `${data.requestsToday?.toLocaleString()} reqs`, color: "var(--accent)" },
+            { label: "All-time",  val: `${data.totalRequests?.toLocaleString()} reqs`, color: "var(--text2)" },
+          ].map(s => `
+            <div style="flex:1;padding:10px 16px;border-right:1px solid var(--border);text-align:center;">
+              <div style="font-size:14px;font-weight:700;color:${s.color};">${s.val}</div>
+              <div style="font-size:10px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-top:2px;">${s.label}</div>
+            </div>`).join("");
+          document.getElementById("keyMgrSummary").textContent =
+            `${data.active} active · ${data.pending} pending · ${data.total} total`;
+          return true;
+        } catch (err) {
+          document.getElementById("keyMgrSummary").textContent = `Error: ${err.message}`;
+          return false;
+        }
+      }
+    
+      // ── Key list 
+      async function loadKeys() {
+        const params = new URLSearchParams({ limit: 100 });
+        if (currentStatus) params.set("status", currentStatus);
+        try {
+          const res  = await fetch(`${API}/keys?${params}`, { headers: { "x-api-key": API_KEY } });
+          const data = await res.json();
+          renderKeys(data.keys || []);
+        } catch (err) {
+          document.getElementById("keyList").innerHTML =
+            `<div style="padding:24px;color:var(--critical);font-size:12px;">⚠ ${escHtml(err.message)}</div>`;
+        }
+      }
+    
+      function renderKeys(keys) {
+        const el     = document.getElementById("keyList");
+        const search = document.getElementById("keySearch")?.value?.toLowerCase() || "";
+        const filtered = search
+          ? keys.filter(k => k.name?.toLowerCase().includes(search) || k.email?.toLowerCase().includes(search))
+          : keys;
+    
+        if (!filtered.length) {
+          el.innerHTML = `<div style="padding:32px;text-align:center;color:var(--text3);font-size:12px;">
+            No keys found.<br><br>
+            <button id="firstInviteBtn" class="btn btn-primary" style="padding:8px 18px;font-size:12px;">+ Create First Invite</button>
+          </div>`;
+          document.getElementById("firstInviteBtn")?.addEventListener("click", openInviteForm);
+          return;
+        }
+    
+        const statusColor = { active:"var(--low)", pending:"var(--medium)", suspended:"var(--high)", revoked:"var(--critical)" };
+        const roleColor   = { admin:"var(--critical)", analyst:"var(--accent)", readonly:"var(--text3)" };
+    
+        el.innerHTML = `
+          <table style="width:100%;border-collapse:collapse;font-size:12px;">
+            <thead>
+              <tr style="background:var(--bg2);border-bottom:1px solid var(--border);">
+                <th style="padding:10px 16px;text-align:left;color:var(--text3);font-size:10px;letter-spacing:1px;">NAME / EMAIL</th>
+                <th style="padding:10px 8px;text-align:left;color:var(--text3);font-size:10px;">ROLE</th>
+                <th style="padding:10px 8px;text-align:center;color:var(--text3);font-size:10px;">STATUS</th>
+                <th style="padding:10px 8px;text-align:left;color:var(--text3);font-size:10px;">USAGE TODAY</th>
+                <th style="padding:10px 8px;text-align:left;color:var(--text3);font-size:10px;">LAST USED</th>
+                <th style="padding:10px 16px;text-align:right;color:var(--text3);font-size:10px;">ACTIONS</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${filtered.map((k, i) => {
+                const sc       = statusColor[k.status] || "var(--text3)";
+                const rc       = roleColor[k.role]     || "var(--text2)";
+                const usagePct = k.daily_limit > 0 ? Math.min((k.daily_used / k.daily_limit) * 100, 100) : 0;
+                const usageColor = usagePct > 80 ? "var(--critical)" : usagePct > 50 ? "var(--high)" : "var(--low)";
+                return `
+                  <tr style="border-bottom:1px solid var(--border);${i%2===0?"":"background:var(--bg);"}">
+                    <td style="padding:10px 16px;">
+                      <div style="font-weight:600;color:var(--text);">${escHtml(k.name)}</div>
+                      ${k.email ? `<div style="font-size:10px;color:var(--text3);margin-top:1px;">${escHtml(k.email)}</div>` : ""}
+                      ${k.notes ? `<div style="font-size:10px;color:var(--text3);font-style:italic;margin-top:1px;">${escHtml(k.notes)}</div>` : ""}
+                      <div style="font-size:10px;color:var(--text3);font-family:monospace;margin-top:2px;">${escHtml(k.key_preview)}</div>
+                    </td>
+                    <td style="padding:10px 8px;">
+                      <span style="font-size:10px;font-weight:700;color:${rc};padding:2px 7px;border-radius:3px;background:${rc}22;text-transform:uppercase;">${k.role}</span>
+                    </td>
+                    <td style="padding:10px 8px;text-align:center;">
+                      <span style="font-size:10px;font-weight:700;color:${sc};padding:2px 8px;border-radius:3px;background:${sc}22;">
+                        ${k.status === "active" ? "● " : "○ "}${k.status.toUpperCase()}
+                      </span>
+                    </td>
+                    <td style="padding:10px 8px;">
+                      <div style="font-size:11px;color:${usageColor};">${k.daily_used?.toLocaleString() || 0} / ${k.daily_limit?.toLocaleString()}</div>
+                      <div style="height:3px;background:var(--bg3);border-radius:2px;margin-top:4px;width:80px;">
+                        <div style="height:3px;width:${usagePct.toFixed(0)}%;background:${usageColor};border-radius:2px;"></div>
+                      </div>
+                    </td>
+                    <td style="padding:10px 8px;color:var(--text3);font-size:11px;">
+                      ${k.last_used ? timeSince(k.last_used) + " ago" : k.status === "pending" ? "Not activated" : "Never"}
+                    </td>
+                    <td style="padding:10px 16px;text-align:right;white-space:nowrap;">
+                      ${k.status === "active" ? `
+                        <button class="km-suspend btn btn-ghost" data-id="${k.id}" style="padding:3px 8px;font-size:10px;margin-right:2px;" title="Suspend">⏸</button>
+                        <button class="km-rotate btn btn-ghost" data-id="${k.id}" data-name="${escHtml(k.name)}" style="padding:3px 8px;font-size:10px;margin-right:2px;" title="Rotate key">↻</button>
+                      ` : ""}
+                      ${k.status === "suspended" ? `
+                        <button class="km-reinstate btn btn-ghost" data-id="${k.id}" style="padding:3px 8px;font-size:10px;color:var(--low);border-color:var(--low);margin-right:2px;">▶</button>
+                      ` : ""}
+                      ${k.status === "pending" ? `
+                        <button class="km-copylink btn btn-ghost" data-id="${k.id}" data-name="${escHtml(k.name)}" style="padding:3px 8px;font-size:10px;margin-right:2px;" title="Copy invite link">🔗</button>
+                      ` : ""}
+                      <button class="km-usage btn btn-ghost" data-id="${k.id}" style="padding:3px 8px;font-size:10px;margin-right:2px;" title="Usage">📊</button>
+                      ${k.status !== "revoked" ? `
+                        <button class="km-revoke btn btn-ghost" data-id="${k.id}" data-name="${escHtml(k.name)}" style="padding:3px 8px;font-size:10px;color:var(--critical);border-color:var(--critical);" title="Revoke">✕</button>
+                      ` : ""}
+                        <button class="km-del btn btn-ghost" data-id="${k.id}" style="padding:3px 10px;font-size:10px;color:var(--critical);border-color:var(--critical);"> Delete </button>
+                    </td>
+                  </tr>`;
+              }).join("")}
+            </tbody>
+          </table>`;
+    
+        // Wire action buttons
+        el.querySelectorAll(".km-suspend").forEach(btn => {
+          btn.addEventListener("click", async () => {
+            if (!confirm("Suspend this key?")) return;
+            await fetch(`${API}/keys/${btn.dataset.id}/suspend`, { method: "POST", headers: { "x-api-key": API_KEY } });
+            toast("Key suspended", "warning"); loadKeys(); loadStats();
+          });
+        });
+    
+        el.querySelectorAll(".km-reinstate").forEach(btn => {
+          btn.addEventListener("click", async () => {
+            await fetch(`${API}/keys/${btn.dataset.id}/reinstate`, { method: "POST", headers: { "x-api-key": API_KEY } });
+            toast("Key reinstated", "success"); loadKeys(); loadStats();
+          });
+        });
+    
+        el.querySelectorAll(".km-rotate").forEach(btn => {
+          btn.addEventListener("click", async () => {
+            if (!confirm(`Rotate key for "${btn.dataset.name}"? The old key will stop working immediately.`)) return;
+            const r    = await fetch(`${API}/keys/${btn.dataset.id}/rotate`, { method: "POST", headers: { "x-api-key": API_KEY } });
+            const data = await r.json();
+            if (r.ok) {
+              showKeyResult(`New key for ${btn.dataset.name}`, data.newKey,
+                "The old key is now invalid. Share this new key with the user.");
+            } else {
+              toast(data.error || "Rotation failed", "error");
+            }
+          });
+        });
+    
+        el.querySelectorAll(".km-copylink").forEach(btn => {
+          btn.addEventListener("click", async () => {
+            const r    = await fetch(`${API}/keys/${btn.dataset.id}`, { headers: { "x-api-key": API_KEY } });
+            const data = await r.json();
+            const baseUrl = `${window.location.origin}/activate?token=`;
+            // We need the invite token — let's just show the activation URL pattern
+            toast(`Invite for "${btn.dataset.name}" — check the invite details`, "info");
+          });
+        });
+    
+        el.querySelectorAll(".km-usage").forEach(btn => {
+          btn.addEventListener("click", () => showUsagePanel(btn.dataset.id));
+        });
+    
+        el.querySelectorAll(".km-revoke").forEach(btn => {
+          btn.addEventListener("click", async () => {
+            const reason = prompt(`Reason for revoking "${btn.dataset.name}"?`, "Access no longer required");
+            if (reason === null) return;
+            await fetch(`${API}/keys/${btn.dataset.id}/revoke`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json", "x-api-key": API_KEY },
+              body: JSON.stringify({ reason }),
+            });
+            toast("Key revoked", "success"); loadKeys(); loadStats();
+          });
+        });
+
+        el.querySelectorAll(".km-del").forEach(btn => {
+          btn.addEventListener("click", async () => {
+            if (!confirm(`Permanently delete this key? This cannot be undone.`)) return;
+            const r = await fetch(`${API}/keys/${btn.dataset.id}`, {
+              method: "DELETE", headers: { "x-api-key": API_KEY }
+            });
+            const d = await r.json();
+            toast(d.message || "Key deleted", r.ok ? "success" : "error");
+            if (r.ok) loadKeys();
+          });
+        });
+      }
+    
+      // ── Invite form 
+      function openInviteForm() {
+        document.getElementById("kfName").value           = "";
+        document.getElementById("kfEmail").value          = "";
+        document.getElementById("kfRole").value           = "analyst";
+        document.getElementById("kfDailyLimit").value     = "1000";
+        document.getElementById("kfNotes").value          = "";
+        document.getElementById("kfError").style.display  = "none";
+        document.getElementById("kfResult").style.display = "none";
+        document.getElementById("keyForm").style.display  = "block";
+        document.getElementById("kfName").focus();
+      }
+    
+      async function submitInvite() {
+        const errEl = document.getElementById("kfError");
+        const name  = document.getElementById("kfName").value.trim();
+        if (!name) { errEl.textContent = "Name is required"; errEl.style.display = "block"; return; }
+    
+        const body = {
+          name,
+          email:      document.getElementById("kfEmail").value.trim() || undefined,
+          role:       document.getElementById("kfRole").value,
+          dailyLimit: parseInt(document.getElementById("kfDailyLimit").value) || 1000,
+          notes:      document.getElementById("kfNotes").value.trim() || undefined,
+        };
+    
+        const r    = await fetch(`${API}/keys/invite`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "x-api-key": API_KEY },
+          body: JSON.stringify(body),
+        });
+        const data = await r.json();
+    
+        if (!r.ok) { errEl.textContent = data.error || "Failed"; errEl.style.display = "block"; return; }
+    
+        // Show result with activation URL
+        const resultEl = document.getElementById("kfResult");
+        resultEl.style.display = "block";
+        resultEl.innerHTML = `
+          <div style="font-size:11px;font-weight:600;color:var(--low);margin-bottom:8px;">✓ Invite created for ${escHtml(data.name)}</div>
+          <div style="font-size:11px;color:var(--text3);margin-bottom:6px;">Share this activation link with the recipient:</div>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <code style="flex:1;background:var(--bg2);padding:8px 10px;border-radius:6px;font-size:11px;color:var(--accent);word-break:break-all;">${escHtml(data.activateUrl)}</code>
+            <button onclick="navigator.clipboard.writeText('${escHtml(data.activateUrl)}').then(()=>toast('Link copied','success'))"
+              class="btn btn-ghost" style="padding:6px 12px;font-size:11px;white-space:nowrap;">Copy</button>
+          </div>
+          <div style="font-size:10px;color:var(--text3);margin-top:8px;">The key activates when the recipient visits this link. It expires if not activated within 7 days.</div>`;
+    
+        loadKeys(); loadStats();
+        document.getElementById("kfSave").disabled  = true;
+        document.getElementById("kfSave").textContent = "✓ Created";
+        setTimeout(() => {
+          document.getElementById("kfSave").disabled   = false;
+          document.getElementById("kfSave").textContent = "Create Invite";
+          document.getElementById("kfName").value      = "";
+          document.getElementById("kfEmail").value     = "";
+          resultEl.style.display = "none";
+        }, 5000);
+      }
+    
+      // ── Usage panel 
+      async function showUsagePanel(keyId) {
+        const r    = await fetch(`${API}/keys/${keyId}/usage?days=30`, { headers: { "x-api-key": API_KEY } });
+        const data = await r.json();
+        const usage = data.usage || [];
+    
+        const ov = document.createElement("div");
+        ov.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:10001;display:flex;align-items:center;justify-content:center;padding:24px;";
+    
+        const panel = document.createElement("div");
+        panel.style.cssText = "background:var(--bg1);border:1px solid var(--border);border-radius:12px;width:100%;max-width:560px;max-height:80vh;display:flex;flex-direction:column;overflow:hidden;";
+    
+        panel.innerHTML = `
+          <div style="padding:14px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
+            <div style="font-size:13px;font-weight:700;color:var(--text);">Usage — Last 30 Days</div>
+            <button onclick="this.closest('[style*=fixed]').remove()" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:18px;">✕</button>
+          </div>
+          <div style="overflow-y:auto;flex:1;">
+            ${usage.length ? `
+              <table style="width:100%;border-collapse:collapse;font-size:12px;">
+                <thead>
+                  <tr style="background:var(--bg2);border-bottom:1px solid var(--border);">
+                    <th style="padding:8px 14px;text-align:left;color:var(--text3);font-size:10px;">DATE</th>
+                    <th style="padding:8px 8px;text-align:right;color:var(--text3);font-size:10px;">REQUESTS</th>
+                    <th style="padding:8px 8px;text-align:right;color:var(--text3);font-size:10px;">SCORES</th>
+                    <th style="padding:8px 8px;text-align:right;color:var(--text3);font-size:10px;">CACHE HITS</th>
+                    <th style="padding:8px 14px;text-align:right;color:var(--text3);font-size:10px;">ERRORS</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${usage.map((u, i) => `
+                    <tr style="border-bottom:1px solid var(--border);${i%2===0?"":"background:var(--bg);"}">
+                      <td style="padding:8px 14px;color:var(--text2);">${new Date(u.date).toLocaleDateString()}</td>
+                      <td style="padding:8px 8px;text-align:right;color:var(--text);">${u.requests?.toLocaleString()}</td>
+                      <td style="padding:8px 8px;text-align:right;color:var(--accent);">${u.scores?.toLocaleString()}</td>
+                      <td style="padding:8px 8px;text-align:right;color:var(--low);">${u.cache_hits?.toLocaleString()}</td>
+                      <td style="padding:8px 14px;text-align:right;color:${u.errors > 0 ? "var(--critical)" : "var(--text3)"};">${u.errors?.toLocaleString()}</td>
+                    </tr>`).join("")}
+                </tbody>
+              </table>` : `<div style="padding:32px;text-align:center;color:var(--text3);font-size:12px;">No usage data yet.</div>`}
+          </div>`;
+    
+        ov.appendChild(panel);
+        document.body.appendChild(ov);
+        ov.addEventListener("click", e => { if (e.target === ov) ov.remove(); });
+      }
+    
+      // ── Show key result modal (for rotations)
+      function showKeyResult(title, key, note) {
+        const ov = document.createElement("div");
+        ov.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:10001;display:flex;align-items:center;justify-content:center;padding:24px;";
+        ov.innerHTML = `
+          <div style="background:var(--bg1);border:1px solid var(--low);border-radius:12px;width:100%;max-width:500px;padding:24px;">
+            <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px;">🔑 ${escHtml(title)}</div>
+            <div style="font-size:11px;color:var(--text3);margin-bottom:12px;">${escHtml(note)}</div>
+            <code style="display:block;background:var(--bg2);padding:12px 14px;border-radius:8px;font-size:12px;color:var(--accent);word-break:break-all;margin-bottom:12px;">${escHtml(key)}</code>
+            <div style="display:flex;gap:8px;justify-content:flex-end;">
+              <button onclick="navigator.clipboard.writeText('${escHtml(key)}').then(()=>toast('Key copied','success'))"
+                class="btn btn-primary" style="padding:7px 16px;font-size:12px;">Copy Key</button>
+              <button onclick="this.closest('[style*=fixed]').remove()"
+                class="btn btn-ghost" style="padding:7px 16px;font-size:12px;">Close</button>
+            </div>
+          </div>`;
+        document.body.appendChild(ov);
+        ov.addEventListener("click", e => { if (e.target === ov) ov.remove(); });
+      }
+    
+      // ── Wire events 
+      document.getElementById("createInviteBtn").addEventListener("click", openInviteForm);
+      document.getElementById("kfSave").addEventListener("click", submitInvite);
+      document.getElementById("kfCancel").addEventListener("click", () => {
+        document.getElementById("keyForm").style.display = "none";
+      });
+    
+      // Status filter chips
+      modal.querySelectorAll(".key-status-filter").forEach(chip => {
+        chip.addEventListener("click", () => {
+          modal.querySelectorAll(".key-status-filter").forEach(c => {
+            c.style.borderColor = "var(--border)"; c.style.background = "transparent"; c.style.color = "var(--text3)";
+            c.classList.remove("kf-active");
+          });
+          chip.style.borderColor = "var(--accent)"; chip.style.background = "rgba(0,217,255,0.1)"; chip.style.color = "var(--accent)";
+          chip.classList.add("kf-active");
+          currentStatus = chip.dataset.status;
+          loadKeys();
+        });
+      });
+    
+      // Search
+      document.getElementById("keySearch").addEventListener("input", () => {
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(loadKeys, 250);
+      });
+    
+      // Initial load
+      const ok = await loadStats();
+      if (ok) loadKeys();
+    }
+
 })();
