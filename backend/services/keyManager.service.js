@@ -33,7 +33,7 @@ async function createInvite({ name, email, role = "analyst", dailyLimit = 1000, 
 
   // Build the activation URL
   const baseUrl    = process.env.APP_URL || "https://ipshield.live";
-  const activateUrl = `${baseUrl}/api/keys/activate/${inviteToken}`;
+  const activateUrl = `${baseUrl}/activate?token=${inviteToken}`;
 
   logger.info(`[keyManager] Invite created for ${email || name} by ${invitedBy}`);
 
