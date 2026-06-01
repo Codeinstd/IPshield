@@ -4522,6 +4522,21 @@ function applyTheme(dark) {
       return `${Math.floor(secs / 86400)}d`;
     }
 
+    // Check current key's role and show admin-only UI
+      async function checkAdminAccess() {
+        try {
+          const res  = await fetch(`${API}/keys/me`, { headers: { "x-api-key": API_KEY } });
+          const data = await res.json();
+          if (data.role === "admin") {
+            document.getElementById("keyMgrBtn")?.style.removeProperty("display");
+          } else {
+            document.getElementById("keyMgrBtn")?.style.setProperty("display", "none");
+          }
+        } catch (_) {
+          document.getElementById("keyMgrBtn")?.style.setProperty("display", "none");
+        }
+      }
+
     // KEY MANAGEMENT PANEL 
     async function showKeyManagerPanel() {
       document.getElementById("keyMgrModal")?.remove();
@@ -4648,21 +4663,7 @@ function applyTheme(dark) {
           return false;
         }
       }
-      // Check current key's role and show admin-only UI
-      async function checkAdminAccess() {
-        try {
-          const res  = await fetch(`${API}/keys/me`, { headers: { "x-api-key": API_KEY } });
-          const data = await res.json();
-          if (data.role === "admin") {
-            document.getElementById("keyMgrBtn")?.style.removeProperty("display");
-          } else {
-            document.getElementById("keyMgrBtn")?.style.setProperty("display", "none");
-          }
-        } catch (_) {
-          document.getElementById("keyMgrBtn")?.style.setProperty("display", "none");
-        }
-      }
-    
+      
       // ── Key list 
       async function loadKeys() {
         const params = new URLSearchParams({ limit: 100 });

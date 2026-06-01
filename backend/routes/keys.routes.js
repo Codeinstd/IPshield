@@ -65,7 +65,6 @@ router.post("/invite",
   ],
   validate,
   async (req, res) => {
-     console.log('[invite] body:', req.body);
     try {
       const invite = await km.createInvite({
         ...req.body,
@@ -74,7 +73,6 @@ router.post("/invite",
 
       // Send invite email if email provided and SMTP configured
      if (req.body.email && process.env.SMTP_HOST) {
-        console.log('[invite] Sending email to:', req.body.email);
       const nodemailer = require("nodemailer");
       const transporter = nodemailer.createTransport({
         host:   process.env.SMTP_HOST,
@@ -106,7 +104,6 @@ router.post("/invite",
             </p>
           </div>`,
       }).catch(err => {
-      console.error('[invite] Email FAILED:', err.message);
     });
     }
 
@@ -122,7 +119,6 @@ router.post("/invite",
         message:      "Invite created. Share the activateUrl with the recipient.",
       });
     } catch (err) {
-      console.error("[keys] Create invite error:", err.message);
       res.status(500).json({ error: "Failed to create invite" });
     }
   }
@@ -134,7 +130,6 @@ router.get("/activate/:token",
   [ param("token").trim().notEmpty().isLength({ min: 40, max: 60 })],
   validate,
   async (req, res) => {
-    console.log("[activate] HIT — token:", req.params.token);
     try {
       const res2 = await require("../store/db").query(
         `SELECT name, email, role, daily_limit, invited_at
