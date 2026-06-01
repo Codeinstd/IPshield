@@ -100,7 +100,7 @@
 }
 
   // responsive nav 
-      var _drawerInitialized = false;
+    var _drawerInitialized = false;
 
     function buildHamburgerMenu() {
   const hamburger   = document.getElementById("mainHamburger");
@@ -4654,12 +4654,12 @@ function applyTheme(dark) {
           const res  = await fetch(`${API}/keys/me`, { headers: { "x-api-key": API_KEY } });
           const data = await res.json();
           if (data.role === "admin") {
-            document.getElementById("keyManagerBtn")?.style.removeProperty("display");
+            document.getElementById("keyMgrBtn")?.style.removeProperty("display");
           } else {
-            document.getElementById("keyManagerBtn")?.style.setProperty("display", "none");
+            document.getElementById("keyMgrBtn")?.style.setProperty("display", "none");
           }
         } catch (_) {
-          document.getElementById("keyManagerBtn")?.style.setProperty("display", "none");
+          document.getElementById("keyMgrBtn")?.style.setProperty("display", "none");
         }
       }
     

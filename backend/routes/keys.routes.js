@@ -75,40 +75,40 @@ router.post("/invite",
       // Send invite email if email provided and SMTP configured
      if (req.body.email && process.env.SMTP_HOST) {
         console.log('[invite] Sending email to:', req.body.email);
-  const nodemailer = require("nodemailer");
-  const transporter = nodemailer.createTransport({
-    host:   process.env.SMTP_HOST,
-    port:   parseInt(process.env.SMTP_PORT || "587"),
-    secure: process.env.SMTP_PORT === "465",
-    auth:   { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
-  });
+      const nodemailer = require("nodemailer");
+      const transporter = nodemailer.createTransport({
+        host:   process.env.SMTP_HOST,
+        port:   parseInt(process.env.SMTP_PORT || "587"),
+        secure: process.env.SMTP_PORT === "465",
+        auth:   { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
+      });
 
-  transporter.sendMail({
-    from:    process.env.ALERT_FROM || process.env.SMTP_USER,
-    to:      req.body.email,   // ← recipient, not ALERT_TO
-    subject: "Your IPShield API Access",
-    html: `
-      <div style="background:#0d1117;padding:32px;font-family:monospace;max-width:560px;margin:0 auto;">
-        <h2 style="color:#c9d8e8;">IP<span style="color:#00d9ff;">Shield</span> — You're invited</h2>
-        <p style="color:#8fa8bc;">Hi ${invite.name},<br><br>
-        You've been granted access to the IPShield API.<br>
-        Click below to activate your key:</p>
-        <div style="margin:24px 0;text-align:center;">
-          <a href="${invite.activateUrl}"
-            style="background:#00d9ff;color:#000;padding:12px 32px;border-radius:6px;
-                   text-decoration:none;font-weight:700;display:inline-block;">
-            Activate API Key →
-          </a>
-        </div>
-        <p style="color:#4a6278;font-size:11px;">
-          Role: ${invite.role} · Daily limit: ${invite.daily_limit} requests<br>
-          This link expires in 7 days. Do not share it.
-        </p>
-      </div>`,
-  }).catch(err => {
-  console.error('[invite] Email FAILED:', err.message);
-});
-}
+      transporter.sendMail({
+        from:    process.env.ALERT_FROM || process.env.SMTP_USER,
+        to:      req.body.email,   // ← recipient, not ALERT_TO
+        subject: "Your IPShield API Access",
+        html: `
+          <div style="background:#0d1117;padding:32px;font-family:monospace;max-width:560px;margin:0 auto;">
+            <h2 style="color:#c9d8e8;">IP<span style="color:#00d9ff;">Shield</span> — You're invited</h2>
+            <p style="color:#8fa8bc;">Hi ${invite.name},<br><br>
+            You've been granted access to the IPShield API.<br>
+            Click below to activate your key:</p>
+            <div style="margin:24px 0;text-align:center;">
+              <a href="${invite.activateUrl}"
+                style="background:#00d9ff;color:#000;padding:12px 32px;border-radius:6px;
+                      text-decoration:none;font-weight:700;display:inline-block;">
+                Activate API Key →
+              </a>
+            </div>
+            <p style="color:#4a6278;font-size:11px;">
+              Role: ${invite.role} · Daily limit: ${invite.daily_limit} requests<br>
+              This link expires in 7 days. Do not share it.
+            </p>
+          </div>`,
+      }).catch(err => {
+      console.error('[invite] Email FAILED:', err.message);
+    });
+    }
 
       res.status(201).json({
         id:           invite.id,
