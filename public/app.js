@@ -72,7 +72,6 @@
   }
 
   // update version label
-  
 
   document.getElementById(
     "dashboard-version"
@@ -88,6 +87,7 @@
     // Reload stats with new API version
     loadStats();
     loadWatchlist();
+    checkAdminAccess();
   
     toast(
     version === "v2"
@@ -256,6 +256,7 @@
   const btn = document.createElement("button");
   btn.className     = "btn btn-ghost";
   btn.id            = "keyMgrBtn";
+  btn.style.display = "none"; 
   btn.textContent   = "🔑 Keys";
   btn.style.cssText = "padding:6px 12px;font-size:11px;";
   headerRight.prepend(btn);
@@ -4645,6 +4646,20 @@ function applyTheme(dark) {
         } catch (err) {
           document.getElementById("keyMgrSummary").textContent = `Error: ${err.message}`;
           return false;
+        }
+      }
+      // Check current key's role and show admin-only UI
+      async function checkAdminAccess() {
+        try {
+          const res  = await fetch(`${API}/keys/me`, { headers: { "x-api-key": API_KEY } });
+          const data = await res.json();
+          if (data.role === "admin") {
+            document.getElementById("keyManagerBtn")?.style.removeProperty("display");
+          } else {
+            document.getElementById("keyManagerBtn")?.style.setProperty("display", "none");
+          }
+        } catch (_) {
+          document.getElementById("keyManagerBtn")?.style.setProperty("display", "none");
         }
       }
     

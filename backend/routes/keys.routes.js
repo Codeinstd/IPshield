@@ -74,6 +74,7 @@ router.post("/invite",
 
       // Send invite email if email provided and SMTP configured
      if (req.body.email && process.env.SMTP_HOST) {
+        console.log('[invite] Sending email to:', req.body.email);
   const nodemailer = require("nodemailer");
   const transporter = nodemailer.createTransport({
     host:   process.env.SMTP_HOST,
@@ -104,7 +105,9 @@ router.post("/invite",
           This link expires in 7 days. Do not share it.
         </p>
       </div>`,
-  }).catch(err => console.error("[invite] Email error:", err.message));
+  }).catch(err => {
+  console.error('[invite] Email FAILED:', err.message);
+});
 }
 
       res.status(201).json({
@@ -147,6 +150,15 @@ router.get("/activate/:token",
     }
   }
 );
+
+// GET /api/keys/me — returns current key info (any authenticated user)
+router.get("/me", requireAuth, async (req, res) => {
+  res.json({
+    id:          req.apiKey.id,
+    name:        req.apiKey.name,
+    role:        req.apiKey.role,
+  });
+});
 
 // ── POST /api/keys/activate/:token — activate 
 
