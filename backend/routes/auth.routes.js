@@ -42,9 +42,7 @@ router.post("/login", async (req, res) => {
         user: { id: key.id, name: key.name, email: key.email, role: key.role },
       });
     }
-
-    // ── Option B: Login with email + password 
-    // In auth.routes.js — update the email+password branch:
+    // Login with email + password 
 if (email && password) {
   const result = await db.query(
     `SELECT id, name, email, role, status, password_hash

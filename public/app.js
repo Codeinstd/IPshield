@@ -3673,7 +3673,7 @@ async function loadStats() {
   const token = localStorage.getItem("token");
 
   if (!token) {
-    window.location.href = "/login";
+    window.location.href = "/landing";
     return;
   }
 
@@ -4740,7 +4740,7 @@ async function loadStats() {
     async function checkAdminAccess() {
     const token = localStorage.getItem("token");
     if (!token) {
-      window.location.href = "/login";
+      window.location.href = "/landing";
       return;
     }
 
@@ -4752,7 +4752,7 @@ async function loadStats() {
       localStorage.removeItem("user");
       const guard = document.getElementById("authGuard");
       if (guard) guard.remove();
-      window.location.href = "/login";
+      window.location.href = "/landing";
       return;
     }
 
