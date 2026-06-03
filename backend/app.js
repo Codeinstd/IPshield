@@ -1,50 +1,54 @@
+require("dotenv").config();
 
-const express      = require("express");
-const cors         = require("cors");
-const helmet       = require("helmet");
-const morgan       = require("morgan");
-const compression  = require("compression");
-const path         = require("path");
-const rateLimit    = require("express-rate-limit");
+const express    = require("express");
+const cors       = require("cors");
+const helmet     = require("helmet");
+const morgan     = require("morgan");
+const compression = require("compression");
+const path       = require("path");
+const rateLimit  = require("express-rate-limit");
 
-// ── Routes
-const scoreRoutes           = require("./routes/score.routes");
-const statsRoutes           = require("./routes/stats.routes");
-const auditRoutes           = require("./routes/audit.routes");
-const streamRoutes          = require("./routes/stream.routes");
-const watchlistRoutes       = require("./routes/watchlist.routes");
-const whoisRoutes           = require("./routes/whois.routes");
-const siemRoutes            = require("./routes/siem.routes");
-const docsRoutes            = require("./routes/docs.routes");
-const authMiddleware        = require("./middleware/auth.middleware");
-const errorMiddleware       = require("./middleware/error.middleware");
-const logger                = require("./utils/logger");
-const reportRoutes          = require("./routes/report.routes");
-const timelineRoutes        = require("./routes/timeline.routes");
-const telemetryMiddleware   = require("./middleware/telemetry.middleware");
-const telemetryRoutes       = require("./routes/telemetry.routes");
-const batchAsyncRoutes      = require("./routes/batchAsync.routes");
-const threatRoutes          = require("./routes/threat.routes");
-const cidrRoutes            = require("./routes/cidr.routes");
-const siemTargetsRoutes     = require("./routes/siemTargets.routes");
-const caseAccountsRoutes    = require("./routes/caseAccounts.routes");
-const clusterRoutes         = require("./routes/clusters.routes");
-const keysRoutes            = require("./routes/keys.routes");
+// ── Route imports 
+const scoreRoutes        = require("./routes/score.routes");
+const statsRoutes        = require("./routes/stats.routes");
+const auditRoutes        = require("./routes/audit.routes");
+const streamRoutes       = require("./routes/stream.routes");
+const watchlistRoutes    = require("./routes/watchlist.routes");
+const whoisRoutes        = require("./routes/whois.routes");
+const siemRoutes         = require("./routes/siem.routes");
+const docsRoutes         = require("./routes/docs.routes");
+const authMiddleware     = require("./middleware/auth.middleware");
+const errorMiddleware    = require("./middleware/error.middleware");
+const logger             = require("./utils/logger");
+const reportRoutes       = require("./routes/report.routes");
+const timelineRoutes     = require("./routes/timeline.routes");
+const telemetryMiddleware = require("./middleware/telemetry.middleware");
+const telemetryRoutes    = require("./routes/telemetry.routes");
+const batchAsyncRoutes   = require("./routes/batchAsync.routes");
+const threatRoutes       = require("./routes/threat.routes");
+const cidrRoutes         = require("./routes/cidr.routes");
+const siemTargetsRoutes  = require("./routes/siemTargets.routes");
+const caseAccountsRoutes = require("./routes/caseAccounts.routes");
+const clusterRoutes      = require("./routes/clusters.routes");
+const keysRoutes         = require("./routes/keys.routes");
+const authRoutes         = require("./routes/auth.routes");
 
-// v2-only Routes
+// ── v2-only route imports 
 const blacklistRoutes = require("./routes/blacklist.routes");
 const casesRoutes     = require("./routes/cases.routes");
 
+// ── App init 
 const isProd = process.env.NODE_ENV === "production";
 const app    = express();
 
+// ── Request logger (dev only) 
 app.use((req, res, next) => {
   console.log("REQ:", req.originalUrl);
   next();
 });
 
 
-// ── Security & middleware 
+// 1. SENTRY (must be first handler)
 if (process.env.SENTRY_DSN) {
   try {
     const Sentry = require("@sentry/node");
@@ -53,85 +57,58 @@ if (process.env.SENTRY_DSN) {
   } catch (_) {}
 }
 
+// 2. SECURITY HEADERS
 app.use(helmet({
- contentSecurityPolicy: {
-  directives: {
-    defaultSrc: ["'self'"],
-
-    scriptSrc: [
-      "'self'",
-      "'unsafe-inline'",
-      "https://cdnjs.cloudflare.com",
-      "https://cdn.jsdelivr.net",
-      "https://www.googletagmanager.com",
-      "https://www.google-analytics.com"
-    ],
-
-    scriptSrcAttr: ["'unsafe-inline'"],
-
-    styleSrc: [
-      "'self'",
-      "'unsafe-inline'",
-      "https://fonts.googleapis.com",
-      "https://cdnjs.cloudflare.com"
-    ],
-
-    fontSrc: [
-      "'self'",
-      "https://fonts.gstatic.com"
-    ],
-
-    imgSrc: [
-      "'self'",
-      "data:",
-      "https://www.google-analytics.com",
-      "https://*.basemaps.cartocdn.com",
-      "https://*.cartocdn.com",
-      "https://*.tile.openstreetmap.org",
-      "https://*.openstreetmap.org"
-    ],
-
-    connectSrc: [
-      "'self'",
-      "https://api.ipify.org",
-      "https://www.google-analytics.com",
-      "https://region1.google-analytics.com"
-    ],
-
-    workerSrc: [
-      "'self'",
-      "blob:"
-    ],
-
-    objectSrc: ["'none'"]
-  }
-},
-  hsts: isProd ? { maxAge: 31536000, includeSubDomains: true } : false
-}
-
-));
-
-const allowedOrigins = (process.env.ALLOWED_ORIGIN || "").split(",").map(s => s.trim()).filter(Boolean);
-app.use(cors({
-  origin: (origin, cb) => {
-    if (!origin || !allowedOrigins.length || allowedOrigins.includes(origin)) return cb(null, true);
-    cb(new Error(`CORS: origin ${origin} not allowed`));
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc:    ["'self'"],
+      scriptSrc:     ["'self'", "'unsafe-inline'", "https://cdnjs.cloudflare.com", "https://cdn.jsdelivr.net", "https://www.googletagmanager.com", "https://www.google-analytics.com"],
+      scriptSrcAttr: ["'unsafe-inline'"],
+      styleSrc:      ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://cdnjs.cloudflare.com"],
+      fontSrc:       ["'self'", "https://fonts.gstatic.com"],
+      imgSrc:        ["'self'", "data:", "https://www.google-analytics.com", "https://*.basemaps.cartocdn.com", "https://*.cartocdn.com", "https://*.tile.openstreetmap.org", "https://*.openstreetmap.org"],
+      connectSrc:    ["'self'", "https://api.ipify.org", "https://www.google-analytics.com", "https://region1.google-analytics.com"],
+      workerSrc:     ["'self'", "blob:"],
+      objectSrc:     ["'none'"],
+    },
   },
-  methods:        ["GET", "POST", "DELETE"],
-  allowedHeaders: ["Content-Type", "x-api-key"]
+  hsts: isProd ? { maxAge: 31536000, includeSubDomains: true } : false,
 }));
 
+
+// 3. CORS
+const allowedOrigins = (process.env.ALLOWED_ORIGIN || "")
+  .split(",").map(s => s.trim()).filter(Boolean);
+
+app.use(cors({
+  origin: (origin, cb) => {
+    if (!origin || !allowedOrigins.length || allowedOrigins.includes(origin))
+      return cb(null, true);
+    cb(new Error(`CORS: origin ${origin} not allowed`));
+  },
+  methods:        ["GET", "POST", "PUT", "DELETE"],
+  allowedHeaders: ["Content-Type", "x-api-key", "Authorization"],
+}));
+
+
+// 4. BODY PARSING & COMPRESSION
 app.use(compression());
 app.use(express.json({ limit: "50kb" }));
 app.use(express.urlencoded({ extended: false }));
 
+
+// 5. HTTP LOGGING
 if (isProd) {
-  app.use(morgan("combined", { stream: { write: msg => logger.info(msg.trim()) }, skip: req => req.path === "/api/health" }));
+  app.use(morgan("combined", {
+    stream: { write: msg => logger.info(msg.trim()) },
+    skip:   req => req.path === "/api/health",
+  }));
 } else {
   app.use(morgan("dev"));
 }
 
-// ── Rate limiting with structured error body 
+
+// 6. RATE LIMITING
 const makeRateLimiter = (windowMs, max, message) => rateLimit({
   windowMs, max,
   standardHeaders: true,
@@ -139,18 +116,10 @@ const makeRateLimiter = (windowMs, max, message) => rateLimit({
   handler: (req, res) => {
     const retryAfter = Math.ceil(windowMs / 1000);
     res.setHeader("Retry-After", retryAfter);
-    res.status(429).json({
-      error:        "rate_limit_exceeded",
-      message,
-      retryAfter,
-      retryAfterMs: windowMs,
-      limit:        max,
-      windowMs
-    });
-  }
+    res.status(429).json({ error: "rate_limit_exceeded", message, retryAfter, retryAfterMs: windowMs, limit: max, windowMs });
+  },
 });
 
-// Apply to all /api/* variants
 ["/api/", "/api/v1/", "/api/v2/"].forEach(prefix => {
   app.use(prefix, makeRateLimiter(15 * 60 * 1000, 200, "Too many requests. Try again in 15 minutes."));
 });
@@ -161,97 +130,24 @@ const makeRateLimiter = (windowMs, max, message) => rateLimit({
   app.use(p, makeRateLimiter(60 * 1000, 20, "WHOIS rate limit: 20 requests per minute."));
 });
 
-// telemetry checker
+
+// 7. TELEMETRY MIDDLEWARE (all /api/* requests)
 app.use("/api", telemetryMiddleware);
 
-// ── Static files  
-app.use(express.static(path.join(__dirname, "../public"), { maxAge: isProd ? "1d" : 0, etag: true }));
+
+// 8. STATIC FILES
+app.use(express.static(path.join(__dirname, "../public"), {
+  maxAge: isProd ? "1d" : 0,
+  etag:   true,
+}));
 
 
-// ── Health (public — all versions)
-async function healthHandler(req, res) {
-  const db                  = require("./store/db");
-  const monitor             = require("./jobs/monitor.job");
-  const { getSIEMStatus }   = require("./services/siem.service");
-  const telemetry           = require("./store/telemetry.store");   
-  const tel                 = telemetry.getSummary();  
+// 9. HTML PAGE ROUTES (public — no auth)
+// Must come after static but before API routes and the catch-all.
+app.get("/login", (req, res) => {
+  res.sendFile(path.join(__dirname, "../public", "login.html"));
+});
 
-  const version = req.baseUrl?.includes("/v1") ? "v1" : "v2";
-  // Detect which version is being called
-  // const version = req.path.includes("/v1/") ? "v1"
-  //                : req.path.includes("/v2/") ? "v2"
-  //                : "v1"; // default
-  res.json({
-    status:      "ok",
-    version:     process.env.npm_package_version || "2.2.0",
-    api_version: version,
-    environment: process.env.NODE_ENV || "development",
-    uptime:      Math.floor(process.uptime()),
-    db:          await db.isHealthy() ? "connected" : "memory-only",
-    monitor:     monitor.getMonitorStatus?.() || {},
-    siem:        getSIEMStatus(),
-    memoryMB:    Math.round(process.memoryUsage().heapUsed / 1024 / 1024),
-    timestamp:   new Date().toISOString(),
-    telemetry: {
-        totalRequests: tel.requests.total,
-        errorRate:     tel.requests.errorRate,
-        rps:           tel.requests.rps,
-        uptime:        tel.uptime.human,
-        topEndpoints:  tel.topEndpoints.slice(0, 5).map(e => ({
-          route:    e.route,
-          count:    e.count,
-          avgMs:    e.avgMs,
-          errorRate:e.errorRate
-        }))
-      }
-  });
-}
- 
-app.get("/api/health",    healthHandler);
-app.get("/api/v1/health", healthHandler);
-app.get("/api/v2/health", healthHandler);
- 
-// ── Docs (public — all versions) 
-// Each version gets its own spec
-app.use("/api/docs",    docsRoutes);
-app.use("/api/v1/docs", require("./routes/docs.v1.routes"));
-app.use("/api/v2/docs", require("./routes/docs.v2.routes"));
-
-// Telemetry (internal)
-app.use("/api/telemetry",    telemetryRoutes);
-app.use("/api/v1/telemetry", telemetryRoutes);
-app.use("/api/v2/telemetry", telemetryRoutes);
-
-// ── Version info endpoints (public) 
-function versionInfoHandler(req, res) {
-  const isV1 = req.path.startsWith("/v1") || req.baseUrl?.includes("/v1");
-  res.json({
-    versions: {
-      v1: {
-        status:      "stable",
-        base_url:    "/api/v1",
-        docs:        "/api/v1/docs",
-        description: "Core IP intelligence — scoring, WHOIS, watchlist, audit, SIEM, reports",
-        features:    ["scoring","whois","watchlist","audit","siem","timeline","report"]
-      },
-      v2: {
-        status:      "latest",
-        base_url:    "/api/v2",
-        docs:        "/api/v2/docs",
-        description: "Full platform — everything in v1 plus blacklist management and case management",
-        features:    ["scoring","whois","watchlist","audit","siem","timeline","report","blacklist","cases"]
-      }
-    },
-    current:  "v2",
-    default:  "/api routes to v2"
-  });
-}
- 
-app.get("/api/versions", versionInfoHandler);
-app.get("/api/v1",       versionInfoHandler);
-app.get("/api/v2",       versionInfoHandler);
-
-// ── Key activation page (public HTML — no auth)
 app.get("/activate", (req, res) => {
   const token = req.query.token || "";
   res.send(`<!DOCTYPE html>
@@ -291,7 +187,6 @@ app.get("/activate", (req, res) => {
 </div>
 <script>
   const token = "${token}";
-
   async function init() {
     if (!token) { showError("No invite token found in the link."); return; }
     try {
@@ -299,11 +194,8 @@ app.get("/activate", (req, res) => {
       const data = await res.json();
       if (!data.valid) { showError("This invite link is invalid or has already been used."); return; }
       showInvite(data.invite);
-    } catch (e) {
-      showError("Failed to load invite details.");
-    }
+    } catch (e) { showError("Failed to load invite details."); }
   }
-
   function showInvite(invite) {
     document.getElementById("content").innerHTML = \`
       <h2>You're invited</h2>
@@ -316,7 +208,6 @@ app.get("/activate", (req, res) => {
       <button class="btn" onclick="activate()">Activate My Key →</button>
       <div id="err"></div>\`;
   }
-
   async function activate() {
     const btn = document.querySelector(".btn");
     btn.disabled = true; btn.textContent = "Activating…";
@@ -325,12 +216,8 @@ app.get("/activate", (req, res) => {
       const data = await res.json();
       if (!res.ok) { showError(data.error || "Activation failed."); btn.disabled = false; btn.textContent = "Activate My Key →"; return; }
       showKey(data);
-    } catch (e) {
-      showError("Activation failed. Please try again.");
-      btn.disabled = false; btn.textContent = "Activate My Key →";
-    }
+    } catch (e) { showError("Activation failed. Please try again."); btn.disabled = false; btn.textContent = "Activate My Key →"; }
   }
-
   function showKey(data) {
     document.getElementById("content").innerHTML = \`
       <div class="success-icon">✓</div>
@@ -348,7 +235,6 @@ app.get("/activate", (req, res) => {
         <span style="color:#00d9ff;">x-api-key: \${data.key.slice(0,16)}••••</span>
       </p>\`;
   }
-
   function copyKey() {
     const key = document.getElementById("keyVal")?.textContent;
     if (!key) return;
@@ -358,103 +244,170 @@ app.get("/activate", (req, res) => {
       setTimeout(() => { btn.textContent = "Copy API Key"; }, 2000);
     });
   }
-
   function showError(msg) {
     document.getElementById("content").innerHTML =
       \`<div class="error">⚠ \${msg}</div>
-       <p style="margin-top:16px;font-size:11px;color:#4a6278;">
-         Contact the admin if you believe this is an error.
-       </p>\`;
+       <p style="margin-top:16px;font-size:11px;color:#4a6278;">Contact the admin if you believe this is an error.</p>\`;
   }
-
   init();
 </script>
 </body>
 </html>`);
 });
 
-// ── Public key activation (no auth — must be before authMiddleware) ──
-app.get("/api/keys/activate/:token",    keysRoutes);
-app.post("/api/keys/activate/:token",   keysRoutes);
-app.get("/api/v1/keys/activate/:token", keysRoutes);
-app.post("/api/v1/keys/activate/:token",keysRoutes);
-app.get("/api/v2/keys/activate/:token", keysRoutes);
-app.post("/api/v2/keys/activate/:token",keysRoutes);
 
-// Then auth middleware
-app.use("/api/v1/", authMiddleware);
-app.use("/api/v2/", authMiddleware);
+// 10. PUBLIC API ROUTES (no auth required)
 
+// Health
+async function healthHandler(req, res) {
+  const db                = require("./store/db");
+  const monitor           = require("./jobs/monitor.job");
+  const { getSIEMStatus } = require("./services/siem.service");
+  const telemetry         = require("./store/telemetry.store");
+  const tel               = telemetry.getSummary();
+  const version           = req.baseUrl?.includes("/v1") ? "v1" : "v2";
 
-// ── Helper: mount shared routes on multiple prefixes 
-function mountShared(prefixes, path, router) {
-  prefixes.forEach(prefix => app.use(`${prefix}${path}`, router));
+  res.json({
+    status:      "ok",
+    version:     process.env.npm_package_version || "2.2.0",
+    api_version: version,
+    environment: process.env.NODE_ENV || "development",
+    uptime:      Math.floor(process.uptime()),
+    db:          await db.isHealthy() ? "connected" : "memory-only",
+    monitor:     monitor.getMonitorStatus?.() || {},
+    siem:        getSIEMStatus(),
+    memoryMB:    Math.round(process.memoryUsage().heapUsed / 1024 / 1024),
+    timestamp:   new Date().toISOString(),
+    telemetry: {
+      totalRequests: tel.requests.total,
+      errorRate:     tel.requests.errorRate,
+      rps:           tel.requests.rps,
+      uptime:        tel.uptime.human,
+      topEndpoints:  tel.topEndpoints.slice(0, 5).map(e => ({
+        route: e.route, count: e.count, avgMs: e.avgMs, errorRate: e.errorRate,
+      })),
+    },
+  });
 }
 
-// ── Shared routes (v1 + v2 + default) 
+app.get("/api/health",    healthHandler);
+app.get("/api/v1/health", healthHandler);
+app.get("/api/v2/health", healthHandler);
+
+// Docs
+app.use("/api/docs",    docsRoutes);
+app.use("/api/v1/docs", require("./routes/docs.v1.routes"));
+app.use("/api/v2/docs", require("./routes/docs.v2.routes"));
+
+// Telemetry
+app.use("/api/telemetry",    telemetryRoutes);
+app.use("/api/v1/telemetry", telemetryRoutes);
+app.use("/api/v2/telemetry", telemetryRoutes);
+
+// Auth (login endpoint — issues JWTs, no key needed)
+app.use("/api/v1/auth", authRoutes);
+app.use("/api/v2/auth", authRoutes);
+app.use("/api/auth",    authRoutes);
+
+// Version info
+function versionInfoHandler(req, res) {
+  res.json({
+    versions: {
+      v1: { status: "stable", base_url: "/api/v1", docs: "/api/v1/docs", description: "Core IP intelligence — scoring, WHOIS, watchlist, audit, SIEM, reports", features: ["scoring","whois","watchlist","audit","siem","timeline","report"] },
+      v2: { status: "latest", base_url: "/api/v2", docs: "/api/v2/docs", description: "Full platform — everything in v1 plus blacklist management and case management", features: ["scoring","whois","watchlist","audit","siem","timeline","report","blacklist","cases"] },
+    },
+    current: "v2",
+    default: "/api routes to v2",
+  });
+}
+
+app.get("/api/versions", versionInfoHandler);
+app.get("/api/v1",       versionInfoHandler);
+app.get("/api/v2",       versionInfoHandler);
+
+// Key activation (public — no auth, must be before authMiddleware)
+app.get("/api/keys/activate/:token",     keysRoutes);
+app.post("/api/keys/activate/:token",    keysRoutes);
+app.get("/api/v1/keys/activate/:token",  keysRoutes);
+app.post("/api/v1/keys/activate/:token", keysRoutes);
+app.get("/api/v2/keys/activate/:token",  keysRoutes);
+app.post("/api/v2/keys/activate/:token", keysRoutes);
+
+
+// 11. AUTH MIDDLEWARE (protects all /api/* routes below this point)
+
+app.use("/api/", authMiddleware);
+
+// Audit routes
+app.use("/api/v1/audit", auditRoutes);
+app.use("/api/v2/audit", auditRoutes);
+
+
+// 12. PROTECTED API ROUTES
+
+// Helper — mount a router on multiple prefixes.
+function mountShared(prefixes, routePath, routerArg) {
+  prefixes.forEach(prefix => app.use(`${prefix}${routePath}`, routerArg));
+}
+
 const SHARED_PREFIXES = ["/api", "/api/v1", "/api/v2"];
- 
-mountShared(SHARED_PREFIXES, "/score",     scoreRoutes);
-mountShared(SHARED_PREFIXES, "/score",     batchAsyncRoutes);
-mountShared(SHARED_PREFIXES, "/stats",     statsRoutes);
-mountShared(SHARED_PREFIXES, "/audit",     auditRoutes);
-mountShared(SHARED_PREFIXES, "/watchlist", watchlistRoutes);
-mountShared(SHARED_PREFIXES, "/whois",     whoisRoutes);
-mountShared(SHARED_PREFIXES, "/siem",      siemRoutes);
-mountShared(SHARED_PREFIXES, "/report",    reportRoutes);
-mountShared(SHARED_PREFIXES, "/timeline",  timelineRoutes);
-mountShared(SHARED_PREFIXES, "/threat",    threatRoutes);
+const V2_PREFIXES     = ["/api", "/api/v2"];
 
-// ── v2-only routes 
-const V2_PREFIXES = ["/api", "/api/v2"]; // /api defaults to v2
- 
-mountShared(V2_PREFIXES, "/blacklist", blacklistRoutes);
-mountShared(V2_PREFIXES, "/cases",     casesRoutes);
-// CIDR blocking — under blacklist prefix
-mountShared(V2_PREFIXES, "/blacklist/cidr",    cidrRoutes);
-// Case accounts — nested under cases
-mountShared(V2_PREFIXES, "/cases",             caseAccountsRoutes);
-// SIEM targets — extend existing siem routes
-mountShared(SHARED_PREFIXES, "/siem",          siemTargetsRoutes);
-// Clusters — under threat prefix (alongside Phase 2 threat dashboard)
+// Shared (v1 + v2 + default /api)
+mountShared(SHARED_PREFIXES, "/score",           scoreRoutes);
+mountShared(SHARED_PREFIXES, "/score",           batchAsyncRoutes);
+mountShared(SHARED_PREFIXES, "/stats",           statsRoutes);
+mountShared(SHARED_PREFIXES, "/audit",           auditRoutes);
+mountShared(SHARED_PREFIXES, "/watchlist",       watchlistRoutes);
+mountShared(SHARED_PREFIXES, "/whois",           whoisRoutes);
+mountShared(SHARED_PREFIXES, "/siem",            siemRoutes);
+mountShared(SHARED_PREFIXES, "/siem",            siemTargetsRoutes);
+mountShared(SHARED_PREFIXES, "/report",          reportRoutes);
+mountShared(SHARED_PREFIXES, "/timeline",        timelineRoutes);
+mountShared(SHARED_PREFIXES, "/threat",          threatRoutes);
 mountShared(SHARED_PREFIXES, "/threat/clusters", clusterRoutes);
-// Key management — all versions
-mountShared(SHARED_PREFIXES, "/keys", keysRoutes);
+mountShared(SHARED_PREFIXES, "/keys",            keysRoutes);
 
+// v2-only
+mountShared(V2_PREFIXES, "/blacklist",      blacklistRoutes);
+mountShared(V2_PREFIXES, "/blacklist/cidr", cidrRoutes);
+mountShared(V2_PREFIXES, "/cases",          casesRoutes);
+mountShared(V2_PREFIXES, "/cases",          caseAccountsRoutes);
 
-// ── v1 — explicit 404 for v2-only features 
-app.use("/api/v1/blacklist", (req, res) => {
-  res.status(404).json({
-    error:       "not_available_in_v1",
-    message:     "Blacklist management is a v2 feature. Use /api/v2/blacklist",
-    upgrade_url: "/api/v2/blacklist",
-    docs:        "/api/v2/docs"
-  });
-});
- 
-app.use("/api/v1/cases", (req, res) => {
-  res.status(404).json({
-    error:       "not_available_in_v1",
-    message:     "Case management is a v2 feature. Use /api/v2/cases",
-    upgrade_url: "/api/v2/cases",
-    docs:        "/api/v2/docs"
-  });
-});
-
-// ── SPA fallback 
-app.get("/", (req, res) => res.sendFile(path.join(__dirname, "../public/index.html")));
- 
-app.use((req, res) => res.status(404).json({
-  error:   "Not Found",
-  path:    req.path,
-  hint:    "See /api/versions for available API versions"
+// v1 stubs — explicit 404 for v2-only endpoints
+app.use("/api/v1/blacklist", (req, res) => res.status(404).json({
+  error: "not_available_in_v1", message: "Blacklist management is a v2 feature. Use /api/v2/blacklist", upgrade_url: "/api/v2/blacklist", docs: "/api/v2/docs",
 }));
+
+app.use("/api/v1/cases", (req, res) => res.status(404).json({
+  error: "not_available_in_v1", message: "Case management is a v2 feature. Use /api/v2/cases", upgrade_url: "/api/v2/cases", docs: "/api/v2/docs",
+}));
+
+
+// 13. SPA FALLBACK & 404
+app.use(express.static(path.join(__dirname, "../public")));
+
+app.get(/.*/, (req, res, next) => {
+  if (req.path.startsWith("/api")) return next();
+  res.sendFile(path.join(__dirname, "../public/index.html"));
+});
+
+app.use((req, res) => res.status(404).json({
+  error: "Not Found",
+  path:  req.path,
+  hint:  "See /api/versions for available API versions",
+}));
+
+
+// 14. ERROR HANDLERS (must be after all routes)
 
 if (process.env.SENTRY_DSN) {
   try { app.use(require("@sentry/node").Handlers.errorHandler()); } catch (_) {}
 }
 app.use(errorMiddleware);
 
+
+// 15. BACKGROUND JOBS
 const { startMonitor } = require("./jobs/monitor.job");
 startMonitor();
 

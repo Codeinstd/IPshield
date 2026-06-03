@@ -1,8 +1,8 @@
 
-const express    = require("express");
-const router     = express.Router();
-const telemetry  = require("../store/telemetry.store");
-const { requireAuth, requireRole }         = require("../middleware/auth.js");
+const express                         = require("express");
+const router                          = express.Router();
+const telemetry                       = require("../store/telemetry.store");
+const { requireAuth, requireRole }    = require("../middleware/auth.js");
 
 // ── JSON endpoints 
 router.get("/", requireAuth, requireRole("admin"), async (req, res) => {
@@ -25,12 +25,25 @@ router.get("/endpoint", requireAuth, requireRole("admin"), async (req, res) => {
 });
 
 // ── Live dashboard 
-router.get("/dashboard", requireAuth, requireRole("admin"), async (req, res) => {
-  res.setHeader("Content-Type", "text/html");
-  res.send(buildDashboard());
-});
+router.get("/dashboard",
+  (req, res, next) => {
+    // If token passed as query param, inject it as Authorization header
+    if (req.query.auth && !req.headers.authorization) {
+      req.headers.authorization = `Bearer ${req.query.auth}`;
+    }
+    next();
+  },
+  requireAuth,
+  requireRole("admin"),
+  async (req, res) => {
+    const token = req.query.auth || 
+                  (req.headers.authorization || "").replace("Bearer ", "");
+    res.setHeader("Content-Type", "text/html");
+    res.send(buildDashboard(token));
+  }
+);
 
-function buildDashboard() {
+function buildDashboard(token) {
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -507,11 +520,23 @@ function buildDashboard() {
       </div>
     </div>
   </div>
-
 </div>
 
 <script>
-  function fmt(n) { return n >= 1e6 ? (n/1e6).toFixed(1)+"M" : n >= 1e3 ? (n/1e3).toFixed(1)+"k" : String(n); }
+  // ── Auth helper — JWT first, API key fallback 
+  function getAuthHeaders() {
+    const token  = localStorage.getItem("token");
+    const apiKey = localStorage.getItem("ipshield_api_key");
+    if (token)  return { "Authorization": "Bearer " + token };
+    if (apiKey) return { "x-api-key": apiKey };
+    return {};
+  }
+
+  function fmt(n) { 
+    return n >= 1e6 ? (n/1e6).toFixed(1)+"M" 
+         : n >= 1e3 ? (n/1e3).toFixed(1)+"k" 
+         : String(n); 
+  }
 
   function methodBadge(m) {
     const cls = {GET:"get",POST:"post",PUT:"put",DELETE:"delete"}[m] || "get";
@@ -519,36 +544,39 @@ function buildDashboard() {
   }
 
   function statusClass(s) {
-    if (s < 300) return "status-ok";
-    if (s === 429) return "status-warn";
-    if (s >= 400) return "status-err";
+    if (s < 300)    return "status-ok";
+    if (s === 429)  return "status-warn";
+    if (s >= 400)   return "status-err";
     return "";
   }
 
   function latBar(val, max) {
-    const pct = max > 0 ? Math.round((val / max) * 100) : 0;
-    const color = pct > 80 ? "var(--critical)" : pct > 50 ? "var(--medium)" : "var(--accent)";
+    const pct   = max > 0 ? Math.round((val / max) * 100) : 0;
+    const color = pct > 80 ? "var(--critical)" 
+                : pct > 50 ? "var(--medium)" 
+                : "var(--accent)";
     return \`<div class="lat-bar-wrap">
-      <div class="lat-bar-bg"><div class="lat-bar" style="width:\${pct}%;background:\${color};"></div></div>
+      <div class="lat-bar-bg">
+        <div class="lat-bar" style="width:\${pct}%;background:\${color};"></div>
+      </div>
       <span class="lat-val">\${val}ms</span>
     </div>\`;
   }
 
-    function toggleMenu() {
-  const menu = document.getElementById("mobileMenu");
-  const backdrop = document.getElementById("drawerBackdrop");
-  const isOpen = menu.classList.toggle("open");
-  backdrop.classList.toggle("open", isOpen);
-  document.body.style.overflow = isOpen ? "hidden" : "";
-    }
+  function toggleMenu() {
+    const menu     = document.getElementById("mobileMenu");
+    const backdrop = document.getElementById("drawerBackdrop");
+    const isOpen   = menu.classList.toggle("open");
+    backdrop.classList.toggle("open", isOpen);
+    document.body.style.overflow = isOpen ? "hidden" : "";
+  }
 
-    // Close on Escape key
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape") {
-        const menu = document.getElementById("mobileMenu");
-        if (menu.classList.contains("open")) toggleMenu();
-      }
-    });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
+      const menu = document.getElementById("mobileMenu");
+      if (menu.classList.contains("open")) toggleMenu();
+    }
+  });
 
   function drawSparkline(hourly) {
     const canvas = document.getElementById("trafficCanvas");
@@ -556,8 +584,8 @@ function buildDashboard() {
     const dpr = window.devicePixelRatio || 1;
     const W   = canvas.parentElement.clientWidth - 40;
     const H   = 60;
-    canvas.width  = W * dpr;
-    canvas.height = H * dpr;
+    canvas.width        = W * dpr;
+    canvas.height       = H * dpr;
     canvas.style.width  = W + "px";
     canvas.style.height = H + "px";
     const ctx = canvas.getContext("2d");
@@ -569,7 +597,6 @@ function buildDashboard() {
     const cW   = W - PAD.l - PAD.r;
     const cH   = H - PAD.t - PAD.b;
 
-    // Gradient fill
     const grad = ctx.createLinearGradient(0, PAD.t, 0, PAD.t + cH);
     grad.addColorStop(0, "rgba(0,217,255,0.3)");
     grad.addColorStop(1, "rgba(0,217,255,0)");
@@ -581,12 +608,11 @@ function buildDashboard() {
       i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
     });
     ctx.lineTo(PAD.l + cW, PAD.t + cH);
-    ctx.lineTo(PAD.l, PAD.t + cH);
+    ctx.lineTo(PAD.l,      PAD.t + cH);
     ctx.closePath();
     ctx.fillStyle = grad;
     ctx.fill();
 
-    // Line
     ctx.beginPath();
     vals.forEach((v, i) => {
       const x = PAD.l + (i / (vals.length - 1)) * cW;
@@ -598,38 +624,74 @@ function buildDashboard() {
     ctx.stroke();
   }
 
+  // Token injected by server at page-build time
+  const _TOKEN = ${JSON.stringify(token)}; 
+
+  function getAuthHeaders() {
+    const tok    = _TOKEN || localStorage.getItem("token");
+    const apiKey = localStorage.getItem("ipshield_api_key");
+    if (tok)    return { "Authorization": "Bearer " + tok };
+    if (apiKey) return { "x-api-key": apiKey };
+    return {};
+  }
+
   async function refresh() {
+    const headers = getAuthHeaders();
+
+    if (!Object.keys(headers).length) {
+      document.getElementById("endpointTable").innerHTML =
+        \`<tr><td colspan="9" style="text-align:center;color:var(--critical);padding:32px;">
+          ⚠ Not authenticated — 
+          <a href="/" style="color:var(--accent);">return to app</a> and log in first
+        </td></tr>\`;
+      return;
+    }
+
     try {
-      const [summary, recent] = await Promise.all([
-        fetch("/api/telemetry", { headers:{"x-api-key": localStorage.getItem("ipshield_api_key")||""} }).then(r=>r.json()),
-        fetch("/api/telemetry/history?limit=20", { headers:{"x-api-key": localStorage.getItem("ipshield_api_key")||""} }).then(r=>r.json())
+      const [summaryRes, recentRes] = await Promise.all([
+        fetch("/api/v1/telemetry",                 { headers }),
+        fetch("/api/v1/telemetry/history?limit=20", { headers }),
       ]);
 
-      // Stat cards
-      document.getElementById("totalReqs").textContent   = fmt(summary.requests.total);
-      document.getElementById("rps").textContent         = summary.requests.rps + " req/s";
-      document.getElementById("errorRate").textContent   = summary.requests.errorRate;
-      document.getElementById("totalErrors").textContent = fmt(summary.requests.errors) + " errors";
-      document.getElementById("uptime").textContent      = summary.uptime.human;
-      document.getElementById("startedAt").textContent   = "since " + new Date(summary.uptime.startedAt).toLocaleTimeString();
+      if (summaryRes.status === 401 || summaryRes.status === 403) {
+        document.getElementById("endpointTable").innerHTML =
+          \`<tr><td colspan="9" style="text-align:center;color:var(--critical);padding:32px;">
+            ⚠ Session expired — 
+            <a href="/" style="color:var(--accent);">return to app</a> and log in again
+          </td></tr>\`;
+        return;
+      }
+
+      const summary = await summaryRes.json();
+      const recent  = await recentRes.json();
+
+      // ── Stat cards
+      document.getElementById("totalReqs").textContent     = fmt(summary.requests.total);
+      document.getElementById("rps").textContent           = summary.requests.rps + " req/s";
+      document.getElementById("errorRate").textContent     = summary.requests.errorRate;
+      document.getElementById("totalErrors").textContent   = fmt(summary.requests.errors) + " errors";
+      document.getElementById("uptime").textContent        = summary.uptime.human;
+      document.getElementById("startedAt").textContent     = "since " + new Date(summary.uptime.startedAt).toLocaleTimeString();
       document.getElementById("endpointCount").textContent = summary.topEndpoints.length;
       document.getElementById("consumerCount").textContent = summary.topConsumers.length;
 
-      // Status pills
-      const pills = document.getElementById("statusPills");
-      pills.innerHTML = Object.entries(summary.byStatus)
-        .sort(([a],[b]) => Number(a)-Number(b))
-        .map(([code, count]) => {
-          const cls = code.startsWith("2") ? "s2xx" : code === "429" ? "s429" : code.startsWith("4") ? "s4xx" : "s5xx";
-          return \`<div class="status-pill \${cls}">\${code} <span style="opacity:0.7;">\${fmt(count)}</span></div>\`;
-        }).join("");
+      // ── Status pills 
+      document.getElementById("statusPills").innerHTML =
+        Object.entries(summary.byStatus)
+          .sort(([a],[b]) => Number(a) - Number(b))
+          .map(([code, count]) => {
+            const cls = code.startsWith("2") ? "s2xx" 
+                      : code === "429"        ? "s429" 
+                      : code.startsWith("4")  ? "s4xx" 
+                      : "s5xx";
+            return \`<div class="status-pill \${cls}">\${code} <span style="opacity:0.7;">\${fmt(count)}</span></div>\`;
+          }).join("");
 
-      // Hourly sparkline
+      // ── Sparkline 
       drawSparkline(summary.hourlyTraffic);
 
-      // Endpoint table
+      // ── Endpoint table 
       const maxAvg = Math.max(...summary.topEndpoints.map(e => e.p99), 1);
-      const [method, ...pathParts] = summary.topEndpoints[0]?.route?.split(" ") || [];
       document.getElementById("endpointTable").innerHTML =
         summary.topEndpoints.slice(0, 20).map(ep => {
           const [meth, ...pp] = ep.route.split(" ");
@@ -652,38 +714,56 @@ function buildDashboard() {
             <td class="mono" style="color:var(--high);">\${ep.p99}ms</td>
             <td style="min-width:120px;">\${latBar(ep.p95, maxAvg)}</td>
           </tr>\`;
-        }).join("") || '<tr><td colspan="9" style="text-align:center;color:var(--text3);padding:24px;">No data yet — make some API requests</td></tr>';
+        }).join("") ||
+        \`<tr><td colspan="9" style="text-align:center;color:var(--text3);padding:24px;">
+          No data yet — make some API requests
+        </td></tr>\`;
 
-      // Consumer table
+      // ── Consumer table 
       document.getElementById("consumerTable").innerHTML =
-        summary.topConsumers.slice(0,10).map(c => \`<tr>
+        summary.topConsumers.slice(0, 10).map(c => \`<tr>
           <td class="mono" style="color:var(--accent);font-size:11px;">\${c.key}</td>
           <td class="mono">\${fmt(c.count)}</td>
           <td style="color:\${parseFloat(c.errorRate)>10?"var(--critical)":parseFloat(c.errorRate)>2?"var(--medium)":"var(--low)"}">\${c.errorRate}</td>
           <td style="font-size:11px;color:var(--text3);">\${new Date(c.lastSeen).toLocaleTimeString()}</td>
-        </tr>\`).join("") || '<tr><td colspan="4" style="text-align:center;color:var(--text3);padding:16px;">No consumer data yet</td></tr>';
+        </tr>\`).join("") ||
+        \`<tr><td colspan="4" style="text-align:center;color:var(--text3);padding:16px;">
+          No consumer data yet
+        </td></tr>\`;
 
-      // Recent requests
-      const rows = Array.isArray(recent?.results) ? recent.results : Array.isArray(recent)? recent : [];
+      // ── Recent requests 
+      const rows = Array.isArray(recent?.results) ? recent.results 
+                 : Array.isArray(recent)           ? recent 
+                 : [];
       document.getElementById("recentTable").innerHTML =
-        rows.slice(0,20).map(r => \`<tr>
+        rows.slice(0, 20).map(r => \`<tr>
           <td>\${methodBadge(r.method)}</td>
-          <td class="mono" style="font-size:10px;color:var(--text2);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">\${r.route||r.path}</td>
+          <td class="mono" style="font-size:10px;color:var(--text2);max-width:180px;
+              overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">\${r.route || r.path}</td>
           <td class="\${statusClass(r.status)} mono">\${r.status}</td>
           <td class="mono" style="color:\${r.durationMs>1000?"var(--critical)":r.durationMs>300?"var(--medium)":"var(--text2)"}">\${r.durationMs}</td>
-          <td style="font-size:10px;color:var(--text3);">\${r.apiVersion||"v2"}</td>
-        </tr>\`).join("") || '<tr><td colspan="5" style="text-align:center;color:var(--text3);padding:16px;">No requests yet</td></tr>';
+          <td style="font-size:10px;color:var(--text3);">\${r.apiVersion || "v2"}</td>
+        </tr>\`).join("") ||
+        \`<tr><td colspan="5" style="text-align:center;color:var(--text3);padding:16px;">
+          No requests yet
+        </td></tr>\`;
 
-      document.getElementById("lastUpdate").textContent = new Date().toLocaleTimeString();
-    } catch(err) {
+      // ── Timestamps 
+      const now = new Date().toLocaleTimeString();
+      document.getElementById("lastUpdate").textContent       = now;
+      document.getElementById("lastUpdateMobile").textContent = now;
+
+    } catch (err) {
       console.error("Telemetry refresh error:", err);
     }
   }
 
-  // Initial + auto-refresh every 10 seconds
   refresh();
   setInterval(refresh, 10000);
 </script>
+
+
+
 </body>
 </html>`;
 }

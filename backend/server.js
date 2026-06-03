@@ -7,12 +7,16 @@ const app    = require("./app");
 const logger = require("./utils/logger");
 const { startWorkers } = require("./jobs/workers");
 const { startWatchlistCron } = require("./jobs/watchlistCron");
+const path = require("path");
 
 const PORT   = parseInt(process.env.PORT || "8080", 10);
 const server = app.listen(PORT, "0.0.0.0", () => {
   logger.info(`IPShield running on port ${PORT} [${process.env.NODE_ENV || "development"}]`);
 });
 
+require("dotenv").config({
+  path: path.join(__dirname, "../.env")
+});
 // ── Graceful shutdown
 function shutdown(signal) {
   logger.info(`${signal} received — shutting down gracefully`);

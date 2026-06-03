@@ -46,29 +46,48 @@ exports.scoreIP = async (req, res, next) => {
     }
 
     // Persist to audit_log
-    try {
-      await db.query(
-        `INSERT INTO audit_log
-           (ip, score, risk_level, action, is_proxy, is_tor, is_datacenter,
-            country, isp, asn, cached, scored_at)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,NOW())`,
-        [
-          result.ip,
-          result.score,
-          result.riskLevel,
-          result.action      || null,
-          result.intelligence?.isProxy      || false,
-          result.intelligence?.isTor        || false,
-          result.intelligence?.isDatacenter || false,
-          result.geo?.country  || null,
-          result.network?.isp  || null,
-          result.network?.asn  || null,
-          result.meta?.cached  || false,
-        ]
-      );
-    } catch (dbErr) {
-      logger.error("audit_log insert error:", dbErr.message);
-    }
+    // AFTER — matches all table columns:
+try {
+  await db.query(
+    `INSERT INTO audit_log (
+      ip, score, risk_level, action,
+      is_proxy, is_tor, is_dc,
+      country, city, isp, asn,
+      is_feodo, is_spamhaus, is_et, otx_pulses,
+      cached, processing_ms, api_version,
+      scored_at
+    ) VALUES (
+      $1,$2,$3,$4,
+      $5,$6,$7,
+      $8,$9,$10,$11,
+      $12,$13,$14,$15,
+      $16,$17,$18,
+      NOW()
+    )`,
+    [
+      result.ip,
+      result.score,
+      result.riskLevel,
+      result.action                          || null,
+      result.intelligence?.isProxy           || false,
+      result.intelligence?.isTor             || false,
+      result.intelligence?.isDatacenter      || false,
+      result.geo?.country                    || null,
+      result.geo?.city                       || null,
+      result.network?.isp                    || null,
+      result.network?.asn                    || null,
+      result.threatFeeds?.feodo              || false,
+      result.threatFeeds?.spamhaus           || false,
+      result.threatFeeds?.emergingThreats    || false,
+      result.threatFeeds?.otx?.pulseCount    || 0,
+      result.meta?.cached                    || false,
+      result.meta?.processingMs              || null,
+      "v2",
+    ]
+  );
+} catch (dbErr) {
+  logger.error("[audit_log] insert error:", dbErr.message);
+}
 
     addAudit(result);
     checkAndAutoCase(result).catch(() => {});
@@ -96,27 +115,46 @@ exports.scoreBatch = async (req, res, next) => {
         const result = r.value;
 
         // Persist to audit_log
-        try {
-          await db.query(
-            `INSERT INTO audit_log
-               (ip, score, risk_level, action, is_proxy, is_tor, is_datacenter,
-                country, isp, asn, cached, scored_at)
-             VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,NOW())`,
-            [
-              result.ip,
-              result.score,
-              result.riskLevel,
-              result.action      || null,
-              result.intelligence?.isProxy      || false,
-              result.intelligence?.isTor        || false,
-              result.intelligence?.isDatacenter || false,
-              result.geo?.country  || null,
-              result.network?.isp  || null,
-              result.network?.asn  || null,
-              result.meta?.cached  || false,
-            ]
-          );
-        } catch (_) {}
+       // Inside scoreBatch — AFTER:
+try {
+  await db.query(
+    `INSERT INTO audit_log (
+      ip, score, risk_level, action,
+      is_proxy, is_tor, is_dc,
+      country, city, isp, asn,
+      is_feodo, is_spamhaus, is_et, otx_pulses,
+      cached, processing_ms, api_version,
+      scored_at
+    ) VALUES (
+      $1,$2,$3,$4,
+      $5,$6,$7,
+      $8,$9,$10,$11,
+      $12,$13,$14,$15,
+      $16,$17,$18,
+      NOW()
+    )`,
+    [
+      result.ip,
+      result.score,
+      result.riskLevel,
+      result.action                          || null,
+      result.intelligence?.isProxy           || false,
+      result.intelligence?.isTor             || false,
+      result.intelligence?.isDatacenter      || false,
+      result.geo?.country                    || null,
+      result.geo?.city                       || null,
+      result.network?.isp                    || null,
+      result.network?.asn                    || null,
+      result.threatFeeds?.feodo              || false,
+      result.threatFeeds?.spamhaus           || false,
+      result.threatFeeds?.emergingThreats    || false,
+      result.threatFeeds?.otx?.pulseCount    || 0,
+      result.meta?.cached                    || false,
+      result.meta?.processingMs              || null,
+      "v2",
+    ]
+  );
+} catch (_) {}
 
         addAudit(result);
         checkAndAutoCase(result).catch(() => {});

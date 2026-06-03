@@ -16,18 +16,23 @@ function validate(req, res, next) {
 }
 
 // ── GET /api/keys/stats 
-
-router.get("/stats", requireAuth, requireRole("admin"), async (req, res) => {
-  try {
-    const stats = await km.getKeyStats();
-    res.json(stats);
-  } catch (err) {
-    res.status(500).json({ error: "Failed to load stats" });
+router.get(
+  "/stats",
+  requireAuth,
+  requireRole("admin"),
+  async (req, res) => {
+    try {
+      const stats = await km.getKeyStats();
+      res.json(stats);
+    } catch (err) {
+      console.error("[keys/stats] ERROR:", err);
+      res.status(500).json({ error: err.message });
+    }
   }
-});
+);
+
 
 // ── GET /api/keys
-
 router.get("/",
   requireAuth, requireRole("admin"),
   [
@@ -46,14 +51,15 @@ router.get("/",
         offset: parseInt(req.query.offset || "0"),
       });
       res.json(result);
-    } catch (err) {
-      res.status(500).json({ error: "Failed to list keys" });
+       } catch (err) {
+      console.error("[keys/list] ERROR:", err);        
+      res.status(500).json({ error: "Failed to list keys" });     
     }
   }
 );
 
 // ── POST /api/keys/invite 
-
+// AFTER — shows real error in both server logs and response:
 router.post("/invite",
   requireAuth, requireRole("admin"),
   [
@@ -67,45 +73,46 @@ router.post("/invite",
   async (req, res) => {
     try {
       const invite = await km.createInvite({
-        ...req.body,
-        invitedBy: req.apiKey?.name || "admin",
+        name:       req.body.name,
+        email:      req.body.email,
+        role:       req.body.role || "analyst",   // ← explicit fallback, never undefined
+        dailyLimit: req.body.dailyLimit,
+        notes:      req.body.notes,
+        invitedBy:  req.auth?.name || req.auth?.email || "admin",
       });
 
-      // Send invite email if email provided and SMTP configured
-     if (req.body.email && process.env.SMTP_HOST) {
-      const nodemailer = require("nodemailer");
-      const transporter = nodemailer.createTransport({
-        host:   process.env.SMTP_HOST,
-        port:   parseInt(process.env.SMTP_PORT || "587"),
-        secure: process.env.SMTP_PORT === "465",
-        auth:   { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
-      });
-
-      transporter.sendMail({
-        from:    process.env.ALERT_FROM || process.env.SMTP_USER,
-        to:      req.body.email,   // ← recipient, not ALERT_TO
-        subject: "Your IPShield API Access",
-        html: `
-          <div style="background:#0d1117;padding:32px;font-family:monospace;max-width:560px;margin:0 auto;">
-            <h2 style="color:#c9d8e8;">IP<span style="color:#00d9ff;">Shield</span> — You're invited</h2>
-            <p style="color:#8fa8bc;">Hi ${invite.name},<br><br>
-            You've been granted access to the IPShield API.<br>
-            Click below to activate your key:</p>
-            <div style="margin:24px 0;text-align:center;">
-              <a href="${invite.activateUrl}"
-                style="background:#00d9ff;color:#000;padding:12px 32px;border-radius:6px;
-                      text-decoration:none;font-weight:700;display:inline-block;">
-                Activate API Key →
-              </a>
-            </div>
-            <p style="color:#4a6278;font-size:11px;">
-              Role: ${invite.role} · Daily limit: ${invite.daily_limit} requests<br>
-              This link expires in 7 days. Do not share it.
-            </p>
-          </div>`,
-      }).catch(err => {
-    });
-    }
+      if (req.body.email && process.env.SMTP_HOST) {
+        const nodemailer  = require("nodemailer");
+        const transporter = nodemailer.createTransport({
+          host:   process.env.SMTP_HOST,
+          port:   parseInt(process.env.SMTP_PORT || "587"),
+          secure: process.env.SMTP_PORT === "465",
+          auth:   { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
+        });
+        transporter.sendMail({
+          from:    process.env.ALERT_FROM || process.env.SMTP_USER,
+          to:      req.body.email,
+          subject: "Your IPShield API Access",
+          html: `
+            <div style="background:#0d1117;padding:32px;font-family:monospace;max-width:560px;margin:0 auto;">
+              <h2 style="color:#c9d8e8;">IP<span style="color:#00d9ff;">Shield</span> — You're invited</h2>
+              <p style="color:#8fa8bc;">Hi ${invite.name},<br><br>
+              You've been granted access to the IPShield API.<br>
+              Click below to activate your key:</p>
+              <div style="margin:24px 0;text-align:center;">
+                <a href="${invite.activateUrl}"
+                  style="background:#00d9ff;color:#000;padding:12px 32px;border-radius:6px;
+                        text-decoration:none;font-weight:700;display:inline-block;">
+                  Activate API Key →
+                </a>
+              </div>
+              <p style="color:#4a6278;font-size:11px;">
+                Role: ${invite.role} · Daily limit: ${invite.daily_limit} requests<br>
+                This link expires in 7 days. Do not share it.
+              </p>
+            </div>`,
+        }).catch(e => console.error("[invite/email] SMTP error:", e));
+      }
 
       res.status(201).json({
         id:           invite.id,
@@ -118,8 +125,11 @@ router.post("/invite",
         invite_token: invite.invite_token,
         message:      "Invite created. Share the activateUrl with the recipient.",
       });
+
     } catch (err) {
-      res.status(500).json({ error: "Failed to create invite" });
+      console.error("[keys/invite] ERROR:", err.message);
+      console.error("[keys/invite] DETAIL:", err.detail || err.stack);
+      res.status(500).json({ error: err.message });   // ← return real message to frontend
     }
   }
 );
@@ -148,15 +158,15 @@ router.get("/activate/:token",
 
 // GET /api/keys/me — returns current key info (any authenticated user)
 router.get("/me", requireAuth, async (req, res) => {
-  res.json({
-    id:          req.apiKey.id,
-    name:        req.apiKey.name,
-    role:        req.apiKey.role,
-  });
+  if (!req.auth) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+  res.json(req.auth);
 });
 
-// ── POST /api/keys/activate/:token — activate 
+// proxy endpoint for public stats
 
+// ── POST /api/keys/activate/:token — activate 
 router.post("/activate/:token",
   [ param("token").trim().notEmpty().isLength({ min: 40, max: 60 })],
   validate,
@@ -186,7 +196,6 @@ router.post("/activate/:token",
 );
 
 // ── GET /api/keys/:id
-
 router.get("/:id",
   requireAuth, requireRole("admin"),
   [param("id").isInt({ min: 1 })],
@@ -204,7 +213,6 @@ router.get("/:id",
 );
 
 // ── PUT /api/keys/:id 
-
 router.put("/:id",
   requireAuth, requireRole("admin"),
   [
@@ -228,7 +236,6 @@ router.put("/:id",
 );
 
 // ── POST /api/keys/:id/revoke 
-
 router.post("/:id/revoke",
   requireAuth, requireRole("admin"),
   [
@@ -237,6 +244,12 @@ router.post("/:id/revoke",
   ],
   validate,
   async (req, res) => {
+    // you cannot revoke your own key (to prevent locking yourself out)
+    if (req.auth.id === parseInt(req.params.id)) {
+    return res.status(400).json({
+      error: "You cannot revoke your own key"
+    });
+  }
     try {
       const ok = await km.revokeKey(parseInt(req.params.id), req.body.reason);
       if (!ok) return res.status(404).json({ error: "Key not found or already revoked" });
@@ -248,12 +261,17 @@ router.post("/:id/revoke",
 );
 
 // ── POST /api/keys/:id/suspend 
-
 router.post("/:id/suspend",
   requireAuth, requireRole("admin"),
   [param("id").isInt({ min: 1 })],
   validate,
   async (req, res) => {
+    // you cannot suspend your own key (to prevent locking yourself out)
+    if (req.auth.id === parseInt(req.params.id)) {
+  return res.status(400).json({
+    error: "You cannot suspend your own key"
+  });
+}
     try {
       await km.suspendKey(parseInt(req.params.id));
       res.json({ message: "Key suspended" });
@@ -264,12 +282,17 @@ router.post("/:id/suspend",
 );
 
 // ── DELETE /api/keys/:id
-
 router.delete("/:id",
   requireAuth, requireRole("admin"),
   [param("id").isInt({ min: 1 })],
   validate,
   async (req, res) => {
+    //  prevent self-deletion
+    if (req.auth.id === parseInt(req.params.id)) {
+      return res.status(400).json({
+        error: "You cannot delete your own admin key"
+      });
+    }
     try {
       const result = await db.query(
         `DELETE FROM api_keys WHERE id = $1 RETURNING id, name`,
@@ -308,6 +331,12 @@ router.post("/:id/rotate",
   [param("id").isInt({ min: 1 })],
   validate,
   async (req, res) => {
+    // you cannot rotate your own active key (to prevent locking yourself out)
+    if (req.auth.id === parseInt(req.params.id)) {
+  return res.status(400).json({
+    error: "You cannot rotate your own active admin key"
+  });
+}
     try {
       const result = await km.rotateKey(parseInt(req.params.id));
       if (!result) return res.status(404).json({ error: "Key not found or not active" });

@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IPShield — Login</title>
+  <!-- Favicon metadata -->
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon.ico/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="96x96" href="/favicon.ico/favicon-96x96.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon.ico/favicon-16x16.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&amp;family=Syne:wght@400;600;700;800&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/leaflet.min.css">
+<style>
+  :root {
+    --bg:         #080c0f;
+    --bg1:        #0d1117;
+    --bg2:        #111820;
+    --bg3:        #162030;
+    --border:     #1e2d3d;
+    --border2:    #243447;
+    --accent:     #02bfe0 ;
+    --accent2:    #0099cc;
+    --text:       #c9d8e8;
+    --text2:      #6a8fa8;
+    --text3:      #3d5a72;
+    --critical:   #ff3355;
+    --high:       #ff7700;
+    --medium:     #ffcc00;
+    --low:        #01cd6e;
+    --info:       #00d9ff;
+    --glow-c:     0 0 20px rgba(255,51,85,0.4);
+    --glow-h:     0 0 20px rgba(255,119,0,0.4);
+    --glow-m:     0 0 20px rgba(255,204,0,0.3);
+    --glow-l:     0 0 20px rgba(0,232,124,0.3);
+    --glow-a:     0 0 20px rgba(0,217,255,0.25);
+    --panel:    rgba(13, 17, 23, 0.72);
+    --panel-border: rgba(255, 255, 255, 0.06); 
+    --shadow: 0 10px 40px rgba(0, 0, 0, 0.45);
+    --radius: 18px;
+  }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #0d1117;
+      font-family: 'Segoe UI', system-ui, monospace;
+    }
+
+    .card {
+      background: #161b22;
+      border: 1px solid #21262d;
+      border-radius: 10px;
+      padding: 40px 36px;
+      width: 100%;
+      max-width: 380px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .logo { display: flex; align-items: center; gap: 12px; }
+  
+      .logo-icon {
+        width: 36px; height: 36px;
+        border: 2px solid var(--accent); border-radius: 6px;
+        display: flex; align-items: center; justify-content: center;
+        color: var(--accent); font-size: 18px; font-weight: 700;
+        box-shadow: var(--glow-a);
+        animation: pulse-border 3s ease-in-out infinite;
+      }
+
+      .logo-text { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 22px; letter-spacing: -0.5px; }
+      .logo-text span { color: var(--accent); }
+      .logo-sub { font-size: 10px; color: var(--text3); letter-spacing: 3px; margin-top: 1px; }
+
+    .logo {
+      text-align: center;
+      font-size: 22px;
+      font-weight: 700;
+      color: #c9d8e8;
+      letter-spacing: 1px;
+    }
+    .logo span { color: #00d9ff; }
+
+    label {
+      display: block;
+      font-size: 12px;
+      color: #8b949e;
+      margin-bottom: 6px;
+      /* text-transform: uppercase; */
+      letter-spacing: 0.5px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px 14px;
+      background: #0d1117;
+      border: 1px solid #30363d;
+      border-radius: 6px;
+      color: #e6edf3;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    input:focus { border-color: #00d9ff; }
+
+    button#login-submit {
+      width: 100%;
+      padding: 11px;
+      background: #00d9ff;
+      color: #000;
+      border: none;
+      border-radius: 6px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity 0.2s;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    button#login-submit:hover    { opacity: 0.88; }
+    button#login-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    #login-error {
+      display: none;
+      background: #2d1b1b;
+      border: 1px solid #6e2020;
+      color: #ff6b6b;
+      border-radius: 6px;
+      padding: 10px 14px;
+      font-size: 13px;
+    }
+
+    .footer-note {
+      text-align: center;
+      font-size: 11px;
+      color: #3d4451;
+      font-family: 'JetBrains Mono', monospace;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="logo">
+    <div class="logo-icon">⬡</div>
+    <div>
+      <div class="logo-text">IP<span>Shield</span></div>
+      <div class="logo-sub">Risk Intelligence</div>
+    </div>
+  </div>
+
+    <div>
+      <label for="auth-email">Email</label>
+      <input id="auth-email" type="email" placeholder="you@example.com" autocomplete="email" />
+    </div>
+
+    <div>
+      <label for="auth-password">Password</label>
+      <input id="auth-password" type="password" placeholder="••••••••" autocomplete="current-password" />
+    </div>
+
+    <div id="login-error"></div>
+
+    <button id="login-submit">Sign in</button>
+
+    <p class="footer-note">IPShield Admin Console</p>
+  </div>
+
+  <script>
+    // If already logged in, skip straight to dashboard
+    if (localStorage.getItem("token")) {
+      window.location.replace("/");
+    }
+
+    const emailEl  = document.getElementById("auth-email");
+    const passEl   = document.getElementById("auth-password");
+    const btnEl    = document.getElementById("login-submit");
+    const errorEl  = document.getElementById("login-error");
+
+    function showError(msg) {
+      errorEl.textContent    = msg;
+      errorEl.style.display  = "block";
+    }
+    function clearError() {
+      errorEl.style.display  = "none";
+      errorEl.textContent    = "";
+    }
+
+    async function doLogin() {
+      clearError();
+
+      const email    = emailEl.value.trim();
+      const password = passEl.value;
+
+      if (!email || !password) {
+        showError("Email and password are required.");
+        return;
+      }
+
+      btnEl.disabled    = true;
+      btnEl.textContent = "Signing in…";
+
+      try {
+        const res  = await fetch("/api/v1/auth/login", {
+          method:  "POST",
+          headers: { "Content-Type": "application/json" },
+          body:    JSON.stringify({ email, password }),
+        });
+        const data = await res.json();
+
+        if (!res.ok) {
+          showError(data.error || "Invalid credentials.");
+          return;
+        }
+
+        localStorage.setItem("token", data.token);
+        if (data.user) localStorage.setItem("user", JSON.stringify(data.user));
+
+        window.location.replace("/");   // back to dashboard
+
+      } catch (err) {
+        showError("Network error — is the server running?");
+      } finally {
+        btnEl.disabled    = false;
+        btnEl.textContent = "Sign in";
+      }
+    }
+
+    btnEl.addEventListener("click", doLogin);
+
+    // Allow Enter key to submit
+    [emailEl, passEl].forEach(el =>
+      el.addEventListener("keydown", e => { if (e.key === "Enter") doLogin(); })
+    );
+  </script>
+</body>
+</html>

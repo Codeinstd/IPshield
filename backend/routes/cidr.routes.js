@@ -43,7 +43,7 @@ router.post("/",
          VALUES ($1::cidr, $2, $3, $4, $5, $6, $7)
          RETURNING *`,
         [cidr, asn || null, severity, reason || null,
-         req.apiKey?.name || "analyst", expires_at || null, tags]
+         req.auth?.name || "analyst", expires_at || null, tags]
       );
 
       res.status(201).json(result.rows[0]);

@@ -59,7 +59,7 @@ router.post("/batch-async",
         ips,
         threshold: threshold || null,
         caseName:  caseName  || null,
-        addedBy:   addedBy   || req.apiKey?.name || "analyst",
+        addedBy:   addedBy   || req.auth?.name || "analyst",
       });
 
       res.status(202).json({

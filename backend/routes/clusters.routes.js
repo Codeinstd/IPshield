@@ -101,7 +101,7 @@ router.get("/:id/ips",
 
 router.post("/:id/resolve",
   requireAuth, requireRole("analyst"),
-  [param("id").isInt({ min: 1 })],
+  [ param("id").isInt({ min: 1 })],
   validate,
   async (req, res) => {
     try {

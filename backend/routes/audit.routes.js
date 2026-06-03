@@ -76,7 +76,7 @@ router.get("/search", requireAuth, requireRole('readonly'),
       if (maxScore)   { conds.push(`score <= $${i++}`);       params.push(parseInt(maxScore)); }
       if (proxy != null)      { conds.push(`is_proxy = $${i++}`);      params.push(proxy === "true"); }
       if (tor != null)        { conds.push(`is_tor = $${i++}`);        params.push(tor === "true"); }
-      if (datacenter != null) { conds.push(`is_datacenter = $${i++}`); params.push(datacenter === "true"); }
+      if (datacenter != null) { conds.push(`is_dc = $${i++}`); params.push(datacenter === "true"); }
       if (from) { conds.push(`scored_at >= $${i++}`); params.push(new Date(from)); }
       if (to)   { conds.push(`scored_at <= $${i++}`); params.push(new Date(to)); }
 

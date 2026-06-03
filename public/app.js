@@ -1,10 +1,8 @@
 (() => {
-  // const API     = "/api";
-  const API_KEY = "b2bc8fe074823d37e59d57a80bbb67f6558bc145e8d6f6ef5111133a0159f020";
-
-  let apiVersion = localStorage.getItem("ipshield_api_version") || "v2";
-  const getAPI   = () => `/api/${apiVersion}`;
+  const API_BASE = "http://localhost:3000";
+  let apiVersion = localStorage.getItem("ipshield_api_version") || "v2";  
   let API = `/api/${apiVersion}`;
+  const API_KEY  = localStorage.getItem("ipshield_api_key") || "";
 
   const ipInput    = document.getElementById("ipInput");
   const scoreBtn   = document.getElementById("scoreBtn");
@@ -14,9 +12,6 @@
   const auditList  = document.getElementById("auditList");
   const auditCount = document.getElementById("auditCount");
   
-  // const apiDocsBtn = document.getElementById("apiDocsBtn");
-  
-
   const sessionStats = { CRITICAL: 0, HIGH: 0, MEDIUM: 0, LOW: 0 };
   let auditEntries   = [];
   let map            = null;
@@ -31,14 +26,26 @@
   let usingDB       = false; 
   const AUDIT_PAGE_SIZE = 25;
 
-  injectExtraUI();
-  applyTheme(isDark); 
-  injectAuditControls();
-  initMap();
-  loadStats();
-  loadWatchlist();
-  setupEventListeners();
-  detectAndFillIP();
+  
+    // Safe to boot
+    function authHeaders() {
+  const token = localStorage.getItem("token");
+
+  return {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${token}`
+    };
+  }
+    injectExtraUI();
+    applyTheme(isDark);
+    injectAuditControls();
+    initMap();
+    loadWatchlist();
+    setupEventListeners();
+    detectAndFillIP();
+    checkAdminAccess();
+    loadStats();           
+  
 
   // ── Auto-detect system IP 
   async function detectAndFillIP() {
@@ -55,8 +62,7 @@
 
   // Switch API version
   function switchAPIVersion(version) {
-  if (version !== "v1" && version !== "v2") 
-    
+  if (version !== "v1" && version !== "v2")  
   return;
   apiVersion = version;
   API        = `/api/${version}`;
@@ -102,7 +108,7 @@
   // responsive nav 
     var _drawerInitialized = false;
 
-    function buildHamburgerMenu() {
+  function buildHamburgerMenu() {
   const hamburger   = document.getElementById("mainHamburger");
   const drawer      = document.getElementById("navDrawer");
   const overlay     = document.getElementById("navOverlay");
@@ -182,9 +188,18 @@
   
   // ── Extra UI 
   function injectExtraUI() {
-    const headerRight = document.querySelector(".header-right");
+  const headerRight = document.querySelector(".header-right");
 
   if (headerRight) {
+
+  // logout 
+  const logoutbtn = document.createElement("button");
+  logoutbtn.className     = "btn btn-ghost";
+  logoutbtn.id            = "logoutBtn";
+  logoutbtn.style.display = "none"; 
+  logoutbtn.textContent   = "Logout";
+  logoutbtn.style.cssText = "padding:6px 12px;font-size:11px;";
+  headerRight.prepend(logoutbtn);
  
   // Theme toggle
   const toggle = document.createElement("button");
@@ -253,13 +268,14 @@
   headerRight.prepend(rateLimitBtn);
 
   // Mgr Btn
-  // const btn = document.createElement("button");
-  // btn.className     = "btn btn-ghost";
-  // btn.id            = "keyMgrBtn";
-  // btn.style.display = "none"; 
-  // btn.textContent   = "🔑 Keys";
-  // btn.style.cssText = "padding:6px 12px;font-size:11px;";
-  // headerRight.prepend(btn);
+  const btn = document.createElement("button");
+  btn.className     = "btn btn-ghost";
+  btn.id            = "keyMgrBtn";
+  btn.style.display = "none"; 
+  btn.textContent   = "🔑 Keys";
+  btn.style.cssText = "padding:6px 12px;font-size:11px;";
+  headerRight.prepend(btn);
+ 
  
   buildHamburgerMenu();
 }
@@ -885,7 +901,7 @@
             <option value="">Select category…</option>
             ${["Malware","Botnet","C2","Scanner","Spam","Proxy","Tor","Phishing","Brute Force","Manual","Other"]
               .map(c => `<option value="${c}">${c}</option>`).join("")}
-          </select>
+          </select>x
         </div>
         <div>
           <label style="font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--text3);display:block;margin-bottom:4px;">EXPIRES AT (optional)</label>
@@ -930,15 +946,18 @@
  
   // ── Load & render
   async function loadBlacklist() {
-    const params = new URLSearchParams({
-      limit:  200,
-      status: currentQuery.status || "active"
+  const params = new URLSearchParams({
+    limit:  200,
+    status: currentQuery.status || "active"
     });
     if (currentQuery.q)        params.set("q",        currentQuery.q);
     if (currentQuery.severity) params.set("severity", currentQuery.severity);
- 
+
     try {
-      const res  = await fetch(`${API}/blacklist?${params}`, { headers: { "x-api-key": API_KEY } });
+      const res  = await fetch(`${API}/blacklist?${params}`, {
+        method:  "GET",
+        headers: authHeaders()
+      });
       const data = await res.json();
       renderStats(data.stats);
       renderTable(data.entries || []);
@@ -946,7 +965,7 @@
       document.getElementById("blTableWrap").innerHTML =
         `<div style="padding:24px;color:var(--critical);font-size:12px;">Error: ${escHtml(err.message)}</div>`;
     }
-  }
+}
  
   function renderStats(stats) {
     if (!stats) return;
@@ -1054,9 +1073,9 @@
 
     try {
       const res = await fetch(`${API}/blacklist/${btn.dataset.id}`, {
-        method: "DELETE",
-        headers: { "x-api-key": API_KEY }
-      });
+      method: "DELETE",
+      headers: authHeaders()
+    });
 
       if (!res.ok) {
         throw new Error("Delete failed");
@@ -1148,7 +1167,7 @@
     try {
       const res  = await fetch(url, {
         method,
-        headers: { "Content-Type": "application/json", "x-api-key": API_KEY },
+        headers: { ...authHeaders(), "Content-Type": "application/json" },
         body:    JSON.stringify(body)
       });
       const data = await res.json();
@@ -1193,10 +1212,10 @@
   document.getElementById("blBulkDeleteBtn").addEventListener("click", async () => {
     if (!selectedIds.size || !confirm(`Delete ${selectedIds.size} entries?`)) return;
     await fetch(`${API}/blacklist/bulk`, {
-      method: "DELETE",
-      headers: { "Content-Type": "application/json", "x-api-key": API_KEY },
-      body: JSON.stringify({ ids: [...selectedIds] })
-    });
+    method: "DELETE",
+    headers: { ...authHeaders(), "Content-Type": "application/json" },
+    body: JSON.stringify({ ids: [...selectedIds] })
+  });
     selectedIds.clear();
     loadBlacklist();
   });
@@ -1215,7 +1234,7 @@
       const url = `${API}/blacklist/export?fmt=${fmt}`;
       const a   = Object.assign(document.createElement("a"), { href: url });
       // Must include auth header — use fetch + blob
-      fetch(url, { headers: { "x-api-key": API_KEY } })
+      fetch(url, { headers: authHeaders() })
       .then(r => {
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
         return r.blob();
@@ -1234,7 +1253,7 @@
  
   // Initial load
   loadBlacklist();
-}
+  }
 
   // Cases Panel 
   // ── Status colors & icons 
@@ -1254,10 +1273,10 @@
     HIGH:"var(--high)", 
     MEDIUM:"var(--medium)", 
     LOW:"var(--low)" }[sev] || "var(--text2)";
-}
+  }
 
   // - Main Cases panel 
-      async function showCasesPanel() {
+    async function showCasesPanel() {
     document.getElementById("casesModal")?.remove();
  
   const overlay = document.createElement("div");
@@ -1997,7 +2016,7 @@
   // - Initial Load
   await refreshStats();
   await refreshList();
-}
+  }
 
     // ── Add current IP to an existing or new case 
     async function addIPToCase(ip, result) {
@@ -2065,7 +2084,7 @@
   } catch (err) {
     toast(`Error: ${err.message}`, "error");
   }
-}
+    }
 
   // toast msg
   function toast(message, type = "success", duration = 3500) {
@@ -2133,7 +2152,7 @@
 
   el.addEventListener("click", dismiss);
   setTimeout(dismiss, duration);
-}
+  }
  
 // ── Quick block from score result 
 async function quickBlock(ip) {
@@ -2142,11 +2161,11 @@ async function quickBlock(ip) {
   const reason   = prompt(`Reason for blocking ${ip}:`, "Manual block") ?? "Manual block";
 
   try {
-    const res  = await fetch(`${API}/blacklist`, {
-      method:  "POST",
-      headers: { "Content-Type": "application/json", "x-api-key": API_KEY },
-      body:    JSON.stringify({ ip, severity: "HIGH", reason, category: "Manual", added_by: "analyst" })
-    });
+    const res  = await fetch("/api/v2/blacklist", {
+                    method: "POST",
+                    headers: authHeaders(),
+                    body: JSON.stringify({ ip, severity: "HIGH", reason, category: "Manual", added_by: "analyst" })
+                  });
     const data = await res.json();
 
     if (res.status === 409) {
@@ -2696,23 +2715,33 @@ async function fetchAndRenderFromDB() {
   const params = new URLSearchParams({
     limit:  AUDIT_PAGE_SIZE,
     offset: auditPage * AUDIT_PAGE_SIZE,
-    sort:   auditFilters.sort
+    sort:   auditFilters.sort || "date_desc",
   });
-  if (auditFilters.q)                   params.set("q",           auditFilters.q);
-  if (auditFilters.risk)                params.set("risk",        auditFilters.risk);
-  if (auditFilters.minScore > 0)        params.set("minScore",    auditFilters.minScore);
-  if (auditFilters.maxScore < 100)      params.set("maxScore",    auditFilters.maxScore);
-  if (auditFilters.proxy    != null)    params.set("proxy",       auditFilters.proxy);
-  if (auditFilters.tor      != null)    params.set("tor",         auditFilters.tor);
-  if (auditFilters.datacenter != null)  params.set("datacenter",  auditFilters.datacenter);
- 
+
+  if (auditFilters.q)                    params.set("q",          auditFilters.q);
+  if (auditFilters.risk)                 params.set("risk",        auditFilters.risk);
+  if (auditFilters.minScore > 0)         params.set("minScore",    auditFilters.minScore);
+  if (auditFilters.maxScore < 100)       params.set("maxScore",    auditFilters.maxScore);
+  if (auditFilters.proxy      != null)   params.set("proxy",       auditFilters.proxy);
+  if (auditFilters.tor        != null)   params.set("tor",         auditFilters.tor);
+  if (auditFilters.datacenter != null)   params.set("datacenter",  auditFilters.datacenter);
+
   try {
-    const res  = await fetch(`${API}/audit/search?${params}`, { headers: { "x-api-key": API_KEY } });
+    const res = await fetch(`/api/v2/audit/search?${params}`, {
+      headers: authHeaders()
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ error: `HTTP ${res.status}` }));
+      throw new Error(err.error || `HTTP ${res.status}`);
+    }
+
     const data = await res.json();
-    if (!res.ok) throw new Error(data.error);
     auditTotal = data.total;
-    renderAuditEntries(data.entries, data.total);
+    renderAuditEntries(data.entries || [], data.total);
+
   } catch (err) {
+    console.error("[audit/db] error:", err);
     setBulkStatus(`Audit DB error: ${err.message}`);
   }
 }
@@ -2735,66 +2764,89 @@ function renderAudit() {
 }
  
 function renderAuditEntries(entries, total) {
-  auditCount.textContent = `${total} ${total===1?"entry":"entries"}`;
- 
-  const status = document.getElementById("auditFilterStatus");
-  const hasFilter = auditFilters.q || auditFilters.risk || auditFilters.minScore > 0 ||
-                    auditFilters.maxScore < 100 || auditFilters.proxy != null ||
-                    auditFilters.tor != null || auditFilters.datacenter != null;
- 
+  auditCount.textContent = `${total} ${total === 1 ? "entry" : "entries"}`;
+
+  const status    = document.getElementById("auditFilterStatus");
+  const hasFilter = auditFilters.q || auditFilters.risk ||
+                    auditFilters.minScore > 0 || auditFilters.maxScore < 100 ||
+                    auditFilters.proxy != null || auditFilters.tor != null ||
+                    auditFilters.datacenter != null;
+
   if (status) {
     status.textContent = hasFilter
       ? `Showing ${Math.min(entries.length, total)} of ${total} matching entries${usingDB ? " (DB)" : " (session)"}`
       : usingDB ? `Full database history — ${total} total entries` : "";
   }
- 
+
   if (!entries.length) {
-    auditList.innerHTML = `<div style="padding:24px;text-align:center;color:var(--text3);font-size:11px;">
-      ${hasFilter ? "No entries match your filters" : "No queries yet"}
-    </div>`;
+    auditList.innerHTML = `
+      <div style="padding:24px;text-align:center;color:var(--text3);font-size:11px;">
+        ${hasFilter ? "No entries match your filters" : "No queries yet"}
+      </div>`;
     return;
   }
- 
-  auditList.innerHTML = entries.map(e => {
 
-    // Handle both in-memory format and DB row format
+  auditList.innerHTML = entries.map(e => {
+    // ── Handle both DB (snake_case) and in-memory (camelCase) formats ──
     const ip        = e.ip;
-    const score     = e.score       ?? 0;
-    const riskLevel = e.riskLevel   || e.risk_level || "LOW";
-    const scoredAt  = e.meta?.scoredAt || (e.scored_at ? new Date(e.scored_at) : new Date());
+    const score     = e.score        ?? 0;
+    const riskLevel = e.riskLevel    || e.risk_level  || "LOW";
+    const scoredAt  = e.meta?.scoredAt || e.scored_at || new Date();
+
+    // Threat feed flags — handle both formats
+    const isFeodo    = e.threatFeeds?.feodo            || e.is_feodo    || false;
+    const isSpamhaus = e.threatFeeds?.spamhaus         || e.is_spamhaus || false;
+    const isET       = e.threatFeeds?.emergingThreats  || e.is_et       || false;
+    const otxCount   = e.threatFeeds?.otx?.pulseCount  || e.otx_pulses  || 0;
+
     const f = [
-      (e.threatFeeds?.feodo || e.is_feodo)           && "F",
-      (e.threatFeeds?.spamhaus || e.is_spamhaus)     && "S",
-      (e.threatFeeds?.emergingThreats || e.is_et)    && "E",
-      (e.threatFeeds?.otx?.pulseCount > 0)           && "O"
+      isFeodo    && "F",
+      isSpamhaus && "S",
+      isET       && "E",
+      otxCount > 0 && "O",
     ].filter(Boolean).join("");
- 
-    return `<div class="audit-item" data-ip="${escHtml(ip)}">
-      <span class="audit-ip">${escHtml(ip)}</span>
-      ${f ? `<span style="font-size:9px;color:#ff3355;font-weight:700;">[${f}]</span>` : ""}
-      <span class="audit-badge ${riskLevel}">${riskLevel}</span>
-      <span class="audit-score ${riskLevel}">${score}</span>
-      <span class="audit-ts">${fmtTime(new Date(scoredAt))}</span>
-    </div>`;
+
+    return `
+      <div class="audit-item" data-ip="${escHtml(ip)}">
+        <span class="audit-ip">${escHtml(ip)}</span>
+        ${f ? `<span style="font-size:9px;color:#ff3355;font-weight:700;">[${f}]</span>` : ""}
+        <span class="audit-badge ${riskLevel}">${riskLevel}</span>
+        <span class="audit-score ${riskLevel}">${score}</span>
+        <span class="audit-ts">${fmtTime(new Date(scoredAt))}</span>
+      </div>`;
   }).join("");
- 
-  // Pagination controls
+
+  // Pagination
   const totalPages = Math.ceil(total / AUDIT_PAGE_SIZE);
   if (totalPages > 1) {
     const nav = document.createElement("div");
     nav.style.cssText = "display:flex;justify-content:space-between;align-items:center;padding:8px 16px;border-top:1px solid var(--border);font-size:11px;color:var(--text3);";
     nav.innerHTML = `
-      <button id="auditPrev" class="btn btn-ghost" style="padding:4px 10px;font-size:11px;" ${auditPage===0?"disabled":""}>← Prev</button>
-      <span>Page ${auditPage+1} of ${totalPages}</span>
-      <button id="auditNext" class="btn btn-ghost" style="padding:4px 10px;font-size:11px;" ${auditPage>=totalPages-1?"disabled":""}>Next →</button>`;
+      <button id="auditPrev" class="btn btn-ghost"
+        style="padding:4px 10px;font-size:11px;"
+        ${auditPage === 0 ? "disabled" : ""}>← Prev</button>
+      <span>Page ${auditPage + 1} of ${totalPages} · ${total} total</span>
+      <button id="auditNext" class="btn btn-ghost"
+        style="padding:4px 10px;font-size:11px;"
+        ${auditPage >= totalPages - 1 ? "disabled" : ""}>Next →</button>`;
     auditList.appendChild(nav);
- 
-    document.getElementById("auditPrev")?.addEventListener("click", () => { auditPage--; renderAudit(); });
-    document.getElementById("auditNext")?.addEventListener("click", () => { auditPage++; renderAudit(); });
+
+    document.getElementById("auditPrev")?.addEventListener("click", () => {
+      auditPage--;
+      renderAudit();
+    });
+    document.getElementById("auditNext")?.addEventListener("click", () => {
+      auditPage++;
+      renderAudit();
+    });
   }
- 
+
+  // Click to re-score
   auditList.querySelectorAll(".audit-item").forEach(item => {
-    item.addEventListener("click", () => { ipInput.value = item.dataset.ip; scoreIP(); });
+    item.addEventListener("click", () => {
+      ipInput.value = item.dataset.ip;
+      scoreIP();
+    });
   });
 }
 
@@ -2826,7 +2878,7 @@ function renderAuditEntries(entries, total) {
   });
 }
 
-  function updateMap(geo, ip, riskLevel) {
+function updateMap(geo, ip, riskLevel) {
     if (!map || geo.lat == null || geo.lon == null) return;
     const color = { CRITICAL:"#ff3355", HIGH:"#ff7700", MEDIUM:"#ffcc00", LOW:"#00e87c" }[riskLevel] || "#00d9ff";
     const icon  = L.divIcon({
@@ -2841,10 +2893,10 @@ function renderAuditEntries(entries, total) {
     map.flyTo([geo.lat, geo.lon], 6, { duration: 1.2 });
     const label = document.getElementById("mapLabel");
     if (label) label.textContent = `${geo.city||"—"}, ${geo.country||"—"}`;
-  }
+}
 
   // ── Events 
-  function setupEventListeners() {
+function setupEventListeners() {
     scoreBtn.addEventListener("click", scoreIP);
     clearBtn.addEventListener("click", clearPanel);
     // apiDocsBtn.addEventListener("click", () => window.open("https://ipshield.live/api/docs", "_blank"));
@@ -2867,13 +2919,28 @@ function renderAuditEntries(entries, total) {
       if (e.target.id === "addToCaseBtn")  addIPToCase(currentIP, lastResult);
       if (e.target.id === "versionBtn")    showVersionPanel();
       if (e.target.id === "threatBtn")     showClustersPanel();
-      if (e.target.id === "rateLimitBtn")  showRateLimitPanel();
-      if (e.target.id === "keyMgrBtn")     showKeyManagerPanel();
+      // AFTER — double-check role before opening panel:
+      if (e.target.id === "rateLimitBtn") {
+        if (window._userRole === "admin") showRateLimitPanel();
+        else toast("Admin access required", "warning");
+      }
+      if (e.target.id === "keyMgrBtn") {
+        if (window._userRole === "admin") showKeyManagerPanel();
+        else toast("Admin access required", "warning");
+      }
+      if (e.target.id === "logoutBtn")     logout();
       
     });
 
     document.addEventListener("change", e => {
       if (e.target.id === "csvUpload") handleCSVUpload(e.target.files[0]);
+    });
+
+    // Find the right button id from your earlier dump — e.g. apiBadge or add a new one
+    document.getElementById("YOUR-LOGOUT-BTN-ID")?.addEventListener("click", () => {
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      window.location.replace("/login");
     });
 
     // Single unified click handler on resultBody — no inline onclick needed
@@ -2956,10 +3023,10 @@ function renderAuditEntries(entries, total) {
         }
       }
     });
-  }
+}
 
   // ── Theme 
-  function toggleTheme() {
+function toggleTheme() {
   isDark = !isDark;
   applyTheme(isDark);
   localStorage.setItem("ipshield_theme", isDark ? "dark" : "light");
@@ -3006,15 +3073,19 @@ function applyTheme(dark) {
     }
   }
 }
-
   // ── Score 
   async function scoreIP() {
+    const token = localStorage.getItem("token");
     const ip = ipInput.value.trim();
     if (!ip) return;
     if (!isValidIP(ip)) { showError("Invalid IP address format."); return; }
     setLoading(true);
     try {
-      const res  = await fetch(`${API}/score/${encodeURIComponent(ip)}`, { headers: { "x-api-key": API_KEY } });
+      const res  = await fetch(`${API}/score/${ip}`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Scoring failed");
       currentIP  = ip;
@@ -3182,6 +3253,12 @@ function applyTheme(dark) {
       btn.addEventListener("click", e => { e.stopPropagation(); removeFromWatchlist(btn.dataset.ip); });
     });
   }
+
+  // logout
+  async function logout() {
+  localStorage.removeItem("token");
+  window.location.href = "/login";
+}
 
   // ── WHOIS 
   async function loadWhois(ip) {
@@ -3507,24 +3584,33 @@ function applyTheme(dark) {
     }
   }
 
+  // call stats
   async function loadStats() {
-    try {
-      const res  = await fetch(`${API}/stats`, { headers: { "x-api-key": API_KEY } });
-      if (!res.ok) return;
-      const data = await res.json();
-      if (data.riskDistribution) {
-        const map = { CRITICAL:"stat-critical", HIGH:"stat-high", MEDIUM:"stat-medium", LOW:"stat-low" };
-        Object.entries(map).forEach(([risk, id]) => {
-          const el = document.getElementById(id);
-          if (el && data.riskDistribution[risk] != null) {
-            el.textContent = data.riskDistribution[risk];
-            sessionStats[risk] = data.riskDistribution[risk];
-          }
-        });
+    const token = localStorage.getItem("token");
+
+    const res = await fetch("/api/v1/stats", {
+      headers: {
+        Authorization: `Bearer ${token}`
       }
-      if (data.threatFeeds) showFeedStatus(data.threatFeeds);
-    } catch (_) {}
+    });
+
+    const data = await res.json();
+    
   }
+  
+  //initApp
+  function initApp() {
+  const token = localStorage.getItem("token");
+
+  if (!token) {
+    window.location.href = "/login";
+    return;
+  }
+
+  loadStats();
+  checkAdminAccess();
+  }
+  initApp();
 
   function showFeedStatus(feeds) {
     let bar = document.getElementById("feedStatusBar");
@@ -3654,7 +3740,7 @@ function applyTheme(dark) {
 
       async function loadClusters() {
         try {
-          const res  = await fetch(`${API}/threat/clusters?limit=50`, { headers: { "x-api-key": API_KEY } });
+          const res = await fetch("/api/v2/threat/clusters?limit=50", { headers: authHeaders() });
           const data = await res.json();
           activeClustersData = data.clusters || [];
 
@@ -3732,7 +3818,7 @@ function applyTheme(dark) {
         const typeIcon = { subnet: "🔷", asn: "🏢", country: "🌍" };
 
         try {
-          const res  = await fetch(`${API}/threat/clusters/${cluster.id}/ips`, { headers: { "x-api-key": API_KEY } });
+          const res  = await fetch(`/api/v2/threat/clusters/${cluster.id}/ips`);
           const data = await res.json();
           const ips  = data.ips || [];
 
@@ -3820,7 +3906,7 @@ function applyTheme(dark) {
               btn._busy = true; btn.textContent = "…";
               const r = await fetch(`${API}/blacklist`, {
                 method: "POST",
-                headers: { "Content-Type": "application/json", "x-api-key": API_KEY },
+                headers: { "Content-Type": "application/json", authHeaders },
                 body: JSON.stringify({ ip: btn.dataset.ip, severity: "HIGH", reason: `Cluster: ${label}`, category: "Cluster", added_by: "analyst" }),
               });
               if (r.ok) { btn.textContent = "✓"; btn.style.color = "var(--low)"; toast(`${btn.dataset.ip} blocked`, "success"); }
@@ -3842,9 +3928,10 @@ function applyTheme(dark) {
             const btn = document.getElementById("blockSubnetBtn");
             if (!confirm(`Block entire subnet ${details.subnet}?`)) return;
             btn.disabled = true; btn.textContent = "Blocking…";
+            // blockSubnetBtn:
             const r = await fetch(`${API}/blacklist/cidr`, {
               method: "POST",
-              headers: { "Content-Type": "application/json", "x-api-key": API_KEY },
+              headers: { ...authHeaders(), "Content-Type": "application/json" },
               body: JSON.stringify({ cidr: details.subnet, severity: cluster.severity, reason: `Cluster block: ${cluster.ip_count} IPs detected`, tags: ["cluster", "auto"] }),
             });
             if (r.ok) { toast(`Subnet ${details.subnet} blocked`, "success"); btn.textContent = "✓ Blocked"; }
@@ -3856,9 +3943,11 @@ function applyTheme(dark) {
             if (!confirm("Mark this cluster as resolved?")) return;
             const btn = document.getElementById("resolveClusterBtn");
             btn.disabled = true; btn.textContent = "Resolving…";
+            // resolveClusterBtn:
             const r = await fetch(`${API}/threat/clusters/${cluster.id}/resolve`, {
-              method: "POST", headers: { "x-api-key": API_KEY },
-            });
+            method: "POST",
+            headers: authHeaders(),
+          });
             if (r.ok) {
               toast("Cluster resolved", "success");
               activeClustersData = activeClustersData.filter(c => c.id !== cluster.id);
@@ -3891,15 +3980,16 @@ function applyTheme(dark) {
         { id:"generic",  label:"Generic Webhook",      hint:"Bearer {token} or no auth" },
       ];
 
-      // ── Fetch both webhook status and targets in parallel ──────────────────────
+      // ── Fetch both webhook status and targets in parallel 
       let status = null, formats = [], targets = [];
       try {
+        // In showUnifiedSIEMPanel — loadClusters equivalent block:
         const [sRes, fRes, tRes] = await Promise.all([
-          fetch(`${API}/siem/status`,  { headers: { "x-api-key": API_KEY } }),
-          fetch(`${API}/siem/formats`, { headers: { "x-api-key": API_KEY } }),
-          fetch(`${API}/siem/targets`, { headers: { "x-api-key": API_KEY } }),
+          fetch(`${API}/siem/status`,  { headers: authHeaders() }),
+          fetch(`${API}/siem/formats`, { headers: authHeaders() }),
+          fetch(`${API}/siem/targets`, { headers: authHeaders() }),
         ]);
-        status  = (await sRes.json()).siem;
+                status  = (await sRes.json()).siem;
         formats = (await fRes.json()).formats || [];
         targets = (await tRes.json()).targets || [];
       } catch (_) {}
@@ -4086,11 +4176,11 @@ function applyTheme(dark) {
       overlay.appendChild(modal);
       document.body.appendChild(overlay);
 
-      // ── Close ──────────────────────────────────────────────────────────────────
+      // ── Close 
       document.getElementById("siemUnifiedClose").addEventListener("click", () => overlay.remove());
       overlay.addEventListener("click", e => { if (e.target === overlay) overlay.remove(); });
 
-      // ── Tab switching ──────────────────────────────────────────────────────────
+      // ── Tab switching
       modal.querySelectorAll(".siem-tab").forEach(tab => {
         tab.addEventListener("click", () => {
           modal.querySelectorAll(".siem-tab").forEach(t => {
@@ -4113,7 +4203,7 @@ function applyTheme(dark) {
         });
       });
 
-      // ── Webhook tab: test ──────────────────────────────────────────────────────
+      // ── Webhook tab: test 
       document.getElementById("siemTestBtn").addEventListener("click", async () => {
         const btn    = document.getElementById("siemTestBtn");
         const result = document.getElementById("siemTestResult");
@@ -4121,8 +4211,11 @@ function applyTheme(dark) {
         btn.disabled = true; btn.textContent = "Sending…";
         result.textContent = ""; detail.style.display = "none";
         try {
-          const res  = await fetch(`${API}/siem/test`, {
-            method: "POST", headers: { "Content-Type": "application/json", "x-api-key": API_KEY }, body: JSON.stringify({})
+          // siemTestBtn click handler:
+          const res = await fetch(`${API}/siem/test`, {
+            method: "POST",
+            headers: { ...authHeaders(), "Content-Type": "application/json" },
+            body: JSON.stringify({})
           });
           const data = await res.json();
           result.textContent = data.message;
@@ -4132,6 +4225,7 @@ function applyTheme(dark) {
             detail.style.display = "block";
           }
         } catch (err) {
+          // siemTestBtn click handler:
           result.textContent = `Error: ${err.message}`;
           result.style.color = "var(--critical)";
         } finally {
@@ -4139,12 +4233,13 @@ function applyTheme(dark) {
         }
       });
 
-      // ── Webhook tab: sample payload ────────────────────────────────────────────
+      // ── Webhook tab: sample payload 
       async function loadSIEMSample(format) {
         const pre = document.getElementById("siemSamplePayload");
         pre.textContent = "Loading…";
         try {
-          const res  = await fetch(`${API}/siem/sample/${format}`, { headers: { "x-api-key": API_KEY } });
+          // loadSIEMSample:
+          const res = await fetch(`${API}/siem/sample/${format}`, { headers: authHeaders() });
           const data = await res.json();
           pre.textContent = JSON.stringify(data.sample, null, 2);
         } catch (err) {
@@ -4173,7 +4268,7 @@ function applyTheme(dark) {
 
       if (formats.length) loadSIEMSample(formats[0].id);
 
-      // ── Targets tab ────────────────────────────────────────────────────────────
+      // ── Targets tab
       const typeSelect = document.getElementById("stType");
       typeSelect.addEventListener("change", () => {
         document.getElementById("stTypeHint").textContent =
@@ -4186,7 +4281,8 @@ function applyTheme(dark) {
       async function loadTargets() {
         const el = document.getElementById("siemTargetsList");
         try {
-          const res  = await fetch(`${API}/siem/targets`, { headers: { "x-api-key": API_KEY } });
+          // loadTargets:
+          const res = await fetch(`${API}/siem/targets`, { headers: authHeaders() });
           const data = await res.json();
           renderTargets(data.targets || []);
         } catch (err) {
@@ -4248,7 +4344,11 @@ function applyTheme(dark) {
         el.querySelectorAll(".st-test").forEach(btn => {
           btn.addEventListener("click", async () => {
             btn.disabled = true; btn.textContent = "Testing…";
-            const r    = await fetch(`${API}/siem/targets/${btn.dataset.id}/test`, { method: "POST", headers: { "x-api-key": API_KEY } });
+            // st-test buttons:
+            const r = await fetch(`${API}/siem/targets/${btn.dataset.id}/test`, {
+              method: "POST",
+              headers: authHeaders()
+            });
             const data = await r.json();
             btn.disabled = false; btn.textContent = "Test";
             toast(data.message || (data.success ? "✓ Delivered" : "✗ Failed"), data.success ? "success" : "error");
@@ -4263,7 +4363,11 @@ function applyTheme(dark) {
         el.querySelectorAll(".st-del").forEach(btn => {
           btn.addEventListener("click", async () => {
             if (!confirm("Delete this SIEM target?")) return;
-            await fetch(`${API}/siem/targets/${btn.dataset.id}`, { method: "DELETE", headers: { "x-api-key": API_KEY } });
+            // st-del buttons:
+            await fetch(`${API}/siem/targets/${btn.dataset.id}`, {
+              method: "DELETE",
+              headers: authHeaders()
+            });
             toast("Target deleted", "success");
             loadTargets();
           });
@@ -4319,12 +4423,16 @@ function applyTheme(dark) {
           verifySsl: document.getElementById("stVerifySsl").checked,
         };
 
-        const method = editingId ? "PUT"  : "POST";
-        const path   = editingId ? `${API}/siem/targets/${editingId}` : `${API}/siem/targets`;
-        const r      = await fetch(path, { method, headers: { "Content-Type": "application/json", "x-api-key": API_KEY }, body: JSON.stringify(body) });
-        const data   = await r.json();
+       const method = editingId ? "PUT"  : "POST";
+       const path   = editingId ? `${API}/siem/targets/${editingId}` : `${API}/siem/targets`;
+       const saveRes  = await fetch(path, {
+        method,
+        headers: { ...authHeaders(), "Content-Type": "application/json" },
+        body: JSON.stringify(body)
+      });
+      const saveData = await saveRes.json();
 
-        if (!r.ok) { errEl.textContent = data.error || "Save failed"; errEl.style.display = "block"; return; }
+      if (!saveRes.ok) { errEl.textContent = saveData.error || "Save failed."; errEl.style.display = "block"; return; }
         document.getElementById("siemTargetForm").style.display = "none";
         toast(editingId ? "Target updated" : "Target added", "success");
         loadTargets();
@@ -4380,135 +4488,171 @@ function applyTheme(dark) {
         { route: "/api/report/*",  limit: 10,  windowMins: 1,  key: "report" },
       ];
 
+      // In loadRateLimitData:
       async function loadRateLimitData() {
         const el = document.getElementById("rateLimitContent");
         try {
-          const res  = await fetch(`${API}/telemetry/dashboard`, { headers: { "x-api-key": API_KEY } });
+          const res = await fetch(`/api/v1/telemetry`, { headers: authHeaders() });
+
+          if (!res.ok) {
+            const text = await res.text();
+            throw new Error(`HTTP ${res.status}`);
+          }
+
+          const contentType = res.headers.get("content-type") || "";
+          if (!contentType.includes("application/json")) {
+            throw new Error("Telemetry endpoint returned non-JSON — check the route is registered");
+          }
+
           const data = await res.json();
           const tel  = data.summary || data;
           renderRateLimits(tel);
         } catch (err) {
-          el.innerHTML = `<div style="color:var(--critical);font-size:12px;">⚠ ${escHtml(err.message)}<br><span style="color:var(--text3);">Make sure your admin API key is set correctly.</span></div>`;
+          el.innerHTML = `
+            <div style="color:var(--critical);font-size:12px;padding:24px;">
+              ⚠ ${escHtml(err.message)}<br>
+              <span style="color:var(--text3);margin-top:6px;display:block;">
+                Make sure your admin token is valid and the telemetry route is registered.
+              </span>
+            </div>`;
         }
       }
+      
+  function renderRateLimits(tel) {
+  const el        = document.getElementById("rateLimitContent");
 
-      function renderRateLimits(tel) {
-        const el        = document.getElementById("rateLimitContent");
-        const endpoints = tel.topEndpoints || [];
-        const uptime    = tel.uptime || {};
-        const requests  = tel.requests || {};
+  // Handle both { summary: {...} } and direct summary object
+  const data      = tel.summary || tel;
+  const endpoints = data.topEndpoints || [];
+  const uptime    = data.uptime       || {};
+  const requests  = data.requests     || {};
 
-        // Group by route prefix to match against rate limit buckets
-        function getRouteStats(prefix) {
-          const matching = endpoints.filter(e => !prefix || e.route?.includes(prefix));
-          if (!matching.length) return null;
-          const totalCount = matching.reduce((a, b) => a + (b.count || 0), 0);
-          const maxRPS     = Math.max(...matching.map(e => {
-            const secs = (uptime.seconds || 1);
-            return (e.count || 0) / secs;
-          }));
-          const avgMs      = matching.reduce((a, b) => a + (b.avgMs || 0), 0) / matching.length;
-          const maxP99     = Math.max(...matching.map(e => e.p99 || 0));
-          return { totalCount, maxRPS, avgMs: Math.round(avgMs), maxP99, endpoints: matching };
-        }
+  const overallRPS    = requests.rps       || "0.00";
+  const totalRequests = requests.total     || 0;
+  const errorRate     = requests.errorRate || "0%";
+  const uptimeHuman   = uptime.human       || "—";
 
-        // Overall stats
-        const overallRPS     = requests.rps || 0;
-        const totalRequests  = requests.total || 0;
-        const errorRate      = requests.errorRate || "0%";
-        const uptimeHuman    = uptime.human || "—";
+  el.innerHTML = `
+    <!-- Overall health -->
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px;">
+      ${[
+        { label: "Total Requests", val: totalRequests.toLocaleString(), color: "var(--accent)"   },
+        { label: "Requests/sec",   val: parseFloat(overallRPS).toFixed(2), color: "var(--low)"  },
+        { label: "Error Rate",     val: errorRate, color: parseFloat(errorRate) > 5 ? "var(--critical)" : "var(--low)" },
+        { label: "Uptime",         val: uptimeHuman, color: "var(--text2)"                       },
+      ].map(s => `
+        <div style="background:var(--bg1);border:1px solid var(--border);border-radius:8px;padding:14px;text-align:center;">
+          <div style="font-size:20px;font-weight:700;color:${s.color};">${escHtml(String(s.val))}</div>
+          <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-top:4px;">${s.label}</div>
+        </div>`).join("")}
+    </div>
 
-        el.innerHTML = `
-          <!-- Overall health -->
-          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px;">
-            ${[
-              { label: "Total Requests",  val: totalRequests.toLocaleString(), color: "var(--accent)" },
-              { label: "Requests/sec",    val: parseFloat(overallRPS).toFixed(2), color: "var(--low)" },
-              { label: "Error Rate",      val: errorRate, color: parseFloat(errorRate) > 5 ? "var(--critical)" : "var(--low)" },
-              { label: "Uptime",          val: uptimeHuman, color: "var(--text2)" },
-            ].map(s => `
-              <div style="background:var(--bg1);border:1px solid var(--border);border-radius:8px;padding:14px;text-align:center;">
-                <div style="font-size:20px;font-weight:700;color:${s.color};">${escHtml(String(s.val))}</div>
-                <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-top:4px;">${s.label}</div>
-              </div>`).join("")}
-          </div>
+    <!-- Rate limit analysis -->
+    <div style="font-size:12px;font-weight:600;color:var(--text);letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;">
+      Rate Limit Analysis
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:24px;">
+      ${CURRENT_LIMITS.map(cfg => {
+        const matching = endpoints.filter(e => !cfg.key || e.route?.includes(cfg.key));
+        const peakRPS  = matching.length
+          ? Math.max(...matching.map(e => {
+              const secs = uptime.seconds || 1;
+              return (e.count || 0) / secs;
+            }))
+          : 0;
+        const limitRPS = cfg.limit / (cfg.windowMins * 60);
+        const usage    = limitRPS > 0 ? Math.min((peakRPS / limitRPS) * 100, 100) : 0;
+        const color    = usage > 80 ? "var(--critical)"
+                       : usage > 50 ? "var(--high)"
+                       : usage > 20 ? "var(--medium)"
+                       : "var(--low)";
+        const avgMs    = matching.length
+          ? Math.round(matching.reduce((a, b) => a + (b.avgMs || 0), 0) / matching.length)
+          : 0;
 
-          <!-- Rate limit analysis -->
-          <div style="font-size:12px;font-weight:600;color:var(--text);letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;">Rate Limit Analysis</div>
-          <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:24px;">
-            ${CURRENT_LIMITS.map(cfg => {
-              const stats  = getRouteStats(cfg.key);
-              const peakRPS = stats?.maxRPS || 0;
-              const limitRPS = cfg.limit / (cfg.windowMins * 60);
-              const usage  = limitRPS > 0 ? Math.min((peakRPS / limitRPS) * 100, 100) : 0;
-              const color  = usage > 80 ? "var(--critical)" : usage > 50 ? "var(--high)" : usage > 20 ? "var(--medium)" : "var(--low)";
+        const recommendation =
+          usage > 80 ? `⚠ Near limit — consider raising to ${Math.ceil(cfg.limit * 1.5)}/window`
+        : usage > 50 ? `ℹ Moderate usage — current limit looks appropriate`
+        : usage > 5  ? `✓ Healthy headroom — limit could be tightened to ${Math.ceil(cfg.limit * 0.7)} if needed`
+        :               `✓ Very low usage — limit is generous`;
 
-              const recommendation = usage > 80
-                ? `⚠ Near limit — consider raising to ${Math.ceil(cfg.limit * 1.5)}/window`
-                : usage > 50
-                ? `ℹ Moderate usage — current limit looks appropriate`
-                : usage > 5
-                ? `✓ Healthy headroom — limit could be tightened to ${Math.ceil(cfg.limit * 0.7)} if needed`
-                : `✓ Very low usage — limit is generous`;
-
-              return `
-                <div style="background:var(--bg1);border:1px solid var(--border);border-radius:8px;padding:14px 16px;">
-                  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:8px;">
-                    <span style="font-size:12px;font-weight:600;color:var(--text);font-family:monospace;">${cfg.route}</span>
-                    <div style="display:flex;gap:12px;font-size:11px;color:var(--text3);">
-                      <span>Limit: <strong style="color:var(--text);">${cfg.limit} / ${cfg.windowMins}min</strong></span>
-                      <span>Peak RPS: <strong style="color:${color};">${peakRPS.toFixed(3)}</strong></span>
-                      ${stats ? `<span>Avg: <strong style="color:var(--text);">${stats.avgMs}ms</strong></span>` : ""}
-                    </div>
-                  </div>
-                  <div style="height:6px;background:var(--bg);border-radius:3px;overflow:hidden;margin-bottom:8px;">
-                    <div style="height:6px;width:${usage.toFixed(1)}%;background:${color};border-radius:3px;transition:width 0.5s;"></div>
-                  </div>
-                  <div style="font-size:11px;color:var(--text3);">${recommendation}</div>
-                </div>`;
-            }).join("")}
-          </div>
-
-          <!-- Top endpoints by volume -->
-          ${endpoints.length ? `
-            <div style="font-size:12px;font-weight:600;color:var(--text);letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;">Top Endpoints</div>
-            <div style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;overflow:hidden;">
-              <table style="width:100%;border-collapse:collapse;font-size:11px;">
-                <thead>
-                  <tr style="background:var(--bg1);border-bottom:1px solid var(--border);">
-                    <th style="padding:8px 12px;text-align:left;color:var(--text3);font-size:10px;letter-spacing:1px;">ROUTE</th>
-                    <th style="padding:8px 12px;text-align:right;color:var(--text3);font-size:10px;letter-spacing:1px;">REQUESTS</th>
-                    <th style="padding:8px 12px;text-align:right;color:var(--text3);font-size:10px;letter-spacing:1px;">AVG</th>
-                    <th style="padding:8px 12px;text-align:right;color:var(--text3);font-size:10px;letter-spacing:1px;">P95</th>
-                    <th style="padding:8px 12px;text-align:right;color:var(--text3);font-size:10px;letter-spacing:1px;">P99</th>
-                    <th style="padding:8px 12px;text-align:right;color:var(--text3);font-size:10px;letter-spacing:1px;">ERRORS</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  ${endpoints.slice(0, 15).map((e, i) => {
-                    const errColor = parseFloat(e.errorRate) > 10 ? "var(--critical)"
-                                  : parseFloat(e.errorRate) > 2  ? "var(--high)"
-                                  : "var(--low)";
-                    return `<tr style="border-top:1px solid var(--border);${i%2===0?"":"background:var(--bg1)"}">
-                      <td style="padding:8px 12px;font-family:monospace;color:var(--accent);">${escHtml(e.route || "—")}</td>
-                      <td style="padding:8px 12px;text-align:right;color:var(--text);">${(e.count||0).toLocaleString()}</td>
-                      <td style="padding:8px 12px;text-align:right;color:var(--text2);">${e.avgMs||0}ms</td>
-                      <td style="padding:8px 12px;text-align:right;color:var(--text2);">${e.p95||0}ms</td>
-                      <td style="padding:8px 12px;text-align:right;color:${(e.p99||0) > 2000 ? "var(--critical)" : "var(--text2)"};">${e.p99||0}ms</td>
-                      <td style="padding:8px 12px;text-align:right;color:${errColor};">${e.errorRate||"0%"}</td>
-                    </tr>`;
-                  }).join("")}
-                </tbody>
-              </table>
+        return `
+          <div style="background:var(--bg1);border:1px solid var(--border);border-radius:8px;padding:14px 16px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:8px;">
+              <span style="font-size:12px;font-weight:600;color:var(--text);font-family:monospace;">${cfg.route}</span>
+              <div style="display:flex;gap:12px;font-size:11px;color:var(--text3);">
+                <span>Limit: <strong style="color:var(--text);">${cfg.limit} / ${cfg.windowMins}min</strong></span>
+                <span>Peak RPS: <strong style="color:${color};">${peakRPS.toFixed(3)}</strong></span>
+                ${avgMs ? `<span>Avg: <strong style="color:var(--text);">${avgMs}ms</strong></span>` : ""}
+              </div>
             </div>
+            <div style="height:6px;background:var(--bg);border-radius:3px;overflow:hidden;margin-bottom:8px;">
+              <div style="height:6px;width:${usage.toFixed(1)}%;background:${color};border-radius:3px;transition:width 0.5s;"></div>
+            </div>
+            <div style="font-size:11px;color:var(--text3);">${recommendation}</div>
+          </div>`;
+      }).join("")}
+    </div>
 
-            <div style="margin-top:14px;padding:12px 14px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;font-size:11px;color:var(--text3);line-height:1.6;">
-              <strong style="color:var(--text);">How to change rate limits:</strong><br>
-              Edit the <code style="color:var(--accent);">makeRateLimiter</code> calls in <code style="color:var(--accent);">backend/app.js</code>.
-              Redeploy after changes. These values are set at server start time and cannot be changed at runtime.
-            </div>` : ""}`;
-      }
+    <!-- Top endpoints table -->
+    ${endpoints.length ? `
+      <div style="font-size:12px;font-weight:600;color:var(--text);letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;">
+        Top Endpoints
+      </div>
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;overflow:hidden;">
+        <table style="width:100%;border-collapse:collapse;font-size:11px;">
+          <thead>
+            <tr style="background:var(--bg1);border-bottom:1px solid var(--border);">
+              <th style="padding:8px 12px;text-align:left;color:var(--text3);font-size:10px;letter-spacing:1px;">ROUTE</th>
+              <th style="padding:8px 12px;text-align:right;color:var(--text3);font-size:10px;">REQUESTS</th>
+              <th style="padding:8px 12px;text-align:right;color:var(--text3);font-size:10px;">AVG</th>
+              <th style="padding:8px 12px;text-align:right;color:var(--text3);font-size:10px;">P95</th>
+              <th style="padding:8px 12px;text-align:right;color:var(--text3);font-size:10px;">P99</th>
+              <th style="padding:8px 12px;text-align:right;color:var(--text3);font-size:10px;">ERRORS</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${endpoints.slice(0, 15).map((e, i) => {
+              const errColor = parseFloat(e.errorRate) > 10 ? "var(--critical)"
+                             : parseFloat(e.errorRate) > 2  ? "var(--high)"
+                             : "var(--low)";
+              return `
+                <tr style="border-top:1px solid var(--border);${i % 2 === 0 ? "" : "background:var(--bg1)"}">
+                  <td style="padding:8px 12px;font-family:monospace;color:var(--accent);">${escHtml(e.route || "—")}</td>
+                  <td style="padding:8px 12px;text-align:right;color:var(--text);">${(e.count || 0).toLocaleString()}</td>
+                  <td style="padding:8px 12px;text-align:right;color:var(--text2);">${e.avgMs || 0}ms</td>
+                  <td style="padding:8px 12px;text-align:right;color:var(--text2);">${e.p95 || 0}ms</td>
+                  <td style="padding:8px 12px;text-align:right;color:${(e.p99 || 0) > 2000 ? "var(--critical)" : "var(--text2)"};">${e.p99 || 0}ms</td>
+                  <td style="padding:8px 12px;text-align:right;color:${errColor};">${e.errorRate || "0%"}</td>
+                </tr>`;
+            }).join("")}
+          </tbody>
+        </table>
+      </div>` : ""}
 
+    <div style="margin-top:14px;padding:12px 14px;background:var(--bg2);border:1px solid var(--border);
+                border-radius:8px;font-size:11px;color:var(--text3);line-height:1.6;">
+      <strong style="color:var(--text);">How to change rate limits:</strong><br>
+      Edit the <code style="color:var(--accent);">makeRateLimiter</code> calls in
+      <code style="color:var(--accent);">backend/app.js</code>.
+      Redeploy after changes — limits are set at server start time.
+      <br><br>
+      <a href="#" id="telemetryDashboardLink"
+        style="color:var(--accent);text-decoration:none;">
+        Open full telemetry dashboard ↗
+      </a>
+    </div>`;
+  
+     const dashLink = document.getElementById("telemetryDashboardLink");
+        if (dashLink) {
+          dashLink.addEventListener("click", (e) => {
+            e.preventDefault();
+            const token = localStorage.getItem("token");
+            const url   = `/api/v1/telemetry/dashboard${token ? `?auth=${encodeURIComponent(token)}` : ""}`;
+            window.open(url, "_blank");
+          });
+        }
+  }
       loadRateLimitData();
     }
 
@@ -4523,19 +4667,64 @@ function applyTheme(dark) {
     }
 
     // Check current key's role and show admin-only UI
-      async function checkAdminAccess() {
-        try {
-          const res  = await fetch(`${API}/keys/me`, { headers: { "x-api-key": API_KEY } });
-          const data = await res.json();
-          if (data.role === "admin") {
-            document.getElementById("keyMgrBtn")?.style.removeProperty("display");
-          } else {
-            document.getElementById("keyMgrBtn")?.style.setProperty("display", "none");
-          }
-        } catch (_) {
-          document.getElementById("keyMgrBtn")?.style.setProperty("display", "none");
-        }
-      }
+  async function checkAdminAccess() {
+  const token = localStorage.getItem("token");
+  if (!token) {
+    window.location.href = "/login";
+    return;
+  }
+
+  try {
+    const res  = await fetch("/api/v1/keys/me", { headers: authHeaders() });
+
+    if (!res.ok) {
+      // Token invalid or expired — redirect to login
+      localStorage.removeItem("token");
+      window.location.href = "/login";
+      return;
+    }
+
+    const user = await res.json();
+    const role = user.role || "readonly";
+
+    // ── Always visible to all roles ──
+    const logoutBtn = document.getElementById("logoutBtn");
+    if (logoutBtn) logoutBtn.style.display = "";
+
+    // ── Admin only: Keys button + Rate Limits button ──
+    const keyMgrBtn    = document.getElementById("keyMgrBtn");
+    const rateLimitBtn = document.getElementById("rateLimitBtn");
+
+    if (keyMgrBtn) {
+      keyMgrBtn.style.display = role === "admin" ? "" : "none";
+    }
+    if (rateLimitBtn) {
+      rateLimitBtn.style.display = role === "admin" ? "" : "none";
+    }
+
+    // ── Admin + analyst: Blacklist, Cases, Threat buttons ──
+    const analystAndAbove = role === "admin" || role === "analyst";
+
+    const blacklistBtn = document.getElementById("blacklistBtn");
+    const casesBtn     = document.getElementById("casesBtn");
+    const threatBtn    = document.getElementById("threatBtn");
+    const siemBtn      = document.getElementById("siemBtn");
+
+    if (blacklistBtn) blacklistBtn.style.display  = analystAndAbove ? "" : "none";
+    if (casesBtn)     casesBtn.style.display      = analystAndAbove ? "" : "none";
+    if (threatBtn)    threatBtn.style.display     = analystAndAbove ? "" : "none";
+    if (siemBtn)      siemBtn.style.display       = analystAndAbove ? "" : "none";
+
+
+    // Store role for use elsewhere
+    window._userRole = role;
+
+    buildHamburgerMenu();
+
+  } catch (err) {
+    console.error("[checkAdminAccess] error:", err);
+  }
+}
 
     // KEY MANAGEMENT PANEL 
     async function showKeyManagerPanel() {
@@ -4630,46 +4819,58 @@ function applyTheme(dark) {
       let searchTimer;
     
       // ── Stats bar 
-      async function loadStats() {
-        try {
-          const res  = await fetch(`${API}/keys/stats`, { headers: { "x-api-key": API_KEY } });
-          if (res.status === 403) {
-            document.getElementById("keyMgrSummary").textContent = "Admin access required";
-            document.getElementById("keyList").innerHTML =
-              `<div style="padding:32px;text-align:center;color:var(--text3);font-size:12px;">
-                ⚠ This panel requires an admin API key.
-              </div>`;
-            return false;
-          }
-          const data = await res.json();
-          const bar  = document.getElementById("keyStatsBar");
-          bar.innerHTML = [
-            { label: "Active",    val: data.active,        color: "var(--low)" },
-            { label: "Pending",   val: data.pending,       color: "var(--medium)" },
-            { label: "Suspended", val: data.suspended,     color: "var(--high)" },
-            { label: "Revoked",   val: data.revoked,       color: "var(--critical)" },
-            { label: "Today",     val: `${data.requestsToday?.toLocaleString()} reqs`, color: "var(--accent)" },
-            { label: "All-time",  val: `${data.totalRequests?.toLocaleString()} reqs`, color: "var(--text2)" },
-          ].map(s => `
-            <div style="flex:1;padding:10px 16px;border-right:1px solid var(--border);text-align:center;">
-              <div style="font-size:14px;font-weight:700;color:${s.color};">${s.val}</div>
-              <div style="font-size:10px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-top:2px;">${s.label}</div>
-            </div>`).join("");
-          document.getElementById("keyMgrSummary").textContent =
-            `${data.active} active · ${data.pending} pending · ${data.total} total`;
-          return true;
-        } catch (err) {
-          document.getElementById("keyMgrSummary").textContent = `Error: ${err.message}`;
-          return false;
-        }
-      }
-      
+      // AFTER — surfaces real server error:
+async function loadKeyStats() {
+  try {
+    const res = await fetch(`${API}/keys/stats`, { headers: authHeaders() });
+    if (res.status === 403) {
+      document.getElementById("keyMgrSummary").textContent = "Admin access required";
+      document.getElementById("keyList").innerHTML =
+        `<div style="padding:32px;text-align:center;color:var(--text3);font-size:12px;">
+          ⚠ This panel requires an admin role.
+        </div>`;
+      return false;
+    }
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ error: `HTTP ${res.status}` }));
+      throw new Error(err.error || `HTTP ${res.status}`);
+    }
+    const data = await res.json();
+    const bar  = document.getElementById("keyStatsBar");
+    bar.innerHTML = [
+      { label: "Active",    val: data.active,                              color: "var(--low)"      },
+      { label: "Pending",   val: data.pending,                             color: "var(--medium)"   },
+      { label: "Suspended", val: data.suspended,                           color: "var(--high)"     },
+      { label: "Revoked",   val: data.revoked,                             color: "var(--critical)" },
+      { label: "Today",     val: `${data.requestsToday?.toLocaleString()} reqs`, color: "var(--accent)" },
+      { label: "All-time",  val: `${data.totalRequests?.toLocaleString()} reqs`, color: "var(--text2)"  },
+    ].map(s => `
+      <div style="flex:1;padding:10px 16px;border-right:1px solid var(--border);text-align:center;">
+        <div style="font-size:14px;font-weight:700;color:${s.color};">${s.val}</div>
+        <div style="font-size:10px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-top:2px;">${s.label}</div>
+      </div>`).join("");
+    document.getElementById("keyMgrSummary").textContent =
+      `${data.active} active · ${data.pending} pending · ${data.total} total`;
+    return true;
+  } catch (err) {
+    document.getElementById("keyMgrSummary").textContent = `Error: ${err.message}`;
+    document.getElementById("keyList").innerHTML =
+      `<div style="padding:32px;text-align:center;color:var(--critical);font-size:12px;">
+        ⚠ ${escHtml(err.message)}
+      </div>`;
+    return false;
+  }
+}
       // ── Key list 
       async function loadKeys() {
         const params = new URLSearchParams({ limit: 100 });
         if (currentStatus) params.set("status", currentStatus);
         try {
-          const res  = await fetch(`${API}/keys?${params}`, { headers: { "x-api-key": API_KEY } });
+          const res = await fetch(`${API}/keys?${params}`, { headers: authHeaders() });
+            if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.error || `HTTP ${res.status}`);   
+    }
           const data = await res.json();
           renderKeys(data.keys || []);
         } catch (err) {
@@ -4743,7 +4944,7 @@ function applyTheme(dark) {
                     <td style="padding:10px 16px;text-align:right;white-space:nowrap;">
                       ${k.status === "active" ? `
                         <button class="km-suspend btn btn-ghost" data-id="${k.id}" style="padding:3px 8px;font-size:10px;margin-right:2px;" title="Suspend">⏸</button>
-                        <button class="km-rotate btn btn-ghost" data-id="${k.id}" data-name="${escHtml(k.name)}" style="padding:3px 8px;font-size:10px;margin-right:2px;" title="Rotate key">↻</button>
+                        <button class="km-rotate btn btn-ghost" data-id="${k.id}" data-name="${escHtml(k.name)}" style="padding:3px 8px;font-size:10px;margin-right:2px;" title="Rotate key">↻</button>                    
                       ` : ""}
                       ${k.status === "suspended" ? `
                         <button class="km-reinstate btn btn-ghost" data-id="${k.id}" style="padding:3px 8px;font-size:10px;color:var(--low);border-color:var(--low);margin-right:2px;">▶</button>
@@ -4766,22 +4967,31 @@ function applyTheme(dark) {
         el.querySelectorAll(".km-suspend").forEach(btn => {
           btn.addEventListener("click", async () => {
             if (!confirm("Suspend this key?")) return;
-            await fetch(`${API}/keys/${btn.dataset.id}/suspend`, { method: "POST", headers: { "x-api-key": API_KEY } });
-            toast("Key suspended", "warning"); loadKeys(); loadStats();
+            // km-suspend:
+            await fetch(`${API}/keys/${btn.dataset.id}/suspend`, {
+              method: "POST",
+              headers: authHeaders()
+            });
+            toast("Key suspended", "warning"); loadKeys(); loadKeyStats();
           });
         });
     
         el.querySelectorAll(".km-reinstate").forEach(btn => {
           btn.addEventListener("click", async () => {
-            await fetch(`${API}/keys/${btn.dataset.id}/reinstate`, { method: "POST", headers: { "x-api-key": API_KEY } });
-            toast("Key reinstated", "success"); loadKeys(); loadStats();
+            // km-reinstate:
+            await fetch(`${API}/keys/${btn.dataset.id}/reinstate`, { method: "POST", headers: authHeaders() });
+            toast("Key reinstated", "success"); loadKeys(); loadKeyStats();
           });
         });
     
         el.querySelectorAll(".km-rotate").forEach(btn => {
           btn.addEventListener("click", async () => {
             if (!confirm(`Rotate key for "${btn.dataset.name}"? The old key will stop working immediately.`)) return;
-            const r    = await fetch(`${API}/keys/${btn.dataset.id}/rotate`, { method: "POST", headers: { "x-api-key": API_KEY } });
+            // km-rotate:
+            const r = await fetch(`${API}/keys/${btn.dataset.id}/rotate`, {
+              method: "POST",
+              headers: authHeaders()
+            });
             const data = await r.json();
             if (r.ok) {
               showKeyResult(`New key for ${btn.dataset.name}`, data.newKey,
@@ -4794,7 +5004,7 @@ function applyTheme(dark) {
     
         el.querySelectorAll(".km-copylink").forEach(btn => {
           btn.addEventListener("click", async () => {
-            const r    = await fetch(`${API}/keys/${btn.dataset.id}`, { headers: { "x-api-key": API_KEY } });
+            const r = await fetch(`${API}/keys/${btn.dataset.id}`, { headers: authHeaders() });
             const data = await r.json();
             const baseUrl = `${window.location.origin}/activate?token=`;
             // We need the invite token — let's just show the activation URL pattern
@@ -4810,20 +5020,23 @@ function applyTheme(dark) {
           btn.addEventListener("click", async () => {
             const reason = prompt(`Reason for revoking "${btn.dataset.name}"?`, "Access no longer required");
             if (reason === null) return;
+            // km-revoke:
             await fetch(`${API}/keys/${btn.dataset.id}/revoke`, {
               method: "POST",
-              headers: { "Content-Type": "application/json", "x-api-key": API_KEY },
+              headers: { ...authHeaders(), "Content-Type": "application/json" },
               body: JSON.stringify({ reason }),
             });
-            toast("Key revoked", "success"); loadKeys(); loadStats();
+            toast("Key revoked", "success"); loadKeys(); loadKeyStats();
           });
         });
 
         el.querySelectorAll(".km-del").forEach(btn => {
           btn.addEventListener("click", async () => {
             if (!confirm(`Permanently delete this key? This cannot be undone.`)) return;
+            // km-del:
             const r = await fetch(`${API}/keys/${btn.dataset.id}`, {
-              method: "DELETE", headers: { "x-api-key": API_KEY }
+              method: "DELETE",
+              headers: authHeaders()
             });
             const d = await r.json();
             toast(d.message || "Key deleted", r.ok ? "success" : "error");
@@ -4845,56 +5058,65 @@ function applyTheme(dark) {
         document.getElementById("kfName").focus();
       }
     
-      async function submitInvite() {
-        const errEl = document.getElementById("kfError");
-        const name  = document.getElementById("kfName").value.trim();
-        if (!name) { errEl.textContent = "Name is required"; errEl.style.display = "block"; return; }
-    
-        const body = {
-          name,
-          email:      document.getElementById("kfEmail").value.trim() || undefined,
-          role:       document.getElementById("kfRole").value,
-          dailyLimit: parseInt(document.getElementById("kfDailyLimit").value) || 1000,
-          notes:      document.getElementById("kfNotes").value.trim() || undefined,
-        };
-    
-        const r    = await fetch(`${API}/keys/invite`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json", "x-api-key": API_KEY },
-          body: JSON.stringify(body),
-        });
-        const data = await r.json();
-    
-        if (!r.ok) { errEl.textContent = data.error || "Failed"; errEl.style.display = "block"; return; }
-    
-        // Show result with activation URL
-        const resultEl = document.getElementById("kfResult");
-        resultEl.style.display = "block";
-        resultEl.innerHTML = `
-          <div style="font-size:11px;font-weight:600;color:var(--low);margin-bottom:8px;">✓ Invite created for ${escHtml(data.name)}</div>
-          <div style="font-size:11px;color:var(--text3);margin-bottom:6px;">Share this activation link with the recipient:</div>
-          <div style="display:flex;gap:8px;align-items:center;">
-            <code style="flex:1;background:var(--bg2);padding:8px 10px;border-radius:6px;font-size:11px;color:var(--accent);word-break:break-all;">${escHtml(data.activateUrl)}</code>
-            <button onclick="navigator.clipboard.writeText('${escHtml(data.activateUrl)}').then(()=>toast('Link copied','success'))"
-              class="btn btn-ghost" style="padding:6px 12px;font-size:11px;white-space:nowrap;">Copy</button>
-          </div>
-          <div style="font-size:10px;color:var(--text3);margin-top:8px;">The key activates when the recipient visits this link. It expires if not activated within 7 days.</div>`;
-    
-        loadKeys(); loadStats();
-        document.getElementById("kfSave").disabled  = true;
-        document.getElementById("kfSave").textContent = "✓ Created";
-        setTimeout(() => {
-          document.getElementById("kfSave").disabled   = false;
-          document.getElementById("kfSave").textContent = "Create Invite";
-          document.getElementById("kfName").value      = "";
-          document.getElementById("kfEmail").value     = "";
-          resultEl.style.display = "none";
-        }, 5000);
-      }
+      // submitInvite
+      // AFTER — parse error safely and show real message:
+async function submitInvite() {
+  const errEl = document.getElementById("kfError");
+  const name  = document.getElementById("kfName").value.trim();
+  if (!name) { errEl.textContent = "Name is required"; errEl.style.display = "block"; return; }
+
+  const body = {
+    name,
+    email:      document.getElementById("kfEmail").value.trim()    || undefined,
+    role:       document.getElementById("kfRole").value,
+    dailyLimit: parseInt(document.getElementById("kfDailyLimit").value) || 1000,
+    notes:      document.getElementById("kfNotes").value.trim()    || undefined,
+  };
+
+  const r = await fetch(`${API}/keys/invite`, {
+    method:  "POST",
+    headers: { ...authHeaders(), "Content-Type": "application/json" },
+    body:    JSON.stringify(body),
+  });
+
+  // Parse response safely — server might return non-JSON on some errors
+  const data = await r.json().catch(() => ({ error: `HTTP ${r.status}` }));
+
+  if (!r.ok) {
+    errEl.textContent  = data.error || `Server error ${r.status}`;
+    errEl.style.display = "block";
+    return;
+  }
+
+  // Show activation URL result
+  const resultEl = document.getElementById("kfResult");
+  resultEl.style.display = "block";
+  resultEl.innerHTML = `
+    <div style="font-size:11px;font-weight:600;color:var(--low);margin-bottom:8px;">✓ Invite created for ${escHtml(data.name)}</div>
+    <div style="font-size:11px;color:var(--text3);margin-bottom:6px;">Share this activation link with the recipient:</div>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <code style="flex:1;background:var(--bg2);padding:8px 10px;border-radius:6px;font-size:11px;color:var(--accent);word-break:break-all;">${escHtml(data.activateUrl)}</code>
+      <button onclick="navigator.clipboard.writeText('${escHtml(data.activateUrl)}').then(()=>toast('Link copied','success'))"
+        class="btn btn-ghost" style="padding:6px 12px;font-size:11px;white-space:nowrap;">Copy</button>
+    </div>
+    <div style="font-size:10px;color:var(--text3);margin-top:8px;">The key activates when the recipient visits this link. It expires if not activated within 7 days.</div>`;
+
+  loadKeys();
+  loadKeyStats();
+  document.getElementById("kfSave").disabled   = true;
+  document.getElementById("kfSave").textContent = "✓ Created";
+  setTimeout(() => {
+    document.getElementById("kfSave").disabled   = false;
+    document.getElementById("kfSave").textContent = "Create Invite";
+    document.getElementById("kfName").value      = "";
+    document.getElementById("kfEmail").value     = "";
+    resultEl.style.display = "none";
+  }, 5000);
+}
     
       // ── Usage panel 
       async function showUsagePanel(keyId) {
-        const r    = await fetch(`${API}/keys/${keyId}/usage?days=30`, { headers: { "x-api-key": API_KEY } });
+        const r = await fetch(`${API}/keys/${keyId}/usage?days=30`, { headers: authHeaders() });
         const data = await r.json();
         const usage = data.usage || [];
     
@@ -4987,7 +5209,7 @@ function applyTheme(dark) {
       });
     
       // Initial load
-      const ok = await loadStats();
+      const ok = await loadKeyStats();
       if (ok) loadKeys();
     }
 
