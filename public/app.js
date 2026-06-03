@@ -2932,30 +2932,44 @@ function setupEventListeners() {
       chip.addEventListener("click", () => { ipInput.value = chip.dataset.ip; scoreIP(); });
     });
 
+    // addEvent Listener
     document.addEventListener("click", e => {
-      if (e.target.id === "apiBadge")      showVersionPanel();
-      if (e.target.id === "siemBtn")       showUnifiedSIEMPanel();
-      if (e.target.id === "blacklistBtn")  showBlacklistPanel();
-      if (e.target.id === "casesBtn")      showCasesPanel();
-      if (e.target.id === "firewallBtn")   showFirewallExport();
-      if (e.target.id === "csvBtn")        document.getElementById("csvUpload").click();
-      if (e.target.id === "exportBtn")     exportLog();
-      if (e.target.id === "addWatchBtn")   addCurrentToWatchlist();
-      if (e.target.id === "pollBtn")       triggerPoll();
-      if (e.target.id === "addToCaseBtn")  addIPToCase(currentIP, lastResult);
-      if (e.target.id === "versionBtn")    showVersionPanel();
-      if (e.target.id === "threatBtn")     showClustersPanel();
-      // AFTER — double-check role before opening panel:
+      if (e.target.id === "apiBadge")     showVersionPanel();
+      if (e.target.id === "siemBtn") {
+        if ((window._userRank ?? 0) >= 2) showUnifiedSIEMPanel();
+        else toast("Admin access required", "warning");
+      }
+      if (e.target.id === "blacklistBtn") {
+        if ((window._userRank ?? 0) >= 1) showBlacklistPanel();
+        else toast("Analyst access required", "warning");
+      }
+      if (e.target.id === "casesBtn") {
+        if ((window._userRank ?? 0) >= 1) showCasesPanel();
+        else toast("Analyst access required", "warning");
+      }
+      if (e.target.id === "firewallBtn")  showFirewallExport();
+      if (e.target.id === "csvBtn")       document.getElementById("csvUpload").click();
+      if (e.target.id === "exportBtn")    exportLog();
+      if (e.target.id === "addWatchBtn")  addCurrentToWatchlist();
+      if (e.target.id === "pollBtn")      triggerPoll();
+      if (e.target.id === "addToCaseBtn") {
+        if ((window._userRank ?? 0) >= 1) addIPToCase(currentIP, lastResult);
+        else toast("Analyst access required", "warning");
+      }
+      if (e.target.id === "versionBtn")   showVersionPanel();
+      if (e.target.id === "threatBtn") {
+        if ((window._userRank ?? 0) >= 1) showClustersPanel();
+        else toast("Analyst access required", "warning");
+      }
       if (e.target.id === "rateLimitBtn") {
-        if (window._userRole === "admin") showRateLimitPanel();
+        if ((window._userRank ?? 0) >= 2) showRateLimitPanel();
         else toast("Admin access required", "warning");
       }
       if (e.target.id === "keyMgrBtn") {
-        if (window._userRole === "admin") showKeyManagerPanel();
+        if ((window._userRank ?? 0) >= 2) showKeyManagerPanel();
         else toast("Admin access required", "warning");
       }
-      if (e.target.id === "logoutBtn")     logout();
-      
+      if (e.target.id === "logoutBtn")    logout();
     });
 
     document.addEventListener("change", e => {
@@ -3398,16 +3412,18 @@ function applyTheme(dark) {
         <button id="watchCurrentBtn" class="btn btn-ghost" style="padding:5px 12px;font-size:11px;">+ Watch</button>
         <button id="downloadPdfBtn"  class="btn btn-ghost" style="padding:5px 12px;font-size:11px;">↓ PDF Report</button>
         <button id="timelineBtn"     class="btn btn-ghost" style="padding:5px 12px;font-size:11px;">↑ History</button> 
-         <button id="blockCurrentBtn" class="btn btn-ghost v2-only"
-      style="padding:5px 12px;font-size:11px;${apiVersion === "v1" ? "display:none;" : ""}
-             color:${d.blacklisted ? "var(--low)" : "var(--critical)"};
-             border-color:${d.blacklisted ? "var(--low)" : "var(--critical)"};">
-      ${d.blacklisted ? "✓ Blacklisted" : "🚫 Block"}
-    </button>
-         <button id="addToCaseBtn" class="btn btn-ghost v2-only"
-      style="padding:5px 12px;font-size:11px;${apiVersion === "v1" ? "display:none;" : ""}">
-      📁 Case
-    </button>
+        <button id="blockCurrentBtn" class="btn btn-ghost v2-only"
+          style="padding:5px 12px;font-size:11px;
+            ${apiVersion === "v1" || (window._userRank ?? 0) < 1 ? "display:none;" : ""}
+            color:${d.blacklisted ? "var(--low)" : "var(--critical)"};
+            border-color:${d.blacklisted ? "var(--low)" : "var(--critical)"};">
+          ${d.blacklisted ? "✓ Blacklisted" : "🚫 Block"}
+        </button>
+        <button id="addToCaseBtn" class="btn btn-ghost v2-only"
+          style="padding:5px 12px;font-size:11px;
+            ${apiVersion === "v1" || (window._userRank ?? 0) < 1 ? "display:none;" : ""}">
+          📁 Case
+        </button>
           </div>
         </div>
       </div>
@@ -4722,63 +4738,81 @@ async function loadStats() {
 
     // Check current key's role and show admin-only UI
     async function checkAdminAccess() {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        window.location.href = "/login";
-        return;
-      }
-
-      try {
-        const res = await fetch("/api/v1/keys/me", { headers: authHeaders() });
-
-        if (res.status === 401 || res.status === 403) {
-          // Token invalid or expired — clear and redirect
-          localStorage.removeItem("token");
-          localStorage.removeItem("user");
-          // Remove guard before redirect
-          const guard = document.getElementById("authGuard");
-          if (guard) guard.remove();
-          window.location.href = "/login";
-          return;
-        }
-
-        if (!res.ok) {
-          // Other error — don't redirect, just log
-          console.error("[checkAdminAccess] unexpected status:", res.status);
-          return;
-        }
-
-        const user = await res.json();
-        const role = user.role || "readonly";
-        window._userRole = role;
-
-        // Show logout button for all roles
-        const logoutBtn = document.getElementById("logoutBtn");
-        if (logoutBtn) logoutBtn.style.display = "";
-
-        // Admin only
-        const keyMgrBtn    = document.getElementById("keyMgrBtn");
-        const rateLimitBtn = document.getElementById("rateLimitBtn");
-        if (keyMgrBtn)    keyMgrBtn.style.display    = role === "admin" ? "" : "none";
-        if (rateLimitBtn) rateLimitBtn.style.display = role === "admin" ? "" : "none";
-
-        // Analyst and above
-        const analystAndAbove = role === "admin" || role === "analyst";
-        const blacklistBtn    = document.getElementById("blacklistBtn");
-        const casesBtn        = document.getElementById("casesBtn");
-        const threatBtn       = document.getElementById("threatBtn");
-        const siemBtn         = document.getElementById("siemBtn");
-        if (blacklistBtn) blacklistBtn.style.display = analystAndAbove ? "" : "none";
-        if (casesBtn)     casesBtn.style.display     = analystAndAbove ? "" : "none";
-        if (threatBtn)    threatBtn.style.display    = analystAndAbove ? "" : "none";
-        if (siemBtn)      siemBtn.style.display      = analystAndAbove ? "" : "none";
-
-        buildHamburgerMenu();
-
-      } catch (err) {
-        console.error("[checkAdminAccess] error:", err.message);
-      }
+    const token = localStorage.getItem("token");
+    if (!token) {
+      window.location.href = "/login";
+      return;
     }
+
+    try {
+    const res = await fetch("/api/v1/keys/me", { headers: authHeaders() });
+
+    if (res.status === 401 || res.status === 403) {
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      const guard = document.getElementById("authGuard");
+      if (guard) guard.remove();
+      window.location.href = "/login";
+      return;
+    }
+
+    if (!res.ok) {
+      const guard = document.getElementById("authGuard");
+      if (guard) guard.remove();
+      return;
+    }
+
+    const user = await res.json();
+    const role = user.role || "readonly";
+    window._userRole = role;
+    window._userRank = { readonly: 0, analyst: 1, admin: 2 }[role] ?? 0;
+
+    // ── Define visibility rules per role
+    const rules = {
+      // buttonId        : minimum role required
+      logoutBtn:      "readonly",   // everyone
+      themeToggle:    "readonly",   // everyone
+      apiBadge:       "readonly",   // everyone
+      siemBtn:        "admin",      // admin only
+      blacklistBtn:   "analyst",    // analyst + admin
+      casesBtn:       "analyst",    // analyst + admin
+      threatBtn:      "analyst",    // analyst + admin
+      rateLimitBtn:   "admin",      // admin only
+      keyMgrBtn:      "admin",      // admin only
+    };
+
+    const rankOf = { readonly: 0, analyst: 1, admin: 2 };
+    const userRank = rankOf[role] ?? 0;
+
+    Object.entries(rules).forEach(([btnId, minRole]) => {
+      const el = document.getElementById(btnId);
+      if (!el) return;
+      const required = rankOf[minRole] ?? 0;
+      el.style.display = userRank >= required ? "" : "none";
+    });
+
+    // ── v2-only buttons — hide for v1 AND check role 
+    document.querySelectorAll(".v2-only").forEach(el => {
+      const btnId  = el.id;
+      const minRole = rules[btnId] || "analyst";
+      const required = rankOf[minRole] ?? 0;
+      const show = apiVersion === "v2" && userRank >= required;
+      el.style.display = show ? "" : "none";
+    });
+
+    // drawer reflects correct buttons 
+    buildHamburgerMenu();
+
+    // ── Remove auth guard — show dashboard 
+    const guard = document.getElementById("authGuard");
+    if (guard) guard.remove();
+
+  } catch (err) {
+    console.error("[checkAdminAccess] error:", err.message);
+    const guard = document.getElementById("authGuard");
+    if (guard) guard.remove();
+  }
+}
     // Remove the visibility guard once auth is verified
     const guard = document.getElementById("authGuard");
     if (guard) guard.remove();
