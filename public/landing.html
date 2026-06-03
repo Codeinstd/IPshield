@@ -4,11 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>IPShield — Real-Time IP Risk Intelligence</title>
-<link rel="icon" type="image/png" sizes="32x32" href="/favicon.ico/favicon-32x32.png">
-<link rel="icon" type="image/png" sizes="96x96" href="/favicon.ico/favicon-96x96.png">
-<link rel="icon" type="image/png" sizes="16x16" href="/favicon.ico/favicon-16x16.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&amp;family=Syne:wght@400;600;700;800&amp;display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon.ico/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="96x96" href="/favicon.ico/favicon-96x96.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon.ico/favicon-16x16.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&amp;family=Syne:wght@400;600;700;800&amp;display=swap" rel="stylesheet">
   <style>
     :root {
       --bg:       #080c0f;
@@ -32,12 +32,12 @@
       min-height: 100vh;
     }
 
-    /* Nav */
-    nav {
+    /* header */
+    header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 20px 48px;
+      padding: 20px 24px;
       border-bottom: 1px solid var(--border);
       background: var(--bg1);
       position: sticky;
@@ -46,7 +46,7 @@
     }
     .logo { display: flex; align-items: center; gap: 12px; }
     .logo-icon {
-      width: 36px; height: 36px;
+      width: 32px; height: 32px;
       border: 2px solid var(--accent);
       border-radius: 6px;
       display: flex; align-items: center; justify-content: center;
@@ -87,7 +87,7 @@
     /* Hero */
     .hero {
       text-align: center;
-      padding: 100px 24px 80px;
+      padding: 70px 24px 80px;
       max-width: 800px;
       margin: 0 auto;
     }
@@ -250,6 +250,198 @@
     .risk-pill.medium   { background: rgba(255,204,0,0.12);  color: var(--medium);   border: 1px solid rgba(255,204,0,0.4);  }
     .risk-pill.low      { background: rgba(0,232,124,0.12);  color: var(--low);      border: 1px solid rgba(0,232,124,0.4);  }
 
+   
+
+  .nav-hamburger {
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+    width: 30px;
+    height: 30px;
+    margin-left: auto;
+    flex-shrink: 0;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    cursor: pointer;
+    padding: 6px;
+    transition: border-color .2s, background .2s;
+    position: relative;
+    z-index: 1001;
+  }
+  .nav-hamburger:hover { border-color: var(--accent); background: rgba(0,217,255,0.08); }
+  .nav-hamburger span {
+    display: block;
+    width: 100%;
+    height: 2px;
+    background: var(--accent);
+    border-radius: 2px;
+    transition: transform .25s ease, opacity .2s ease;
+    transform-origin: center;
+  }
+  .nav-hamburger[aria-expanded="true"] span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+  .nav-hamburger[aria-expanded="true"] span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+  .nav-hamburger[aria-expanded="true"] span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+
+  .nav-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 1002;
+    background: rgba(0,0,0,0.55);
+    backdrop-filter: blur(2px);
+    opacity: 0;
+    transition: opacity .25s ease;
+  }
+  .nav-overlay.open {
+    display: block;
+    opacity: 1;
+  }
+
+  .nav-drawer {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: min(300px, 85vw);
+    height: 100vh;
+    background: var(--bg2, #111820);
+    border-left: 1px solid var(--border);
+    z-index: 1003;
+    transform: translateX(100%);
+    transition: transform .3s cubic-bezier(.4,0,.2,1);
+    display: flex;
+    flex-direction: column;
+    box-shadow: -8px 0 32px rgba(0,0,0,0.4);
+  }
+  .nav-drawer.open {
+    transform: translateX(0);
+  }
+
+  .nav-drawer-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .nav-drawer-close {
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text2);
+    font-size: 14px;
+    cursor: pointer;
+    transition: all .15s;
+    flex-shrink: 0;
+  }
+  .nav-drawer-close:hover {
+    background: rgba(255,51,85,0.1);
+    border-color: var(--danger, #ff3355);
+    color: var(--danger, #ff3355);
+  }
+
+  /* Drawer status row */
+  .nav-drawer-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    font-size: 10px;
+    letter-spacing: 1px;
+    color: var(--text2);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .nav-drawer-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #22c55e;
+    box-shadow: 0 0 6px #22c55e;
+    flex-shrink: 0;
+    animation: blink 2s ease-in-out infinite;
+  }
+  @keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0.4;} }
+
+  /* Drawer body — nav buttons */
+  .nav-drawer-body {
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+    gap: 4px;
+    overflow-y: auto;
+    flex: 1;
+  }
+  .nav-drawer-body .btn {
+    display: flex !important;
+    align-items: center;
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--text2);
+    font-size: 12px;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: background .15s, color .15s, border-color .15s;
+    text-align: left;
+  }
+  .nav-drawer-body .btn:hover        { background: var(--bg3); color: var(--accent); border-color: rgba(0,217,255,0.2); }
+  .nav-drawer-body .btn.active,
+  .nav-drawer-body .btn-primary      { color: var(--accent) !important; background: rgba(0,217,255,0.08) !important; border-color: rgba(0,217,255,0.25) !important; }
+  .nav-drawer-body .btn-danger       { color: var(--danger, #ff3355) !important; }
+  .nav-drawer-body .btn-danger:hover { background: rgba(255,51,85,0.08) !important; border-color: rgba(255,51,85,0.2) !important; }
+
+  @media (max-width: 640px) {
+    nav {
+        padding: 10px 14px;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+  }
+    .nav-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    }
+
+
+    @media (max-width: 768px) {
+    .nav-right {
+        display: none !important;
+    }
+    }
+
+    @media (max-width: 480px) {
+    .logo-icon {
+        width: 28px;
+        height: 28px;
+        font-size: 14px;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .nav-hamburger {
+        display: flex !important;
+    }
+}
+
+  .app {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+    
     /* CTA */
     .cta {
       text-align: center;
@@ -269,6 +461,7 @@
       line-height: 1.8;
       margin-bottom: 32px;
     }
+    
 
     /* Footer */
     footer {
@@ -293,9 +486,9 @@
   </style>
 </head>
 <body>
-
-  <!-- Nav -->
-  <nav>
+  <div class="app">
+      <!-- Nav -->
+  <header id="navRight">
     <div class="logo">
       <div class="logo-icon">⬡</div>
       <div class="logo-text">IP<span>Shield</span></div>
@@ -304,7 +497,28 @@
       <a href="/api/docs" class="btn btn-ghost">API Docs</a>
       <a href="/login" class="btn btn-primary">Sign In →</a>
     </div>
-  </nav>
+    <button class="nav-hamburger" aria-label="Open menu" aria-expanded="false" id="mainHamburger">
+    <span></span><span></span><span></span>
+    </header>
+  <!-- Drawer overlay -->
+<div class="nav-overlay" id="navOverlay"></div>
+<!-- Drawer -->
+<div class="nav-drawer" id="navDrawer" aria-hidden="true">
+  <div class="nav-drawer-header">
+    <div class="logo">
+      <div class="logo-icon">⬡</div>
+      <div>
+        <div class="logo-text">IP<span>Shield</span></div>
+      </div>
+    </div>
+    <button class="nav-drawer-close" id="navDrawerClose" aria-label="Close menu">✕</button>
+  </div>
+
+  <div class="nav-drawer-body" id="navDrawerBody">
+    <a class  href="/api/docs" class="btn btn-ghost">API Docs</a>
+    <a class href="/login" class="btn btn-primary">Sign In →</a>
+  </div>
+</div>
 
   <!-- Hero -->
   <section class="hero">
@@ -451,9 +665,100 @@
 
     // Redirect to dashboard if already logged in
     if (localStorage.getItem("token")) {
-      window.location.replace("/");
+      window.location.replace("/dashboard");
+    }
+
+
+  // Build hamburger menu functionality
+  let _navDrawerReady = false;
+  function buildNavHamburger() {
+  const hamburger  = document.getElementById("mainHamburger");
+  const drawer     = document.getElementById("navDrawer");
+  const overlay    = document.getElementById("navOverlay");
+  const drawerBody = document.getElementById("navDrawerBody");
+
+  if (!hamburger || !drawer || !drawerBody) return;
+
+  // ── Rebuild links/buttons every call ──
+      drawerBody.innerHTML = "";
+      const navRight = document.getElementById("navRight");
+      navRight.querySelectorAll("button, a").forEach(el => {
+        const isAnchor = el.tagName === "A";
+        const clone    = document.createElement(isAnchor ? "a" : "button");
+        clone.textContent = el.textContent.trim();
+        clone.className   = el.className;
+        if (isAnchor) {
+          clone.href   = el.href;
+          clone.target = el.target || "";
+        }
+        clone.addEventListener("click", () => {
+          _closeDrawer();
+          setTimeout(() => { if (!isAnchor) el.click(); }, 320);
+        });
+        drawerBody.appendChild(clone);
+      });
+
+      // ── One-time listener setup ──
+      if (_navDrawerReady) return;
+      _navDrawerReady = true;
+
+      hamburger.addEventListener("click", (e) => {
+        e.stopPropagation();
+        drawer.classList.contains("open") ? _closeDrawer() : _openDrawer();
+      });
+
+      document.getElementById("navDrawerClose")
+        .addEventListener("click", _closeDrawer);
+
+      overlay.addEventListener("click", _closeDrawer);
+
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") _closeDrawer();
+      });
+
+      window.matchMedia("(min-width:769px)").addEventListener("change", (e) => {
+        if (e.matches) _closeDrawer();
+      });
+    }
+
+
+  //openDrawer:
+  function _openDrawer() {
+    const hamburger = document.getElementById("mainHamburger");
+    const drawer    = document.getElementById("navDrawer");
+    const overlay   = document.getElementById("navOverlay");
+    if (!drawer) return;
+
+    if (hamburger) hamburger.setAttribute("aria-expanded", "true");
+    drawer.classList.add("open");
+    drawer.removeAttribute("aria-hidden");
+    if (overlay) overlay.classList.add("open");
+    document.body.style.overflow = "hidden";
+  }
+
+  //closeDrawer:
+  function _closeDrawer() {
+    const hamburger = document.getElementById("mainHamburger");
+    const drawer    = document.getElementById("navDrawer");
+    const overlay   = document.getElementById("navOverlay");
+    if (!drawer) return;
+
+    if (hamburger) hamburger.setAttribute("aria-expanded", "false");
+    drawer.classList.remove("open");
+    drawer.setAttribute("aria-hidden", "true");
+    if (overlay) overlay.classList.remove("open");
+    document.body.style.overflow = "";
+    if (hamburger) hamburger.focus();
+  }
+
+  // Call on DOM ready
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", buildNavHamburger);
+    } else {
+      buildNavHamburger();
     }
   </script>
+  </div>
 
 </body>
 </html>

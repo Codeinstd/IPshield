@@ -66,7 +66,7 @@
     .logo { display: flex; align-items: center; gap: 12px; }
   
       .logo-icon {
-        width: 36px; height: 36px;
+        width: 32px; height: 32px;
         border: 2px solid var(--accent); border-radius: 6px;
         display: flex; align-items: center; justify-content: center;
         color: var(--accent); font-size: 18px; font-weight: 700;
@@ -174,7 +174,7 @@
   <script>
     // If already logged in, skip straight to dashboard
     if (localStorage.getItem("token")) {
-      window.location.replace("/");
+      window.location.replace("/login");
     }
 
     const emailEl  = document.getElementById("auth-email");
@@ -219,8 +219,8 @@
         }
 
         localStorage.setItem("token", data.token);
-        if (data.user) localStorage.setItem("user", JSON.stringify(data.user));
-        window.location.replace("/");   // back to dashboard
+        localStorage.setItem("user",  JSON.stringify(data.user));
+        window.location.href = "/dashboard";  // back to dashboard
 
       } catch (err) {
         showError("Network error — is the server running?");

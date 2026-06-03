@@ -105,7 +105,7 @@
   buildHamburgerMenu();
 }
 
-// responsive nav 
+// responsive dashboard nav 
 function buildHamburgerMenu() {
   const hamburger  = document.getElementById("mainHamburger");
   const drawer     = document.getElementById("navDrawer");
@@ -201,7 +201,7 @@ function _closeDrawer() {
   document.body.style.overflow = "";
   if (hamburger) hamburger.focus();
 }
- 
+
   
   // ── Extra UI 
   function injectExtraUI() {
@@ -3296,9 +3296,10 @@ function applyTheme(dark) {
 
   // logout
   async function logout() {
-  localStorage.removeItem("token");
-  window.location.href = "/login";
-}
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    window.location.href = "/";
+  }
 
   // ── WHOIS 
   async function loadWhois(ip) {
@@ -3671,9 +3672,8 @@ async function loadStats() {
   //initApp
   function initApp() {
   const token = localStorage.getItem("token");
-
   if (!token) {
-    window.location.href = "/landing";
+    window.location.href = "/login";
     return;
   }
 
@@ -4740,7 +4740,7 @@ async function loadStats() {
     async function checkAdminAccess() {
     const token = localStorage.getItem("token");
     if (!token) {
-      window.location.href = "/landing";
+      window.location.href = "/login";
       return;
     }
 
@@ -4752,7 +4752,7 @@ async function loadStats() {
       localStorage.removeItem("user");
       const guard = document.getElementById("authGuard");
       if (guard) guard.remove();
-      window.location.href = "/landing";
+      window.location.href = "/login";
       return;
     }
 
