@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IPShield — Activate Your Account</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon.ico/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="96x96" href="/favicon.ico/favicon-96x96.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon.ico/favicon-16x16.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:       #080c0f;
+      --bg1:      #0d1117;
+      --bg2:      #111820;
+      --border:   #1e2d3d;
+      --accent:   #00d9ff;
+      --text:     #c9d8e8;
+      --text2:    #6a8fa8;
+      --text3:    #3d5a72;
+      --critical: #ff3355;
+      --low:      #00e87c;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'JetBrains Mono', monospace;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .card {
+      background: var(--bg1);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      width: 100%;
+      max-width: 440px;
+      padding: 40px;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 32px;
+    }
+    .logo-icon {
+      width: 36px; height: 36px;
+      border: 2px solid var(--accent);
+      border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--accent); font-size: 18px;
+      box-shadow: 0 0 20px rgba(0,217,255,0.25);
+    }
+    .logo-text {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800; font-size: 22px;
+    }
+    .logo-text span { color: var(--accent); }
+
+    .title {
+      font-family: 'Syne', sans-serif;
+      font-size: 24px;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+    .subtitle {
+      font-size: 12px;
+      color: var(--text2);
+      line-height: 1.7;
+      margin-bottom: 28px;
+    }
+
+    /* Invite info box */
+    .invite-info {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 24px;
+      display: none;
+    }
+    .invite-info-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      margin-bottom: 6px;
+    }
+    .invite-info-row:last-child { margin-bottom: 0; }
+    .invite-info-key   { color: var(--text3); }
+    .invite-info-value { color: var(--text); font-weight: 600; }
+    .invite-info-role  {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 3px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .role-admin    { background: rgba(255,51,85,0.15);  color: var(--critical); }
+    .role-analyst  { background: rgba(0,217,255,0.1);   color: var(--accent);   }
+    .role-readonly { background: rgba(255,255,255,0.05); color: var(--text2);   }
+
+    /* Form */
+    .form-group { margin-bottom: 18px; }
+    label {
+      display: block;
+      font-size: 10px;
+      color: var(--text3);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    input {
+      width: 100%;
+      padding: 12px 14px;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px rgba(0,217,255,0.1);
+    }
+    input:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .password-wrap { position: relative; }
+    .password-toggle {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: var(--text3);
+      cursor: pointer;
+      font-size: 13px;
+      padding: 4px;
+    }
+    .password-toggle:hover { color: var(--text2); }
+
+    .password-strength {
+      margin-top: 6px;
+      height: 3px;
+      background: var(--bg2);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    .password-strength-bar {
+      height: 100%;
+      border-radius: 2px;
+      transition: width 0.3s, background 0.3s;
+      width: 0%;
+    }
+    .password-hint {
+      font-size: 10px;
+      color: var(--text3);
+      margin-top: 4px;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 14px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      transition: all 0.15s;
+      margin-top: 8px;
+    }
+    .btn-primary {
+      background: var(--accent);
+      color: #000;
+      box-shadow: 0 0 20px rgba(0,217,255,0.3);
+    }
+    .btn-primary:hover:not(:disabled) {
+      background: #0099cc;
+      box-shadow: 0 0 30px rgba(0,217,255,0.5);
+    }
+    .btn-primary:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .error-msg {
+      display: none;
+      padding: 12px 14px;
+      background: rgba(255,51,85,0.1);
+      border: 1px solid rgba(255,51,85,0.3);
+      border-radius: 8px;
+      font-size: 12px;
+      color: var(--critical);
+      margin-bottom: 16px;
+      line-height: 1.6;
+    }
+
+    /* Loading state */
+    .loading-state {
+      display: none;
+      text-align: center;
+      padding: 20px 0;
+    }
+    .spinner {
+      width: 32px; height: 32px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      margin: 0 auto 12px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Success state */
+    .success-state {
+      display: none;
+      text-align: center;
+      padding: 20px 0;
+    }
+    .success-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+    }
+    .success-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--low);
+      margin-bottom: 8px;
+    }
+    .success-sub {
+      font-size: 12px;
+      color: var(--text2);
+      line-height: 1.7;
+      margin-bottom: 24px;
+    }
+
+    /* Invalid token state */
+    .invalid-state {
+      display: none;
+      text-align: center;
+      padding: 20px 0;
+    }
+
+    .divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 24px 0;
+    }
+
+    .already-have {
+      text-align: center;
+      font-size: 11px;
+      color: var(--text3);
+      margin-top: 20px;
+    }
+    .already-have a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .already-have a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <div class="logo">
+    <div class="logo-icon">⬡</div>
+    <div class="logo-text">IP<span>Shield</span></div>
+  </div>
+
+  <!-- Loading while validating token -->
+  <div class="loading-state" id="loadingState" style="display:block;">
+    <div class="spinner"></div>
+    <div style="font-size:12px;color:var(--text2);">Validating invite…</div>
+  </div>
+
+  <!-- Invalid token -->
+  <div class="invalid-state" id="invalidState">
+    <div style="font-size:48px;margin-bottom:16px;">⚠️</div>
+    <div class="title">Invalid Invite</div>
+    <div class="subtitle">
+      This invite link is invalid, expired, or has already been used.<br><br>
+      Contact your administrator for a new invite.
+    </div>
+    <a href="/login" class="btn btn-primary" style="display:block;text-align:center;text-decoration:none;padding:14px;margin-top:8px;">
+      Back to Login
+    </a>
+  </div>
+
+  <!-- Activation form -->
+  <div id="activateForm" style="display:none;">
+    <div class="title">Activate Account</div>
+    <div class="subtitle">You've been invited to IPShield. Set a password to complete your account setup.</div>
+
+    <!-- Invite info -->
+    <div class="invite-info" id="inviteInfo">
+      <div class="invite-info-row">
+        <span class="invite-info-key">Name</span>
+        <span class="invite-info-value" id="inviteName">—</span>
+      </div>
+      <div class="invite-info-row">
+        <span class="invite-info-key">Email</span>
+        <span class="invite-info-value" id="inviteEmail">—</span>
+      </div>
+      <div class="invite-info-row">
+        <span class="invite-info-key">Role</span>
+        <span class="invite-info-value" id="inviteRole">—</span>
+      </div>
+      <div class="invite-info-row">
+        <span class="invite-info-key">Daily Limit</span>
+        <span class="invite-info-value" id="inviteLimit">—</span>
+      </div>
+    </div>
+
+    <div class="error-msg" id="errorMsg"></div>
+
+    <div class="form-group">
+      <label>Email Address</label>
+      <input type="email" id="emailInput" placeholder="your@email.com" autocomplete="email">
+    </div>
+
+    <div class="form-group">
+      <label>Password</label>
+      <div class="password-wrap">
+        <input type="password" id="passwordInput"
+          placeholder="Min 8 characters"
+          autocomplete="new-password">
+        <button class="password-toggle" id="togglePassword" type="button">👁</button>
+      </div>
+      <div class="password-strength">
+        <div class="password-strength-bar" id="strengthBar"></div>
+      </div>
+      <div class="password-hint" id="passwordHint">Enter a password</div>
+    </div>
+
+    <div class="form-group">
+      <label>Confirm Password</label>
+      <div class="password-wrap">
+        <input type="password" id="confirmInput"
+          placeholder="Repeat password"
+          autocomplete="new-password">
+      </div>
+    </div>
+
+    <button class="btn btn-primary" id="activateBtn">
+      Activate Account →
+    </button>
+
+    <div class="already-have">
+      Already have an account? <a href="/login">Sign in</a>
+    </div>
+  </div>
+
+  <!-- Success -->
+  <div class="success-state" id="successState">
+    <div class="success-icon">✓</div>
+    <div class="success-title">Account Activated!</div>
+    <div class="success-sub" id="successMsg">
+      Your account is ready. You can now sign in to IPShield.
+    </div>
+    <a href="/login" class="btn btn-primary"
+      style="display:block;text-align:center;text-decoration:none;padding:14px;">
+      Sign In →
+    </a>
+  </div>
+</div>
+
+<script>
+  const token = new URLSearchParams(window.location.search).get("token");
+
+  function show(id) {
+    ["loadingState","invalidState","activateForm","successState"]
+      .forEach(s => {
+        document.getElementById(s).style.display = s === id ? "block" : "none";
+      });
+  }
+
+  function showError(msg) {
+    const el = document.getElementById("errorMsg");
+    el.textContent    = msg;
+    el.style.display  = "block";
+  }
+
+  function hideError() {
+    document.getElementById("errorMsg").style.display = "none";
+  }
+
+  // Password strength checker
+  document.getElementById("passwordInput").addEventListener("input", function() {
+    const pw  = this.value;
+    const bar = document.getElementById("strengthBar");
+    const hint = document.getElementById("passwordHint");
+
+    let strength = 0;
+    if (pw.length >= 8)                        strength++;
+    if (pw.length >= 12)                       strength++;
+    if (/[A-Z]/.test(pw))                      strength++;
+    if (/[0-9]/.test(pw))                      strength++;
+    if (/[^A-Za-z0-9]/.test(pw))              strength++;
+
+    const levels = [
+      { width: "0%",   color: "transparent",    text: "Enter a password" },
+      { width: "20%",  color: "var(--critical)", text: "Very weak" },
+      { width: "40%",  color: "var(--high)",     text: "Weak" },
+      { width: "60%",  color: "var(--medium)",   text: "Fair" },
+      { width: "80%",  color: "var(--accent)",   text: "Good" },
+      { width: "100%", color: "var(--low)",      text: "Strong ✓" },
+    ];
+
+    const level        = levels[Math.min(strength, 5)];
+    bar.style.width    = level.width;
+    bar.style.background = level.color;
+    hint.textContent   = level.text;
+    hint.style.color   = level.color === "transparent" ? "var(--text3)" : level.color;
+  });
+
+  // Toggle password visibility
+  document.getElementById("togglePassword").addEventListener("click", function() {
+    const input = document.getElementById("passwordInput");
+    input.type  = input.type === "password" ? "text" : "password";
+    this.textContent = input.type === "password" ? "👁" : "🙈";
+  });
+
+  // Validate token on load
+  async function validateToken() {
+    if (!token) { show("invalidState"); return; }
+
+    try {
+      const res  = await fetch(`/api/v1/keys/activate/${token}`);
+      const data = await res.json();
+
+      if (!res.ok || !data.valid) {
+        show("invalidState");
+        return;
+      }
+
+      // Populate invite info
+      const invite = data.invite;
+      document.getElementById("inviteName").textContent  = invite.name        || "—";
+      document.getElementById("inviteEmail").textContent = invite.email        || "—";
+      document.getElementById("inviteLimit").textContent =
+        (invite.daily_limit || 1000).toLocaleString() + " req/day";
+
+      // Role badge
+      const roleEl  = document.getElementById("inviteRole");
+      const roleMap = {
+        admin:    "role-admin",
+        analyst:  "role-analyst",
+        readonly: "role-readonly",
+      };
+      roleEl.innerHTML = `<span class="invite-info-role ${roleMap[invite.role] || "role-readonly"}">
+        ${invite.role || "readonly"}
+      </span>`;
+
+      // Pre-fill email if provided
+      if (invite.email) {
+        document.getElementById("emailInput").value    = invite.email;
+        document.getElementById("emailInput").disabled = false;
+      }
+
+      document.getElementById("inviteInfo").style.display = "block";
+      show("activateForm");
+
+    } catch (err) {
+      show("invalidState");
+    }
+  }
+
+  // Activate button
+  document.getElementById("activateBtn").addEventListener("click", async () => {
+    hideError();
+
+    const email    = document.getElementById("emailInput").value.trim();
+    const password = document.getElementById("passwordInput").value;
+    const confirm  = document.getElementById("confirmInput").value;
+    const btn      = document.getElementById("activateBtn");
+
+    // Validate
+    if (!email)              { showError("Email address is required.");       return; }
+    if (!email.includes("@")){ showError("Enter a valid email address.");     return; }
+    if (!password)           { showError("Password is required.");            return; }
+    if (password.length < 8) { showError("Password must be at least 8 characters."); return; }
+    if (password !== confirm) { showError("Passwords do not match.");          return; }
+
+    btn.disabled    = true;
+    btn.textContent = "Activating…";
+
+    try {
+      const res  = await fetch(`/api/v1/keys/activate/${token}`, {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body:    JSON.stringify({ email, password }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        showError(data.error || "Activation failed. Please try again.");
+        btn.disabled    = false;
+        btn.textContent = "Activate Account →";
+        return;
+      }
+
+      // Show success
+      document.getElementById("successMsg").textContent =
+        `Welcome, ${data.name}! Your ${data.role} account is ready. Sign in with your email and password.`;
+      show("successState");
+
+    } catch (err) {
+      showError("Network error. Please try again.");
+      btn.disabled    = false;
+      btn.textContent = "Activate Account →";
+    }
+  });
+
+  // Enter key submits
+  ["emailInput","passwordInput","confirmInput"].forEach(id => {
+    document.getElementById(id).addEventListener("keydown", e => {
+      if (e.key === "Enter") document.getElementById("activateBtn").click();
+    });
+  });
+
+  validateToken();
+</script>
+
+</body>
+</html>

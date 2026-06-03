@@ -365,7 +365,12 @@
 </style>
 </head>
 <body>
- 
+  <style id="authGuard">body { visibility: hidden; }</style>
+<script>
+  if (!localStorage.getItem("token")) {
+    window.location.replace("/login");
+  }
+</script>
 <div class="app">
  <header id="mainHeader">
   <div class="logo">
@@ -376,7 +381,6 @@
     </div>
   </div>
   <div class="header-right" id="headerRight">
-    <!-- <button class="btn btn-ghost" id="logout()" style="padding:6px 12px;font-size:11px;">logout</button> -->
 </button>
     <div class="status-dot" id="statusDot">
       <div class="dot"></div>
@@ -709,6 +713,43 @@
     
   </main>
 </div>
+<script>
+  // ── Load stats into dashboard cards 
+  async function loadDashboardStats() {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) return;
+
+      const res = await fetch("/api/v1/stats", {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      if (!res.ok) return;
+
+      const d = await res.json();
+
+      // Stat cards — handle both flat { CRITICAL:5 } and nested { riskDistribution:{} }
+      const dist = d.riskDistribution || d;
+
+      const critical = dist.CRITICAL ?? d.CRITICAL ?? 0;
+      const high     = dist.HIGH     ?? d.HIGH     ?? 0;
+      const medium   = dist.MEDIUM   ?? d.MEDIUM   ?? 0;
+      const low      = dist.LOW      ?? d.LOW      ?? 0;
+
+      document.getElementById("stat-critical").textContent = Number(critical).toLocaleString();
+      document.getElementById("stat-high").textContent     = Number(high).toLocaleString();
+      document.getElementById("stat-medium").textContent   = Number(medium).toLocaleString();
+      document.getElementById("stat-low").textContent      = Number(low).toLocaleString();
+
+    } catch (err) {
+      console.error("[stats] error:", err.message);
+    }
+  }
+
+  // Run on page load
+  loadDashboardStats();
+</script>
+
 </body>
 <script src="/leaflet.min.js"></script>
 <script src="/app.js"></script>

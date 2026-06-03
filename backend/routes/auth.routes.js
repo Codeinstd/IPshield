@@ -44,48 +44,55 @@ router.post("/login", async (req, res) => {
     }
 
     // ── Option B: Login with email + password 
-    if (email && password) {
-      const result = await db.query(
-        `SELECT id, name, email, role, status, password_hash
-         FROM api_keys
-         WHERE email = $1`,
-        [email.toLowerCase().trim()]
-      );
+    // In auth.routes.js — update the email+password branch:
+if (email && password) {
+  const result = await db.query(
+    `SELECT id, name, email, role, status, password_hash
+     FROM api_keys
+     WHERE LOWER(email) = LOWER($1) AND status = 'active'`,
+    [email.trim()]
+  );
 
-      if (!result.rows.length) {
-        return res.status(401).json({ error: "Invalid email or password" });
-      }
+  if (!result.rows.length) {
+    return res.status(401).json({ error: "Invalid email or password" });
+  }
 
-      const user = result.rows[0];
+  const user = result.rows[0];
 
-      if (user.status !== "active") {
-        return res.status(403).json({ error: `Account is ${user.status}` });
-      }
+  if (!user.password_hash) {
+    return res.status(401).json({
+      error: "Password not set — use your activation link to set a password first"
+    });
+  }
 
-      // Compare password
-      const bcrypt  = require("bcrypt");
-      const isValid = await bcrypt.compare(password, user.password_hash);
-      if (!isValid) {
-        return res.status(401).json({ error: "Invalid email or password" });
-      }
+  const bcrypt  = require("bcryptjs");
+  const isValid = await bcrypt.compare(password, user.password_hash);
 
-      const token = jwt.sign(
-        { id: user.id, name: user.name, email: user.email, role: user.role },
-        process.env.JWT_SECRET,
-        { expiresIn: "7d" }
-      );
+  if (!isValid) {
+    return res.status(401).json({ error: "Invalid email or password" });
+  }
 
-      return res.json({
-        token,
-        user: { id: user.id, name: user.name, email: user.email, role: user.role },
-      });
-    }
+  const token = jwt.sign(
+    { id: user.id, name: user.name, email: user.email, role: user.role },
+    process.env.JWT_SECRET,
+    { expiresIn: "7d" }
+  );
+
+  return res.json({
+    token,
+    user: { id: user.id, name: user.name, email: user.email, role: user.role },
+  });
+}
 
     return res.status(400).json({ error: "Provide apiKey or email + password" });
 
   } catch (err) {
     console.error("[auth/login] ERROR:", err.message);
-    res.status(500).json({ error: "Login failed" });
+    console.error("[auth/login] STACK:", err.stack);
+    res.status(500).json({
+    error:  "Login failed",
+    detail: err.message, 
+  });
   }
 });
 

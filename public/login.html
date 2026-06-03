@@ -212,16 +212,15 @@
           headers: { "Content-Type": "application/json" },
           body:    JSON.stringify({ email, password }),
         });
-        const data = await res.json();
+        const data = await res.json().catch(() => ({ error: `HTTP ${res.status}` }));
 
         if (!res.ok) {
-          showError(data.error || "Invalid credentials.");
+          showError(data.detail || data.error || "Invalid credentials.");
           return;
         }
 
         localStorage.setItem("token", data.token);
         if (data.user) localStorage.setItem("user", JSON.stringify(data.user));
-
         window.location.replace("/");   // back to dashboard
 
       } catch (err) {

@@ -105,16 +105,13 @@
   buildHamburgerMenu();
 }
 
-  // responsive nav 
-    var _drawerInitialized = false;
-
-  function buildHamburgerMenu() {
-  const hamburger   = document.getElementById("mainHamburger");
-  const drawer      = document.getElementById("navDrawer");
-  const overlay     = document.getElementById("navOverlay");
-  const drawerBody  = document.getElementById("navDrawerBody");
-  const headerRight = document.getElementById("headerRight");
-  const drawerVer   = document.getElementById("drawer-version");
+// responsive nav 
+function buildHamburgerMenu() {
+  const hamburger  = document.getElementById("mainHamburger");
+  const drawer     = document.getElementById("navDrawer");
+  const overlay    = document.getElementById("navOverlay");
+  const drawerBody = document.getElementById("navDrawerBody");
+  const drawerVer  = document.getElementById("drawer-version");
 
   if (!hamburger || !drawer || !drawerBody) return;
 
@@ -122,68 +119,88 @@
   const ver = document.getElementById("dashboard-version");
   if (drawerVer && ver) drawerVer.textContent = ver.textContent;
 
-  // ── Rebuild buttons every time ──
+  // ── Rebuild drawer buttons every call ──
   drawerBody.innerHTML = "";
-  headerRight.querySelectorAll("button").forEach(btn => {
-    if (btn.style.display === "none") return;
-    const clone = document.createElement("button");
-    clone.textContent = btn.textContent;
-    clone.className   = btn.className;
-    if (btn.id === "apiBadge") clone.style.cssText = btn.style.cssText;
+  const headerRight = document.getElementById("headerRight");
+  if (headerRight) {
+    headerRight.querySelectorAll("button").forEach(btn => {
+      // Skip hidden buttons
+      if (btn.style.display === "none") return;
 
-    clone.addEventListener("click", () => {
-      _closeDrawer();                          // close drawer first
-      setTimeout(() => btn.click(), 320);      // fire after drawer finishes closing
+      const clone = document.createElement("button");
+      clone.textContent = btn.textContent;
+      clone.className   = "btn btn-ghost";
+
+      // Copy inline styles
+      if (btn.id === "apiBadge") {
+        clone.style.cssText = btn.style.cssText;
+      }
+
+      clone.addEventListener("click", () => {
+        _closeDrawer();
+        setTimeout(() => btn.click(), 320);
+      });
+
+      drawerBody.appendChild(clone);
     });
+  }
 
-    drawerBody.appendChild(clone);
-  });
+  // ── Remove old listeners 
+  const newHamburger = hamburger.cloneNode(true);
+  hamburger.parentNode.replaceChild(newHamburger, hamburger);
 
-  // ── One-time listeners ──
-  if (_drawerInitialized) return;
-  _drawerInitialized = true;
-
-  hamburger.addEventListener("click", (e) => {
+  // ── Wire fresh listeners ──
+  newHamburger.addEventListener("click", (e) => {
     e.stopPropagation();
-    drawer.classList.contains("open") ? _closeDrawer() : _openDrawer();
+    const drawer  = document.getElementById("navDrawer");
+    const isOpen  = drawer.classList.contains("open");
+    isOpen ? _closeDrawer() : _openDrawer();
   });
 
-  document.getElementById("navDrawerClose")
-    .addEventListener("click", _closeDrawer);
-  overlay.addEventListener("click", _closeDrawer);
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") _closeDrawer();
-  });
-  window.matchMedia("(min-width: 769px)")
-    .addEventListener("change", (e) => { if (e.matches) _closeDrawer(); });
+  // Wire close button
+  const closeBtn = document.getElementById("navDrawerClose");
+  if (closeBtn) {
+    const newClose = closeBtn.cloneNode(true);
+    closeBtn.parentNode.replaceChild(newClose, closeBtn);
+    newClose.addEventListener("click", _closeDrawer);
+  }
+
+  // Wire overlay
+  if (overlay) {
+    const newOverlay = overlay.cloneNode(true);
+    overlay.parentNode.replaceChild(newOverlay, overlay);
+    newOverlay.addEventListener("click", _closeDrawer);
+  }
 }
 
-    function _openDrawer() {
-      const hamburger = document.getElementById("mainHamburger");
-      const drawer    = document.getElementById("navDrawer");
-      const overlay   = document.getElementById("navOverlay");
-      if (!hamburger || !drawer) return;
+//openDrawer:
+function _openDrawer() {
+  const hamburger = document.getElementById("mainHamburger");
+  const drawer    = document.getElementById("navDrawer");
+  const overlay   = document.getElementById("navOverlay");
+  if (!drawer) return;
 
-      hamburger.setAttribute("aria-expanded", "true");
-      drawer.classList.add("open");
-      drawer.removeAttribute("aria-hidden");
-      overlay.classList.add("open");
-      document.body.style.overflow = "hidden";
-    }
+  if (hamburger) hamburger.setAttribute("aria-expanded", "true");
+  drawer.classList.add("open");
+  drawer.removeAttribute("aria-hidden");
+  if (overlay) overlay.classList.add("open");
+  document.body.style.overflow = "hidden";
+}
 
-    function _closeDrawer() {
-      const hamburger = document.getElementById("mainHamburger");
-      const drawer    = document.getElementById("navDrawer");
-      const overlay   = document.getElementById("navOverlay");
-      if (!hamburger || !drawer) return;
+//closeDrawer:
+function _closeDrawer() {
+  const hamburger = document.getElementById("mainHamburger");
+  const drawer    = document.getElementById("navDrawer");
+  const overlay   = document.getElementById("navOverlay");
+  if (!drawer) return;
 
-      hamburger.setAttribute("aria-expanded", "false");
-      drawer.classList.remove("open");
-      drawer.setAttribute("aria-hidden", "true");
-      overlay.classList.remove("open");
-      document.body.style.overflow = "";
-      hamburger.focus();
-    }
+  if (hamburger) hamburger.setAttribute("aria-expanded", "false");
+  drawer.classList.remove("open");
+  drawer.setAttribute("aria-hidden", "true");
+  if (overlay) overlay.classList.remove("open");
+  document.body.style.overflow = "";
+  if (hamburger) hamburger.focus();
+}
  
   
   // ── Extra UI 
@@ -276,8 +293,17 @@
   btn.style.cssText = "padding:6px 12px;font-size:11px;";
   headerRight.prepend(btn);
  
- 
   buildHamburgerMenu();
+
+  // Escape key closes drawer
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") _closeDrawer();
+  });
+
+  // Close drawer when resizing to desktop
+  window.matchMedia("(min-width: 769px)").addEventListener("change", (e) => {
+    if (e.matches) _closeDrawer();
+  });
 }
 
     // Quick Tests Btn - Bulk Section
@@ -3575,28 +3601,56 @@ function applyTheme(dark) {
     });
   }
 
+  //update stats
   function updateStats(riskLevel) {
-    if (riskLevel in sessionStats) {
-      sessionStats[riskLevel]++;
-      const map = { CRITICAL:"stat-critical", HIGH:"stat-high", MEDIUM:"stat-medium", LOW:"stat-low" };
-      const el  = document.getElementById(map[riskLevel]);
-      if (el) el.textContent = sessionStats[riskLevel];
-    }
-  }
+  if (!(riskLevel in sessionStats)) return;
+  sessionStats[riskLevel]++;
+
+  const map = {
+    CRITICAL: "stat-critical",
+    HIGH:     "stat-high",
+    MEDIUM:   "stat-medium",
+    LOW:      "stat-low",
+  };
+
+  const el = document.getElementById(map[riskLevel]);
+  if (!el) return;
+
+  // Parse current value and increment
+  const current  = parseInt(el.textContent.replace(/,/g, "")) || 0;
+  el.textContent = (current + 1).toLocaleString();
+}
 
   // call stats
-  async function loadStats() {
-    const token = localStorage.getItem("token");
+async function loadStats() {
+  try {
+    const res = await fetch("/api/v1/stats", { headers: authHeaders() });
+    if (!res.ok) return;
 
-    const res = await fetch("/api/v1/stats", {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
+    const d    = await res.json();
+    const dist = d.riskDistribution || d;
+
+    const map = {
+      CRITICAL: "stat-critical",
+      HIGH:     "stat-high",
+      MEDIUM:   "stat-medium",
+      LOW:      "stat-low",
+    };
+
+    Object.entries(map).forEach(([risk, elId]) => {
+      const el = document.getElementById(elId);
+      if (!el) return;
+
+      // DB total + current session additions
+      const dbVal      = dist[risk] ?? d[risk] ?? 0;
+      const sessionVal = sessionStats[risk]     ?? 0;
+      el.textContent   = Number(dbVal + sessionVal).toLocaleString();
     });
 
-    const data = await res.json();
-    
+  } catch (err) {
+    console.error("[loadStats] error:", err.message);
   }
+}
   
   //initApp
   function initApp() {
@@ -4667,64 +4721,67 @@ function applyTheme(dark) {
     }
 
     // Check current key's role and show admin-only UI
-  async function checkAdminAccess() {
-  const token = localStorage.getItem("token");
-  if (!token) {
-    window.location.href = "/login";
-    return;
-  }
+    async function checkAdminAccess() {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        window.location.href = "/login";
+        return;
+      }
 
-  try {
-    const res  = await fetch("/api/v1/keys/me", { headers: authHeaders() });
+      try {
+        const res = await fetch("/api/v1/keys/me", { headers: authHeaders() });
 
-    if (!res.ok) {
-      // Token invalid or expired — redirect to login
-      localStorage.removeItem("token");
-      window.location.href = "/login";
-      return;
+        if (res.status === 401 || res.status === 403) {
+          // Token invalid or expired — clear and redirect
+          localStorage.removeItem("token");
+          localStorage.removeItem("user");
+          // Remove guard before redirect
+          const guard = document.getElementById("authGuard");
+          if (guard) guard.remove();
+          window.location.href = "/login";
+          return;
+        }
+
+        if (!res.ok) {
+          // Other error — don't redirect, just log
+          console.error("[checkAdminAccess] unexpected status:", res.status);
+          return;
+        }
+
+        const user = await res.json();
+        const role = user.role || "readonly";
+        window._userRole = role;
+
+        // Show logout button for all roles
+        const logoutBtn = document.getElementById("logoutBtn");
+        if (logoutBtn) logoutBtn.style.display = "";
+
+        // Admin only
+        const keyMgrBtn    = document.getElementById("keyMgrBtn");
+        const rateLimitBtn = document.getElementById("rateLimitBtn");
+        if (keyMgrBtn)    keyMgrBtn.style.display    = role === "admin" ? "" : "none";
+        if (rateLimitBtn) rateLimitBtn.style.display = role === "admin" ? "" : "none";
+
+        // Analyst and above
+        const analystAndAbove = role === "admin" || role === "analyst";
+        const blacklistBtn    = document.getElementById("blacklistBtn");
+        const casesBtn        = document.getElementById("casesBtn");
+        const threatBtn       = document.getElementById("threatBtn");
+        const siemBtn         = document.getElementById("siemBtn");
+        if (blacklistBtn) blacklistBtn.style.display = analystAndAbove ? "" : "none";
+        if (casesBtn)     casesBtn.style.display     = analystAndAbove ? "" : "none";
+        if (threatBtn)    threatBtn.style.display    = analystAndAbove ? "" : "none";
+        if (siemBtn)      siemBtn.style.display      = analystAndAbove ? "" : "none";
+
+        buildHamburgerMenu();
+
+      } catch (err) {
+        console.error("[checkAdminAccess] error:", err.message);
+      }
     }
-
-    const user = await res.json();
-    const role = user.role || "readonly";
-
-    // ── Always visible to all roles ──
-    const logoutBtn = document.getElementById("logoutBtn");
-    if (logoutBtn) logoutBtn.style.display = "";
-
-    // ── Admin only: Keys button + Rate Limits button ──
-    const keyMgrBtn    = document.getElementById("keyMgrBtn");
-    const rateLimitBtn = document.getElementById("rateLimitBtn");
-
-    if (keyMgrBtn) {
-      keyMgrBtn.style.display = role === "admin" ? "" : "none";
-    }
-    if (rateLimitBtn) {
-      rateLimitBtn.style.display = role === "admin" ? "" : "none";
-    }
-
-    // ── Admin + analyst: Blacklist, Cases, Threat buttons ──
-    const analystAndAbove = role === "admin" || role === "analyst";
-
-    const blacklistBtn = document.getElementById("blacklistBtn");
-    const casesBtn     = document.getElementById("casesBtn");
-    const threatBtn    = document.getElementById("threatBtn");
-    const siemBtn      = document.getElementById("siemBtn");
-
-    if (blacklistBtn) blacklistBtn.style.display  = analystAndAbove ? "" : "none";
-    if (casesBtn)     casesBtn.style.display      = analystAndAbove ? "" : "none";
-    if (threatBtn)    threatBtn.style.display     = analystAndAbove ? "" : "none";
-    if (siemBtn)      siemBtn.style.display       = analystAndAbove ? "" : "none";
-
-
-    // Store role for use elsewhere
-    window._userRole = role;
-
-    buildHamburgerMenu();
-
-  } catch (err) {
-    console.error("[checkAdminAccess] error:", err);
-  }
-}
+    // Remove the visibility guard once auth is verified
+    const guard = document.getElementById("authGuard");
+    if (guard) guard.remove();
 
     // KEY MANAGEMENT PANEL 
     async function showKeyManagerPanel() {

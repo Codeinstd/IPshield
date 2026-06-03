@@ -47,6 +47,16 @@ app.use((req, res, next) => {
   next();
 });
 
+// Serve landing page at /landing or make it the public homepage
+app.get("/landing", (req, res) => {
+  res.sendFile(path.join(__dirname, "../public", "landing.html"));
+});
+
+// Serve activate page
+app.get("/activate", (req, res) => {
+  res.sendFile(path.join(__dirname, "../public", "activate.html"));
+});
+
 
 // 1. SENTRY (must be first handler)
 if (process.env.SENTRY_DSN) {
@@ -341,6 +351,10 @@ app.use("/api/", authMiddleware);
 // Audit routes
 app.use("/api/v1/audit", auditRoutes);
 app.use("/api/v2/audit", auditRoutes);
+
+// Stats routes
+app.use("/api/v1/stats", statsRoutes);
+app.use("/api/v2/stats", statsRoutes);
 
 
 // 12. PROTECTED API ROUTES

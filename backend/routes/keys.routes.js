@@ -164,32 +164,66 @@ router.get("/me", requireAuth, async (req, res) => {
   res.json(req.auth);
 });
 
-// proxy endpoint for public stats
 
-// ── POST /api/keys/activate/:token — activate 
+// POST activate route:
 router.post("/activate/:token",
-  [ param("token").trim().notEmpty().isLength({ min: 40, max: 60 })],
+  [param("token").trim().notEmpty().isLength({ min: 40, max: 60 })],
   validate,
   async (req, res) => {
     try {
-      const activated = await km.activateInvite(req.params.token);
-      if (!activated) {
+      const { email, password } = req.body;
+
+      // Validate password
+      if (!password || password.length < 8) {
+        return res.status(400).json({ error: "Password must be at least 8 characters" });
+      }
+      if (!email || !email.includes("@")) {
+        return res.status(400).json({ error: "Valid email is required" });
+      }
+
+      // Check token is still valid
+      const check = await db.query(
+        `SELECT id, name, email, role FROM api_keys
+         WHERE invite_token = $1 AND status = 'pending'`,
+        [req.params.token]
+      );
+      if (!check.rows.length) {
         return res.status(404).json({ error: "Invalid or already-used invite token" });
       }
-      // Fetch the full key to return it (only time it's shown)
-      const full = await require("../store/db").query(
-        `SELECT key, name, email, role, daily_limit FROM api_keys WHERE id = $1`,
-        [activated.id]
+
+      // Hash password
+      const bcrypt      = require("bcryptjs");
+      const passwordHash = await bcrypt.hash(password, 12);
+
+      // Activate — set password, email, status
+      const result = await db.query(
+        `UPDATE api_keys
+         SET status        = 'active',
+             activated_at  = NOW(),
+             invite_token  = NULL,
+             email         = $1,
+             password_hash = $2
+         WHERE id = $3
+         RETURNING id, name, email, role, status, daily_limit`,
+        [email.toLowerCase().trim(), passwordHash, check.rows[0].id]
       );
 
+      if (!result.rows.length) {
+        return res.status(404).json({ error: "Activation failed" });
+      }
+
+      const activated = result.rows[0];
+
       res.json({
-        message:     "API key activated successfully. Save your key — it will not be shown again.",
-        key:         full.rows[0].key,
+        message:     "Account activated successfully.",
         name:        activated.name,
+        email:       activated.email,
         role:        activated.role,
         daily_limit: activated.daily_limit,
       });
+
     } catch (err) {
+      console.error("[activate] ERROR:", err.message);
       res.status(500).json({ error: "Activation failed" });
     }
   }
