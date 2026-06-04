@@ -317,8 +317,7 @@ app.get("/api/versions", versionInfoHandler);
 app.get("/api/v1",       versionInfoHandler);
 app.get("/api/v2",       versionInfoHandler);
 
-
-// (public — no auth, must be before authMiddleware)
+// public — no auth, must be before authMiddleware
 app.use("/api/keys",    keysRoutes);
 app.use("/api/v1/keys", keysRoutes);
 app.use("/api/v2/keys", keysRoutes);

@@ -223,9 +223,9 @@ router.post("/activate/:token",
       });
 
     } catch (err) {
-      console.error("[activate] ERROR:", err.message);
-      res.status(500).json({ error: "Activation failed" });
-    }
+    console.error("[activate POST] full error:", err);
+    res.status(500).json({ error: "Activation failed", detail: err.message });
+  }
   }
 );
 
