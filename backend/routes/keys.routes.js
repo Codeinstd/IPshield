@@ -226,14 +226,50 @@ router.get("/me", requireAuth, async (req, res) => {
 
 
 // POST activate route:
+router.get("/activate/:token",
+  [ param("token").trim().notEmpty().isLength({ min: 20, max: 120 }) ],
+  validate,
+  async (req, res) => {
+    try {
+      const result = await db.query(
+        `SELECT name, email, role, daily_limit, invited_at
+         FROM api_keys 
+         WHERE invite_token = $1 AND status = 'pending'`,
+        [req.params.token]
+      );
+
+      if (!result.rows.length) {
+        // Extra debug info — remove after fixing
+        const anyMatch = await db.query(
+          `SELECT id, status, left(invite_token,8) as preview 
+           FROM api_keys 
+           WHERE left(invite_token, 8) = left($1, 8)`,
+          [req.params.token]
+        );
+        return res.status(404).json({
+          valid: false,
+          error: "Invalid or expired invite token",
+          debug_matches: anyMatch.rows   // remove this line in prod
+        });
+      }
+
+      res.json({ valid: true, invite: result.rows[0] });
+
+    } catch (err) {
+      console.error("[activate GET] ERROR:", err.message, err.code);
+      res.status(500).json({ error: err.message, code: err.code });
+    }
+  }
+);
+
+// POST activate
 router.post("/activate/:token",
-  [param("token").trim().notEmpty().isLength({ min: 40, max: 60 })],
+  [ param("token").trim().notEmpty().isLength({ min: 20, max: 120 }) ],
   validate,
   async (req, res) => {
     try {
       const { email, password } = req.body;
 
-      // Validate password
       if (!password || password.length < 8) {
         return res.status(400).json({ error: "Password must be at least 8 characters" });
       }
@@ -241,35 +277,45 @@ router.post("/activate/:token",
         return res.status(400).json({ error: "Valid email is required" });
       }
 
-      // Check token is still valid
       const check = await db.query(
-        `SELECT id, name, email, role FROM api_keys
+        `SELECT id, name, email, role, daily_limit
+         FROM api_keys
          WHERE invite_token = $1 AND status = 'pending'`,
         [req.params.token]
       );
+
       if (!check.rows.length) {
         return res.status(404).json({ error: "Invalid or already-used invite token" });
       }
 
-      // Hash password
-      const bcrypt      = require("bcryptjs");
+      const bcrypt       = require("bcryptjs");
+      const crypto       = require("crypto");
       const passwordHash = await bcrypt.hash(password, 12);
+      const apiKey       = "ips_" + crypto.randomBytes(32).toString("hex");
+      const keyPreview   = apiKey.slice(0, 12) + "••••••••••••";
 
-      // Activate — set password, email, status
       const result = await db.query(
         `UPDATE api_keys
          SET status        = 'active',
              activated_at  = NOW(),
              invite_token  = NULL,
              email         = $1,
-             password_hash = $2
-         WHERE id = $3
+             password_hash = $2,
+             key           = $3,
+             key_preview   = $4
+         WHERE id = $5
          RETURNING id, name, email, role, status, daily_limit`,
-        [email.toLowerCase().trim(), passwordHash, check.rows[0].id]
+        [
+          email.toLowerCase().trim(),
+          passwordHash,
+          apiKey,
+          keyPreview,
+          check.rows[0].id
+        ]
       );
 
       if (!result.rows.length) {
-        return res.status(404).json({ error: "Activation failed" });
+        return res.status(404).json({ error: "Activation failed — row not updated" });
       }
 
       const activated = result.rows[0];
@@ -280,12 +326,19 @@ router.post("/activate/:token",
         email:       activated.email,
         role:        activated.role,
         daily_limit: activated.daily_limit,
+        key:         apiKey,
       });
 
     } catch (err) {
-    console.error("[activate POST] full error:", err);
-    res.status(500).json({ error: "Activation failed", detail: err.message });
-  }
+      console.error("[activate POST] ERROR:", err.message);
+      console.error("[activate POST] CODE:", err.code);
+      console.error("[activate POST] DETAIL:", err.detail);
+      res.status(500).json({
+        error:  err.message,
+        code:   err.code   || null,
+        detail: err.detail || null,
+      });
+    }
   }
 );
 

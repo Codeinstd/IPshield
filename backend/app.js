@@ -47,7 +47,7 @@ app.use((req, res, next) => {
   next();
 });
 
-// 1. SENTRY (must be first handler)
+//  SENTRY (must be first handler)
 if (process.env.SENTRY_DSN) {
   try {
     const Sentry = require("@sentry/node");
@@ -56,7 +56,7 @@ if (process.env.SENTRY_DSN) {
   } catch (_) {}
 }
 
-// 2. SECURITY HEADERS
+//  SECURITY HEADERS
 app.use(helmet({
   contentSecurityPolicy: {
     directives: {
@@ -75,7 +75,7 @@ app.use(helmet({
 }));
 
 
-// 3. CORS
+//  CORS
 const allowedOrigins = (process.env.ALLOWED_ORIGIN || "")
   .split(",").map(s => s.trim()).filter(Boolean);
 
@@ -96,7 +96,7 @@ app.use(express.json({ limit: "50kb" }));
 app.use(express.urlencoded({ extended: false }));
 
 
-// 5. HTTP LOGGING
+//  HTTP LOGGING
 if (isProd) {
   app.use(morgan("combined", {
     stream: { write: msg => logger.info(msg.trim()) },
@@ -107,7 +107,7 @@ if (isProd) {
 }
 
 
-// 6. RATE LIMITING
+// RATE LIMITING
 const makeRateLimiter = (windowMs, max, message) => rateLimit({
   windowMs, max,
   standardHeaders: true,
@@ -130,11 +130,11 @@ const makeRateLimiter = (windowMs, max, message) => rateLimit({
 });
 
 
-// 7. TELEMETRY MIDDLEWARE (all /api/* requests)
+// TELEMETRY MIDDLEWARE (all /api/* requests)
 app.use("/api", telemetryMiddleware);
 
 
-// 8. STATIC FILES
+//  STATIC FILES
 app.use(express.static(path.join(__dirname, "../public"), {
   maxAge: isProd ? "1d" : 0,
   etag:   true,
@@ -145,116 +145,29 @@ app.get("/activate", (req, res) => {
   res.sendFile(path.join(__dirname, "../public", "activate.html"));
 });
 
-
-app.get("/activate", (req, res) => {
-  const token = req.query.token || "";
-  res.send(`<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Activate — IPShield</title>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { background: #080c0f; color: #c9d8e8; font-family: 'JetBrains Mono', monospace; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; }
-    .card { background: #0d1117; border: 1px solid #1e2d3d; border-radius: 12px; width: 100%; max-width: 480px; padding: 40px; }
-    .logo { font-family: 'Syne', sans-serif; font-size: 24px; font-weight: 800; margin-bottom: 28px; }
-    .logo span { color: #00d9ff; }
-    h2 { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
-    p  { font-size: 12px; color: #8fa8bc; line-height: 1.7; margin-bottom: 20px; }
-    .meta { background: #111820; border-radius: 8px; padding: 14px 16px; margin-bottom: 24px; }
-    .meta div { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #1e2d3d; font-size: 11px; }
-    .meta div:last-child { border-bottom: none; }
-    .meta .lbl { color: #4a6278; }
-    .meta .val { color: #c9d8e8; font-weight: 600; }
-    .btn { width: 100%; padding: 14px; background: #00d9ff; color: #000; border: none; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit; letter-spacing: 0.5px; }
-    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-    .key-box { background: #111820; border: 1px solid #00d9ff; border-radius: 8px; padding: 16px; margin-bottom: 20px; word-break: break-all; font-size: 12px; color: #00d9ff; line-height: 1.6; }
-    .copy-btn { width: 100%; padding: 10px; background: transparent; color: #00d9ff; border: 1px solid #00d9ff; border-radius: 8px; font-size: 12px; cursor: pointer; font-family: inherit; margin-top: 8px; }
-    .error { color: #ff3355; font-size: 12px; margin-top: 12px; padding: 10px 14px; background: rgba(255,51,85,0.08); border-radius: 6px; border: 1px solid rgba(255,51,85,0.2); }
-    .success-icon { font-size: 40px; text-align: center; margin-bottom: 16px; }
-  </style>
-</head>
-<body>
-<div class="card" id="card">
-  <div class="logo">IP<span>Shield</span></div>
-  <div id="content">
-    <div style="text-align:center;color:#4a6278;font-size:12px;">Checking invite…</div>
-  </div>
-</div>
-<script>
-  const token = "${token}";
-  async function init() {
-    if (!token) { showError("No invite token found in the link."); return; }
-    try {
-      const res  = await fetch("/api/keys/activate/" + token);
-      const data = await res.json();
-      if (!data.valid) { showError("This invite link is invalid or has already been used."); return; }
-      showInvite(data.invite);
-    } catch (e) { showError("Failed to load invite details."); }
-  }
-  function showInvite(invite) {
-    document.getElementById("content").innerHTML = \`
-      <h2>You're invited</h2>
-      <p>Click below to activate your IPShield API key. Save it somewhere safe — it will only be shown once.</p>
-      <div class="meta">
-        <div><span class="lbl">Name</span>        <span class="val">\${invite.name}</span></div>
-        <div><span class="lbl">Role</span>        <span class="val">\${invite.role}</span></div>
-        <div><span class="lbl">Daily limit</span> <span class="val">\${invite.daily_limit.toLocaleString()} requests</span></div>
-      </div>
-      <button class="btn" onclick="activate()">Activate My Key →</button>
-      <div id="err"></div>\`;
-  }
-  async function activate() {
-    const btn = document.querySelector(".btn");
-    btn.disabled = true; btn.textContent = "Activating…";
-    try {
-      const res  = await fetch("/api/keys/activate/" + token, { method: "POST" });
-      const data = await res.json();
-      if (!res.ok) { showError(data.error || "Activation failed."); btn.disabled = false; btn.textContent = "Activate My Key →"; return; }
-      showKey(data);
-    } catch (e) { showError("Activation failed. Please try again."); btn.disabled = false; btn.textContent = "Activate My Key →"; }
-  }
-  function showKey(data) {
-    document.getElementById("content").innerHTML = \`
-      <div class="success-icon">✓</div>
-      <h2 style="text-align:center;margin-bottom:8px;">Key activated</h2>
-      <p style="text-align:center;">Save this key now — it will <strong style="color:#c9d8e8;">never be shown again</strong>.</p>
-      <div class="key-box" id="keyVal">\${data.key}</div>
-      <button class="copy-btn" onclick="copyKey()">Copy API Key</button>
-      <div class="meta" style="margin-top:16px;">
-        <div><span class="lbl">Name</span>  <span class="val">\${data.name}</span></div>
-        <div><span class="lbl">Role</span>  <span class="val">\${data.role}</span></div>
-        <div><span class="lbl">Limit</span> <span class="val">\${data.daily_limit.toLocaleString()} req/day</span></div>
-      </div>
-      <p style="margin-top:16px;font-size:11px;color:#4a6278;">
-        Include your key in every API request:<br>
-        <span style="color:#00d9ff;">x-api-key: \${data.key.slice(0,16)}••••</span>
-      </p>\`;
-  }
-  function copyKey() {
-    const key = document.getElementById("keyVal")?.textContent;
-    if (!key) return;
-    navigator.clipboard.writeText(key).then(() => {
-      const btn = document.querySelector(".copy-btn");
-      btn.textContent = "✓ Copied!";
-      setTimeout(() => { btn.textContent = "Copy API Key"; }, 2000);
+app.get("/api/debug/schema-check", async (req, res) => {
+  const db = require("./store/db");
+  try {
+    const cols = await db.query(
+      `SELECT column_name FROM information_schema.columns
+       WHERE table_name = 'api_keys' ORDER BY ordinal_position`
+    );
+    const pending = await db.query(
+      `SELECT id, name, status, length(invite_token) as token_len,
+              left(invite_token, 8) as token_preview
+       FROM api_keys WHERE status = 'pending' LIMIT 5`
+    );
+    res.json({
+      columns:     cols.rows.map(r => r.column_name),
+      pendingKeys: pending.rows
     });
+  } catch (err) {
+    res.json({ error: err.message, code: err.code });
   }
-  function showError(msg) {
-    document.getElementById("content").innerHTML =
-      \`<div class="error">⚠ \${msg}</div>
-       <p style="margin-top:16px;font-size:11px;color:#4a6278;">Contact the admin if you believe this is an error.</p>\`;
-  }
-  init();
-</script>
-</body>
-</html>`);
 });
 
 
-// 10. PUBLIC API ROUTES (no auth required)
+//  PUBLIC API ROUTES (no auth required)
 
 // Health
 async function healthHandler(req, res) {
@@ -342,7 +255,7 @@ app.use("/api/v1/stats", statsRoutes);
 app.use("/api/v2/stats", statsRoutes);
 
 
-// 12. PROTECTED API ROUTES
+//  PROTECTED API ROUTES
 
 // Helper — mount a router on multiple prefixes.
 function mountShared(prefixes, routePath, routerArg) {
@@ -382,7 +295,7 @@ app.use("/api/v1/cases", (req, res) => res.status(404).json({
 }));
 
 
-// 13. SPA FALLBACK & 404
+//  SPA FALLBACK & 404
 app.use(express.static(path.join(__dirname, "../public")));
 
 
@@ -415,7 +328,7 @@ app.use((req, res) => res.status(404).json({
 }));
 
 
-// 14. ERROR HANDLERS (must be after all routes)
+//  ERROR HANDLERS (must be after all routes)
 
 if (process.env.SENTRY_DSN) {
   try { app.use(require("@sentry/node").Handlers.errorHandler()); } catch (_) {}
@@ -423,7 +336,7 @@ if (process.env.SENTRY_DSN) {
 app.use(errorMiddleware);
 
 
-// 15. BACKGROUND JOBS
+//  BACKGROUND JOBS
 const { startMonitor } = require("./jobs/monitor.job");
 startMonitor();
 
