@@ -317,13 +317,11 @@ app.get("/api/versions", versionInfoHandler);
 app.get("/api/v1",       versionInfoHandler);
 app.get("/api/v2",       versionInfoHandler);
 
-// Key activation (public — no auth, must be before authMiddleware)
-app.get("/api/keys/activate/:token",     keysRoutes);
-app.post("/api/keys/activate/:token",    keysRoutes);
-app.get("/api/v1/keys/activate/:token",  keysRoutes);
-app.post("/api/v1/keys/activate/:token", keysRoutes);
-app.get("/api/v2/keys/activate/:token",  keysRoutes);
-app.post("/api/v2/keys/activate/:token", keysRoutes);
+
+// (public — no auth, must be before authMiddleware)
+app.use("/api/keys",    keysRoutes);
+app.use("/api/v1/keys", keysRoutes);
+app.use("/api/v2/keys", keysRoutes);
 
 
 // 11. AUTH MIDDLEWARE (protects all /api/* routes below this point)
@@ -362,7 +360,6 @@ mountShared(SHARED_PREFIXES, "/report",          reportRoutes);
 mountShared(SHARED_PREFIXES, "/timeline",        timelineRoutes);
 mountShared(SHARED_PREFIXES, "/threat",          threatRoutes);
 mountShared(SHARED_PREFIXES, "/threat/clusters", clusterRoutes);
-mountShared(SHARED_PREFIXES, "/keys",            keysRoutes);
 
 // v2-only
 mountShared(V2_PREFIXES, "/blacklist",      blacklistRoutes);
