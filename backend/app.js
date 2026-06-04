@@ -47,17 +47,6 @@ app.use((req, res, next) => {
   next();
 });
 
-// Serve landing page at /landing or make it the public homepage
-app.get("/landing", (req, res) => {
-  res.sendFile(path.join(__dirname, "../public", "landing.html"));
-});
-
-// Serve activate page
-app.get("/activate", (req, res) => {
-  res.sendFile(path.join(__dirname, "../public", "activate.html"));
-});
-
-
 // 1. SENTRY (must be first handler)
 if (process.env.SENTRY_DSN) {
   try {
@@ -150,12 +139,6 @@ app.use(express.static(path.join(__dirname, "../public"), {
   maxAge: isProd ? "1d" : 0,
   etag:   true,
 }));
-
-
-// 9. HTML PAGE ROUTES (public — no auth)
-app.get("/login", (req, res) => {
-  res.sendFile(path.join(__dirname, "../public", "login.html"));
-});
 
 app.get("/activate", (req, res) => {
   const token = req.query.token || "";
@@ -401,13 +384,27 @@ app.use("/api/v1/cases", (req, res) => res.status(404).json({
 app.use(express.static(path.join(__dirname, "../public")));
 
 
-
 app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "../public", "landing.html"));
+  res.sendFile(path.join(__dirname, "../public", "index.html"));
+});
+
+// Serve landing page at /landing or make it the public homepage
+app.get("/landing", (req, res) => {
+  res.sendFile(path.join(__dirname, "../public", "index.html"));
 });
 
 app.get("/dashboard", (req, res) => {
-  res.sendFile(path.join(__dirname, "../public", "index.html"));
+  res.sendFile(path.join(__dirname, "../public", "dashboard.html"));
+});
+
+// 9. HTML PAGE ROUTES (public — no auth)
+app.get("/login", (req, res) => {
+  res.sendFile(path.join(__dirname, "../public", "login.html"));
+});
+
+// Serve activate page
+app.get("/activate", (req, res) => {
+  res.sendFile(path.join(__dirname, "../public", "activate.html"));
 });
 
 app.get(/.*/, (req, res) => {
