@@ -135,23 +135,83 @@ router.post("/invite",
 );
 
 // ── GET /api/keys/activate/:token — check token validity 
-
-router.get("/activate/:token",
-  [ param("token").trim().notEmpty().isLength({ min: 40, max: 60 })],
+router.post("/activate/:token",
+  [param("token").trim().notEmpty().isLength({ min: 40, max: 60 })],
   validate,
   async (req, res) => {
     try {
-      const res2 = await require("../store/db").query(
-        `SELECT name, email, role, daily_limit, invited_at
-         FROM api_keys WHERE invite_token = $1 AND status = 'pending'`,
+      const { email, password } = req.body;
+
+      if (!password || password.length < 8) {
+        return res.status(400).json({ error: "Password must be at least 8 characters" });
+      }
+      if (!email || !email.includes("@")) {
+        return res.status(400).json({ error: "Valid email is required" });
+      }
+
+      // Check token is still valid
+      const check = await db.query(
+        `SELECT id, name, email, role, daily_limit 
+         FROM api_keys
+         WHERE invite_token = $1 AND status = 'pending'`,
         [req.params.token]
       );
-      if (!res2.rows.length) {
-        return res.status(404).json({ valid: false, error: "Invalid or expired invite token" });
+      if (!check.rows.length) {
+        return res.status(404).json({ error: "Invalid or already-used invite token" });
       }
-      res.json({ valid: true, invite: res2.rows[0] });
+
+      const bcrypt       = require("bcryptjs");
+      const crypto       = require("crypto");
+      const passwordHash = await bcrypt.hash(password, 12);
+      
+      // Generate a secure API key
+      const apiKey     = "ips_" + crypto.randomBytes(32).toString("hex");
+      const keyPreview = apiKey.slice(0, 12) + "••••••••••••";
+
+      const result = await db.query(
+        `UPDATE api_keys
+         SET status        = 'active',
+             activated_at  = NOW(),
+             invite_token  = NULL,
+             email         = $1,
+             password_hash = $2,
+             key           = $3,
+             key_preview   = $4
+         WHERE id = $5
+         RETURNING id, name, email, role, status, daily_limit`,
+        [
+          email.toLowerCase().trim(),
+          passwordHash,
+          apiKey,
+          keyPreview,
+          check.rows[0].id
+        ]
+      );
+
+      if (!result.rows.length) {
+        return res.status(404).json({ error: "Activation failed" });
+      }
+
+      const activated = result.rows[0];
+
+      res.json({
+        message:     "Account activated successfully.",
+        name:        activated.name,
+        email:       activated.email,
+        role:        activated.role,
+        daily_limit: activated.daily_limit,
+        key:         apiKey,   // shown once
+      });
+
     } catch (err) {
-      res.status(500).json({ error: "Token check failed" });
+      console.error("[activate POST] ERROR:", err.message);
+      console.error("[activate POST] CODE:", err.code);
+      console.error("[activate POST] DETAIL:", err.detail);
+      res.status(500).json({ 
+        error: err.message,
+        code: err.code || null,
+        detail: err.detail || null
+      });
     }
   }
 );
