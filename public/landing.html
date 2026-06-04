@@ -663,10 +663,26 @@
 
     loadPublicStats();
 
-    // Redirect to dashboard if already logged in
-    if (localStorage.getItem("token")) {
-      window.location.replace("/dashboard");
+    // Only redirect logged-in users to dashboard, never redirect to login:
+    const existingToken = localStorage.getItem("token");
+    if (existingToken) {
+      // Verify token is still valid before redirecting
+      fetch("/api/v1/keys/me", {
+        headers: { Authorization: `Bearer ${existingToken}` }
+      })
+      .then(r => {
+        if (r.ok) {
+          window.location.replace("/dashboard");
+        } else {
+          // Token invalid — clear it, stay on landing page
+          localStorage.removeItem("token");
+          localStorage.removeItem("user");
+        }
+      })
+      .catch(() => {
+      });
     }
+
 
 
   // Build hamburger menu functionality
