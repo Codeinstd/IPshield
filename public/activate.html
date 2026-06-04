@@ -395,8 +395,8 @@
 
   function showError(msg) {
     const el = document.getElementById("errorMsg");
-    el.textContent    = msg;
-    el.style.display  = "block";
+    el.textContent   = msg;
+    el.style.display = "block";
   }
 
   function hideError() {
@@ -405,41 +405,41 @@
 
   // Password strength checker
   document.getElementById("passwordInput").addEventListener("input", function() {
-    const pw  = this.value;
-    const bar = document.getElementById("strengthBar");
+    const pw   = this.value;
+    const bar  = document.getElementById("strengthBar");
     const hint = document.getElementById("passwordHint");
 
     let strength = 0;
-    if (pw.length >= 8)                        strength++;
-    if (pw.length >= 12)                       strength++;
-    if (/[A-Z]/.test(pw))                      strength++;
-    if (/[0-9]/.test(pw))                      strength++;
-    if (/[^A-Za-z0-9]/.test(pw))              strength++;
+    if (pw.length >= 8)           strength++;
+    if (pw.length >= 12)          strength++;
+    if (/[A-Z]/.test(pw))         strength++;
+    if (/[0-9]/.test(pw))         strength++;
+    if (/[^A-Za-z0-9]/.test(pw))  strength++;
 
     const levels = [
       { width: "0%",   color: "transparent",    text: "Enter a password" },
       { width: "20%",  color: "var(--critical)", text: "Very weak" },
-      { width: "40%",  color: "var(--high)",     text: "Weak" },
-      { width: "60%",  color: "var(--medium)",   text: "Fair" },
+      { width: "40%",  color: "#ff7700",         text: "Weak" },
+      { width: "60%",  color: "#ffcc00",         text: "Fair" },
       { width: "80%",  color: "var(--accent)",   text: "Good" },
       { width: "100%", color: "var(--low)",      text: "Strong ✓" },
     ];
 
-    const level        = levels[Math.min(strength, 5)];
-    bar.style.width    = level.width;
+    const level          = levels[Math.min(strength, 5)];
+    bar.style.width      = level.width;
     bar.style.background = level.color;
-    hint.textContent   = level.text;
-    hint.style.color   = level.color === "transparent" ? "var(--text3)" : level.color;
+    hint.textContent     = level.text;
+    hint.style.color     = level.color === "transparent" ? "var(--text3)" : level.color;
   });
 
   // Toggle password visibility
   document.getElementById("togglePassword").addEventListener("click", function() {
-    const input = document.getElementById("passwordInput");
-    input.type  = input.type === "password" ? "text" : "password";
+    const input  = document.getElementById("passwordInput");
+    input.type   = input.type === "password" ? "text" : "password";
     this.textContent = input.type === "password" ? "👁" : "🙈";
   });
 
-  // Validate token on load
+  // Validate token on load — loads invite details
   async function validateToken() {
     if (!token) { show("invalidState"); return; }
 
@@ -452,14 +452,13 @@
         return;
       }
 
-      // Populate invite info
       const invite = data.invite;
-      document.getElementById("inviteName").textContent  = invite.name        || "—";
-      document.getElementById("inviteEmail").textContent = invite.email        || "—";
+
+      document.getElementById("inviteName").textContent  = invite.name  || "—";
+      document.getElementById("inviteEmail").textContent = invite.email || "—";
       document.getElementById("inviteLimit").textContent =
         (invite.daily_limit || 1000).toLocaleString() + " req/day";
 
-      // Role badge
       const roleEl  = document.getElementById("inviteRole");
       const roleMap = {
         admin:    "role-admin",
@@ -470,7 +469,7 @@
         ${invite.role || "readonly"}
       </span>`;
 
-      // Pre-fill email if provided
+      // Pre-fill email if known
       if (invite.email) {
         document.getElementById("emailInput").value    = invite.email;
         document.getElementById("emailInput").disabled = false;
@@ -480,6 +479,7 @@
       show("activateForm");
 
     } catch (err) {
+      console.error("validateToken error:", err);
       show("invalidState");
     }
   }
@@ -493,12 +493,11 @@
     const confirm  = document.getElementById("confirmInput").value;
     const btn      = document.getElementById("activateBtn");
 
-    // Validate
-    if (!email)              { showError("Email address is required.");       return; }
-    if (!email.includes("@")){ showError("Enter a valid email address.");     return; }
-    if (!password)           { showError("Password is required.");            return; }
-    if (password.length < 8) { showError("Password must be at least 8 characters."); return; }
-    if (password !== confirm) { showError("Passwords do not match.");          return; }
+    if (!email)               { showError("Email address is required.");              return; }
+    if (!email.includes("@")) { showError("Enter a valid email address.");            return; }
+    if (!password)            { showError("Password is required.");                   return; }
+    if (password.length < 8)  { showError("Password must be at least 8 characters."); return; }
+    if (password !== confirm)  { showError("Passwords do not match.");                return; }
 
     btn.disabled    = true;
     btn.textContent = "Activating…";
@@ -513,46 +512,75 @@
       const data = await res.json();
 
       if (!res.ok) {
-        showError(data.error || "Activation failed. Please try again.");
+        // Show the real server error so we can debug
+        showError(data.error || data.detail || "Activation failed. Please try again.");
         btn.disabled    = false;
         btn.textContent = "Activate Account →";
         return;
       }
 
-      // Show success
-        const activated = result.rows?.[0] || data;
-        document.getElementById("successMsg").innerHTML = `
-          Welcome, ${data.name}! Your <strong>${data.role}</strong> account is ready.<br><br>
-          <strong style="color:var(--critical);">Save your API key now — it will never be shown again:</strong><br><br>
-          <div style="background:var(--bg2);border:1px solid var(--accent);border-radius:8px;
-                      padding:12px 16px;font-family:monospace;font-size:12px;
-                      color:var(--accent);word-break:break-all;margin:8px 0;">
-            ${data.key}
-          </div>
-          <button onclick="navigator.clipboard.writeText('${data.key}').then(()=>this.textContent='✓ Copied!')"
-            style="margin-top:8px;padding:6px 16px;background:transparent;border:1px solid var(--accent);
-                  color:var(--accent);border-radius:6px;cursor:pointer;font-family:inherit;font-size:11px;">
-            Copy API Key
-          </button>
-        `;
-        show("successState");
+      // Build success HTML — data.key is only returned once
+      const keyHtml = data.key ? `
+        <br><br>
+        <strong style="color:var(--critical);">
+          Save your API key — it will never be shown again:
+        </strong>
+        <div style="background:var(--bg2);border:1px solid var(--accent);
+                    border-radius:8px;padding:12px 16px;font-family:monospace;
+                    font-size:11px;color:var(--accent);word-break:break-all;
+                    margin:12px 0;text-align:left;">
+          ${escHtml(data.key)}
+        </div>
+        <button id="copyKeyBtn"
+          style="padding:6px 16px;background:transparent;border:1px solid var(--accent);
+                 color:var(--accent);border-radius:6px;cursor:pointer;
+                 font-family:inherit;font-size:11px;margin-bottom:16px;">
+          Copy API Key
+        </button>` : "";
+
+      document.getElementById("successMsg").innerHTML = `
+        Welcome, <strong>${escHtml(data.name)}</strong>!
+        Your <strong>${escHtml(data.role)}</strong> account is ready.
+        ${keyHtml}
+        <br>Sign in with your email and password.
+      `;
+
+      // Wire copy button after it's in the DOM
+      if (data.key) {
+        document.getElementById("copyKeyBtn")?.addEventListener("click", function() {
+          navigator.clipboard.writeText(data.key)
+            .then(() => { this.textContent = "✓ Copied!"; })
+            .catch(() => { this.textContent = "Copy failed"; });
+        });
+      }
+
+      show("successState");
 
     } catch (err) {
+      console.error("Activation fetch error:", err);
       showError("Network error. Please try again.");
       btn.disabled    = false;
       btn.textContent = "Activate Account →";
     }
   });
 
-  // Enter key submits
+  // Enter key submits form
   ["emailInput","passwordInput","confirmInput"].forEach(id => {
     document.getElementById(id).addEventListener("keydown", e => {
       if (e.key === "Enter") document.getElementById("activateBtn").click();
     });
   });
 
+  // Simple HTML escape to avoid XSS in success message
+  function escHtml(str) {
+    return String(str || "")
+      .replace(/&/g,"&amp;")
+      .replace(/</g,"&lt;")
+      .replace(/>/g,"&gt;")
+      .replace(/"/g,"&quot;");
+  }
+
   validateToken();
 </script>
-
 </body>
 </html>

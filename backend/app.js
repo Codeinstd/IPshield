@@ -140,6 +140,12 @@ app.use(express.static(path.join(__dirname, "../public"), {
   etag:   true,
 }));
 
+// Serve activate page
+app.get("/activate", (req, res) => {
+  res.sendFile(path.join(__dirname, "../public", "activate.html"));
+});
+
+
 app.get("/activate", (req, res) => {
   const token = req.query.token || "";
   res.send(`<!DOCTYPE html>
@@ -396,11 +402,6 @@ app.get("/dashboard", (req, res) => {
 // 9. HTML PAGE ROUTES (public — no auth)
 app.get("/login", (req, res) => {
   res.sendFile(path.join(__dirname, "../public", "login.html"));
-});
-
-// Serve activate page
-app.get("/activate", (req, res) => {
-  res.sendFile(path.join(__dirname, "../public", "activate.html"));
 });
 
 app.get(/.*/, (req, res) => {
