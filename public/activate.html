@@ -522,13 +522,13 @@
       // Build success HTML — data.key is only returned once
       const keyHtml = data.key ? `
         <br><br>
-        <strong style="color:var(--critical);">
+        <strong style="color:var(--critical);font-size:10px">
           Save your API key — it will never be shown again:
         </strong>
-        <div style="background:var(--bg2);border:1px solid var(--accent);
+        <div style="background:var(--bg2);border:0.5px solid var(--accent);
                     border-radius:8px;padding:12px 16px;font-family:monospace;
                     font-size:11px;color:var(--accent);word-break:break-all;
-                    margin:12px 0;text-align:left;">
+                    margin:12px 0;text-align:center;">
           ${escHtml(data.key)}
         </div>
         <button id="copyKeyBtn"

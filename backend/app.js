@@ -32,6 +32,7 @@ const caseAccountsRoutes = require("./routes/caseAccounts.routes");
 const clusterRoutes      = require("./routes/clusters.routes");
 const keysRoutes         = require("./routes/keys.routes");
 const authRoutes         = require("./routes/auth.routes");
+const accessRequestRoutes = require("./routes/accessRequest.routes");
 
 // ── v2-only route imports 
 const blacklistRoutes = require("./routes/blacklist.routes");
@@ -145,28 +146,6 @@ app.get("/activate", (req, res) => {
   res.sendFile(path.join(__dirname, "../public", "activate.html"));
 });
 
-app.get("/api/debug/schema-check", async (req, res) => {
-  const db = require("./store/db");
-  try {
-    const cols = await db.query(
-      `SELECT column_name FROM information_schema.columns
-       WHERE table_name = 'api_keys' ORDER BY ordinal_position`
-    );
-    const pending = await db.query(
-      `SELECT id, name, status, length(invite_token) as token_len,
-              left(invite_token, 8) as token_preview
-       FROM api_keys WHERE status = 'pending' LIMIT 5`
-    );
-    res.json({
-      columns:     cols.rows.map(r => r.column_name),
-      pendingKeys: pending.rows
-    });
-  } catch (err) {
-    res.json({ error: err.message, code: err.code });
-  }
-});
-
-
 //  PUBLIC API ROUTES (no auth required)
 
 // Health
@@ -220,6 +199,8 @@ app.use("/api/v1/auth", authRoutes);
 app.use("/api/v2/auth", authRoutes);
 app.use("/api/auth",    authRoutes);
 
+app.use("/api/access-request", accessRequestRoutes);
+
 // Version info
 function versionInfoHandler(req, res) {
   res.json({
@@ -242,7 +223,7 @@ app.use("/api/v1/keys", keysRoutes);
 app.use("/api/v2/keys", keysRoutes);
 
 
-// 11. AUTH MIDDLEWARE (protects all /api/* routes below this point)
+//  AUTH MIDDLEWARE (protects all /api/* routes below this point)
 
 app.use("/api/", authMiddleware);
 

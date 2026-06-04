@@ -4176,7 +4176,7 @@ async function loadStats() {
             </div>
           </div>
 
-          <!-- ── TARGETS TAB ─────────────────────────────────────────────────── -->
+          <!-- ── TARGETS TAB  -->
           <div id="siemTab-targets" style="display:none;flex-direction:column;">
             <div style="padding:12px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
               <span style="font-size:11px;color:var(--text3);">All enabled targets receive every qualifying event simultaneously</span>

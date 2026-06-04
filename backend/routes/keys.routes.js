@@ -59,7 +59,7 @@ router.get("/",
 );
 
 // ── POST /api/keys/invite 
-// AFTER — shows real error in both server logs and response:
+//shows real error in both server logs and response:
 router.post("/invite",
   requireAuth, requireRole("admin"),
   [
@@ -239,7 +239,7 @@ router.get("/activate/:token",
       );
 
       if (!result.rows.length) {
-        // Extra debug info — remove after fixing
+        // Extra debug info 
         const anyMatch = await db.query(
           `SELECT id, status, left(invite_token,8) as preview 
            FROM api_keys 
@@ -249,7 +249,6 @@ router.get("/activate/:token",
         return res.status(404).json({
           valid: false,
           error: "Invalid or expired invite token",
-          debug_matches: anyMatch.rows   // remove this line in prod
         });
       }
 
