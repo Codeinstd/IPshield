@@ -371,6 +371,33 @@
   if (!localStorage.getItem("token")) {
     window.location.replace("/login");
   }
+
+  const NOTACTIVE_TIMEOUT = 3 * 60 * 1000;
+  let notactiveTimer;
+
+  function logoutUser() {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    window.location.replace("/login");
+  }
+
+  function resetNotActiveTimer() {
+    clearTimeout(notactiveTimer);
+    notactiveTimer = setTimeout(logoutUser, NOTACTIVE_TIMEOUT);
+  }
+
+  [
+    "mousemove",
+    "mousedown",
+    "keydown",
+    "scroll",
+    "touchstart",
+    "click"
+  ].forEach(event => {
+    document.addEventListener(event, resetNotActiveTimer, true);
+  });
+
+  resetNotActiveTimer();
 </script>
 <div class="app">
  <header id="mainHeader">
