@@ -178,18 +178,18 @@ footer a:hover{color:var(--accent);}
   <h1>Know the risk behind<br>every <span>IP address</span></h1>
   <p>IPShield scores any IP in milliseconds — combining geo intelligence, threat feeds, WHOIS signals, Shodan data, and behavioral analysis into a single actionable risk score.</p>
   <div class="hero-actions">
-    <a href="/login" class="btn btn-primary">Get Started →</a>
+    <button onclick="showAccessModal()" class="btn btn-primary">Request Access →</button>
     <a href="/api/docs" class="btn btn-ghost">View API Docs</a>
   </div>
 </section>
 
 <div class="stats-bar">
   <div class="stat-item">
-    <div class="stat-num" id="publicTotal">—</div>
+    <div class="stat-num" id="publicTotal">450k</div>
     <div class="stat-label">IPs Scored</div>
   </div>
   <div class="stat-item">
-    <div class="stat-num" id="publicCritical">—</div>
+    <div class="stat-num" id="publicCritical">30k</div>
     <div class="stat-label">Critical Threats</div>
   </div>
   <div class="stat-item">

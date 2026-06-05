@@ -274,13 +274,7 @@ try {
       border-radius: 16px;
       overflow: hidden;
     }
-    .hero::before {
-      content: '';
-      position: absolute; top: -60px; right: -60px;
-      width: 200px; height: 200px;
-      background: radial-gradient(circle, rgba(0,217,255,0.08) 0%, transparent 70%);
-      border-radius: 50%;
-    }
+   
     .hero-badge {
       display: inline-flex; align-items: center; gap: 6px;
       font-size: 11px; font-weight: 600; letter-spacing: 1px;
