@@ -375,8 +375,8 @@ function buildDashboard(token) {
     <div class="live-dot"></div>
     <span class="refresh-info">Live · refreshes every 10s</span>
     <span id="lastUpdate"></span>
-    <a href="/api/docs" class="back-link">← Docs</a>
-    <a href="/" class="back-link">← App</a>
+    <a href="/api/docs"  class="back-link">← Docs</a>
+    <a href="/dashboard" class="back-link">← App</a>
   </div>
   <div class="hamburger" onclick="toggleMenu()" aria-label="Open menu">☰</div>
 
@@ -402,7 +402,7 @@ function buildDashboard(token) {
       </div>
       <div id="lastUpdateMobile">14:11:32</div>
       </div>
-      <a href="/" class="drawer-back-item">← Back to App</a>
+      <a href="/dashboard" class="drawer-back-item">← Back to App</a>
     </div>
     </nav>
   </div>
@@ -521,21 +521,22 @@ function buildDashboard(token) {
     </div>
   </div>
 </div>
-
 <script>
-  // ── Auth helper — JWT first, API key fallback 
+  const _TOKEN = ${JSON.stringify(token)};
+
+  // ── Single auth helper — server token first, localStorage fallback ──
   function getAuthHeaders() {
-    const token  = localStorage.getItem("token");
+    const tok    = _TOKEN || localStorage.getItem("token");
     const apiKey = localStorage.getItem("ipshield_api_key");
-    if (token)  return { "Authorization": "Bearer " + token };
+    if (tok)    return { "Authorization": "Bearer " + tok };
     if (apiKey) return { "x-api-key": apiKey };
     return {};
   }
 
-  function fmt(n) { 
-    return n >= 1e6 ? (n/1e6).toFixed(1)+"M" 
-         : n >= 1e3 ? (n/1e3).toFixed(1)+"k" 
-         : String(n); 
+  function fmt(n) {
+    return n >= 1e6 ? (n/1e6).toFixed(1)+"M"
+         : n >= 1e3 ? (n/1e3).toFixed(1)+"k"
+         : String(n);
   }
 
   function methodBadge(m) {
@@ -544,16 +545,16 @@ function buildDashboard(token) {
   }
 
   function statusClass(s) {
-    if (s < 300)    return "status-ok";
-    if (s === 429)  return "status-warn";
-    if (s >= 400)   return "status-err";
+    if (s < 300)   return "status-ok";
+    if (s === 429) return "status-warn";
+    if (s >= 400)  return "status-err";
     return "";
   }
 
   function latBar(val, max) {
     const pct   = max > 0 ? Math.round((val / max) * 100) : 0;
-    const color = pct > 80 ? "var(--critical)" 
-                : pct > 50 ? "var(--medium)" 
+    const color = pct > 80 ? "var(--critical)"
+                : pct > 50 ? "var(--medium)"
                 : "var(--accent)";
     return \`<div class="lat-bar-wrap">
       <div class="lat-bar-bg">
@@ -624,40 +625,29 @@ function buildDashboard(token) {
     ctx.stroke();
   }
 
-  // Token injected by server at page-build time
-  const _TOKEN = ${JSON.stringify(token)}; 
-
-  function getAuthHeaders() {
-    const tok    = _TOKEN || localStorage.getItem("token");
-    const apiKey = localStorage.getItem("ipshield_api_key");
-    if (tok)    return { "Authorization": "Bearer " + tok };
-    if (apiKey) return { "x-api-key": apiKey };
-    return {};
-  }
-
   async function refresh() {
     const headers = getAuthHeaders();
 
     if (!Object.keys(headers).length) {
       document.getElementById("endpointTable").innerHTML =
         \`<tr><td colspan="9" style="text-align:center;color:var(--critical);padding:32px;">
-          ⚠ Not authenticated — 
-          <a href="/" style="color:var(--accent);">return to app</a> and log in first
+          ⚠ Not authenticated —
+          <a href="/dashboard" style="color:var(--accent);">return to app</a> and log in first
         </td></tr>\`;
       return;
     }
 
     try {
       const [summaryRes, recentRes] = await Promise.all([
-        fetch("/api/v1/telemetry",                 { headers }),
+        fetch("/api/v1/telemetry",                  { headers }),
         fetch("/api/v1/telemetry/history?limit=20", { headers }),
       ]);
 
       if (summaryRes.status === 401 || summaryRes.status === 403) {
         document.getElementById("endpointTable").innerHTML =
           \`<tr><td colspan="9" style="text-align:center;color:var(--critical);padding:32px;">
-            ⚠ Session expired — 
-            <a href="/" style="color:var(--accent);">return to app</a> and log in again
+            ⚠ Session expired —
+            <a href="/dashboard" style="color:var(--accent);">return to app</a> and log in again
           </td></tr>\`;
         return;
       }
@@ -665,7 +655,7 @@ function buildDashboard(token) {
       const summary = await summaryRes.json();
       const recent  = await recentRes.json();
 
-      // ── Stat cards
+      // ── Stat cards ─
       document.getElementById("totalReqs").textContent     = fmt(summary.requests.total);
       document.getElementById("rps").textContent           = summary.requests.rps + " req/s";
       document.getElementById("errorRate").textContent     = summary.requests.errorRate;
@@ -675,22 +665,22 @@ function buildDashboard(token) {
       document.getElementById("endpointCount").textContent = summary.topEndpoints.length;
       document.getElementById("consumerCount").textContent = summary.topConsumers.length;
 
-      // ── Status pills 
+      // ── Status pills ──
       document.getElementById("statusPills").innerHTML =
         Object.entries(summary.byStatus)
           .sort(([a],[b]) => Number(a) - Number(b))
           .map(([code, count]) => {
-            const cls = code.startsWith("2") ? "s2xx" 
-                      : code === "429"        ? "s429" 
-                      : code.startsWith("4")  ? "s4xx" 
+            const cls = code.startsWith("2") ? "s2xx"
+                      : code === "429"        ? "s429"
+                      : code.startsWith("4")  ? "s4xx"
                       : "s5xx";
             return \`<div class="status-pill \${cls}">\${code} <span style="opacity:0.7;">\${fmt(count)}</span></div>\`;
           }).join("");
 
-      // ── Sparkline 
+      // ── Sparkline ──
       drawSparkline(summary.hourlyTraffic);
 
-      // ── Endpoint table 
+      // ── Endpoint table ─
       const maxAvg = Math.max(...summary.topEndpoints.map(e => e.p99), 1);
       document.getElementById("endpointTable").innerHTML =
         summary.topEndpoints.slice(0, 20).map(ep => {
@@ -719,7 +709,7 @@ function buildDashboard(token) {
           No data yet — make some API requests
         </td></tr>\`;
 
-      // ── Consumer table 
+      // ── Consumer table ─
       document.getElementById("consumerTable").innerHTML =
         summary.topConsumers.slice(0, 10).map(c => \`<tr>
           <td class="mono" style="color:var(--accent);font-size:11px;">\${c.key}</td>
@@ -731,9 +721,9 @@ function buildDashboard(token) {
           No consumer data yet
         </td></tr>\`;
 
-      // ── Recent requests 
-      const rows = Array.isArray(recent?.results) ? recent.results 
-                 : Array.isArray(recent)           ? recent 
+      // ── Recent requests ──
+      const rows = Array.isArray(recent?.results) ? recent.results
+                 : Array.isArray(recent)           ? recent
                  : [];
       document.getElementById("recentTable").innerHTML =
         rows.slice(0, 20).map(r => \`<tr>
@@ -748,10 +738,12 @@ function buildDashboard(token) {
           No requests yet
         </td></tr>\`;
 
-      // ── Timestamps 
+      // ── Timestamps ──
       const now = new Date().toLocaleTimeString();
-      document.getElementById("lastUpdate").textContent       = now;
-      document.getElementById("lastUpdateMobile").textContent = now;
+      const lu  = document.getElementById("lastUpdate");
+      const lum = document.getElementById("lastUpdateMobile");
+      if (lu)  lu.textContent  = now;
+      if (lum) lum.textContent = now;
 
     } catch (err) {
       console.error("Telemetry refresh error:", err);
@@ -761,7 +753,6 @@ function buildDashboard(token) {
   refresh();
   setInterval(refresh, 10000);
 </script>
-
 
 
 </body>

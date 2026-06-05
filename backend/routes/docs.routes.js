@@ -293,7 +293,7 @@ try {
 
     .hero h1 {
       font-size: 32px; font-weight: 800; line-height: 1.2;
-      margin-bottom: 12px; color: var(--text);
+      margin-bottom: 12px; color: var(--text); font-family: 'Syne', sans-serif;
     }
     .hero h1 span { color: var(--accent); }
     .hero p { font-size: 14px; color: var(--text2); line-height: 1.7; max-width: 560px; margin-bottom: 24px; }

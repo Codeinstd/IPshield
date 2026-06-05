@@ -728,7 +728,8 @@ function _closeDrawer() {
   });
  
   document.getElementById("auditLoadDB")?.addEventListener("click", async () => {
-    usingDB = true; auditPage = 0;
+    usingDB = true; 
+    auditPage = 0;
     await fetchAndRenderFromDB();
   });
  
@@ -2705,33 +2706,15 @@ function generateRules(format, ips, action = "DROP") {
   }
 }
  
-// ── Filter in-memory entries 
-function applyFilters(entries) {
-  return entries.filter(e => {
-    const f = auditFilters;
-    if (f.q) {
-      const q = f.q.toLowerCase();
-      if (!e.ip?.toLowerCase().includes(q) &&
-          !e.geo?.country?.toLowerCase().includes(q) &&
-          !e.network?.isp?.toLowerCase().includes(q)) return false;
-    }
-    if (f.risk       && e.riskLevel !== f.risk)                                  return false;
-    if (f.minScore != null && (e.score??0) < f.minScore)                         return false;
-    if (f.maxScore != null && (e.score??0) > f.maxScore)                         return false;
-    if (f.proxy    != null && !!e.intelligence?.isProxy !== f.proxy)             return false;
-    if (f.tor      != null && !!e.intelligence?.isTor   !== f.tor)               return false;
-    if (f.datacenter != null && !!e.intelligence?.isDatacenter !== f.datacenter) return false;
-    return true;
-  });
-}
- 
+// sort entries
 function sortEntries(entries) {
+  const getDate = e => e.meta?.scoredAt || e.scored_at || 0;
   return [...entries].sort((a, b) => {
     switch (auditFilters.sort) {
-      case "score_desc": return (b.score??0) - (a.score??0);
-      case "score_asc":  return (a.score??0) - (b.score??0);
-      case "date_asc":   return new Date(a.meta?.scoredAt||0) - new Date(b.meta?.scoredAt||0);
-      default:           return new Date(b.meta?.scoredAt||0) - new Date(a.meta?.scoredAt||0);
+      case "score_desc": return (b.score ?? 0) - (a.score ?? 0);
+      case "score_asc":  return (a.score ?? 0) - (b.score ?? 0);
+      case "date_asc":   return new Date(getDate(a)) - new Date(getDate(b));
+      default:           return new Date(getDate(b)) - new Date(getDate(a));
     }
   });
 }
@@ -2773,11 +2756,6 @@ async function fetchAndRenderFromDB() {
 }
  
 // ── Main renderAudit 
-function addAuditEntry(d) {
-  auditEntries.unshift(d);
-  if (auditEntries.length > 200) auditEntries.pop();
-  if (!usingDB) renderAudit();
-}
  
 function renderAudit() {
   if (usingDB) { fetchAndRenderFromDB(); return; }
@@ -3590,32 +3568,6 @@ function applyTheme(dark) {
     auditEntries.unshift(d);
     if (auditEntries.length > 100) auditEntries.pop();
     renderAudit();
-  }
-
-  function renderAudit() {
-    auditCount.textContent = `${auditEntries.length} ${auditEntries.length===1?"entry":"entries"}`;
-    if (!auditEntries.length) {
-      auditList.innerHTML = `<div style="padding:24px;text-align:center;color:var(--text3);font-size:11px;">No queries yet</div>`;
-      return;
-    }
-    auditList.innerHTML = auditEntries.map(e => {
-      const f = [
-        e.threatFeeds?.feodo&&"F",
-        e.threatFeeds?.spamhaus&&"S",
-        e.threatFeeds?.emergingThreats&&"E",
-        e.threatFeeds?.otx?.pulseCount>0&&"O"
-      ].filter(Boolean).join("");
-      return `<div class="audit-item" data-ip="${escHtml(e.ip)}">
-        <span class="audit-ip">${escHtml(e.ip)}</span>
-        ${f?`<span style="font-size:9px;color:#ff3355;font-weight:700;">[${f}]</span>`:""}
-        <span class="audit-badge ${e.riskLevel}">${e.riskLevel}</span>
-        <span class="audit-score ${e.riskLevel}">${e.score}</span>
-        <span class="audit-ts">${fmtTime(new Date(e.meta?.scoredAt||Date.now()))}</span>
-      </div>`;
-    }).join("");
-    auditList.querySelectorAll(".audit-item").forEach(item => {
-      item.addEventListener("click", () => { ipInput.value = item.dataset.ip; scoreIP(); });
-    });
   }
 
   //update stats
@@ -4757,8 +4709,6 @@ async function loadStats() {
     }
 
     if (!res.ok) {
-      const guard = document.getElementById("authGuard");
-      if (guard) guard.remove();
       return;
     }
 

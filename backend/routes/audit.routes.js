@@ -72,8 +72,8 @@ router.get("/search", requireAuth, requireRole('readonly'),
       if (risk)       { conds.push(`risk_level = $${i++}`);  params.push(risk); }
       if (action)     { conds.push(`action = $${i++}`);       params.push(action); }
       if (country)    { conds.push(`country ILIKE $${i++}`);  params.push(`%${country}%`); }
-      if (minScore)   { conds.push(`score >= $${i++}`);       params.push(parseInt(minScore)); }
-      if (maxScore)   { conds.push(`score <= $${i++}`);       params.push(parseInt(maxScore)); }
+      if (minScore != null && minScore !== "") { conds.push(`score >= $${i++}`); params.push(parseInt(minScore)); }
+      if (maxScore != null && maxScore !== "") { conds.push(`score <= $${i++}`); params.push(parseInt(maxScore)); }
       if (proxy != null)      { conds.push(`is_proxy = $${i++}`);      params.push(proxy === "true"); }
       if (tor != null)        { conds.push(`is_tor = $${i++}`);        params.push(tor === "true"); }
       if (datacenter != null) { conds.push(`is_dc = $${i++}`); params.push(datacenter === "true"); }
@@ -88,11 +88,14 @@ router.get("/search", requireAuth, requireRole('readonly'),
         date_desc:  "scored_at DESC",
       }[sort] || "scored_at DESC";
 
+      const countParams = [...params];
+      const dataParams  = [...params, parseInt(limit), parseInt(offset)];
+
       const [totalRes, rowsRes] = await Promise.all([
-        db.query(`SELECT COUNT(*) AS total FROM audit_log ${where}`, params),
+        db.query(`SELECT COUNT(*) AS total FROM audit_log ${where}`, countParams),
         db.query(
           `SELECT * FROM audit_log ${where} ORDER BY ${orderBy} LIMIT $${i} OFFSET $${i+1}`,
-          [...params, parseInt(limit), parseInt(offset)]
+          dataParams
         ),
       ]);
 
