@@ -1,5 +1,4 @@
 const app = require('./server');
-
 const PORT = process.env.PORT || 3000;
 
 fetch("http://localhost:XXXX/api/score")
@@ -25,6 +24,7 @@ const {applyAuth} = require("../middleware/auth.js");
 button.addEventListener("click", () => {
   searchIP(input.value);
 });
+
 
 input.addEventListener("keyup", (e) => {
   if (e.key === "Enter") {
