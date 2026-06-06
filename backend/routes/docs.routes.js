@@ -798,10 +798,6 @@ try {
       gap: 8px;
       align-items: center;
     }
-      #epctx_N
-      flex-wrap: wrap;
-      gap: 8px;
-    }
 
         .response-body {
         word-break: break-all;
@@ -1382,66 +1378,65 @@ try {
    var _docsDrawerReady = false;
 
    function buildDocsHamburger() {
-      const hamburger   = document.getElementById("docsHamburger");
-      const drawer      = document.getElementById("docsNavDrawer");
-      const overlay     = document.getElementById("docsNavOverlay");
-      const drawerBody  = document.getElementById("docsDrawerBody");
-      const headerRight = document.getElementById("docsHeaderRight");
+    const hamburger   = document.getElementById("docsHamburger");
+    const drawer      = document.getElementById("docsNavDrawer");
+    const overlay     = document.getElementById("docsNavOverlay");
+    const drawerBody  = document.getElementById("docsDrawerBody");
+    const headerRight = document.getElementById("docsHeaderRight");
 
-      if (!hamburger || !drawer || !drawerBody || !headerRight) return;
+    if (!hamburger || !drawer || !drawerBody || !headerRight) return;
 
-      drawerBody.innerHTML = "";
+    drawerBody.innerHTML = "";
 
-        // ── Mirror header links ──
-        const linksSection = document.createElement("div");
-        linksSection.style.cssText = "padding:4px 0;border-bottom:1px solid var(--border);margin-bottom:8px;";
-        headerRight.querySelectorAll("button, a").forEach(el => {
-          const isAnchor = el.tagName === "A";
-          const clone    = document.createElement(isAnchor ? "a" : "button");
-          clone.textContent = el.textContent.trim();
-          clone.className   = el.className;
-          if (isAnchor) { clone.href = el.href; clone.target = el.target || ""; }
-          clone.addEventListener("click", () => {
-            _docsDrawerClose();
-            setTimeout(() => { if (!isAnchor) el.click(); }, 320);
-          });
-          linksSection.appendChild(clone);
-        });
-        drawerBody.appendChild(linksSection);
+    // Mirror header links
+    const linksSection = document.createElement("div");
+    linksSection.style.cssText = "padding:4px 0;border-bottom:1px solid var(--border);margin-bottom:8px;";
+    headerRight.querySelectorAll("button, a").forEach(function(el) {
+      var isAnchor = el.tagName === "A";
+      var clone    = document.createElement(isAnchor ? "a" : "button");
+      clone.textContent = el.textContent.trim();
+      clone.className   = el.className;
+      if (isAnchor) { clone.href = el.href; clone.target = el.target || ""; }
+      clone.addEventListener("click", function() {
+        _docsDrawerClose();
+        setTimeout(function() { if (!isAnchor) el.click(); }, 320);
+      });
+      linksSection.appendChild(clone);
+    });
+    drawerBody.appendChild(linksSection);
 
-        // ── Inject sidebar nav 
-        const navSection = document.createElement("div");
+    // Inject sidebar nav
+    var navSection = document.createElement("div");
 
-      // Static overview links
-      [
+    [
       ["Introduction", "⬡", "overview"],
       ["Authentication", "🔑", "auth"],
-      ["Rate Limits", "⏱", "rates"],
+      ["Rate Limits", "⏱", "rates"]
     ].forEach(function(item) {
       var btn = document.createElement("button");
       btn.innerHTML = '<span style="font-size:13px;">' + item[1] + '</span> ' + item[0];
-      btn.addEventListener("click", function() { _docsDrawerClose(); setTimeout(function() { scrollToSection(item[2]); }, 320); });
+      btn.addEventListener("click", function() {
+        _docsDrawerClose();
+        setTimeout(function() { scrollToSection(item[2]); }, 320);
+      });
       navSection.appendChild(btn);
     });
 
-    // Endpoint groups from existing sidebar
-    const sidebarSections = document.querySelectorAll("#sidebarEndpoints .sidebar-section");
-    sidebarSections.forEach(section => {
-      const label = section.querySelector(".sidebar-label");
+    document.querySelectorAll("#sidebarEndpoints .sidebar-section").forEach(function(section) {
+      var label = section.querySelector(".sidebar-label");
       if (label) {
-        const div = document.createElement("div");
+        var div = document.createElement("div");
         div.style.cssText = "font-size:9px;font-weight:700;letter-spacing:2px;color:var(--text3);text-transform:uppercase;padding:10px 14px 2px;";
         div.textContent = label.textContent;
         navSection.appendChild(div);
       }
-      section.querySelectorAll(".sidebar-item").forEach(item => {
-        const btn = document.createElement("button");
+      section.querySelectorAll(".sidebar-item").forEach(function(item) {
+        var btn = document.createElement("button");
         btn.innerHTML = item.innerHTML;
-        btn.addEventListener("click", () => {
+        var oc = item.getAttribute("onclick") || "";
+        btn.addEventListener("click", function() {
           _docsDrawerClose();
-          // replicate the onclick of the original sidebar item
-          const oc = item.getAttribute("onclick") || "";
-          setTimeout(() => { try { eval(oc); } catch(e) {} }, 320);
+          setTimeout(function() { try { eval(oc); } catch(e) {} }, 320);
         });
         navSection.appendChild(btn);
       });
@@ -1449,32 +1444,28 @@ try {
 
       drawerBody.appendChild(navSection);
 
-      // ── One-time listener setup 
+      // One-time listener setup
       if (_docsDrawerReady) return;
       _docsDrawerReady = true;
-      // ... rest of listener setup unchanged
-  }
 
-  
-
-      hamburger.addEventListener("click", (e) => {
+      hamburger.addEventListener("click", function(e) {
         e.stopPropagation();
         drawer.classList.contains("open") ? _docsDrawerClose() : _docsDrawerOpen();
       });
 
-      document.getElementById("docsDrawerClose")
-        .addEventListener("click", _docsDrawerClose);
-
+      document.getElementById("docsDrawerClose").addEventListener("click", _docsDrawerClose);
       overlay.addEventListener("click", _docsDrawerClose);
 
-      document.addEventListener("keydown", (e) => {
+      document.addEventListener("keydown", function(e) {
         if (e.key === "Escape") _docsDrawerClose();
       });
 
-      window.matchMedia("(min-width:769px)").addEventListener("change", (e) => {
+      window.matchMedia("(min-width:769px)").addEventListener("change", function(e) {
         if (e.matches) _docsDrawerClose();
       });
     }
+
+
 
     function _docsDrawerOpen() {
       const hamburger = document.getElementById("docsHamburger");
