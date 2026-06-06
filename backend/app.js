@@ -225,7 +225,13 @@ app.use("/api/v2/keys", keysRoutes);
 
 //  AUTH MIDDLEWARE (protects all /api/* routes below this point)
 
-app.use("/api/", authMiddleware);
+app.use("/api/", (req, res, next) => {
+  if (req.path.startsWith("/docs") ||
+      req.path.startsWith("/telemetry/dashboard")) {
+    return next();
+  }
+  return authMiddleware(req, res, next);
+});
 
 // Audit routes
 app.use("/api/v1/audit", auditRoutes);

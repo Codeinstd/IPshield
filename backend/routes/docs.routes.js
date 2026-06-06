@@ -897,7 +897,7 @@ try {
     <span class="version-bar-links" style="margin-left:auto;">
       <a href="/api/v1/docs" style="color:var(--text3);font-size:11px;text-decoration:none;margin-right:12px;">v1 Swagger ↗</a>
       <a href="/api/v2/docs" style="color:var(--accent);font-size:11px;text-decoration:none;">v2 Swagger ↗</a>
-      <a href="/api/telemetry/dashboard" target="_blank" onclick="(function(e){
+      <a href="/api/telemetry/dashboard" style="color:var(--accent);font-size:11px;text-decoration:none;" target="_blank" onclick="(function(e){
       e.preventDefault();
       var tok = localStorage.getItem('token') || localStorage.getItem('ipshield_token') || '';
       window.open('/api/telemetry/dashboard' + (tok ? '?auth=' + encodeURIComponent(tok) : ''), '_blank');
