@@ -13,13 +13,8 @@ router.get("/openapi.json", (req, res) => {
 
 // Custom docs UI
 router.get("/", (req, res) => {
-  try {
-    res.setHeader("Content-Type", "text/html");
-    res.send(buildDocsHTML(spec));
-  } catch (err) {
-    console.error("Docs build error:", err);
-    res.status(500).json({ error: err.message, stack: err.stack });
-  }
+  res.setHeader("Content-Type", "text/html");
+  res.send(buildDocsHTML(spec));
 });
 
 function buildDocsHTML(spec) {
@@ -1010,7 +1005,7 @@ try {
 
     const V1_HIDDEN_TAGS = ["Blacklist", "Cases"];
 
-    const endpoints = JSON.parse(document.getElementById('__endpoints__').textContent);
+    const endpoints = ${endpointsJSON};
 
     function setVersion(v) {
       currentVersion = v;
@@ -1419,15 +1414,15 @@ try {
 
       // Static overview links
       [
-        { label: "Introduction", icon: "⬡", id: "overview" },
-        { label: "Authentication", icon: "🔑", id: "auth" },
-        { label: "Rate Limits", icon: "⏱", id: "rates" },
-      ].forEach(({ label, icon, id }) => {
-        const btn = document.createElement("button");
-        btn.innerHTML = \`<span style="font-size:13px;">${icon}</span> ${label}\`;
-        btn.addEventListener("click", () => { _docsDrawerClose(); setTimeout(() => scrollToSection(id), 320); });
-        navSection.appendChild(btn);
-      });
+      ["Introduction", "⬡", "overview"],
+      ["Authentication", "🔑", "auth"],
+      ["Rate Limits", "⏱", "rates"],
+    ].forEach(function(item) {
+      var btn = document.createElement("button");
+      btn.innerHTML = '<span style="font-size:13px;">' + item[1] + '</span> ' + item[0];
+      btn.addEventListener("click", function() { _docsDrawerClose(); setTimeout(function() { scrollToSection(item[2]); }, 320); });
+      navSection.appendChild(btn);
+    });
 
     // Endpoint groups from existing sidebar
     const sidebarSections = document.querySelectorAll("#sidebarEndpoints .sidebar-section");
