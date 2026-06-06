@@ -738,8 +738,117 @@ try {
         height: 28px;
         font-size: 14px;
     }
-}
-  </style>
+    }
+    .version-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+      padding: 10px 16px;
+      background: var(--bg2);
+      border-bottom: 1px solid var(--border);
+      font-size: 12px;
+    }
+      @media (max-width: 480px) {
+      .endpoint-header {
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+      .endpoint-summary {
+        display: none; /* hide on very small — it's redundant with description */
+      }
+      .endpoint-path {
+        font-size: 11px;
+      }
+    }
+
+    .hero-stats {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .hero-stat .num {
+      font-size: 20px; /* was 22px */
+    }
+    @media (max-width: 400px) {
+      .hero-stats {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 600px) {
+      .try-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+      }
+      .try-label {
+        width: auto;
+      }
+      .try-input {
+        width: 100%;
+      }
+    }
+
+    .version-bar-links {
+      margin-left: auto;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+      #epctx_N
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+        .response-body {
+        word-break: break-all;
+        overflow-x: auto;        
+      }
+
+      @media (max-width: 600px) {
+        .main {
+          padding: 16px 14px; 
+        }
+        .hero {
+          padding: 20px 16px;
+        }
+      }
+    @media (max-width: 600px) {
+      .version-bar-links {
+        margin-left: 0;
+        width: 100%;
+      }
+    }
+
+      .version-bar { flex-wrap: wrap; gap: 6px; }
+      .version-bar > span:last-child { margin-left: auto; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+
+      @media (max-width: 600px) {
+        .version-bar > span:last-child { margin-left: 0; width: 100%; }
+
+        .try-row { flex-direction: column; align-items: flex-start; gap: 4px; }
+        .try-label { width: auto; }
+
+        .main { padding: 16px 14px; }
+        .hero { padding: 20px 16px; }
+        .hero h1 { font-size: 20px; }
+
+        .response-body { overflow-x: auto; }
+        .param-table { font-size: 10px; }
+        .param-table th, .param-table td { padding: 6px 6px; }
+      }
+
+      @media (max-width: 480px) {
+        .endpoint-header { flex-wrap: wrap; }
+        .endpoint-summary { display: none; }
+        .endpoint-path { font-size: 11px; min-width: 0; }
+        .hero-stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+        .overview-cards { grid-template-columns: repeat(2, 1fr); }
+      }
+        </style>
 </head>
     <!-- Header -->
     <header class="header" id="docsHeader">
@@ -784,7 +893,7 @@ try {
     <button class="ver-btn active" id="vBtn2" onclick="setVersion('v2')">v2 Latest</button>
     <span style="margin-left:8px;color:#4a6278;">|</span>
     <span style="margin-left:8px;" id="versionDesc">Full platform — Scoring, WHOIS, Watchlist, Audit, SIEM, Blacklist, Cases</span>
-    <span style="margin-left:auto;">
+    <span class="version-bar-links" style="margin-left:auto;">
       <a href="/api/v1/docs" style="color:var(--text3);font-size:11px;text-decoration:none;margin-right:12px;">v1 Swagger ↗</a>
       <a href="/api/v2/docs" style="color:var(--accent);font-size:11px;text-decoration:none;">v2 Swagger ↗</a>
       <a href="/api/telemetry/dashboard" target="_blank" style="color:var(--low);font-size:11px;text-decoration:none;margin-left:8px;">📊 Live Metrics ↗</a>
@@ -1272,7 +1381,7 @@ try {
    // nav drawer 
    var _docsDrawerReady = false;
 
-    function buildDocsHamburger() {
+   function buildDocsHamburger() {
       const hamburger   = document.getElementById("docsHamburger");
       const drawer      = document.getElementById("docsNavDrawer");
       const overlay     = document.getElementById("docsNavOverlay");
@@ -1281,27 +1390,72 @@ try {
 
       if (!hamburger || !drawer || !drawerBody || !headerRight) return;
 
-      // ── Rebuild links/buttons every call ──
       drawerBody.innerHTML = "";
-      headerRight.querySelectorAll("button, a").forEach(el => {
-        const isAnchor = el.tagName === "A";
-        const clone    = document.createElement(isAnchor ? "a" : "button");
-        clone.textContent = el.textContent.trim();
-        clone.className   = el.className;
-        if (isAnchor) {
-          clone.href   = el.href;
-          clone.target = el.target || "";
-        }
-        clone.addEventListener("click", () => {
-          _docsDrawerClose();
-          setTimeout(() => { if (!isAnchor) el.click(); }, 320);
+
+        // ── Mirror header links ──
+        const linksSection = document.createElement("div");
+        linksSection.style.cssText = "padding:4px 0;border-bottom:1px solid var(--border);margin-bottom:8px;";
+        headerRight.querySelectorAll("button, a").forEach(el => {
+          const isAnchor = el.tagName === "A";
+          const clone    = document.createElement(isAnchor ? "a" : "button");
+          clone.textContent = el.textContent.trim();
+          clone.className   = el.className;
+          if (isAnchor) { clone.href = el.href; clone.target = el.target || ""; }
+          clone.addEventListener("click", () => {
+            _docsDrawerClose();
+            setTimeout(() => { if (!isAnchor) el.click(); }, 320);
+          });
+          linksSection.appendChild(clone);
         });
-        drawerBody.appendChild(clone);
+        drawerBody.appendChild(linksSection);
+
+        // ── Inject sidebar nav 
+        const navSection = document.createElement("div");
+
+      // Static overview links
+      [
+        { label: "Introduction", icon: "⬡", id: "overview" },
+        { label: "Authentication", icon: "🔑", id: "auth" },
+        { label: "Rate Limits", icon: "⏱", id: "rates" },
+      ].forEach(({ label, icon, id }) => {
+        const btn = document.createElement("button");
+        btn.innerHTML = \`<span style="font-size:13px;">${icon}</span> ${label}\`;
+        btn.addEventListener("click", () => { _docsDrawerClose(); setTimeout(() => scrollToSection(id), 320); });
+        navSection.appendChild(btn);
       });
 
-      // ── One-time listener setup ──
+    // Endpoint groups from existing sidebar
+    const sidebarSections = document.querySelectorAll("#sidebarEndpoints .sidebar-section");
+    sidebarSections.forEach(section => {
+      const label = section.querySelector(".sidebar-label");
+      if (label) {
+        const div = document.createElement("div");
+        div.style.cssText = "font-size:9px;font-weight:700;letter-spacing:2px;color:var(--text3);text-transform:uppercase;padding:10px 14px 2px;";
+        div.textContent = label.textContent;
+        navSection.appendChild(div);
+      }
+      section.querySelectorAll(".sidebar-item").forEach(item => {
+        const btn = document.createElement("button");
+        btn.innerHTML = item.innerHTML;
+        btn.addEventListener("click", () => {
+          _docsDrawerClose();
+          // replicate the onclick of the original sidebar item
+          const oc = item.getAttribute("onclick") || "";
+          setTimeout(() => { try { eval(oc); } catch(e) {} }, 320);
+        });
+        navSection.appendChild(btn);
+      });
+    });
+
+      drawerBody.appendChild(navSection);
+
+      // ── One-time listener setup 
       if (_docsDrawerReady) return;
       _docsDrawerReady = true;
+      // ... rest of listener setup unchanged
+  }
+
+  
 
       hamburger.addEventListener("click", (e) => {
         e.stopPropagation();
