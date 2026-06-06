@@ -13,8 +13,13 @@ router.get("/openapi.json", (req, res) => {
 
 // Custom docs UI
 router.get("/", (req, res) => {
-  res.setHeader("Content-Type", "text/html");
-  res.send(buildDocsHTML(spec));
+  try {
+    res.setHeader("Content-Type", "text/html");
+    res.send(buildDocsHTML(spec));
+  } catch (err) {
+    console.error("Docs build error:", err);
+    res.status(500).json({ error: err.message, stack: err.stack });
+  }
 });
 
 function buildDocsHTML(spec) {
@@ -1005,7 +1010,7 @@ try {
 
     const V1_HIDDEN_TAGS = ["Blacklist", "Cases"];
 
-    const endpoints = ${endpointsJSON};
+    const endpoints = JSON.parse(document.getElementById('__endpoints__').textContent);
 
     function setVersion(v) {
       currentVersion = v;
