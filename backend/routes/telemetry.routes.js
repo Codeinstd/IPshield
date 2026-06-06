@@ -344,6 +344,55 @@ function buildDashboard(token) {
       .header-right { display: none; }
       .hamburger { display: block; }
     }
+      @media (max-width: 768px) {
+        .header { height: 56px; padding: 0 16px; }
+      }
+
+      .scroll-hint {
+      text-align: center; font-size: 10px; color: var(--text3);
+      padding: 4px; font-family: 'JetBrains Mono', monospace;
+      letter-spacing: 1px;
+    }
+    @media (max-width: 768px) {
+      #scrollHint { display: block !important; }
+    }
+
+    @media (max-width: 768px) {
+      .container { padding: 16px 14px; }
+
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+      }
+      .stat-value { font-size: 22px; }
+
+      .two-col { grid-template-columns: 1fr; }
+
+      .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+      table { min-width: 480px; }
+
+      #endpointTable { }
+      .section .table-wrap table { min-width: 700px; }
+
+      .two-col.sparkline-row { grid-template-columns: 1fr; }
+
+      /* Hide less critical columns on the endpoint table */
+      th:nth-child(9), td:nth-child(9),   
+      th:nth-child(5), td:nth-child(5) { 
+        display: none;
+      }
+
+      .sparkline-wrap { padding: 14px; }
+      .stat-card { padding: 14px 16px; }
+    }
+
+    @media (max-width: 480px) {
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .stat-value { font-size: 20px; }
+      .stat-label { font-size: 9px; }
+
+      th:nth-child(8), td:nth-child(8) { display: none; }
+    }
 
 
     .err-rate-bar-bg { height:6px; background:var(--bg3); border-radius:3px; overflow:hidden; }
@@ -403,7 +452,6 @@ function buildDashboard(token) {
       <div id="lastUpdateMobile">14:11:32</div>
       </div>
       <a href="/dashboard" class="drawer-back-item">← Back to App</a>
-    </div>
     </nav>
   </div>
 </div>
@@ -440,7 +488,7 @@ function buildDashboard(token) {
   </div>
 
   <!-- Status codes + hourly sparkline -->
-  <div class="two-col" style="margin-bottom:28px;">
+  <div class="two-col sparkline-row" style="margin-bottom:28px;">
     <div class="sparkline-wrap">
       <div class="sparkline-title">Status Code Distribution</div>
       <div id="statusPills" class="status-pills"></div>
@@ -459,7 +507,8 @@ function buildDashboard(token) {
         <div class="section-sub">Sorted by request count · p50/p95/p99 latencies</div>
       </div>
     </div>
-    <div class="table-wrap">
+      <div class="table-wrap" style="position:relative;">
+      <div style="display:none;" id="scrollHint" class="scroll-hint">← scroll →</div>
       <table>
         <thead>
           <tr>

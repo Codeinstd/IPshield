@@ -854,7 +854,12 @@ try {
     <div class="logo-badge">API DOCS</div>
   </div>
   <div class="header-right" id="docsHeaderRight">
-    <a href="/api/telemetry/dashboard" target="_blank">📊 Telemetry</a>
+    <a href="/api/telemetry/dashboard" target="_blank" onclick="(function(e){
+  e.preventDefault();
+  var tok = localStorage.getItem('token') || localStorage.getItem('ipshield_token') || '';
+  var url = '/api/telemetry/dashboard' + (tok ? '?auth=' + encodeURIComponent(tok) : '');
+      window.open(url, '_blank');
+    })(event)">📊 Telemetry</a>
     <a href="/api/docs/openapi.json" target="_blank">↓ OpenAPI JSON</a>
     <a href="/" class="btn-primary">← Back to App</a>
   </div>
@@ -892,7 +897,11 @@ try {
     <span class="version-bar-links" style="margin-left:auto;">
       <a href="/api/v1/docs" style="color:var(--text3);font-size:11px;text-decoration:none;margin-right:12px;">v1 Swagger ↗</a>
       <a href="/api/v2/docs" style="color:var(--accent);font-size:11px;text-decoration:none;">v2 Swagger ↗</a>
-      <a href="/api/telemetry/dashboard" target="_blank" style="color:var(--low);font-size:11px;text-decoration:none;margin-left:8px;">📊 Live Metrics ↗</a>
+      <a href="/api/telemetry/dashboard" target="_blank" onclick="(function(e){
+      e.preventDefault();
+      var tok = localStorage.getItem('token') || localStorage.getItem('ipshield_token') || '';
+      window.open('/api/telemetry/dashboard' + (tok ? '?auth=' + encodeURIComponent(tok) : ''), '_blank');
+    })(event)" ...>📊 Live Metrics ↗</a>
     </span>
   </div>
 
