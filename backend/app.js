@@ -8,7 +8,7 @@ const compression = require("compression");
 const path       = require("path");
 const rateLimit  = require("express-rate-limit");
 
-// ── Route imports 
+// Route imports 
 const scoreRoutes        = require("./routes/score.routes");
 const statsRoutes        = require("./routes/stats.routes");
 const auditRoutes        = require("./routes/audit.routes");
@@ -34,21 +34,21 @@ const keysRoutes         = require("./routes/keys.routes");
 const authRoutes         = require("./routes/auth.routes");
 const accessRequestRoutes = require("./routes/accessRequest.routes");
 
-// ── v2-only route imports 
+// v2-only route imports 
 const blacklistRoutes = require("./routes/blacklist.routes");
 const casesRoutes     = require("./routes/cases.routes");
 
-// ── App init 
+// App init 
 const isProd = process.env.NODE_ENV === "production";
 const app    = express();
 
-// ── Request logger (dev only) 
+// Request logger (dev only) 
 app.use((req, res, next) => {
   console.log("REQ:", req.originalUrl);
   next();
 });
 
-//  SENTRY (must be first handler)
+// Sentry (must be first handler)
 if (process.env.SENTRY_DSN) {
   try {
     const Sentry = require("@sentry/node");
@@ -57,7 +57,7 @@ if (process.env.SENTRY_DSN) {
   } catch (_) {}
 }
 
-//  SECURITY HEADERS
+//  Security Headers
 app.use(helmet({
   contentSecurityPolicy: {
     directives: {
@@ -91,7 +91,7 @@ app.use(cors({
 }));
 
 
-// 4. BODY PARSING & COMPRESSION
+// BODY PARSING & COMPRESSION
 app.use(compression());
 app.use(express.json({ limit: "50kb" }));
 app.use(express.urlencoded({ extended: false }));
@@ -107,8 +107,7 @@ if (isProd) {
   app.use(morgan("dev"));
 }
 
-
-// RATE LIMITING
+// Rate Limiting
 const makeRateLimiter = (windowMs, max, message) => rateLimit({
   windowMs, max,
   standardHeaders: true,
@@ -131,11 +130,11 @@ const makeRateLimiter = (windowMs, max, message) => rateLimit({
 });
 
 
-// TELEMETRY MIDDLEWARE (all /api/* requests)
+// Telemetry Authmiddleware (all /api/* requests)
 app.use("/api", telemetryMiddleware);
 
 
-//  STATIC FILES
+//  Static files
 app.use(express.static(path.join(__dirname, "../public"), {
   maxAge: isProd ? "1d" : 0,
   etag:   true,
@@ -146,7 +145,7 @@ app.get("/activate", (req, res) => {
   res.sendFile(path.join(__dirname, "../public", "activate.html"));
 });
 
-//  PUBLIC API ROUTES (no auth required)
+// PUBLIC API ROUTES (no auth required)
 
 // Health
 async function healthHandler(req, res) {
@@ -169,12 +168,12 @@ async function healthHandler(req, res) {
     memoryMB:    Math.round(process.memoryUsage().heapUsed / 1024 / 1024),
     timestamp:   new Date().toISOString(),
     telemetry: {
-      totalRequests: tel.requests.total,
+    totalRequests: tel.requests.total,
       errorRate:     tel.requests.errorRate,
-      rps:           tel.requests.rps,
-      uptime:        tel.uptime.human,
-      topEndpoints:  tel.topEndpoints.slice(0, 5).map(e => ({
-        route: e.route, count: e.count, avgMs: e.avgMs, errorRate: e.errorRate,
+    rps:           tel.requests.rps,
+    uptime:        tel.uptime.human,
+    topEndpoints:  tel.topEndpoints.slice(0, 5).map(e => ({
+    route: e.route, count: e.count, avgMs: e.avgMs, errorRate: e.errorRate,
       })),
     },
   });
@@ -217,14 +216,13 @@ app.get("/api/versions", versionInfoHandler);
 app.get("/api/v1",       versionInfoHandler);
 app.get("/api/v2",       versionInfoHandler);
 
-// public — no auth, must be before authMiddleware
+// Public — no auth, must be before authMiddleware
 app.use("/api/keys",    keysRoutes);
 app.use("/api/v1/keys", keysRoutes);
 app.use("/api/v2/keys", keysRoutes);
 
 
-//  AUTH MIDDLEWARE (protects all /api/* routes below this point)
-
+//  Auth Middleware (protects all /api/* routes below this point)
 app.use("/api/", (req, res, next) => {
   if (req.path.startsWith("/docs") ||
       req.path.startsWith("/telemetry/dashboard")) {
@@ -242,7 +240,7 @@ app.use("/api/v1/stats", statsRoutes);
 app.use("/api/v2/stats", statsRoutes);
 
 
-//  PROTECTED API ROUTES
+//  ProtectedD API Routes
 
 // Helper — mount a router on multiple prefixes.
 function mountShared(prefixes, routePath, routerArg) {
@@ -281,8 +279,7 @@ app.use("/api/v1/cases", (req, res) => res.status(404).json({
   error: "not_available_in_v1", message: "Case management is a v2 feature. Use /api/v2/cases", upgrade_url: "/api/v2/cases", docs: "/api/v2/docs",
 }));
 
-
-//  SPA FALLBACK & 404
+//  SPA Fallback & 404
 app.use(express.static(path.join(__dirname, "../public")));
 
 
@@ -314,16 +311,14 @@ app.use((req, res) => res.status(404).json({
   hint:  "See /api/versions for available API versions",
 }));
 
-
-//  ERROR HANDLERS (must be after all routes)
-
+//  Error Handlers (must be after all routes)
 if (process.env.SENTRY_DSN) {
   try { app.use(require("@sentry/node").Handlers.errorHandler()); } catch (_) {}
 }
 app.use(errorMiddleware);
 
 
-//  BACKGROUND JOBS
+//  Background Jobs
 const { startMonitor } = require("./jobs/monitor.job");
 startMonitor();
 

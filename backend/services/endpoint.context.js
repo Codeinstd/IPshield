@@ -11,7 +11,6 @@ function getEndpointContext(method, path) {
   if (!ep || ep.count === 0) {
     return { hasData: false };
   }
- 
   const errPct = parseFloat(ep.errorRate);
   const health =
     errPct > 20 ? "degraded" :

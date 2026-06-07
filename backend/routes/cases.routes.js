@@ -1,8 +1,6 @@
 const express = require("express");
 const router  = express.Router();
 const { body, param, query, validationResult } = require("express-validator");
-
-
 const {
   listCases, getCase, createCase, updateCase, deleteCase,
   addCaseIP, removeCaseIP, addCaseNote, deleteCaseNote, getCaseStats
@@ -18,7 +16,7 @@ function validate(req, res, next) {
   next();
 }
 
-// ── GET /api/cases/stats
+// GET /api/cases/stats
 router.get("/stats", async (req, res) => {
   try {
     const stats = await getCaseStats();
@@ -28,7 +26,7 @@ router.get("/stats", async (req, res) => {
   }
 });
 
-// ── GET /api/cases
+// GET /api/cases
 router.get("/", [
   query("status").optional().isIn(STATUSES),
   query("severity").optional().isIn(SEVERITIES),
@@ -45,7 +43,7 @@ router.get("/", [
   }
 });
 
-// ── GET /api/cases/:id
+// GET /api/cases/:id
 router.get("/:id", [
   param("id").isInt({ min: 1 }),
 ], validate, async (req, res) => {
@@ -58,7 +56,7 @@ router.get("/:id", [
   }
 });
 
-// ── POST /api/cases
+// POST /api/cases
 router.post("/",  [
   body("title").trim().notEmpty().isLength({ max: 200 }),
   body("description").optional().trim().isLength({ max: 2000 }),
@@ -78,7 +76,7 @@ router.post("/",  [
   }
 });
 
-// ── PUT /api/cases/:id
+// PUT /api/cases/:id
 router.put("/:id", [
   param("id").isInt({ min: 1 }),
   body("title").optional().trim().isLength({ max: 200 }),
@@ -107,7 +105,7 @@ router.put("/:id", [
   }
 });
 
-// ── DELETE /api/cases/:id
+// DELETE /api/cases/:id
 router.delete("/:id", [
   param("id").isInt({ min: 1 }),
 ], validate, async (req, res) => {
@@ -121,7 +119,7 @@ router.delete("/:id", [
   }
 });
 
-// ── POST /api/cases/:id/ips
+// POST /api/cases/:id/ips
 router.post("/:id/ips",  [
   param("id").isInt({ min: 1 }),
   body("ip").trim().notEmpty().custom(ip => {
@@ -143,7 +141,7 @@ router.post("/:id/ips",  [
   }
 });
 
-// ── DELETE /api/cases/:id/ips/:ipId
+// DELETE /api/cases/:id/ips/:ipId
 router.delete("/:id/ips/:ipId",[
   param("id").isInt({ min: 1 }),
   param("ipId").isInt({ min: 1 }),
@@ -156,7 +154,7 @@ router.delete("/:id/ips/:ipId",[
   }
 });
 
-// ── POST /api/cases/:id/notes
+// POST /api/cases/:id/notes
 router.post("/:id/notes", [
   param("id").isInt({ min: 1 }),
   body("note").trim().notEmpty().isLength({ max: 2000 }),
@@ -172,7 +170,7 @@ router.post("/:id/notes", [
   }
 });
 
-// ── DELETE /api/cases/:id/notes/:noteId
+// DELETE /api/cases/:id/notes/:noteId
 router.delete("/:id/notes/:noteId",  [
   param("id").isInt({ min: 1 }),
   param("noteId").isInt({ min: 1 }),

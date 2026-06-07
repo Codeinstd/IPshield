@@ -4,7 +4,6 @@ const router  = express.Router({ mergeParams: true }); // mergeParams gets :id f
 const { body, param, validationResult } = require("express-validator");
 const { requireAuth, requireRole }      = require("../middleware/auth.js");
 const db = require("../store/db");
-
 const ACCOUNT_TYPES = ["user","service","device","other"];
 
 function validate(req, res, next) {
@@ -13,8 +12,7 @@ function validate(req, res, next) {
   next();
 }
 
-// ── POST /cases/:id/accounts 
-
+// POST /cases/:id/accounts 
 router.post("/",
   requireAuth, requireRole("analyst"),
   [
@@ -67,7 +65,7 @@ router.post("/",
   }
 );
 
-// ── GET /cases/:id/accounts 
+// GET /cases/:id/accounts 
 
 router.get("/",
   requireAuth, requireRole("readonly"),
@@ -89,7 +87,7 @@ router.get("/",
   }
 );
 
-// ── DELETE /cases/:id/accounts/:accId 
+// DELETE /cases/:id/accounts/:accId 
 
 router.delete("/:accId",
   requireAuth, requireRole("analyst"),

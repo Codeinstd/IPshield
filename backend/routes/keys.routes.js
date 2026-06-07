@@ -1,12 +1,10 @@
-
 const express = require("express");
-const router  = express.Router();
+const router = express.Router();
 const { body, param, query, validationResult } = require("express-validator");
-const { requireAuth, requireRole }             = require("../middleware/auth.js");
+const { requireAuth, requireRole } = require("../middleware/auth.js");
 const km = require("../services/keyManager.service");
-const { sendEmailAlert } = require("../services/alerts.service");
+const { sendInviteEmail } = require("../services/email.service");
 const db = require("../store/db");
-
 const ROLES = ["readonly","analyst","admin"];
 
 function validate(req, res, next) {
@@ -15,7 +13,7 @@ function validate(req, res, next) {
   next();
 }
 
-// ── GET /api/keys/stats 
+// GET /api/keys/stats 
 router.get(
   "/stats",
   requireAuth,
@@ -32,7 +30,7 @@ router.get(
 );
 
 
-// ── GET /api/keys
+// GET /api/keys
 router.get("/",
   requireAuth, requireRole("admin"),
   [
@@ -58,8 +56,7 @@ router.get("/",
   }
 );
 
-// ── POST /api/keys/invite 
-//shows real error in both server logs and response:
+// POST /api/keys/invite 
 router.post("/invite",
   requireAuth, requireRole("admin"),
   [
@@ -81,38 +78,11 @@ router.post("/invite",
         invitedBy:  req.auth?.name || req.auth?.email || "admin",
       });
 
-      if (req.body.email && process.env.SMTP_HOST) {
-        const nodemailer  = require("nodemailer");
-        const transporter = nodemailer.createTransport({
-          host:   process.env.SMTP_HOST,
-          port:   parseInt(process.env.SMTP_PORT || "587"),
-          secure: process.env.SMTP_PORT === "465",
-          auth:   { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
-        });
-        transporter.sendMail({
-          from:    process.env.ALERT_FROM || process.env.SMTP_USER,
-          to:      req.body.email,
-          subject: "Your IPShield API Access",
-          html: `
-            <div style="background:#0d1117;padding:32px;font-family:monospace;max-width:560px;margin:0 auto;">
-              <h2 style="color:#c9d8e8;">IP<span style="color:#00d9ff;">Shield</span> — You're invited</h2>
-              <p style="color:#8fa8bc;">Hi ${invite.name},<br><br>
-              You've been granted access to the IPShield API.<br>
-              Click below to activate your key:</p>
-              <div style="margin:24px 0;text-align:center;">
-                <a href="${invite.activateUrl}"
-                  style="background:#00d9ff;color:#000;padding:12px 32px;border-radius:6px;
-                        text-decoration:none;font-weight:700;display:inline-block;">
-                  Activate API Key →
-                </a>
-              </div>
-              <p style="color:#4a6278;font-size:11px;">
-                Role: ${invite.role} · Daily limit: ${invite.daily_limit} requests<br>
-                This link expires in 7 days. Do not share it.
-              </p>
-            </div>`,
-        }).catch(e => console.error("[invite/email] SMTP error:", e));
-      }
+    if (invite.email) {
+  sendInviteEmail(invite).catch(err => {
+    console.error("[invite/email]", err.message);
+  });
+}
 
       res.status(201).json({
         id:           invite.id,
@@ -134,88 +104,6 @@ router.post("/invite",
   }
 );
 
-// ── GET /api/keys/activate/:token — check token validity 
-router.post("/activate/:token",
-  [param("token").trim().notEmpty().isLength({ min: 40, max: 60 })],
-  validate,
-  async (req, res) => {
-    try {
-      const { email, password } = req.body;
-
-      if (!password || password.length < 8) {
-        return res.status(400).json({ error: "Password must be at least 8 characters" });
-      }
-      if (!email || !email.includes("@")) {
-        return res.status(400).json({ error: "Valid email is required" });
-      }
-
-      // Check token is still valid
-      const check = await db.query(
-        `SELECT id, name, email, role, daily_limit 
-         FROM api_keys
-         WHERE invite_token = $1 AND status = 'pending'`,
-        [req.params.token]
-      );
-      if (!check.rows.length) {
-        return res.status(404).json({ error: "Invalid or already-used invite token" });
-      }
-
-      const bcrypt       = require("bcryptjs");
-      const crypto       = require("crypto");
-      const passwordHash = await bcrypt.hash(password, 12);
-      
-      // Generate a secure API key
-      const apiKey     = "ips_" + crypto.randomBytes(32).toString("hex");
-      const keyPreview = apiKey.slice(0, 12) + "••••••••••••";
-
-      const result = await db.query(
-        `UPDATE api_keys
-         SET status        = 'active',
-             activated_at  = NOW(),
-             invite_token  = NULL,
-             email         = $1,
-             password_hash = $2,
-             key           = $3,
-             key_preview   = $4
-         WHERE id = $5
-         RETURNING id, name, email, role, status, daily_limit`,
-        [
-          email.toLowerCase().trim(),
-          passwordHash,
-          apiKey,
-          keyPreview,
-          check.rows[0].id
-        ]
-      );
-
-      if (!result.rows.length) {
-        return res.status(404).json({ error: "Activation failed" });
-      }
-
-      const activated = result.rows[0];
-
-      res.json({
-        message:     "Account activated successfully.",
-        name:        activated.name,
-        email:       activated.email,
-        role:        activated.role,
-        daily_limit: activated.daily_limit,
-        key:         apiKey,   // shown once
-      });
-
-    } catch (err) {
-      console.error("[activate POST] ERROR:", err.message);
-      console.error("[activate POST] CODE:", err.code);
-      console.error("[activate POST] DETAIL:", err.detail);
-      res.status(500).json({ 
-        error: err.message,
-        code: err.code || null,
-        detail: err.detail || null
-      });
-    }
-  }
-);
-
 // GET /api/keys/me — returns current key info (any authenticated user)
 router.get("/me", requireAuth, async (req, res) => {
   if (!req.auth) {
@@ -223,7 +111,6 @@ router.get("/me", requireAuth, async (req, res) => {
   }
   res.json(req.auth);
 });
-
 
 // POST activate route:
 router.get("/activate/:token",
@@ -341,7 +228,7 @@ router.post("/activate/:token",
   }
 );
 
-// ── GET /api/keys/:id
+// GET /api/keys/:id
 router.get("/:id",
   requireAuth, requireRole("admin"),
   [param("id").isInt({ min: 1 })],
@@ -358,7 +245,7 @@ router.get("/:id",
   }
 );
 
-// ── PUT /api/keys/:id 
+// PUT /api/keys/:id 
 router.put("/:id",
   requireAuth, requireRole("admin"),
   [
@@ -381,7 +268,7 @@ router.put("/:id",
   }
 );
 
-// ── POST /api/keys/:id/revoke 
+// POST /api/keys/:id/revoke 
 router.post("/:id/revoke",
   requireAuth, requireRole("admin"),
   [
@@ -406,7 +293,7 @@ router.post("/:id/revoke",
   }
 );
 
-// ── POST /api/keys/:id/suspend 
+// POST /api/keys/:id/suspend 
 router.post("/:id/suspend",
   requireAuth, requireRole("admin"),
   [param("id").isInt({ min: 1 })],
@@ -427,7 +314,7 @@ router.post("/:id/suspend",
   }
 );
 
-// ── DELETE /api/keys/:id
+// DELETE /api/keys/:id
 router.delete("/:id",
   requireAuth, requireRole("admin"),
   [param("id").isInt({ min: 1 })],
@@ -454,7 +341,7 @@ router.delete("/:id",
   }
 );
 
-// ── POST /api/keys/:id/reinstate
+// POST /api/keys/:id/reinstate
 
 router.post("/:id/reinstate",
   requireAuth, requireRole("admin"),
@@ -470,7 +357,7 @@ router.post("/:id/reinstate",
   }
 );
 
-// ── POST /api/keys/:id/rotate 
+// POST /api/keys/:id/rotate 
 
 router.post("/:id/rotate",
   requireAuth, requireRole("admin"),
@@ -497,7 +384,7 @@ router.post("/:id/rotate",
   }
 );
 
-// ── GET /api/keys/:id/usage 
+// GET /api/keys/:id/usage 
 
 router.get("/:id/usage",
   requireAuth, requireRole("admin"),

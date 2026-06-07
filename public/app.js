@@ -27,8 +27,8 @@
   const AUDIT_PAGE_SIZE = 25;
 
   
-    // Safe to boot
-    function authHeaders() {
+  // Safe to boot
+  function authHeaders() {
   const token = localStorage.getItem("token");
 
   return {
@@ -77,8 +77,7 @@
     badge.style.background  = version === "v2" ?   "rgba(0,217,255,0.1)" : "rgba(0,217,255,0.1)";
   }
 
-  // update version label
-
+  // Update version label
   document.getElementById(
     "dashboard-version"
   ).textContent = `${version}.0.0`;
@@ -105,8 +104,8 @@
   buildHamburgerMenu();
 }
 
-// responsive dashboard nav 
-function buildHamburgerMenu() {
+  // responsive dashboard nav 
+  function buildHamburgerMenu() {
   const hamburger  = document.getElementById("mainHamburger");
   const drawer     = document.getElementById("navDrawer");
   const overlay    = document.getElementById("navOverlay");
@@ -119,7 +118,7 @@ function buildHamburgerMenu() {
   const ver = document.getElementById("dashboard-version");
   if (drawerVer && ver) drawerVer.textContent = ver.textContent;
 
-  // ── Rebuild drawer buttons every call ──
+  // Rebuild drawer buttons @ every call ──
   drawerBody.innerHTML = "";
   const headerRight = document.getElementById("headerRight");
   if (headerRight) {
@@ -145,11 +144,11 @@ function buildHamburgerMenu() {
     });
   }
 
-  // ── Remove old listeners 
+  // Remove old listeners 
   const newHamburger = hamburger.cloneNode(true);
   hamburger.parentNode.replaceChild(newHamburger, hamburger);
 
-  // ── Wire fresh listeners ──
+  // Wire fresh listeners ──
   newHamburger.addEventListener("click", (e) => {
     e.stopPropagation();
     const drawer  = document.getElementById("navDrawer");
@@ -173,7 +172,7 @@ function buildHamburgerMenu() {
   }
 }
 
-//openDrawer:
+//OpenDrawer:
 function _openDrawer() {
   const hamburger = document.getElementById("mainHamburger");
   const drawer    = document.getElementById("navDrawer");
@@ -187,7 +186,7 @@ function _openDrawer() {
   document.body.style.overflow = "hidden";
 }
 
-//closeDrawer:
+//CloseDrawer:
 function _closeDrawer() {
   const hamburger = document.getElementById("mainHamburger");
   const drawer    = document.getElementById("navDrawer");
@@ -203,13 +202,13 @@ function _closeDrawer() {
 }
 
   
-  // ── Extra UI 
+  // Extra UI 
   function injectExtraUI() {
   const headerRight = document.querySelector(".header-right");
 
   if (headerRight) {
 
-  // logout 
+  // Logout 
   const logoutbtn = document.createElement("button");
   logoutbtn.className     = "btn btn-ghost";
   logoutbtn.id            = "logoutBtn";
@@ -306,9 +305,9 @@ function _closeDrawer() {
   });
 }
 
-    // Quick Tests Btn - Bulk Section
-    const searchSection = document.querySelector(".search-section");
-    if (searchSection) {
+  // Quick Tests Btn - Bulk Section
+  const searchSection = document.querySelector(".search-section");
+  if (searchSection) {
       const bulk = document.createElement("div");
       bulk.id = "bulkSection";
       bulk.style.cssText = "margin-top:8px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;";
@@ -323,9 +322,9 @@ function _closeDrawer() {
       searchSection.appendChild(bulk);
     }
 
-    // Map panels
-    const mainGrid = document.querySelector(".main-grid");
-    if (mainGrid) {
+  // Map panels
+  const mainGrid = document.querySelector(".main-grid");
+  if (mainGrid) {
       const row = document.createElement("div");
       row.id            = "mapWatchRow";
       row.style.cssText = "display:grid;grid-template-columns:1fr 1fr;gap:24px;";
@@ -369,17 +368,17 @@ function _closeDrawer() {
       document.head.appendChild(style);
     }
 
-    // Responsive label switching
-    const mq = window.matchMedia("(max-width: 480px)");
-    function updateLabels(e) {
+  // Responsive label switching
+  const mq = window.matchMedia("(max-width: 480px)");
+  function updateLabels(e) {
       document.querySelectorAll(".desktop-label").forEach(el => el.style.display = e.matches ? "none" : "");
       document.querySelectorAll(".mobile-label").forEach(el => el.style.display = e.matches ? "inline" : "none");
     }
     mq.addEventListener("change", updateLabels);
     updateLabels(mq);
 
-      // mobile responsive 
-    function getWatchlistMaxHeight() {
+  // mobile responsive 
+  function getWatchlistMaxHeight() {
     return window.innerWidth < 640 ? "200px" : "260px";
   }
 
@@ -530,10 +529,9 @@ function _closeDrawer() {
       if (card.dataset.version !== apiVersion) card.style.opacity = "0.8";
     });
     card.addEventListener("mouseout", () => { card.style.opacity = "1"; });
- 
     card.addEventListener("click", () => {
       const version = card.dataset.version;
-      if (version === apiVersion) return; // already active
+      if (version === apiVersion) return; 
  
       switchAPIVersion(version);
       overlay.remove();
@@ -541,12 +539,12 @@ function _closeDrawer() {
   });
 }
 
-  // apply Filter
+  // Apply Filter
   function applyFilters(entries) {
   return entries.filter(e => {
     const f = auditFilters;
 
-    // Search — check ip, country, isp
+    // Search — check IP, country, ISP
     if (f.q && f.q.trim()) {
       const q = f.q.trim().toLowerCase();
       const ip      = (e.ip              || "").toLowerCase();
@@ -555,7 +553,7 @@ function _closeDrawer() {
       if (!ip.includes(q) && !country.includes(q) && !isp.includes(q)) return false;
     }
 
-    // Risk — handle both camelCase (session) and snake_case (DB)
+    // Risk, handle both camelCase (session) and snake_case (DB)
     if (f.risk) {
       const risk = e.riskLevel || e.risk_level || "";
       if (risk !== f.risk) return false;
@@ -755,7 +753,7 @@ function _closeDrawer() {
   });
 }
 
-  // timeline history
+  // Timeline history
   async function showTimeline(ip) {
   if (!ip || !isValidIP(ip)) { setBulkStatus("No IP to show history for."); return; }
  
@@ -766,7 +764,6 @@ function _closeDrawer() {
  
   const modal = document.createElement("div");
   modal.style.cssText = "background:var(--bg1);border:1px solid var(--border);border-radius:12px;width:100%;max-width:720px;max-height:85vh;display:flex;flex-direction:column;overflow:hidden;";
- 
   modal.innerHTML = `
     <div style="padding:18px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
       <div>
@@ -854,7 +851,7 @@ function _closeDrawer() {
       </div>`;
   }
 
-  // blacklist panel
+  // Blacklist panel
   window.showBlacklistPanel = async function () {
   const overlay = document.createElement("div");
   overlay.id = "blacklistModal";
@@ -862,7 +859,6 @@ function _closeDrawer() {
  
   const modal = document.createElement("div");
   modal.style.cssText = "background:var(--bg1);border:1px solid var(--border);border-radius:12px;width:100%;max-width:900px;max-height:90vh;display:flex;flex-direction:column;overflow:hidden;";
- 
   modal.innerHTML = `
     <div style="padding:16px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
       <div>
@@ -971,7 +967,7 @@ function _closeDrawer() {
   let selectedIds  = new Set();
   let currentQuery = { q: "", severity: "", status: "active" };
  
-  // ── Load & render
+  // Load & render
   async function loadBlacklist() {
   const params = new URLSearchParams({
     limit:  200,
@@ -979,7 +975,6 @@ function _closeDrawer() {
     });
     if (currentQuery.q)        params.set("q",        currentQuery.q);
     if (currentQuery.severity) params.set("severity", currentQuery.severity);
-
     try {
       const res  = await fetch(`${API}/blacklist?${params}`, {
         method:  "GET",
@@ -1012,7 +1007,6 @@ function _closeDrawer() {
     }
  
     const sevColor = { CRITICAL:"var(--critical)", HIGH:"var(--high)", MEDIUM:"var(--medium)", LOW:"var(--low)" };
- 
     wrap.innerHTML = `
       <table style="width:100%;border-collapse:collapse;font-size:12px;">
         <thead>
@@ -1136,7 +1130,7 @@ function _closeDrawer() {
     }
   }
  
-  // ── Form helpers 
+  // Form helpers 
   function openAddForm() {
     editingId = null;
     document.getElementById("blFormTitle").textContent      = "Add to Blacklist";
@@ -1212,7 +1206,7 @@ function _closeDrawer() {
     }
   }
  
-  // ── Wire events 
+  // Wire events 
   document.getElementById("blCloseBtn").addEventListener("click", () => overlay.remove());
   overlay.addEventListener("click", e => { if (e.target === overlay) overlay.remove(); });
  
@@ -1235,7 +1229,7 @@ function _closeDrawer() {
     currentQuery.status = e.target.value; loadBlacklist();
   });
  
-  // Bulk delete
+  // Bulk Delete
   document.getElementById("blBulkDeleteBtn").addEventListener("click", async () => {
     if (!selectedIds.size || !confirm(`Delete ${selectedIds.size} entries?`)) return;
     await fetch(`${API}/blacklist/bulk`, {
@@ -1282,8 +1276,7 @@ function _closeDrawer() {
   loadBlacklist();
   }
 
-  // Cases Panel 
-  // ── Status colors & icons 
+  // Cases Panel,  Status colors & icons 
   function caseStatusColor(status) {
     return { 
       Open:"var(--accent)", 
@@ -1293,18 +1286,18 @@ function _closeDrawer() {
       Closed:"var(--text3)" }[status] || "var(--text2)";
   }
 
-  // - Severity Color
-    function caseSeverityColor(sev) {
-  return { 
-    CRITICAL:"var(--critical)", 
-    HIGH:"var(--high)", 
-    MEDIUM:"var(--medium)", 
-    LOW:"var(--low)" }[sev] || "var(--text2)";
+  // Severity Color
+  function caseSeverityColor(sev) {
+    return { 
+      CRITICAL:"var(--critical)", 
+      HIGH:"var(--high)", 
+      MEDIUM:"var(--medium)", 
+      LOW:"var(--low)" }[sev] || "var(--text2)";
   }
 
-  // - Main Cases panel 
-    async function showCasesPanel() {
-    document.getElementById("casesModal")?.remove();
+  // Main Cases panel 
+  async function showCasesPanel() {
+  document.getElementById("casesModal")?.remove();
  
   const overlay = document.createElement("div");
   overlay.id = "casesModal";
@@ -1334,62 +1327,55 @@ function _closeDrawer() {
     min-height: 0;
   }
 
-  /* MOBILE */
+  /* Mobile */
   @media (max-width: 768px) {
 
     .cases-layout {
       grid-template-columns: 1fr;
       grid-template-rows: auto 1fr;
     }
-
     .cases-sidebar {
       border-right: none;
       border-bottom: 1px solid var(--border);
       max-height: 220px;
     }
-
     .cases-header {
       padding: 14px !important;
       flex-direction: column;
       align-items: stretch !important;
     }
-
     .cases-actions {
       width: 100%;
       justify-content: space-between;
     }
-
     .cases-filters {
       padding: 12px 14px !important;
       flex-direction: column;
       align-items: stretch !important;
     }
-
     .cases-filters input,
     .cases-filters select {
       width: 100%;
       box-sizing: border-box;
     }
-
     #caseDetail > div {
       padding: 24px 16px !important;
     }
-
     #caseList > div {
       padding: 18px 14px !important;
     }
 
-     .cases-filters select,
-  #caseStatusChange,
-  #cfSeverity,
-  #cfStatus {
+  .cases-filters select,
+    #caseStatusChange,
+    #cfSeverity,
+    #cfStatus {
     width: 100%;
     font-size: 12px !important;
     padding: 12px !important;
   }
 
     #casesModal,
-  #casesModal * {
+    #casesModal * {
     transform: none !important;
   }
 
@@ -1431,7 +1417,6 @@ function _closeDrawer() {
       Loading…
     </div>
   </div>
-
   <div class="cases-actions"
     style="display:flex;gap:8px;align-items:center;">
 
@@ -1450,7 +1435,6 @@ function _closeDrawer() {
 
 <div class="cases-filters"
   style="padding:10px 24px;border-bottom:1px solid var(--border);display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
-
   <input id="caseSearch"
     type="text"
     placeholder="Search cases…"
@@ -1506,7 +1490,7 @@ function _closeDrawer() {
   let activeCaseId = null;
   let caseQuery    = { q: "", status: "", severity: "" };
  
-  // - API helpers 
+  // API helpers 
   async function apiGet(path) {
     const r = await fetch(`${API}${path}`, { headers: { "x-api-key": API_KEY } });
     return r.json();
@@ -1524,7 +1508,7 @@ function _closeDrawer() {
     return r.ok;
   }
  
-  // - Stats 
+  // Stats 
   async function refreshStats() {
     try {
       const data = await apiGet("/cases/stats");
@@ -1534,7 +1518,7 @@ function _closeDrawer() {
     } catch (_) {}
   }
  
-  // - Case List 
+  // Case List 
   async function refreshList() {
     const params = new URLSearchParams({ limit:100 });
     if (caseQuery.q)        params.set("q",        caseQuery.q);
@@ -1602,7 +1586,7 @@ function _closeDrawer() {
     }
   }
  
-  // - Load Case and do ONE full Render 
+  // Load Case and do ONE full Render 
   async function loadAndRenderCase(id) {
     if (!id) return;
     activeCaseId = id;
@@ -1615,7 +1599,7 @@ function _closeDrawer() {
     }
   }
  
-  // - Only Update IP list Container 
+  // Only Update IP list Container 
   function updateIPList(ips, caseId) {
     const container = document.getElementById("caseIPList");
     const label     = document.getElementById("ipCountLabel");
@@ -1624,7 +1608,7 @@ function _closeDrawer() {
     if (!container) return;
     if (label) label.textContent = `ATTACHED IPs (${ips.length})`;
 
-     if (attachBtn && currentIP) {
+    if (attachBtn && currentIP) {
     const alreadyAttached = ips.some(ip => ip.ip === currentIP);
     if (alreadyAttached) {
       attachBtn.textContent       = "✓ Current IP Attached";
@@ -1660,7 +1644,7 @@ function _closeDrawer() {
            No IPs attached yet — click <strong>+ Attach IP</strong> above
          </div>`;
  
-    // - Wire IP row events
+    // Wire IP row events
     container.querySelectorAll(".ci-score").forEach(span => {
       span.addEventListener("click", () => { ipInput.value = span.dataset.ip; overlay.remove(); scoreIP(); });
     });
@@ -1678,7 +1662,7 @@ function _closeDrawer() {
     });
   }
  
-  // - Only update notes list container 
+  // Only update notes list container 
   function updateNotesList(notes, caseId) {
     const container = document.getElementById("caseNotesList");
     const label     = document.getElementById("noteCountLabel");
@@ -1702,7 +1686,7 @@ function _closeDrawer() {
            No notes yet — add your first note below
          </div>`;
  
-    // - Wire note delete events
+    // Wire note delete events
     container.querySelectorAll(".cn-rm").forEach(btn => {
       btn.addEventListener("click", async () => {
         if (btn._busy) return; btn._busy = true; btn.textContent = "…";
@@ -1717,7 +1701,7 @@ function _closeDrawer() {
     });
   }
  
-  // - Full case detail render — called ONCE per case 
+  // Full case detail render — called ONCE per case 
   function renderCaseDetail(c) {
     const detailEl = document.getElementById("caseDetail");
     if (!detailEl) return;
@@ -1727,7 +1711,7 @@ function _closeDrawer() {
     const svColor = caseSeverityColor(c.severity);
     const tags    = c.tags || [];
  
-    // - Build static HTML (IPs and notes have dedicated containers)
+    // Build static HTML (IPs and notes have dedicated containers)
     detailEl.innerHTML = `
       <div style="padding:20px 24px;">
         <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:14px;flex-wrap:wrap;">
@@ -1802,7 +1786,7 @@ function _closeDrawer() {
     updateIPList(c.ips   || [], caseId);
     updateNotesList(c.notes || [], caseId);
  
-    // - Wire all static events — these elements never get replaced 
+    // Wire all static events — these elements never get replaced 
  
     document.getElementById("caseStatusChange")?.addEventListener("change", async e => {
       const r = await apiPut(`/cases/${caseId}`, { status: e.target.value });
@@ -1846,7 +1830,7 @@ function _closeDrawer() {
       document.getElementById("attachIPError").style.display = "none";
     });
  
-    // - Attach IP
+    // Attach IP
     document.getElementById("attachIPSave")?.addEventListener("click", async () => {
       const ipVal   = document.getElementById("attachIPInput").value.trim();
       const noteVal = document.getElementById("attachIPNote").value.trim();
@@ -1869,7 +1853,7 @@ function _closeDrawer() {
       if (r.status === 409) { errEl.textContent = `${ipVal} is already attached.`; errEl.style.display = "block"; return; }
       if (!r.ok)            { errEl.textContent = r.data?.error || "Failed.";       errEl.style.display = "block"; return; }
 
-      //highlight existing IP
+      // Highlight existing IP
        document.querySelectorAll(".ci-score").forEach(span => {
     if (span.dataset.ip === ipVal) {
       const row = span.closest(".ci-row");
@@ -1877,9 +1861,11 @@ function _closeDrawer() {
         row.style.background  = "rgba(255,204,0,0.08)";
         row.style.borderLeft  = "3px solid var(--medium)";
         row.style.transition  = "all 0.3s";
+
         // Scroll it into view
         row.scrollIntoView({ behavior: "smooth", block: "nearest" });
         // Fade back after 3 seconds
+
         setTimeout(() => {
           row.style.background = "";
           row.style.borderLeft = "";
@@ -1889,21 +1875,21 @@ function _closeDrawer() {
   });
   return;
  
-      // - Clear form
+      // Clear form
       document.getElementById("attachIPInput").value = "";
       document.getElementById("attachIPNote").value  = "";
       document.getElementById("attachIPForm").style.display = "none";
  
       toast(`${ipVal} attached to case`, "success");
  
-      // - Fetch fresh IPs only, update only #caseIPList
+      // Fetch fresh IPs only, update only #caseIPList
       const fresh = await apiGet(`/cases/${caseId}`);
       updateIPList(fresh.ips || [], caseId);   // ← only IPs rebuilt
       refreshList();
       refreshStats();
     });
  
-    // - Add Note 
+    // Add Note 
     async function submitNote() {
       const textarea  = document.getElementById("caseNoteInput");
       const submitBtn = document.getElementById("caseNoteSubmit");
@@ -1923,13 +1909,13 @@ function _closeDrawer() {
       textarea.value = ""; // clear before DOM update
       toast("Note added", "success");
  
-      // - Fetch fresh notes only, update only #caseNotesList 
+      // Fetch fresh notes only, update only #caseNotesList 
       const fresh = await apiGet(`/cases/${caseId}`);
       updateNotesList(fresh.notes || [], caseId); // ← only notes rebuilt
       refreshList();
       refreshStats();
  
-      // - Scroll last note into view
+      // Scroll last note into view
       setTimeout(() => {
         const list = document.getElementById("caseNotesList");
         list?.lastElementChild?.scrollIntoView({ behavior:"smooth", block:"nearest" });
@@ -1942,7 +1928,7 @@ function _closeDrawer() {
     });
   }
  
-  // - Case Create / Edit Form 
+  // Case Create / Edit Form 
   function showCaseForm(c) {
     const isEdit = !!c;
     const fo = document.createElement("div");
@@ -2027,7 +2013,7 @@ function _closeDrawer() {
     });
   }
  
-  // - Panel Event Listeners 
+  // Panel Event Listeners 
   document.getElementById("caseNewBtn").addEventListener("click", () => showCaseForm(null));
   document.getElementById("casesCloseBtn").addEventListener("click", () => overlay.remove());
   overlay.addEventListener("click", e => { if (e.target === overlay) overlay.remove(); });
@@ -2040,12 +2026,12 @@ function _closeDrawer() {
   document.getElementById("caseStatusFilter").addEventListener("change", e => { caseQuery.status   = e.target.value; refreshList(); });
   document.getElementById("caseSevFilter").addEventListener("change",    e => { caseQuery.severity = e.target.value; refreshList(); });
  
-  // - Initial Load
+  // Initial Load
   await refreshStats();
   await refreshList();
   }
 
-    // ── Add current IP to an existing or new case 
+    // Add current IP to an existing or new case 
     async function addIPToCase(ip, result) {
   if (!ip || !isValidIP(ip)) { toast("Score an IP first", "warning"); return; }
  
@@ -2181,7 +2167,7 @@ function _closeDrawer() {
   setTimeout(dismiss, duration);
   }
  
-// ── Quick block from score result 
+// Quick block from score result 
 async function quickBlock(ip) {
   if (!ip || !isValidIP(ip)) { setBulkStatus("No valid IP to block."); return; }
 
@@ -2495,8 +2481,8 @@ function resolveScoreColor(score) {
   setTimeout(() => banner.remove(), 10000);
 }
 
-// firewall export 
-function showFirewallExport() {
+  // Firewall export 
+  function showFirewallExport() {
 
   // Collect CRITICAL and HIGH IPs from session
   const threats = auditEntries.filter(e => e.riskLevel === "CRITICAL" || e.riskLevel === "HIGH");
@@ -2706,10 +2692,10 @@ function generateRules(format, ips, action = "DROP") {
   }
 }
  
-// sort entries
-function sortEntries(entries) {
-  const getDate = e => e.meta?.scoredAt || e.scored_at || 0;
-  return [...entries].sort((a, b) => {
+// Sort entries
+  function sortEntries(entries) {
+    const getDate = e => e.meta?.scoredAt || e.scored_at || 0;
+    return [...entries].sort((a, b) => {
     switch (auditFilters.sort) {
       case "score_desc": return (b.score ?? 0) - (a.score ?? 0);
       case "score_asc":  return (a.score ?? 0) - (b.score ?? 0);
@@ -2719,7 +2705,7 @@ function sortEntries(entries) {
   });
 }
  
-// ── Fetch from DB via API 
+// Fetch from DB via API 
 async function fetchAndRenderFromDB() {
   const params = new URLSearchParams({
     limit:  AUDIT_PAGE_SIZE,
@@ -2755,7 +2741,7 @@ async function fetchAndRenderFromDB() {
   }
 }
  
-// ── Main renderAudit 
+// Main renderAudit 
  
 function renderAudit() {
   if (usingDB) { fetchAndRenderFromDB(); return; }
@@ -2791,7 +2777,7 @@ function renderAuditEntries(entries, total) {
   }
 
   auditList.innerHTML = entries.map(e => {
-    // ── Handle both DB (snake_case) and in-memory (camelCase) formats ──
+    // Handle both DB (snake_case) and in-memory (camelCase) formats ──
     const ip        = e.ip;
     const score     = e.score        ?? 0;
     const riskLevel = e.riskLevel    || e.risk_level  || "LOW";
@@ -2854,7 +2840,7 @@ function renderAuditEntries(entries, total) {
   });
 }
 
-  // ── Map 
+Map 
  function initMap() {
   const container = document.getElementById("mapContainer");
   if (!container || typeof L === "undefined") return;
@@ -2899,7 +2885,7 @@ function updateMap(geo, ip, riskLevel) {
     if (label) label.textContent = `${geo.city||"—"}, ${geo.country||"—"}`;
 }
 
-  // ── Events 
+  // Events 
 function setupEventListeners() {
     scoreBtn.addEventListener("click", scoreIP);
     clearBtn.addEventListener("click", clearPanel);
@@ -2910,7 +2896,7 @@ function setupEventListeners() {
       chip.addEventListener("click", () => { ipInput.value = chip.dataset.ip; scoreIP(); });
     });
 
-    // addEvent Listener
+    // AddEvent Listener
     document.addEventListener("click", e => {
       if (e.target.id === "apiBadge")     showVersionPanel();
       if (e.target.id === "siemBtn") {
@@ -2968,11 +2954,11 @@ function setupEventListeners() {
         return;
       }
 
-    // download pdfbtn
-    if (e.target.id === "downloadPdfBtn") {
-        const ip  = currentIP || ipInput.value.trim();
-        if (!ip) return;
-        const url = `${API}/report/${encodeURIComponent(ip)}?cached=true`;
+    // Download pdfbtn
+      if (e.target.id === "downloadPdfBtn") {
+          const ip  = currentIP || ipInput.value.trim();
+          if (!ip) return;
+          const url = `${API}/report/${encodeURIComponent(ip)}?cached=true`;
 
         // Open in new tab — browser handles the PDF download
         const a = Object.assign(document.createElement("a"), {
@@ -3003,22 +2989,22 @@ function setupEventListeners() {
           });
       }
 
-    // timelinebtn
-    if (e.target.id === "timelineBtn") {
-    showTimeline(currentIP || ipInput.value.trim());
-   }
+    // Timelinebtn
+      if (e.target.id === "timelineBtn") {
+          showTimeline(currentIP || ipInput.value.trim());
+        }
 
-   // blacklistbtn
-    if (e.target.id === "blockCurrentBtn") {
-      if (lastResult?.blacklisted) {
-        showBlacklistPanel(); // 
-      } else {
-        quickBlock(currentIP);
-      }
-    }
+    // Blacklistbtn
+      if (e.target.id === "blockCurrentBtn") {
+          if (lastResult?.blacklisted) {
+              showBlacklistPanel(); 
+            } else {
+              quickBlock(currentIP);
+            }
+        }
 
 
-      // ── Tab switching
+      // Tab switching
       const tabBtn = e.target.closest(".tab-btn");
       if (tabBtn) {
         const tab = tabBtn.dataset.tab;
@@ -3043,7 +3029,7 @@ function setupEventListeners() {
     });
 }
 
-  // ── Theme 
+  // Theme 
 function toggleTheme() {
   isDark = !isDark;
   applyTheme(isDark);
@@ -3091,7 +3077,7 @@ function applyTheme(dark) {
     }
   }
 }
-  // ── Score 
+  // Score 
   async function scoreIP() {
     const token = localStorage.getItem("token");
     const ip = ipInput.value.trim();
@@ -3177,7 +3163,7 @@ function applyTheme(dark) {
     </div>`;
 }
 
-  // ── Watchlist 
+  // Watchlist 
   async function loadWatchlist() {
     try {
       const res  = await fetch(`${API}/watchlist`, { headers: { "x-api-key": API_KEY } });
@@ -3272,14 +3258,14 @@ function applyTheme(dark) {
     });
   }
 
-  // logout
+  // Logout
   async function logout() {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     window.location.href = "/";
   }
 
-  // ── WHOIS 
+  // WHOIS 
   async function loadWhois(ip) {
     const panel = document.getElementById("whoisPanel");
     if (!panel) return;
@@ -3348,7 +3334,7 @@ function applyTheme(dark) {
         </div>` : ""}`;
   }
 
-  // ── Render result 
+  // Render result 
   function renderResult(d) {
     const score     = d.score        ?? 0;
     const riskLevel = d.riskLevel    ?? "LOW";
@@ -3453,8 +3439,6 @@ function applyTheme(dark) {
       </div>
     </div>
  
-
- 
     ${intel.virusTotal ? `
       <div class="detail-card" style="margin-top:16px;">
         <div class="detail-card-title">// VirusTotal</div>
@@ -3483,7 +3467,7 @@ function applyTheme(dark) {
       </div>`;
   }
 
-  // ── Helpers 
+  // Helpers 
   function threatFeedBadges(tf) {
     if (!tf) return "";
     const badges = [];
@@ -3570,7 +3554,7 @@ function applyTheme(dark) {
     renderAudit();
   }
 
-  //update stats
+  // Update stats
   function updateStats(riskLevel) {
   if (!(riskLevel in sessionStats)) return;
   sessionStats[riskLevel]++;
@@ -3590,7 +3574,7 @@ function applyTheme(dark) {
   el.textContent = (current + 1).toLocaleString();
 }
 
-  // call stats
+  // Call stats
 async function loadStats() {
   try {
     const res = await fetch("/api/v1/stats", { headers: authHeaders() });
@@ -3621,7 +3605,7 @@ async function loadStats() {
   }
 }
   
-  //initApp
+  // initApp
   function initApp() {
   const token = localStorage.getItem("token");
   if (!token) {
@@ -3710,8 +3694,7 @@ async function loadStats() {
 
   setInterval(loadWatchlist, 1000 * 60 * 2);
 
-    // recent update
-    // 1. CLUSTER VISUALIZATION MODAL
+    // CLUSTER VISUALIZATION MODAL
     async function showClustersPanel() {
       document.getElementById("clustersModal")?.remove();
 
@@ -3825,8 +3808,8 @@ async function loadStats() {
           });
         });
 
-        // Auto-select first
-        el.querySelector(".cluster-item")?.click();
+      // Auto-select first
+      el.querySelector(".cluster-item")?.click();
       }
 
       async function loadClusterDetail(cluster) {
@@ -3990,7 +3973,7 @@ async function loadStats() {
       loadClusters();
     }
 
-    // 2. SIEM TARGETS CONFIGURATION PANEL
+    // SIEM TARGETS CONFIGURATION PANEL
     async function showUnifiedSIEMPanel() {
       document.getElementById("siemUnifiedModal")?.remove();
 
@@ -4002,7 +3985,7 @@ async function loadStats() {
         { id:"generic",  label:"Generic Webhook",      hint:"Bearer {token} or no auth" },
       ];
 
-      // ── Fetch both webhook status and targets in parallel 
+      //  Fetch both webhook status and targets in parallel 
       let status = null, formats = [], targets = [];
       try {
         // In showUnifiedSIEMPanel — loadClusters equivalent block:
@@ -4198,11 +4181,11 @@ async function loadStats() {
       overlay.appendChild(modal);
       document.body.appendChild(overlay);
 
-      // ── Close 
+      // Close 
       document.getElementById("siemUnifiedClose").addEventListener("click", () => overlay.remove());
       overlay.addEventListener("click", e => { if (e.target === overlay) overlay.remove(); });
 
-      // ── Tab switching
+      // Tab switching
       modal.querySelectorAll(".siem-tab").forEach(tab => {
         tab.addEventListener("click", () => {
           modal.querySelectorAll(".siem-tab").forEach(t => {
@@ -4225,7 +4208,7 @@ async function loadStats() {
         });
       });
 
-      // ── Webhook tab: test 
+      // Webhook tab: test 
       document.getElementById("siemTestBtn").addEventListener("click", async () => {
         const btn    = document.getElementById("siemTestBtn");
         const result = document.getElementById("siemTestResult");
@@ -4233,6 +4216,7 @@ async function loadStats() {
         btn.disabled = true; btn.textContent = "Sending…";
         result.textContent = ""; detail.style.display = "none";
         try {
+
           // siemTestBtn click handler:
           const res = await fetch(`${API}/siem/test`, {
             method: "POST",
@@ -4255,7 +4239,7 @@ async function loadStats() {
         }
       });
 
-      // ── Webhook tab: sample payload 
+      // Webhook tab: sample payload 
       async function loadSIEMSample(format) {
         const pre = document.getElementById("siemSamplePayload");
         pre.textContent = "Loading…";
@@ -4290,7 +4274,7 @@ async function loadStats() {
 
       if (formats.length) loadSIEMSample(formats[0].id);
 
-      // ── Targets tab
+      // Targets tab
       const typeSelect = document.getElementById("stType");
       typeSelect.addEventListener("change", () => {
         document.getElementById("stTypeHint").textContent =
@@ -4366,6 +4350,7 @@ async function loadStats() {
         el.querySelectorAll(".st-test").forEach(btn => {
           btn.addEventListener("click", async () => {
             btn.disabled = true; btn.textContent = "Testing…";
+
             // st-test buttons:
             const r = await fetch(`${API}/siem/targets/${btn.dataset.id}/test`, {
               method: "POST",
@@ -4385,6 +4370,7 @@ async function loadStats() {
         el.querySelectorAll(".st-del").forEach(btn => {
           btn.addEventListener("click", async () => {
             if (!confirm("Delete this SIEM target?")) return;
+
             // st-del buttons:
             await fetch(`${API}/siem/targets/${btn.dataset.id}`, {
               method: "DELETE",
@@ -4467,7 +4453,7 @@ async function loadStats() {
       });
     }
 
-    // 3. RATE LIMIT TUNING PANEL
+    // RATE LIMIT TUNING PANEL
     async function showRateLimitPanel() {
       document.getElementById("rateLimitModal")?.remove();
 
@@ -4678,7 +4664,7 @@ async function loadStats() {
       loadRateLimitData();
     }
 
-    // ── Shared utility: human-readable time since
+    // Shared utility: human-readable time since
     function timeSince(dateStr) {
       if (!dateStr) return "never";
       const secs = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000);
@@ -4717,9 +4703,9 @@ async function loadStats() {
     window._userRole = role;
     window._userRank = { readonly: 0, analyst: 1, admin: 2 }[role] ?? 0;
 
-    // ── Define visibility rules per role
+    // Define visibility rules per role
     const rules = {
-      // buttonId        : minimum role required
+      // buttonId     : minimum role required
       logoutBtn:      "readonly",   // everyone
       themeToggle:    "readonly",   // everyone
       apiBadge:       "readonly",   // everyone
@@ -4741,7 +4727,7 @@ async function loadStats() {
       el.style.display = userRank >= required ? "" : "none";
     });
 
-    // ── v2-only buttons — hide for v1 AND check role 
+    // v2-only buttons — hide for v1 AND check role 
     document.querySelectorAll(".v2-only").forEach(el => {
       const btnId  = el.id;
       const minRole = rules[btnId] || "analyst";
@@ -4753,7 +4739,7 @@ async function loadStats() {
     // drawer reflects correct buttons 
     buildHamburgerMenu();
 
-    // ── Remove auth guard — show dashboard 
+    // Remove auth guard — show dashboard 
     const guard = document.getElementById("authGuard");
     if (guard) guard.remove();
 
@@ -4860,9 +4846,8 @@ async function loadStats() {
       let searchTimer;
     
       // ── Stats bar 
-      // AFTER — surfaces real server error:
-async function loadKeyStats() {
-  try {
+  async function loadKeyStats() {
+    try {
     const res = await fetch(`${API}/keys/stats`, { headers: authHeaders() });
     if (res.status === 403) {
       document.getElementById("keyMgrSummary").textContent = "Admin access required";
@@ -4902,7 +4887,7 @@ async function loadKeyStats() {
     return false;
   }
 }
-      // ── Key list 
+      // Key list 
       async function loadKeys() {
         const params = new URLSearchParams({ limit: 100 });
         if (currentStatus) params.set("status", currentStatus);
@@ -4997,7 +4982,9 @@ async function loadKeyStats() {
                       ${k.status !== "revoked" ? `
                         <button class="km-revoke btn btn-ghost" data-id="${k.id}" data-name="${escHtml(k.name)}" style="padding:3px 8px;font-size:10px;color:var(--critical);border-color:var(--critical);" title="Revoke">✕</button>
                       ` : ""}
-                        <button class="km-del btn btn-ghost" data-id="${k.id}" style="padding:3px 10px;font-size:10px;color:var(--critical);border-color:var(--critical);"> Delete </button>
+                      <button class="km-edit btn btn-ghost" data-id="${k.id}" data-role="${k.role}" data-name="${escHtml(k.name)}" 
+                      style="padding:3px 8px;font-size:10px;margin-right:2px;" title="Edit role">✎</button>  
+                      <button class="km-del btn btn-ghost" data-id="${k.id}" style="padding:3px 10px;font-size:10px;color:var(--critical);border-color:var(--critical);"> Delete </button>
                     </td>
                   </tr>`;
               }).join("")}
@@ -5008,6 +4995,7 @@ async function loadKeyStats() {
         el.querySelectorAll(".km-suspend").forEach(btn => {
           btn.addEventListener("click", async () => {
             if (!confirm("Suspend this key?")) return;
+
             // km-suspend:
             await fetch(`${API}/keys/${btn.dataset.id}/suspend`, {
               method: "POST",
@@ -5019,6 +5007,7 @@ async function loadKeyStats() {
     
         el.querySelectorAll(".km-reinstate").forEach(btn => {
           btn.addEventListener("click", async () => {
+
             // km-reinstate:
             await fetch(`${API}/keys/${btn.dataset.id}/reinstate`, { method: "POST", headers: authHeaders() });
             toast("Key reinstated", "success"); loadKeys(); loadKeyStats();
@@ -5084,9 +5073,13 @@ async function loadKeyStats() {
             if (r.ok) loadKeys();
           });
         });
+
+        el.querySelectorAll(".km-edit").forEach(btn => {
+          btn.addEventListener("click", () => openEditForm(btn.dataset.id, btn.dataset.role, btn.dataset.name));
+        });
       }
     
-      // ── Invite form 
+      // Invite form 
       function openInviteForm() {
         document.getElementById("kfName").value           = "";
         document.getElementById("kfEmail").value          = "";
@@ -5100,62 +5093,143 @@ async function loadKeyStats() {
       }
     
       // submitInvite
-      // AFTER — parse error safely and show real message:
-async function submitInvite() {
-  const errEl = document.getElementById("kfError");
-  const name  = document.getElementById("kfName").value.trim();
-  if (!name) { errEl.textContent = "Name is required"; errEl.style.display = "block"; return; }
+      async function submitInvite() {
+        const errEl = document.getElementById("kfError");
+        const name  = document.getElementById("kfName").value.trim();
+        if (!name) { errEl.textContent = "Name is required"; errEl.style.display = "block"; return; }
 
-  const body = {
-    name,
-    email:      document.getElementById("kfEmail").value.trim()    || undefined,
-    role:       document.getElementById("kfRole").value,
-    dailyLimit: parseInt(document.getElementById("kfDailyLimit").value) || 1000,
-    notes:      document.getElementById("kfNotes").value.trim()    || undefined,
-  };
+        const body = {
+          name,
+          email:      document.getElementById("kfEmail").value.trim()    || undefined,
+          role:       document.getElementById("kfRole").value,
+          dailyLimit: parseInt(document.getElementById("kfDailyLimit").value) || 1000,
+          notes:      document.getElementById("kfNotes").value.trim()    || undefined,
+        };
 
-  const r = await fetch(`${API}/keys/invite`, {
-    method:  "POST",
-    headers: { ...authHeaders(), "Content-Type": "application/json" },
-    body:    JSON.stringify(body),
-  });
+    const r = await fetch(`${API}/keys/invite`, {
+      method:  "POST",
+      headers: { ...authHeaders(), "Content-Type": "application/json" },
+      body:    JSON.stringify(body),
+    });
 
-  // Parse response safely — server might return non-JSON on some errors
-  const data = await r.json().catch(() => ({ error: `HTTP ${r.status}` }));
+    // Parse response safely — server might return non-JSON on some errors
+    const data = await r.json().catch(() => ({ error: `HTTP ${r.status}` }));
 
-  if (!r.ok) {
-    errEl.textContent  = data.error || `Server error ${r.status}`;
-    errEl.style.display = "block";
-    return;
-  }
+    if (!r.ok) {
+      errEl.textContent  = data.error || `Server error ${r.status}`;
+      errEl.style.display = "block";
+      return;
+    }
 
-  // Show activation URL result
-  const resultEl = document.getElementById("kfResult");
-  resultEl.style.display = "block";
-  resultEl.innerHTML = `
-    <div style="font-size:11px;font-weight:600;color:var(--low);margin-bottom:8px;">✓ Invite created for ${escHtml(data.name)}</div>
-    <div style="font-size:11px;color:var(--text3);margin-bottom:6px;">Share this activation link with the recipient:</div>
-    <div style="display:flex;gap:8px;align-items:center;">
-      <code style="flex:1;background:var(--bg2);padding:8px 10px;border-radius:6px;font-size:11px;color:var(--accent);word-break:break-all;">${escHtml(data.activateUrl)}</code>
-      <button onclick="navigator.clipboard.writeText('${escHtml(data.activateUrl)}').then(()=>toast('Link copied','success'))"
-        class="btn btn-ghost" style="padding:6px 12px;font-size:11px;white-space:nowrap;">Copy</button>
-    </div>
-    <div style="font-size:10px;color:var(--text3);margin-top:8px;">The key activates when the recipient visits this link. It expires if not activated within 7 days.</div>`;
+    // Show activation URL result
+    const resultEl = document.getElementById("kfResult");
+    resultEl.style.display = "block";
+    resultEl.innerHTML = `
+      <div style="font-size:11px;font-weight:600;color:var(--low);margin-bottom:8px;">✓ Invite created for ${escHtml(data.name)}</div>
+      <div style="font-size:11px;color:var(--text3);margin-bottom:6px;">Share this activation link with the recipient:</div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <code style="flex:1;background:var(--bg2);padding:8px 10px;border-radius:6px;font-size:11px;color:var(--accent);word-break:break-all;">${escHtml(data.activateUrl)}</code>
+        <button onclick="navigator.clipboard.writeText('${escHtml(data.activateUrl)}').then(()=>toast('Link copied','success'))"
+          class="btn btn-ghost" style="padding:6px 12px;font-size:11px;white-space:nowrap;">Copy</button>
+      </div>
+      <div style="font-size:10px;color:var(--text3);margin-top:8px;">The key activates when the recipient visits this link. It expires if not activated within 7 days.</div>`;
 
-  loadKeys();
-  loadKeyStats();
-  document.getElementById("kfSave").disabled   = true;
-  document.getElementById("kfSave").textContent = "✓ Created";
-  setTimeout(() => {
-    document.getElementById("kfSave").disabled   = false;
-    document.getElementById("kfSave").textContent = "Create Invite";
-    document.getElementById("kfName").value      = "";
-    document.getElementById("kfEmail").value     = "";
-    resultEl.style.display = "none";
-  }, 5000);
-}
+    loadKeys();
+    loadKeyStats();
+    document.getElementById("kfSave").disabled   = true;
+    document.getElementById("kfSave").textContent = "✓ Created";
+    setTimeout(() => {
+      document.getElementById("kfSave").disabled   = false;
+      document.getElementById("kfSave").textContent = "Create Invite";
+      document.getElementById("kfName").value      = "";
+      document.getElementById("kfEmail").value     = "";
+      resultEl.style.display = "none";
+    }, 5000);
+      }
+      function openEditForm(keyId, currentRole, keyName) {
+        const form = document.getElementById("keyForm");
+        document.getElementById("keyFormTitle").textContent = "EDIT ROLE — " + keyName.toUpperCase();
+
+        // Pre-fill only the role field; clear the rest
+        document.getElementById("kfName").value           = keyName;
+        document.getElementById("kfEmail").value          = "";
+        document.getElementById("kfRole").value           = currentRole;
+        document.getElementById("kfDailyLimit").value     = "";
+        document.getElementById("kfNotes").value          = "";
+        document.getElementById("kfError").style.display  = "none";
+        document.getElementById("kfResult").style.display = "none";
+
+        // Hide fields that don't apply to an edit
+        document.getElementById("kfName").closest("div").style.display        = "none";
+        document.getElementById("kfEmail").closest("div").style.display       = "none";
+        document.getElementById("kfDailyLimit").closest("div").style.display  = "none";
+        document.getElementById("kfNotes").closest("div").style.display       = "none";
+
+        const saveBtn = document.getElementById("kfSave");
+        saveBtn.textContent = "Save Role";
+
+        // Swap save handler — remove old listener by replacing the button clone
+        const newSaveBtn = saveBtn.cloneNode(true);
+        saveBtn.parentNode.replaceChild(newSaveBtn, saveBtn);
+        newSaveBtn.addEventListener("click", () => submitRoleEdit(keyId, keyName));
+
+        document.getElementById("kfCancel").onclick = () => {
+          form.style.display = "none";
+          restoreFormFields();
+          resetSaveBtn();
+        };
+
+        form.style.display = "block";
+      }
+
+      function restoreFormFields() {
+        // Unhide all fields for next invite creation
+        document.getElementById("kfName").closest("div").style.display        = "";
+        document.getElementById("kfEmail").closest("div").style.display       = "";
+        document.getElementById("kfDailyLimit").closest("div").style.display  = "";
+        document.getElementById("kfNotes").closest("div").style.display       = "";
+        document.getElementById("keyFormTitle").textContent = "CREATE INVITE";
+      }
+
+      function resetSaveBtn() {
+        const btn = document.getElementById("kfSave");
+        const newBtn = btn.cloneNode(true);
+        btn.parentNode.replaceChild(newBtn, btn);
+        newBtn.textContent = "Create Invite";
+        newBtn.addEventListener("click", submitInvite);
+      }
+
+      async function submitRoleEdit(keyId, keyName) {
+        const errEl   = document.getElementById("kfError");
+        const newRole = document.getElementById("kfRole").value;
+
+        errEl.style.display = "none";
+
+        const r = await fetch(`${API}/keys/${keyId}`, {
+          method:  "PUT",
+          headers: { ...authHeaders(), "Content-Type": "application/json" },
+          body:    JSON.stringify({ role: newRole }),
+        });
+
+        const data = await r.json().catch(() => ({ error: `HTTP ${r.status}` }));
+
+        if (!r.ok) {
+          errEl.textContent   = data.error || `Server error ${r.status}`;
+          errEl.style.display = "block";
+          return;
+        }
+
+        document.getElementById("keyForm").style.display = "none";
+        restoreFormFields();
+        resetSaveBtn();
+
+        toast(`Role updated to "${newRole}" for ${keyName}`, "success");
+        loadKeys();
+        loadKeyStats();
+      }
+            
     
-      // ── Usage panel 
+      // Usage panel 
       async function showUsagePanel(keyId) {
         const r = await fetch(`${API}/keys/${keyId}/usage?days=30`, { headers: authHeaders() });
         const data = await r.json();
@@ -5202,7 +5276,7 @@ async function submitInvite() {
         ov.addEventListener("click", e => { if (e.target === ov) ov.remove(); });
       }
     
-      // ── Show key result modal (for rotations)
+      // Show key result modal (for rotations)
       function showKeyResult(title, key, note) {
         const ov = document.createElement("div");
         ov.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:10001;display:flex;align-items:center;justify-content:center;padding:24px;";
@@ -5222,11 +5296,15 @@ async function submitInvite() {
         ov.addEventListener("click", e => { if (e.target === ov) ov.remove(); });
       }
     
-      // ── Wire events 
-      document.getElementById("createInviteBtn").addEventListener("click", openInviteForm);
+      // Wire events 
+      document.getElementById("createInviteBtn").addEventListener("click", () => {
+        restoreFormFields();
+        resetSaveBtn();
+        openInviteForm();
+      });
       document.getElementById("kfSave").addEventListener("click", submitInvite);
       document.getElementById("kfCancel").addEventListener("click", () => {
-        document.getElementById("keyForm").style.display = "none";
+      document.getElementById("keyForm").style.display = "none";
       });
     
       // Status filter chips

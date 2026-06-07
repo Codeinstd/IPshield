@@ -16,7 +16,7 @@ async function detectClusters(result) {
   const windowStart = new Date(Date.now() - CLUSTER_WINDOW_MINS * 60 * 1000);
 
   try {
-    // ── Subnet cluster (/24) 
+    // Subnet cluster (/24) 
     const subnetMatch = ip.match(/^(\d{1,3}\.\d{1,3}\.\d{1,3})\.\d{1,3}$/);
     if (subnetMatch) {
       const subnet     = `${subnetMatch[1]}.0/24`;
@@ -47,7 +47,7 @@ async function detectClusters(result) {
       }
     }
 
-    // ── ASN cluster 
+    // ASN cluster 
     const asn = network?.asn;
     if (asn) {
       const clusterKey = `asn:${asn}`;
@@ -76,7 +76,7 @@ async function detectClusters(result) {
       }
     }
 
-    // ── Country cluster 
+    // Country cluster 
     const country = result.geo?.country;
     if (country && (riskLevel === "CRITICAL" || riskLevel === "HIGH")) {
       const clusterKey = `country:${country}`;

@@ -1,4 +1,3 @@
-// middleware/auth.js
 const jwt = require("jsonwebtoken");
 const db = require("../store/db");
 const { hashKey } = require("../utils/keyHash");
@@ -21,7 +20,7 @@ async function requireAuth(req, res, next) {
     const authHeader = req.headers.authorization;
 
     
-    // 1. JWT (PRIMARY SYSTEM)
+    // JWT (PRIMARY SYSTEM)
     if (authHeader?.startsWith("Bearer ")) {
       const token = authHeader.split(" ")[1];
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
@@ -37,7 +36,7 @@ async function requireAuth(req, res, next) {
     }
 
    
-    // 2. API KEY (SECONDARY SYSTEM)
+    // API KEY (SECONDARY SYSTEM)
     const rawKey = req.headers["x-api-key"];
     if (rawKey) {
       const key = await resolveApiKey(rawKey);

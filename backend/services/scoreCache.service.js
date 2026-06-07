@@ -9,7 +9,7 @@ function getTTL(riskLevel) {
   return (riskLevel === "CRITICAL" || riskLevel === "HIGH") ? TTL_HIGH : TTL_NORMAL;
 }
 
-// ── Redis cache 
+// Redis cache 
 
 async function getFromRedis(ip) {
   const redis = getRedis();
@@ -37,8 +37,7 @@ async function deleteFromRedis(ip) {
   try { await redis.del(`score:${ip}`); } catch (_) {}
 }
 
-// ── Postgres cache 
-
+// Postgres cache 
 async function getFromDB(ip) {
   try {
     const res = await db.query(
@@ -72,7 +71,7 @@ async function setInDB(ip, score, riskLevel, payload, ttlSecs) {
   } catch (_) {}
 }
 
-// ── Public API
+// Public API
 
 /**
  * Get a cached score result for an IP.
@@ -96,9 +95,9 @@ async function getCached(ip) {
   return null;
 }
 
-/**
- * Store a score result in both caches.
- */
+
+// Store a score result in both caches.
+
 async function setCached(ip, result) {
   const ttl = getTTL(result.riskLevel);
   const payload = { ...result, meta: { ...result.meta, cached: true, cachedAt: new Date().toISOString() } };
@@ -109,9 +108,9 @@ async function setCached(ip, result) {
   ]);
 }
 
-/**
- * Invalidate cache for an IP (e.g. when it's blacklisted).
- */
+
+// Invalidate cache for an IP (e.g. when it's blacklisted).
+
 async function invalidate(ip) {
   await Promise.all([
     deleteFromRedis(ip),
@@ -119,9 +118,8 @@ async function invalidate(ip) {
   ]);
 }
 
-/**
- * Cache stats for the admin dashboard.
- */
+// Cache stats for the admin dashboard.
+
 async function getCacheStats() {
   try {
     const redis  = getRedis();
@@ -153,9 +151,8 @@ async function getCacheStats() {
   }
 }
 
-/**
- * Purge expired entries from Postgres (run nightly).
- */
+// Purge expired entries from Postgres (run nightly).
+
 async function purgeExpired() {
   try {
     const res = await db.query(`DELETE FROM score_cache WHERE expires_at <= NOW()`);

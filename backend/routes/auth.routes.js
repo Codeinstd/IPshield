@@ -9,7 +9,7 @@ router.post("/login", async (req, res) => {
   try {
     const { email, password, apiKey } = req.body;
 
-    // ── Option A: Login with API key directly 
+    //  Login with API key directly 
     if (apiKey) {
       const keyHash = hashKey(apiKey);
       const result  = await db.query(

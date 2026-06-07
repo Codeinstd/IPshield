@@ -5,7 +5,7 @@ const { addAudit }        = require("../store/memory.store");
 const db                  = require("../store/db");
 const logger              = require("../utils/logger");
 
-// ─── constants 
+// constants 
 
 const DEFAULT_SEVERITY_MAP = {
   CRITICAL: 90,
@@ -16,7 +16,7 @@ const DEFAULT_SEVERITY_MAP = {
 
 const MAX_IPS = 200;
 
-// ─── helpers 
+// helpers 
 
 /**
  * Derive blacklist severity from a numeric score using the severity map.
@@ -106,7 +106,7 @@ async function insertBlacklist({ ip, severity, reason, added_by, tags, expires_a
   }
 }
 
-// ─── controller 
+// controller 
 
 exports.scoreBatchAndBlock = async (req, res, next) => {
   try {
@@ -130,10 +130,10 @@ exports.scoreBatchAndBlock = async (req, res, next) => {
       `batch-and-block: ${uniqueIPs.length} IPs, threshold=${auto_block_threshold}, dry_run=${dry_run}`
     );
 
-    // ── 1. Score all IPs in parallel
+    // 1. Score all IPs in parallel
     const settled = await Promise.allSettled(uniqueIPs.map(ip => getFullIntel(ip)));
 
-    // ── 2. Process results 
+    // 2. Process results 
     const blocked = [];
     const allowed = [];
     const failed  = [];
@@ -171,7 +171,7 @@ exports.scoreBatchAndBlock = async (req, res, next) => {
         alertIfCritical(result).catch(() => {});
         sendToSIEM(result).catch(() => {});
 
-        // ── Decision: should this IP be blocked? 
+        // Decision: should this IP be blocked? 
         const meetsThreshold = result.score >= auto_block_threshold;
         const alreadyBlocked = !!result.blacklisted;
 
@@ -215,7 +215,7 @@ exports.scoreBatchAndBlock = async (req, res, next) => {
       })
     );
 
-    // ── 3. Respond 207 
+    // 3. Respond 207 
     return res.status(207).json({
       summary: {
         total:         uniqueIPs.length,

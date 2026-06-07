@@ -13,7 +13,7 @@ function validate(req, res, next) {
   next();
 }
 
-// ── POST /score/batch-async
+// POST /score/batch-async
 
 router.post("/batch-async",
   requireAuth,
@@ -75,7 +75,7 @@ router.post("/batch-async",
   }
 );
 
-// ── GET /score/batch-async/:jobId 
+// GET /score/batch-async/:jobId 
 
 router.get("/batch-async/:jobId",
   requireAuth,

@@ -11,7 +11,7 @@ function validate(req, res, next) {
   next();
 }
 
-// ── POST /blacklist/cidr 
+// POST /blacklist/cidr 
 
 router.post("/",
   requireAuth, requireRole("analyst"),
@@ -54,7 +54,7 @@ router.post("/",
   }
 );
 
-// ── GET /blacklist/cidr 
+// GET /blacklist/cidr 
 
 router.get("/", requireAuth, requireRole("readonly"), async (req, res) => {
   try {
@@ -69,7 +69,7 @@ router.get("/", requireAuth, requireRole("readonly"), async (req, res) => {
   }
 });
 
-// ── GET /blacklist/cidr/check/:ip
+// GET /blacklist/cidr/check/:ip
 
 router.get("/check/:ip",
   requireAuth, requireRole("readonly"),
@@ -77,6 +77,7 @@ router.get("/check/:ip",
   validate,
   async (req, res) => {
     try {
+
       // Postgres inet >> operator: does the CIDR contain this IP?
       const result = await db.query(
         `SELECT id, cidr::text AS cidr, severity, reason, asn, added_at
@@ -99,7 +100,7 @@ router.get("/check/:ip",
   }
 );
 
-// ── DELETE /blacklist/cidr/:id 
+// DELETE /blacklist/cidr/:id 
 
 router.delete("/:id",
   requireAuth, requireRole("analyst"),

@@ -12,7 +12,7 @@ function validate(req, res, next) {
   next();
 }
 
-// ── GET /threat/clusters 
+// GET /threat/clusters 
 
 router.get("/", requireAuth, requireRole("readonly"), async (req, res) => {
   try {
@@ -24,7 +24,7 @@ router.get("/", requireAuth, requireRole("readonly"), async (req, res) => {
   }
 });
 
-// ── GET /threat/clusters/:id/ips
+// GET /threat/clusters/:id/ips
 
 router.get("/:id/ips",
   requireAuth, requireRole("readonly"),
@@ -97,7 +97,7 @@ router.get("/:id/ips",
   }
 );
 
-// ── POST /threat/clusters/:id/resolve 
+// POST /threat/clusters/:id/resolve 
 
 router.post("/:id/resolve",
   requireAuth, requireRole("analyst"),

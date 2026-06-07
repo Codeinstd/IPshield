@@ -18,12 +18,12 @@ const MEDIUM_RISK_COUNTRIES = new Set([
 // Datacenter/hosting IP ranges (simplified CIDR representation as prefixes)
 const DATACENTER_PREFIXES = [
   '104.16.', '104.17.', '104.18.', '104.19.', // Cloudflare
-  '192.168.', '10.', '172.16.', '172.17.',       // Private
-  '45.33.', '45.56.', '45.79.',                  // Linode
-  '198.41.', '198.51.',                           // ARIN
-  '35.192.', '35.184.', '34.102.',               // GCP
-  '52.', '54.', '3.208.',                         // AWS (simplified)
-  '40.112.', '40.114.',                           // Azure (simplified)
+  '192.168.', '10.', '172.16.', '172.17.',    // Private
+  '45.33.', '45.56.', '45.79.',               // Linode
+  '198.41.', '198.51.',                       // ARIN
+  '35.192.', '35.184.', '34.102.',            // GCP
+  '52.', '54.', '3.208.',                     // AWS (simplified)
+  '40.112.', '40.114.',                       // Azure (simplified)
 ];
 
 // Threat intelligence feed (mock — in prod, integrate AbuseIPDB, MaxMind, etc.)
@@ -72,6 +72,7 @@ function trackBehavior(ip) {
   } else {
     const data = behaviorTracker.get(ip);
     data.requests.push(now);
+
     // Keep only last 5 mins of requests
     data.requests = data.requests.filter(t => now - t < 300000);
   }
@@ -106,7 +107,7 @@ function scoreIP(ip, metadata = {}) {
     datacenter: 5
   };
 
-  // ── 1. Geo lookup ────────────────────────────────────────────
+  // 1. Geo lookup 
   const geo = geoip.lookup(ip) || {};
   const country = geo.country || 'UNKNOWN';
   const region = geo.region || '';
@@ -131,7 +132,7 @@ function scoreIP(ip, metadata = {}) {
     signals.push({ category: 'geo', severity: 'medium', detail: 'geo lookup failed — unroutable or private IP' });
   }
 
-  // ── 2. Threat Intelligence ───────────────────────────────────
+  // 2. Threat Intelligence 
   let threatScore = 0;
   const threatEntry = THREAT_INTEL_DB.get(ip);
   if (threatEntry) {
@@ -144,7 +145,7 @@ function scoreIP(ip, metadata = {}) {
     });
   }
 
-  // ── 3. Network / ASN analysis ────────────────────────────────
+  // 3. Network / ASN analysis 
   let networkScore = 0;
   const ipType = classifyIPType(ip);
   const datacenter = isDatacenterIP(ip);
@@ -165,14 +166,14 @@ function scoreIP(ip, metadata = {}) {
     signals.push({ category: 'network', severity: 'low', detail: 'IPv6 address — reduced traceability' });
   }
 
-  // ── 4. Behavioral signals ────────────────────────────────────
+  // 4. Behavioral signals 
   const behavior = trackBehavior(ip);
   const velocity = calcVelocityRisk(behavior);
   if (velocity.score > 0) {
     signals.push({ category: 'behavior', severity: velocity.score > 60 ? 'high' : 'medium', detail: velocity.label });
   }
 
-  // ── 5. Composite score ───────────────────────────────────────
+  // 5. Composite score 
   totalScore = Math.min(100, Math.round(
     (geoScore      * weights.geo      / 100) +
     (threatScore   * weights.threatIntel / 100) +

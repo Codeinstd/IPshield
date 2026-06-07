@@ -5,7 +5,6 @@ const { getFullIntel } = require("../services/ipIntel.service");
 const logger = require("../utils/logger");
 const { requireAuth, requireRole } = require("../middleware/auth.js");
 
-
 router.get("/:ip", requireAuth, requireRole('readonly'), 
   [
     param("ip").trim().notEmpty().custom(ip => {
@@ -115,7 +114,7 @@ function buildPDF(doc, d) {
   const FOOTER_H  = 40;
   const MAX_Y     = pageH - FOOTER_H - 10;
 
-  // ── Helpers 
+  // Helpers 
   function checkY(y, needed) {
     if (y + needed > MAX_Y) { doc.addPage(); return M; }
     return y;
@@ -165,7 +164,6 @@ function buildPDF(doc, d) {
   return y + rowHeight + 2;
 }
 
- 
   // HEADER — dark bar
   doc.rect(0, 0, pageW, 64).fill(C.headerBg);
 
@@ -451,7 +449,6 @@ y += rowHeight + 1;
     y += 24;
   }
 
-
   // OTX Pulses
   if (feeds.otx?.pulseNames?.length) {
     y = checkY(y, 60);
@@ -466,8 +463,6 @@ y += rowHeight + 1;
     });
     y += 8;
   }
-
-
   // FOOTER — rendered on every page
   const range = doc.bufferedPageRange();
   for (let i = 0; i < range.count; i++) {

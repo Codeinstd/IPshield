@@ -73,7 +73,6 @@
     pointer-events: none; z-index: 9999;
     font-family: 'JetBrains Mono', monospace;
   }
-
   /* Grid noise texture */
   body::after {
     content: '';
@@ -82,10 +81,8 @@
     pointer-events: none; z-index: 9998; opacity: 0.4;
     font-family: 'JetBrains Mono', monospace;
   }
-
   /* ── Layout  */
   .app { min-height: 100vh; display: flex; flex-direction: column; }
-
   header {
     display: flex; align-items: center; justify-content: space-between;
     padding: 16px 32px;
@@ -119,9 +116,7 @@
   .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--low); animation: blink 2s ease-in-out infinite; }
   @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
   .version { font-size: 10px; color: var(--text3); padding: 4px 8px; border: 1px solid var(--border); border-radius: 4px; }
-
   main { flex: 1; padding: 32px; display: flex; flex-direction: column; gap: 24px; max-width: 1400px; margin: 0 auto; width: 100%; }
-
   /* ── Search bar  */
   .search-section { display: flex; flex-direction: column; gap: 12px; }
   .search-label { font-size: 10px; color: var(--text3); letter-spacing: 3px; text-transform: uppercase; font-family: 'JetBrains Mono', monospace; }
@@ -160,7 +155,6 @@
   .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; transform: none; font-family: 'JetBrains Mono', monospace; }
   .btn-ghost { background: transparent; color: var(--text2); border: 1px solid var(--border2);font-family: 'JetBrains Mono', monospace; }
   .btn-ghost:hover { border-color: var(--accent2); color: var(--accent2); font-family: 'JetBrains Mono', monospace; }
-
   .quick-tests { display: flex; gap: 8px; flex-wrap: wrap; }
   .quick-chip {
     padding: 6px 12px; border-radius: 4px; font-size: 11px; cursor: pointer;
@@ -169,7 +163,6 @@
     font-family: 'JetBrains Mono', monospace;
   }
   .quick-chip:hover { border-color: var(--accent); color: var(--accent); }
-
   /* ── Stats row */
   .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
   .stat-card {
@@ -189,10 +182,8 @@
   .stat-label { font-size: 10px; color: var(--text3); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px; font-family: 'JetBrains Mono', monospace; }
   .stat-value { font-family: 'Syne', sans-serif; font-size: 32px; font-weight: 800; color: var(--accent-color, var(--text)); }
   .stat-sub { font-size: 11px; color: var(--text3); margin-top: 4px; font-family: 'JetBrains Mono', monospace; }
-
   /* ── Main grid  */
   .main-grid { display: grid; grid-template-columns: 1fr 380px; gap: 24px; }
-
   /* ── Result panel  */
   .result-panel {
     background: var(--bg1); border: 1px solid var(--border); border-radius: 12px;
@@ -204,7 +195,6 @@
   }
   .panel-title { font-size: 11px; color: var(--text); letter-spacing: 3px; text-transform: uppercase; }
   .panel-body { padding: 24px; flex: 1; }
-
   /* Score ring */
   .score-header { display: flex; align-items: center; gap: 32px; margin-bottom: 28px; }
   .score-ring-wrap { position: relative; width: 120px; height: 120px; flex-shrink: 0; }
@@ -220,7 +210,6 @@
   }
   .score-num { font-family: 'Syne', sans-serif; font-size: 32px; font-weight: 800; line-height: 1; }
   .score-max { font-size: 11px; color: var(--text3); }
-
   .score-meta { flex: 1; }
   .score-ip { font-family: 'Syne', sans-serif; font-size: 24px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
   .risk-badge {
@@ -240,7 +229,6 @@
   .action-badge.CHALLENGE .action-val { color: var(--high); }
   .action-badge.MONITOR .action-val { color: var(--medium); }
   .action-badge.ALLOW   .action-val { color: var(--low); }
-
   /* Signal list */
   .signals-title { font-size: 10px; color: var(--text3); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 12px; font-family: 'JetBrains Mono', monospace; }
   .signal-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 24px; }
@@ -259,7 +247,6 @@
   .sig-cat { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 1px; width: 80px; flex-shrink: 0; }
   .sig-detail { font-size: 12px; color: var(--text); flex: 1; }
   .sig-sev { font-size: 10px; font-weight: 700; text-transform: uppercase; color: var(--s-color); }
-
   /* Detail grid */
   .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
   .detail-card { background: var(--bg1); border: 0.9px solid var(--border);border-radius: 8px; padding: 16px; }
@@ -267,7 +254,6 @@
   .kv { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; gap: 8px; }
   .kv-key { font-size: 11px; color: var(--text3); }
   .kv-val { font-size: 11px; color: var(--text); text-align: right; max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-
   /* Placeholder */
   .placeholder {
     flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -276,7 +262,6 @@
   }
   .placeholder-icon { font-size: 48px; opacity: 0.3; }
   .placeholder-text { font-size: 12px; line-height: 1.8; }
-
   /* Loading */
   .loading {
     flex: 1; display: flex; align-items: center; justify-content: center; gap: 12px;
@@ -288,7 +273,6 @@
     animation: spin 0.7s linear infinite;
   }
   @keyframes spin { to { transform: rotate(360deg); } }
-
   /* ── Audit log panel  */
   .audit-panel {
     background: var(--bg1); border: 1px solid var(--border); border-radius: 12px;
@@ -299,7 +283,6 @@
   .audit-list::-webkit-scrollbar { width: 4px; }
   .audit-list::-webkit-scrollbar-track { background: var(--bg1); }
   .audit-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
-
   .audit-item {
     display: flex; align-items: center; gap: 10px;
     padding: 10px 16px; border-bottom: 1px solid var(--border);
@@ -323,7 +306,6 @@
   .audit-badge.HIGH     { background: rgba(255,119,0,0.2); color: var(--high); }
   .audit-badge.MEDIUM   { background: rgba(255,204,0,0.15); color: var(--medium); }
   .audit-badge.LOW      { background: rgba(0,232,124,0.15); color: var(--low); }
-
   /* ── API Docs  */
   .docs-section { background: var(--bg1); border: 1px solid var(--border); border-radius: 12px; padding: 24px; }
   .docs-title { font-size: 10px; color: var(--text3); letter-spacing: 3px; text-transform: uppercase; margin-bottom: 20px; }
@@ -334,7 +316,6 @@
   .ep-method.POST { color: var(--medium); }
   .ep-path { font-size: 13px; color: var(--text); margin: 6px 0 4px; }
   .ep-desc { font-size: 11px; color: var(--text3); line-height: 1.5; }
-
   /* Responsive */
   @media (max-width: 1024px) {
     .main-grid { grid-template-columns: 1fr; }
@@ -347,13 +328,10 @@
     .detail-grid { grid-template-columns: 1fr; }
     .score-header { flex-direction: column; align-items: flex-start; gap: 16px; }
   }
-
   .error-msg { color: var(--critical); font-size: 12px; padding: 12px 16px; background: rgba(255,51,85,0.1); border-radius: 6px; border: 1px solid rgba(255,51,85,0.3); font-family: 'JetBrains Mono', monospace; }
-
   /* Geo map mini */
   .geo-indicator { display: flex; align-items: center; gap: 6px; }
   .flag { font-size: 16px; }
-
   .close-btn {
   background: none;
   border: none;
@@ -380,7 +358,6 @@
     localStorage.removeItem("user");
     window.location.replace("/login");
   }
-
   function resetNotActiveTimer() {
     clearTimeout(notactiveTimer);
     notactiveTimer = setTimeout(logoutUser, NOTACTIVE_TIMEOUT);
@@ -419,10 +396,8 @@
     <span></span><span></span><span></span>
   </button>
 </header>
-
 <!-- Drawer overlay -->
 <div class="nav-overlay" id="navOverlay"></div>
-
 <!-- Drawer -->
 <div class="nav-drawer" id="navDrawer" aria-hidden="true">
   <div class="nav-drawer-header">
@@ -441,7 +416,7 @@
     <div class="version" id="drawer-version"></div>
   </div>
   <div class="nav-drawer-body" id="navDrawerBody">
-    <!-- cloned buttons injected here by JS -->
+    <!-- cloned buttons by JS -->
   </div>
 </div>
 
@@ -484,7 +459,6 @@
   </div>
 </div>
     </div>
-
     <!-- Stats -->
     <div class="stats-row" id="statsRow">
       <div class="stat-card critical">
@@ -508,7 +482,6 @@
         <div class="stat-sub">scored today</div>
       </div>
     </div>
-
     <!-- Main grid -->
     <div class="main-grid">
       <!-- Result panel -->
@@ -540,7 +513,6 @@
         </div>
       </div>
     </div>
-
     <!-- API Docs -->
     <div class="docs-section">
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
@@ -562,7 +534,6 @@
     <code>/api/docs</code>.
   </div>
 </div>
-    
   </main>
 </div>
 <script>
@@ -571,18 +542,14 @@
     try {
       const token = localStorage.getItem("token");
       if (!token) return;
-
       const res = await fetch("/api/v1/stats", {
         headers: { Authorization: `Bearer ${token}` }
       });
-
       if (!res.ok) return;
-
       const d = await res.json();
 
       // Stat cards — handle both flat { CRITICAL:5 } and nested { riskDistribution:{} }
       const dist = d.riskDistribution || d;
-
       const critical = dist.CRITICAL ?? d.CRITICAL ?? 0;
       const high     = dist.HIGH     ?? d.HIGH     ?? 0;
       const medium   = dist.MEDIUM   ?? d.MEDIUM   ?? 0;
@@ -597,7 +564,6 @@
       console.error("[stats] error:", err.message);
     }
   }
-
   // Run on page load
   loadDashboardStats();
 
@@ -619,11 +585,7 @@
   .header-right { gap: 10px; }
   .header-right .btn { padding: 4px 8px; font-size: 10px; }
   .version { display: none; }
-
-  /* Main padding */
-  main { padding: 16px; gap: 16px; }
- 
-  /* Stats row — 2 columns  */
+    main { padding: 16px; gap: 16px; }
   .stats-row { grid-template-columns: repeat(2, 1fr); gap: 10px; }
   .stat-value { font-size: 26px; }
  
@@ -660,9 +622,7 @@
   .btn-primary { width:80%; justify-content: center; }
   .btn-ghost   { padding: 14px 14px; } 
 
-
- 
-  /* Quick test chips — scrollable row  */
+  /* Quick test chips  */
   .quick-tests {
     flex-wrap: nowrap;
     overflow-x: auto;
@@ -741,21 +701,19 @@
   }
 } 
  
-/* ── 480px — Phone portrait  */
+  /* ── 480px — Phone portrait  */
  @media (max-width: 480px) {
   /* Header — minimal */
   .logo-icon  { width: 28px; height: 28px; font-size: 14px; }
   .logo-text  { font-size: 16px; }
   header .btn { font-size: 9px; padding: 3px 6px; } 
 
-  
   /* Search Button */
   .search-button { width: 100%; gap: 12px;}
 
   /* .button { flex-wrap: wrap;} */
   .btn-primary { width:75%; justify-content: center; }
   .btn-ghost   { padding: 14px 14px; } 
-
 
  
   /* Stats — 2 small columns */
@@ -794,8 +752,8 @@
   .panel-title  { font-size: 10px; letter-spacing: 2px; }
 } 
  
-/* ── 380px — Small phone  */
- @media (max-width: 380px) {
+  /* ── 380px — Small phone  */
+  @media (max-width: 380px) {
   main { padding: 10px; gap: 12px; }
 
    /* Search Button */
@@ -821,7 +779,7 @@
   .docs-section { padding: 12px; }
 } 
  
-/* ── Touch improvements (all mobile)  */
+  /* ── Touch improvements (all mobile)  */
  @media (hover: none) and (pointer: coarse) {
   /* Larger tap targets */
   .btn              { min-height: 40px; }
@@ -838,7 +796,7 @@
   .audit-item:hover  { background: transparent; } 
 } 
  
-/* ── Scrollbar polish (mobile webkit)  */
+  /* ── Scrollbar polish (mobile webkit)  */
  @media (max-width: 768px) {
   .audit-list::-webkit-scrollbar,
   #watchlistBody::-webkit-scrollbar,
@@ -857,7 +815,6 @@
     max-width: unset;
   }
 }
-
 .nav-hamburger {
   display: none;
   flex-direction: column;
@@ -890,8 +847,6 @@
 .nav-hamburger[aria-expanded="true"] span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
 .nav-hamburger[aria-expanded="true"] span:nth-child(2) { opacity: 0; transform: scaleX(0); }
 .nav-hamburger[aria-expanded="true"] span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
-
-
 .nav-overlay {
   display: none;
   position: fixed;
@@ -906,7 +861,6 @@
   display: block;
   opacity: 1;
 }
-
 .nav-drawer {
   position: fixed;
   top: 0;
@@ -925,7 +879,6 @@
 .nav-drawer.open {
   transform: translateX(0);
 }
-
 .nav-drawer-header {
   display: flex;
   align-items: center;
@@ -1019,7 +972,6 @@
   }
 }
 
-
 @media (max-width: 768px) {
   .header-right  { display: none !important; }
   .nav-hamburger { display: flex !important; }
@@ -1032,7 +984,6 @@
 }
  
 header {
-  /* position: relative; */
   z-index: 1000;        
 }
 </style>

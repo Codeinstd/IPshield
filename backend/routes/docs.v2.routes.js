@@ -28,20 +28,20 @@ const v2spec = {
 `
   },
   servers: [
-    { url: "/api/v2",                                         description: "v2 Latest" },
-    { url: "/api",                                            description: "Default (routes to v2)" },
+    { url: "/api/v2",                            description: "v2 Latest" },
+    { url: "/api",                               description: "Default (routes to v2)" },
     { url: "https://ipshield.live/api/v2",       description: "Production v2" }
   ]
 };
 
-// ── Raw spec 
+// Raw spec 
 router.get("/openapi.json", (req, res) => {
   res.setHeader("Content-Type", "application/json");
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.json(v2spec);
 });
 
-// ── Swagger UI 
+// Swagger UI 
 router.get("/", (req, res) => {
   res.setHeader("Content-Type", "text/html");
   res.send(buildSwaggerHTML(v2spec, "v2", "#00d9ff"));

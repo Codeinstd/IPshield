@@ -1,6 +1,6 @@
 const axios = require("axios");
 
-// ── RDAP lookup (modern replacement for WHOIS)
+// RDAP lookup (modern replacement for WHOIS)
 async function getRDAPData(ip) {
   try {
     // Step 1: Find the correct RDAP server for this IP
@@ -18,6 +18,7 @@ async function getRDAPData(ip) {
       );
       return parseRDAP(ripe.data, ip);
     } catch (_) {
+      
       // Fallback: try APNIC for Asia-Pacific
       try {
         const apnic = await axios.get(
@@ -132,7 +133,7 @@ function extractEmail(entity) {
   return null;
 }
 
-// ── Risk signals from WHOIS data 
+// Risk signals from WHOIS data 
 function buildWhoisSignals(whois) {
   if (!whois) return [];
   const signals = [];
@@ -173,7 +174,7 @@ function buildWhoisSignals(whois) {
   return signals;
 }
 
-// ── Main export 
+// Main export 
 async function getWhoisIntel(ip) {
   const whois   = await getRDAPData(ip);
   const signals = buildWhoisSignals(whois);

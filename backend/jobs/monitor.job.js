@@ -11,7 +11,7 @@ const BATCH_DELAY   = 2000; // ms between batches
 let monitorTimer = null;
 let isRunning    = false;
 
-// ── Custom alert for watchlist changes
+// Custom alert for watchlist changes
 async function sendWatchlistAlert(ip, prev, curr) {
   const axios = require("axios");
   const direction = curr.score > prev.score ? "📈 INCREASED" : "📉 DECREASED";
@@ -61,7 +61,7 @@ async function sendWatchlistAlert(ip, prev, curr) {
   }
 }
 
-// ── Core poll function 
+// Core poll function 
 async function pollWatchlist() {
   if (isRunning) {
     logger.warn("Monitor: previous run still active, skipping");
@@ -121,7 +121,7 @@ async function pollWatchlist() {
   logger.info("Monitor: poll complete");
 }
 
-// ── Scheduler 
+// Scheduler 
 function startMonitor() {
   if (monitorTimer) return;
 

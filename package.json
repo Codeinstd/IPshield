@@ -40,6 +40,7 @@
     "pdfkit": "^0.18.0",
     "pg": "^8.21.0",
     "redis": "^5.12.1",
+    "resend": "^6.12.4",
     "winston": "^3.19.0"
   },
   "optionalDependencies": {

@@ -1,12 +1,12 @@
 const db = require("./db");
 
-// ── In-memory ring buffer (last 10k requests)
+// In-memory ring buffer (last 10k requests)
 const RING_SIZE = 10000;
 const ring      = new Array(RING_SIZE);
 let   ringHead  = 0;
 let   ringCount = 0;
 
-// ── Aggregated counters
+// Aggregated counters
 const counters = {
   totalRequests: 0,
   totalErrors:   0,
@@ -18,7 +18,7 @@ const counters = {
   startedAt:     Date.now()
 };
 
-// ── Bootstrap PostgreSQL table
+// Bootstrap PostgreSQL table
 async function bootstrap() {
   try {
     await db.query(`
@@ -47,7 +47,7 @@ async function bootstrap() {
   }
 }
 
-// ── Record one request
+// Record one request
 async function record({
   method, path, route, status,
   durationMs, reqBytes = 0, resBytes = 0,
@@ -58,7 +58,7 @@ async function record({
   const hour  = new Date(ts).toISOString().slice(0, 13);
   const isErr = status >= 400;
 
-  // ── Update counters
+  // Update counters
   counters.totalRequests++;
   if (isErr) counters.totalErrors++;
   counters.totalBytes += resBytes;
@@ -95,12 +95,12 @@ async function record({
     c.lastSeen = ts;
   }
 
-  // ── Ring buffer
+  // Ring buffer
   ring[ringHead] = { ts, method, path, route, status, durationMs, apiVersion, clientIp, error: error || null };
   ringHead = (ringHead + 1) % RING_SIZE;
   if (ringCount < RING_SIZE) ringCount++;
 
-  // ── Persist to PostgreSQL (non-blocking — never throws)
+  // Persist to PostgreSQL (non-blocking — never throws)
   try {
     await db.query(
       `INSERT INTO telemetry_requests
@@ -121,14 +121,14 @@ async function record({
   }
 }
 
-// ── Percentile helper
+// Percentile helper
 function percentile(arr, p) {
   if (!arr.length) return 0;
   const sorted = [...arr].sort((a, b) => a - b);
   return sorted[Math.floor((p / 100) * (sorted.length - 1))];
 }
 
-// ── Get summary stats
+// Get summary stats
 function getSummary() {
   const uptimeSecs = Math.floor((Date.now() - counters.startedAt) / 1000);
   const rps        = uptimeSecs > 0 ? (counters.totalRequests / uptimeSecs).toFixed(3) : 0;
@@ -179,7 +179,7 @@ function getSummary() {
   };
 }
 
-// ── Get recent requests from ring buffer
+// Get recent requests from ring buffer
 function getRecentRequests(limit = 50) {
   const result = [];
   const start  = ringCount < RING_SIZE ? 0 : ringHead;
@@ -190,7 +190,7 @@ function getRecentRequests(limit = 50) {
   return result;
 }
 
-// ── PostgreSQL-backed history query
+// PostgreSQL-backed history query
 async function getHistory({ route, status, limit = 100, from, to } = {}) {
   try {
     const conds  = [];

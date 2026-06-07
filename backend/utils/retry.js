@@ -9,7 +9,7 @@ async function retry(fn, attempts = 3, delay = 500) {
     } catch (err) {
       lastError = err;
 
-      // exponential backoff: 500ms → 1000ms → 2000ms
+      // Exponential backoff: 500ms → 1000ms → 2000ms
       await sleep(delay * Math.pow(2, i));
     }
   }

@@ -4,7 +4,7 @@ const { hashKey } = require("../utils/keyHash");
 const db     = require("../store/db");
 const logger = require("../utils/logger");
 
-// ── Helpers 
+// Helpers 
 
 function generateKey() {
   return crypto.randomBytes(32).toString("hex");
@@ -14,7 +14,7 @@ function generateInviteToken() {
   return crypto.randomBytes(24).toString("hex");
 }
 
-// ── Create invite 
+// Create invite 
 async function createInvite({ name, email, role = "analyst", dailyLimit = 1000, notes, invitedBy = "admin" }) {
   const key         = generateKey();
   const keyHash     = hashKey(key);
@@ -39,7 +39,7 @@ async function createInvite({ name, email, role = "analyst", dailyLimit = 1000, 
   return { ...invite, activateUrl, rawKey: key, invite_token: inviteToken };
 }
 
-// ── Activate invite 
+// Activate invite 
 async function activateInvite(inviteToken) {
   const res = await db.query(
     `UPDATE api_keys
@@ -54,7 +54,7 @@ async function activateInvite(inviteToken) {
   return res.rows[0];
 }
 
-// ── List keys
+// List keys
 async function listKeys({ status, role, limit = 100, offset = 0 } = {}) {
   const conditions = [];
   const values     = [];
@@ -108,7 +108,7 @@ async function listKeys({ status, role, limit = 100, offset = 0 } = {}) {
   };
 }
 
-// ── Get single key (admin — includes full key) 
+// Get single key (admin — includes full key) 
 async function getKey(id) {
   const res = await db.query(
     `SELECT id, name, email, role, status, key, daily_limit, daily_used,
@@ -120,7 +120,7 @@ async function getKey(id) {
   return res.rows[0] || null;
 }
 
-// ── Update key 
+// Update key 
 async function updateKey(id, { name, email, role, dailyLimit, notes }) {
   const sets   = [];
   const params = [];
@@ -142,7 +142,7 @@ async function updateKey(id, { name, email, role, dailyLimit, notes }) {
   return res.rows[0] || null;
 }
 
-// ── Revoke key 
+// Revoke key 
 async function revokeKey(id, reason = "Revoked by admin") {
   const res = await db.query(
     `UPDATE api_keys
@@ -155,7 +155,7 @@ async function revokeKey(id, reason = "Revoked by admin") {
   return res.rows.length > 0;
 }
 
-// ── Suspend / reinstate 
+// Suspend / reinstate 
 async function suspendKey(id) {
   await db.query(
     `UPDATE api_keys SET status = 'suspended' WHERE id = $1 AND status = 'active'`,
@@ -170,7 +170,7 @@ async function reinstateKey(id) {
   );
 }
 
-// ── Rotate key (generate new key value, keep metadata) 
+// Rotate key (generate new key value, keep metadata) 
 async function rotateKey(id) {
   const newKey     = generateKey();
   const newHash    = hashKey(newKey);
@@ -190,7 +190,7 @@ async function rotateKey(id) {
   return { ...res.rows[0], newKey };
 }
 
-// ── Usage tracking 
+// Usage tracking 
 async function recordUsage(keyId, { isScore = false, isCacheHit = false, isError = false } = {}) {
   try {
     // Reset daily counter if it's a new day
@@ -230,7 +230,7 @@ async function recordUsage(keyId, { isScore = false, isCacheHit = false, isError
   }
 }
 
-// ── Check daily limit
+// Check daily limit
 async function checkDailyLimit(keyId) {
   const res = await db.query(
     `SELECT daily_used, daily_limit, last_reset FROM api_keys WHERE id = $1`,
@@ -254,7 +254,7 @@ async function checkDailyLimit(keyId) {
   };
 }
 
-// ── Usage stats for a key 
+// Usage stats for a key 
 async function getKeyUsage(keyId, days = 30) {
   const res = await db.query(
     `SELECT date, requests, scores, cache_hits, errors
@@ -266,7 +266,7 @@ async function getKeyUsage(keyId, days = 30) {
   return res.rows;
 }
 
-// ── Reset daily counters (call from a nightly cron)
+// Reset daily counters (call from a nightly cron)
 
 async function resetDailyCounters() {
   await db.query(
@@ -277,7 +277,7 @@ async function resetDailyCounters() {
   logger.info("[keyManager] Daily counters reset");
 }
 
-// ── Summary stats for admin dashboard 
+// Summary stats for admin dashboard 
 async function getKeyStats() {
   const result = await db.query(`
     SELECT

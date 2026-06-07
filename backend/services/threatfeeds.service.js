@@ -1,6 +1,6 @@
 const axios = require("axios");
 
-// ── In-memory feed cache 
+// In-memory feed cache 
 const feedCache = {
   feodo:          { ips: new Set(), ts: 0 },
   spamhaus:       { ips: new Set(), ts: 0 },
@@ -9,7 +9,7 @@ const feedCache = {
 
 const FEED_TTL = 1000 * 60 * 60 * 6; // refresh feeds every 6 hours
 
-// ── Feed loaders
+// Feed loaders
 
 async function loadFeodoFeed() {
   if (Date.now() - feedCache.feodo.ts < FEED_TTL) return;
@@ -72,7 +72,7 @@ async function loadEmergingThreatsFeed() {
   }
 }
 
-// ── OTX lookup (per-IP, not a bulk feed) 
+// OTX lookup (per-IP, not a bulk feed) 
 async function getOTXData(ip) {
   if (!process.env.OTX_API_KEY) return null;
   try {
@@ -102,7 +102,7 @@ async function getOTXData(ip) {
   }
 }
 
-// ── CIDR range checker for Spamhaus 
+// CIDR range checker for Spamhaus 
 function ipToInt(ip) {
   return ip.split(".").reduce((acc, oct) => (acc << 8) + parseInt(oct), 0) >>> 0;
 }
@@ -122,13 +122,14 @@ function isInSpamhaus(ip) {
   return false;
 }
 
-// ── Main export 
+// Main export 
 
 /**
  * checkThreatFeeds(ip)
  * Returns a threat feed result object with signals and score boost.
  */
 async function checkThreatFeeds(ip) {
+
   // Load/refresh all feeds in parallel
   await Promise.allSettled([
     loadFeodoFeed(),
@@ -202,10 +203,8 @@ async function checkThreatFeeds(ip) {
   return results;
 }
 
-/**
- * getFeedStats()
- * Returns current feed status for the /api/stats endpoint.
- */
+// getFeedStats() - Returns current feed status for the /api/stats endpoint.
+
 function getFeedStats() {
   return {
     feodo: {
@@ -232,6 +231,7 @@ function isValidIPv4(ip) {
 }
 
 // Pre-load feeds on startup
+
 setTimeout(() => {
   Promise.allSettled([
     loadFeodoFeed(),

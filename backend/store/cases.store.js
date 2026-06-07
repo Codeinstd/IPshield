@@ -1,9 +1,7 @@
 
-
 const db = require("./db");
 
-// ── Helpers 
-
+// Helpers 
 function formatCase(row, ips = [], notes = []) {
   if (!row) return null;
   return {
@@ -14,8 +12,7 @@ function formatCase(row, ips = [], notes = []) {
   };
 }
 
-// ── Cases CRUD 
-
+// Cases CRUD 
 async function listCases({ status, severity, q, limit = 100, offset = 0 } = {}) {
   try {
     const conds  = [];
@@ -138,8 +135,7 @@ async function deleteCase(id) {
   }
 }
 
-// ── Case IPs 
-
+// Case IPs 
 async function addCaseIP(caseId, { ip, score, risk_level, note = "" }) {
   try {
     const dupCheck = await db.query(
@@ -183,8 +179,7 @@ async function removeCaseIP(caseId, ipId) {
   }
 }
 
-// ── Case Notes 
-
+// Case Notes 
 async function addCaseNote(caseId, { note, author = "analyst" }) {
   try {
     const result = await db.query(
@@ -216,8 +211,7 @@ async function deleteCaseNote(caseId, noteId) {
   }
 }
 
-// ── Stats 
-
+// Stats 
 async function getCaseStats() {
   try {
     const [totalRes, statusRes, severityRes] = await Promise.all([

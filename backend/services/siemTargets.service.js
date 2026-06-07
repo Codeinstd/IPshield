@@ -8,7 +8,7 @@ const {
   buildGenericPayload,
 } = require("./siem.service");
 
-// ── Local payload builders (same as siem.service.js, reused here) 
+// Local payload builders (same as siem.service.js, reused here) 
 
 const RISK_ORDER = { LOW: 0, MEDIUM: 1, HIGH: 2, CRITICAL: 3 };
 
@@ -19,6 +19,7 @@ function meetsTargetThreshold(result, target) {
 }
 
 function buildPayload(type, result) {
+
   // Import builders inline to avoid circular deps
   const siem = require("./siem.service");
   switch (type) {
@@ -30,7 +31,7 @@ function buildPayload(type, result) {
   }
 }
 
-// ── Fan-out to all enabled DB targets 
+// Fan-out to all enabled DB targets 
 
 async function sendToAllSIEMTargets(result) {
   let targets;
@@ -101,7 +102,7 @@ async function sendToTarget(target, result) {
   }
 }
 
-// ── CRUD for managing targets 
+// CRUD for managing targets 
 
 async function listTargets() {
   const res = await db.query(

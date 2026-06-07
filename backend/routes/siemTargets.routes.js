@@ -16,7 +16,7 @@ function validate(req, res, next) {
   next();
 }
 
-// ── GET /siem/targets 
+// GET /siem/targets 
 
 router.get("/targets", requireAuth, requireRole("readonly"), async (req, res) => {
   try {
@@ -27,7 +27,7 @@ router.get("/targets", requireAuth, requireRole("readonly"), async (req, res) =>
   }
 });
 
-// ── POST /siem/targets 
+// POST /siem/targets 
 
 router.post("/targets",
   requireAuth, requireRole("admin"),
@@ -55,7 +55,7 @@ router.post("/targets",
   }
 );
 
-// ── PUT /siem/targets/:id 
+// PUT /siem/targets/:id 
 
 router.put("/targets/:id",
   requireAuth, requireRole("admin"),
@@ -82,7 +82,7 @@ router.put("/targets/:id",
   }
 );
 
-// ── DELETE /siem/targets/:id 
+// DELETE /siem/targets/:id 
 
 router.delete("/targets/:id",
   requireAuth, requireRole("admin"),
@@ -99,7 +99,7 @@ router.delete("/targets/:id",
   }
 );
 
-// ── POST /siem/targets/:id/test 
+// POST /siem/targets/:id/test 
 
 router.post("/targets/:id/test",
   requireAuth, requireRole("analyst"),

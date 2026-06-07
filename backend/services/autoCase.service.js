@@ -19,7 +19,7 @@ async function checkAndAutoCase(result) {
   let autoCaseCreated  = false;
   let autoBlacklisted  = false;
 
-  // ── Auto-blacklist if score is above threshold ────────────────────────────
+  // Auto-blacklist if score is above threshold 
   if (score >= BL_THRESHOLD) {
     try {
       await db.query(
@@ -32,7 +32,7 @@ async function checkAndAutoCase(result) {
     } catch (_) {}
   }
 
-  // ── Sliding window counter for CRITICAL/HIGH IPs ──────────────────────────
+  // Sliding window counter for CRITICAL/HIGH IPs 
   if (riskLevel !== "CRITICAL" && riskLevel !== "HIGH") {
     return { autoCaseCreated, autoBlacklisted };
   }

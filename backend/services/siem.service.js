@@ -1,7 +1,7 @@
 const axios  = require("axios");
 const logger = require("../utils/logger");
 
-// ── Config 
+// Config 
 function getConfig() {
   return {
     enabled:    process.env.SIEM_ENABLED === "true",
@@ -14,7 +14,7 @@ function getConfig() {
   };
 }
 
-// ── Risk level ordering 
+// Risk level ordering 
 const RISK_ORDER = { LOW: 0, MEDIUM: 1, HIGH: 2, CRITICAL: 3 };
 
 function meetsThreshold(result) {
@@ -24,8 +24,7 @@ function meetsThreshold(result) {
   return true;
 }
 
-// ── Payload builders 
-
+// Payload builders 
 function buildSplunkPayload(result) {
   return {
     time:       Math.floor(Date.now() / 1000),
@@ -124,6 +123,7 @@ function buildSentinelPayload(result) {
 }
 
 function buildQRadarPayload(result) {
+
   // QRadar CEF (Common Event Format)
   const sev = result.score >= 80 ? 10 : result.score >= 60 ? 7 : result.score >= 30 ? 4 : 1;
   return `CEF:0|IPShield|ThreatIntel|2.2|IP_SCORE|IP Risk Score Event|${sev}|` +
@@ -196,7 +196,7 @@ function buildGenericPayload(result) {
   };
 }
 
-// ── Send to SIEM 
+// Send to SIEM 
 async function sendToSIEM(result) {
   const cfg = getConfig();
   if (!cfg.enabled || !cfg.url) return { sent: false, reason: "SIEM not configured" };
@@ -264,7 +264,7 @@ async function sendToSIEM(result) {
   }
 }
 
-// ── Test webhook
+// Test webhook
 async function testSIEM(overrides = {}) {
   const cfg = { ...getConfig(), ...overrides };
   if (!cfg.url) return { success: false, reason: "No webhook URL configured" };

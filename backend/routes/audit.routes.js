@@ -5,7 +5,7 @@ const { getAuditLog } = require("../store/memory.store");
 const db              = require("../store/db");
 const { requireAuth, requireRole } = require("../middleware/auth.js");
 
-// ── GET /api/audit
+// GET /api/audit
 router.get("/", requireAuth, requireRole('readonly'), async (req, res) => {
   const limit  = Math.min(parseInt(req.query.limit) || 50, 200);
   const offset = parseInt(req.query.offset) || 0;
@@ -28,7 +28,7 @@ router.get("/", requireAuth, requireRole('readonly'), async (req, res) => {
   }
 });
 
-// ── GET /api/audit/search
+// GET /api/audit/search
 router.get("/search", requireAuth, requireRole('readonly'),
   [
     query("q").optional().trim().isLength({ max: 100 }),
@@ -114,7 +114,7 @@ router.get("/search", requireAuth, requireRole('readonly'),
   }
 );
 
-// ── GET /api/audit/threats
+// GET /api/audit/threats
 router.get("/threats", requireAuth, requireRole('readonly'), async (req, res) => {
   const limit = Math.min(parseInt(req.query.limit) || 20, 100);
   try {
@@ -133,7 +133,7 @@ router.get("/threats", requireAuth, requireRole('readonly'), async (req, res) =>
   }
 });
 
-// ── GET /api/audit/breakdown
+// GET /api/audit/breakdown
 router.get("/breakdown", requireAuth, requireRole('readonly'), async (req, res) => {
   try {
     const [distRes, totalRes, countriesRes, ispsRes] = await Promise.all([

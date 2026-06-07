@@ -18,7 +18,7 @@ const pgPool = new pg.Pool({
   ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
 });
 
-// ─── helpers 
+// Helpers 
 
 function log(msg) { console.log(`  ${msg}`); }
 
@@ -33,7 +33,7 @@ function sqliteTables() {
     .map(r => r.name);
 }
 
-// ─── per-table migration handlers 
+// Per-table migration handlers 
 
 async function migrateAuditLog(rows) {
   log(`audit_log: ${rows.length} rows`);
@@ -129,7 +129,7 @@ async function migrateWatchlist(rows) {
   }
 }
 
-// ─── main 
+// Main 
 
 const TABLE_HANDLERS = {
   audit_log:   migrateAuditLog,

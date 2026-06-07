@@ -1,6 +1,5 @@
 
 const net = require("net");
-
 const MAX_IPS        = 200;
 const MIN_THRESHOLD  = 0;
 const MAX_THRESHOLD  = 100;
@@ -22,7 +21,7 @@ exports.validateBatchAndBlockBody = (req, res, next) => {
     expires_at,
   } = req.body;
 
-  // ── ips 
+  // IPs
   if (!Array.isArray(ips) || ips.length === 0) {
     return res.status(400).json({
       error:   "Validation failed",
@@ -43,7 +42,7 @@ exports.validateBatchAndBlockBody = (req, res, next) => {
     });
   }
 
-  // ── auto_block_threshold 
+  // Auto_block_threshold 
   if (auto_block_threshold !== undefined) {
     const t = Number(auto_block_threshold);
     if (!Number.isInteger(t) || t < MIN_THRESHOLD || t > MAX_THRESHOLD) {
@@ -55,7 +54,7 @@ exports.validateBatchAndBlockBody = (req, res, next) => {
     req.body.auto_block_threshold = t;
   }
 
-  // ── dry_run 
+  // Dry_run 
   if (dry_run !== undefined && typeof dry_run !== "boolean") {
     return res.status(400).json({
       error:   "Validation failed",
@@ -63,7 +62,7 @@ exports.validateBatchAndBlockBody = (req, res, next) => {
     });
   }
 
-  // ── severity_map
+  // Severity_map
   if (severity_map !== undefined) {
     if (typeof severity_map !== "object" || Array.isArray(severity_map)) {
       return res.status(400).json({
@@ -89,7 +88,7 @@ exports.validateBatchAndBlockBody = (req, res, next) => {
     }
   }
 
-  // ── tags 
+  // Tags 
   if (tags !== undefined) {
     if (!Array.isArray(tags)) {
       return res.status(400).json({
@@ -112,7 +111,7 @@ exports.validateBatchAndBlockBody = (req, res, next) => {
     }
   }
 
-  // ── added_by 
+  // Added_by 
   if (added_by !== undefined && (typeof added_by !== "string" || added_by.length > 128)) {
     return res.status(400).json({
       error:   "Validation failed",
@@ -120,7 +119,7 @@ exports.validateBatchAndBlockBody = (req, res, next) => {
     });
   }
 
-  // ── expires_at 
+  // Expires_at 
   if (expires_at !== undefined && expires_at !== null) {
     const d = new Date(expires_at);
     if (isNaN(d.getTime()) || d <= new Date()) {

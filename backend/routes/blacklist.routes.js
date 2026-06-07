@@ -3,7 +3,6 @@ const express = require("express");
 const router  = express.Router();
 const { body, param, query, validationResult } = require("express-validator");
 const { requireAuth, requireRole } = require("../middleware/auth.js");
-
 const {
   listBlacklist, addToBlacklist, updateBlacklist,
   deleteFromBlacklist, bulkDelete, getAllActiveIPs, getStats
@@ -13,7 +12,7 @@ const logger = require("../utils/logger");
 const SEVERITIES = ["CRITICAL","HIGH","MEDIUM","LOW"];
 const CATEGORIES = ["Malware","Botnet","C2","Scanner","Spam","Proxy","Tor","Phishing","Brute Force","Manual","Other"];
 
-// ── Validation helpers 
+// Validation helpers 
 const ipValidation = body("ip")
   .trim().notEmpty().withMessage("IP is required")
   .custom(ip => {
@@ -28,7 +27,7 @@ function handleValidation(req, res, next) {
   next();
 }
 
-// ── GET /api/blacklist 
+// GET /api/blacklist 
 router.get("/", requireAuth, requireRole('readonly'), [
   query("severity").optional().isIn(SEVERITIES),
   query("status").optional().isIn(["active","expired","all"]),
@@ -46,12 +45,12 @@ router.get("/", requireAuth, requireRole('readonly'), [
   res.json({ ...result, stats });
 });
 
-// ── GET /api/blacklist/stats 
+// GET /api/blacklist/stats 
 router.get("/stats", requireAuth, requireRole('readonly'), async (req, res) => {
   res.json(getStats());
 });
 
-// ── GET /api/blacklist/export 
+// GET /api/blacklist/export 
 router.get("/export", requireAuth, requireRole('readonly'), [
   query("fmt").optional().isIn(["txt","csv","json","nginx","iptables","cisco","paloalto","windows"])
 ], async (req, res) => {
@@ -145,7 +144,7 @@ router.get("/export", requireAuth, requireRole('readonly'), [
   }
 });
 
-// ── POST /api/blacklist 
+// POST /api/blacklist 
 router.post("/", requireAuth, requireRole('analyst'), [
   ipValidation,
   body("severity").optional().isIn(SEVERITIES),
@@ -164,7 +163,7 @@ router.post("/", requireAuth, requireRole('analyst'), [
   res.status(201).json({ message: "Added to blacklist", entry });
 });
 
-// ── PUT /api/blacklist/:id 
+// PUT /api/blacklist/:id 
 router.put("/:id",requireAuth, requireRole('analyst'), [
   param("id").isInt({ min: 1 }),
   body("severity").optional().isIn(SEVERITIES),
@@ -180,7 +179,7 @@ router.put("/:id",requireAuth, requireRole('analyst'), [
   res.json({ message: "Updated", entry });
 });
 
-// ── DELETE /api/blacklist/bulk 
+// DELETE /api/blacklist/bulk 
 router.delete("/bulk", requireAuth, requireRole('analyst'), [
   body("ids").isArray({ min: 1 }).withMessage("ids array required"),
   body("ids.*").isInt({ min: 1 })
@@ -190,7 +189,7 @@ router.delete("/bulk", requireAuth, requireRole('analyst'), [
   res.json({ message: `Deleted ${count} entries`, count });
 });
 
-// ── DELETE /api/blacklist/:id
+// DELETE /api/blacklist/:id
 router.delete("/:id", requireAuth, requireRole('analyst'), [
   param("id").isInt({ min: 1 })
 ], handleValidation, async (req, res) => {

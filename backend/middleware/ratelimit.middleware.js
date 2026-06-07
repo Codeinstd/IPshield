@@ -6,7 +6,8 @@ const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 100,
   handler: (req, res) => {
-    // track the hit
+
+    // Track the hit
     rateLimitHits.set(req.path, (rateLimitHits.get(req.path) || 0) + 1);
 
     res.status(429).json({

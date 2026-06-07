@@ -1,4 +1,3 @@
-// backend/routes/proxy.routes.js
 const express = require("express");
 const router  = express.Router();
 const { scoreIP } = require("../controllers/score.controller");

@@ -48,7 +48,7 @@ x-api-key: your_api_key_here
     },
     schemas: {
 
-      // ── Shared 
+      // Shared 
       Error: {
         type: "object",
         properties: {
@@ -179,7 +179,7 @@ x-api-key: your_api_key_here
         }
       },
 
-      // ── Blacklist 
+      // Blacklist 
       BlacklistEntry: {
         type: "object",
         properties: {
@@ -214,7 +214,7 @@ x-api-key: your_api_key_here
         }
       },
 
-      // ── Cases 
+      // Cases 
       CaseIP: {
         type: "object",
         properties: {
@@ -313,7 +313,7 @@ x-api-key: your_api_key_here
 
   paths: {
 
-    // ── Health 
+    // Health 
     "/health": {
       get: {
         tags: ["System"], summary: "Health check", security: [],
@@ -338,7 +338,7 @@ x-api-key: your_api_key_here
       }
     },
 
-    // ── Stats 
+    // Stats 
     "/stats": {
       get: {
         tags: ["System"], summary: "Runtime statistics",
@@ -363,7 +363,7 @@ x-api-key: your_api_key_here
       }
     },
 
-    // ── Scoring 
+    // Scoring 
     "/score/{ip}": {
       get: {
         tags: ["Scoring"], summary: "Score a single IP",
@@ -468,7 +468,7 @@ x-api-key: your_api_key_here
       }
     },
 
-    // ── Blacklist 
+    // Blacklist 
     "/blacklist": {
       get: {
         tags: ["Blacklist"], summary: "List blacklisted IPs",
@@ -596,7 +596,7 @@ x-api-key: your_api_key_here
       }
     },
 
-    // ── Cases 
+    // Cases 
     "/cases": {
       get: {
         tags: ["Cases"], summary: "List investigation cases",

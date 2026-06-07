@@ -4,8 +4,7 @@ const router  = express.Router();
 const { requireAuth, requireRole } = require("../middleware/auth.js");
 const db = require("../store/db");
 
-// ── GET /threat/dashboard 
-
+// GET /threat/dashboard 
 router.get("/dashboard", requireAuth, requireRole("readonly"), async (req, res) => {
   try {
     const [
@@ -171,8 +170,7 @@ router.get("/dashboard", requireAuth, requireRole("readonly"), async (req, res) 
   }
 });
 
-// ── GET /threat/timeline ──────────────────────────────────────────────────────
-
+// GET /threat/timeline 
 router.get("/timeline", requireAuth, requireRole("readonly"), async (req, res) => {
   const hours = Math.min(parseInt(req.query.hours || "24"), 168); // max 7 days
 

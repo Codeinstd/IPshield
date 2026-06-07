@@ -191,14 +191,14 @@ All endpoints require \`x-api-key\` header except \`/health\` and \`/docs\`.
   }
 };
 
-// ── Raw Spec 
+// Raw Spec 
 router.get("/openapi.json", (req, res) => {
   res.setHeader("Content-Type", "application/json");
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.json(spec);
 });
 
-// ── Swagger UI 
+// Swagger UI 
 router.get("/",(req, res) => {
   res.setHeader("Content-Type", "text/html");
   res.send(buildSwaggerHTML(spec, "v1", "#02bfe0"));
@@ -396,7 +396,6 @@ function buildSwaggerHTML(spec, version, accentColor) {
     font-family: 'JetBrains Mono', monospace;
     font-size: 14px;
 }
-
 
     .docs-hero {
         position: relative;

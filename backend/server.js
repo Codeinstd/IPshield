@@ -8,6 +8,7 @@ const logger = require("./utils/logger");
 const { startWorkers } = require("./jobs/workers");
 const { startWatchlistCron } = require("./jobs/watchlistCron");
 const path = require("path");
+const { initRedis } = require("./store/redis");
 
 const PORT   = parseInt(process.env.PORT || "8080", 10);
 const server = app.listen(PORT, "0.0.0.0", () => {
@@ -17,7 +18,8 @@ const server = app.listen(PORT, "0.0.0.0", () => {
 require("dotenv").config({
   path: path.join(__dirname, "../.env")
 });
-// ── Graceful shutdown
+
+// Graceful shutdown
 function shutdown(signal) {
   logger.info(`${signal} received — shutting down gracefully`);
   server.close(() => {
@@ -41,6 +43,18 @@ process.on("uncaughtException", (err) => {
   logger.error(`Uncaught exception: ${err.message}`, { stack: err.stack });
   process.exit(1);
 });
+
+async function startServer() {
+  // Initialize Redis — failure is non-fatal
+  await initRedis();
+
+  // ... rest of your server startup
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
+}
+
+startServer();
 
 startWorkers();
 startWatchlistCron();

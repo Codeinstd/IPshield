@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>IPShield — Activate Your Account</title>
+  <title>IPShield — Activate Account</title>
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon.ico/favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="96x96" href="/favicon.ico/favicon-96x96.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/favicon.ico/favicon-16x16.png">
@@ -33,7 +33,6 @@
       justify-content: center;
       padding: 24px;
     }
-
     .card {
       background: var(--bg1);
       border: 1px solid var(--border);
@@ -62,7 +61,6 @@
       font-weight: 800; font-size: 22px;
     }
     .logo-text span { color: var(--accent); }
-
     .title {
       font-family: 'Syne', sans-serif;
       font-size: 24px;
@@ -75,8 +73,6 @@
       line-height: 1.7;
       margin-bottom: 28px;
     }
-
-    /* Invite info box */
     .invite-info {
       background: var(--bg2);
       border: 1px solid var(--border);
@@ -106,8 +102,6 @@
     .role-admin    { background: rgba(255,51,85,0.15);  color: var(--critical); }
     .role-analyst  { background: rgba(0,217,255,0.1);   color: var(--accent);   }
     .role-readonly { background: rgba(255,255,255,0.05); color: var(--text2);   }
-
-    /* Form */
     .form-group { margin-bottom: 18px; }
     label {
       display: block;
@@ -137,7 +131,6 @@
       opacity: 0.5;
       cursor: not-allowed;
     }
-
     .password-wrap { position: relative; }
     .password-toggle {
       position: absolute;
@@ -152,7 +145,6 @@
       padding: 4px;
     }
     .password-toggle:hover { color: var(--text2); }
-
     .password-strength {
       margin-top: 6px;
       height: 3px;
@@ -171,7 +163,6 @@
       color: var(--text3);
       margin-top: 4px;
     }
-
     .btn {
       width: 100%;
       padding: 14px;
@@ -199,7 +190,6 @@
       opacity: 0.4;
       cursor: not-allowed;
     }
-
     .error-msg {
       display: none;
       padding: 12px 14px;
@@ -211,8 +201,6 @@
       margin-bottom: 16px;
       line-height: 1.6;
     }
-
-    /* Loading state */
     .loading-state {
       display: none;
       text-align: center;
@@ -227,8 +215,6 @@
       margin: 0 auto 12px;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
-
-    /* Success state */
     .success-state {
       display: none;
       text-align: center;
@@ -251,20 +237,16 @@
       line-height: 1.7;
       margin-bottom: 24px;
     }
-
-    /* Invalid token state */
     .invalid-state {
       display: none;
       text-align: center;
       padding: 20px 0;
     }
-
     .divider {
       border: none;
       border-top: 1px solid var(--border);
       margin: 24px 0;
     }
-
     .already-have {
       text-align: center;
       font-size: 11px;
@@ -343,7 +325,7 @@
         <input type="password" id="passwordInput"
           placeholder="Min 8 characters"
           autocomplete="new-password">
-        <button class="password-toggle" id="togglePassword" type="button">👁</button>
+        <button class="password-toggle" id="togglePassword" type="button">👀</button>
       </div>
       <div class="password-strength">
         <div class="password-strength-bar" id="strengthBar"></div>
@@ -374,7 +356,7 @@
     <div class="success-icon">✓</div>
     <div class="success-title">Account Activated!</div>
     <div class="success-sub" id="successMsg">
-      Your account is ready. You can now sign in to IPShield.
+      Your account is ready. Sign in to IPShield.
     </div>
     <a href="/login" class="btn btn-primary"
       style="display:block;text-align:center;text-decoration:none;padding:14px;">
@@ -457,7 +439,7 @@
       document.getElementById("inviteName").textContent  = invite.name  || "—";
       document.getElementById("inviteEmail").textContent = invite.email || "—";
       document.getElementById("inviteLimit").textContent =
-        (invite.daily_limit || 1000).toLocaleString() + " req/day";
+      (invite.daily_limit || 1000).toLocaleString() + " req/day";
 
       const roleEl  = document.getElementById("inviteRole");
       const roleMap = {
@@ -512,7 +494,7 @@
       const data = await res.json();
 
       if (!res.ok) {
-        // Show the real server error so we can debug
+        // Show the real server error so developer can debug
         showError(data.error || data.detail || "Activation failed. Please try again.");
         btn.disabled    = false;
         btn.textContent = "Activate Account →";
@@ -523,7 +505,7 @@
       const keyHtml = data.key ? `
         <br><br>
         <strong style="color:var(--critical);font-size:10px">
-          Save your API key — it will never be shown again:
+          Save API key — it will never be shown again:
         </strong>
         <div style="background:var(--bg2);border:0.5px solid var(--accent);
                     border-radius:8px;padding:12px 16px;font-family:monospace;
@@ -553,7 +535,6 @@
             .catch(() => { this.textContent = "Copy failed"; });
         });
       }
-
       show("successState");
 
     } catch (err) {
@@ -562,14 +543,14 @@
       btn.disabled    = false;
       btn.textContent = "Activate Account →";
     }
-  });
-
-  // Enter key submits form
-  ["emailInput","passwordInput","confirmInput"].forEach(id => {
-    document.getElementById(id).addEventListener("keydown", e => {
-      if (e.key === "Enter") document.getElementById("activateBtn").click();
     });
-  });
+
+    // Enter key submits form
+    ["emailInput","passwordInput","confirmInput"].forEach(id => {
+      document.getElementById(id).addEventListener("keydown", e => {
+        if (e.key === "Enter") document.getElementById("activateBtn").click();
+      });
+    });
 
   // Simple HTML escape to avoid XSS in success message
   function escHtml(str) {

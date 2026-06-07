@@ -1,7 +1,6 @@
 const db = require("./db");
 
-// ── Helpers 
-
+//  Helpers 
 function formatEntry(row) {
   if (!row) return null;
   return {
@@ -11,8 +10,7 @@ function formatEntry(row) {
   };
 }
 
-// ── CRUD 
-
+// CRUD 
 async function listBlacklist({ severity, status, q, limit = 200, offset = 0 } = {}) {
   try {
     const conds  = [];

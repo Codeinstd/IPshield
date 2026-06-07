@@ -2,6 +2,7 @@
 const crypto = require("crypto");
 
 function cspMiddleware(req, res, next) {
+  
   // Generate a fresh nonce for every request
   const nonce = crypto.randomBytes(16).toString("base64");
   res.locals.cspNonce = nonce;

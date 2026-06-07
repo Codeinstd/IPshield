@@ -1,6 +1,5 @@
 const express  = require("express");
 const router   = express.Router();
-
 const { scoreBatchAndBlock }              = require("../controllers/scorebatchandblock.controller");
 const { scoreIP, scoreBatch }              = require("../controllers/score.controller");
 const { validateIPParam, validateBatchBody } = require("../middleware/validateIP.middleware");

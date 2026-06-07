@@ -26,6 +26,7 @@ try {
     ]
   });
 } catch (_) {
+  
   // Fallback to console if winston not installed
   logger = {
     info:  (...a) => console.log("[INFO]",  ...a),

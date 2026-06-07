@@ -64,7 +64,6 @@
     }
 
     .logo { display: flex; align-items: center; gap: 12px; }
-  
       .logo-icon {
         width: 32px; height: 32px;
         border: 2px solid var(--accent); border-radius: 6px;
@@ -190,7 +189,6 @@
       errorEl.style.display  = "none";
       errorEl.textContent    = "";
     }
-
     async function doLogin() {
       clearError();
 
@@ -229,7 +227,6 @@
         btnEl.textContent = "Sign in";
       }
     }
-
     btnEl.addEventListener("click", doLogin);
 
     // Allow Enter key to submit

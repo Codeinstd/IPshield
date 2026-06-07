@@ -4,7 +4,7 @@ const router                          = express.Router();
 const telemetry                       = require("../store/telemetry.store");
 const { requireAuth, requireRole }    = require("../middleware/auth.js");
 
-// ── JSON endpoints 
+// JSON endpoints 
 router.get("/", requireAuth, requireRole("admin"), async (req, res) => {
   res.json(telemetry.getSummary());
 });
@@ -24,7 +24,7 @@ router.get("/endpoint", requireAuth, requireRole("admin"), async (req, res) => {
   res.json(summary.topEndpoints);
 });
 
-// ── Live dashboard 
+// Live dashboard 
 router.get("/dashboard",
   (req, res, next) => {
     // If token passed as query param, inject it as Authorization header
@@ -173,8 +173,6 @@ function buildDashboard(token) {
     .two-col { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
     @media(max-width:900px) { .two-col { grid-template-columns:1fr; } }
 
-    
-     
     .hamburger {
       display: none;
       font-size: 26px;
@@ -203,7 +201,6 @@ function buildDashboard(token) {
       opacity: 1;
     }
 
-    
     .mobile-menu {
       display: flex;
       flex-direction: column;
@@ -237,7 +234,6 @@ function buildDashboard(token) {
       gap: 10px;
     }
 
-    
     .drawer-close {
       background: none;
       border: none;
@@ -263,7 +259,6 @@ function buildDashboard(token) {
       border-radius: 4px;
       font-family: monospace;
     }
-
    
     .drawer-nav {
       display: flex;
@@ -300,7 +295,6 @@ function buildDashboard(token) {
       font-size: 15px;
     }
 
-   
     .drawer-footer {
       border-top: 1px solid #1a3a4a;
       padding: 12px 0;
@@ -394,7 +388,6 @@ function buildDashboard(token) {
       th:nth-child(8), td:nth-child(8) { display: none; }
     }
 
-
     .err-rate-bar-bg { height:6px; background:var(--bg3); border-radius:3px; overflow:hidden; }
     .err-rate-bar { height:6px; border-radius:3px; background:var(--critical); transition:width 0.3s; }
 
@@ -407,12 +400,12 @@ function buildDashboard(token) {
     .s4xx { background:rgba(255,119,0,0.1); color:var(--high); border:1px solid rgba(255,119,0,0.2); }
     .s5xx { background:rgba(255,51,85,0.1); color:var(--critical); border:1px solid rgba(255,51,85,0.2); }
     .s429 { background:rgba(255,204,0,0.1); color:var(--medium); border:1px solid rgba(255,204,0,0.2); }
-
     #lastUpdate { color:var(--text3); font-size:11px; font-family:'JetBrains Mono',monospace; }
-  </style>
-</head>
-<body>
-<div class="header">
+  
+    </style>
+    </head>
+    <body>
+    <div class="header">
   <div class="logo">
     <div class="logo-icon">⬡</div>
     <div>
