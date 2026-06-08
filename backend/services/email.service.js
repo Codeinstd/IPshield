@@ -1,3 +1,9 @@
+console.log("[ENV CHECK]", {
+  ALERT_FROM: process.env.ALERT_FROM,
+  ALERT_TO: process.env.ALERT_TO,
+  SMTP_USER: process.env.SMTP_USER,
+});
+
 const nodemailer = require("nodemailer");
 
 let transporter = null;

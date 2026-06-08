@@ -1,6 +1,5 @@
-if (process.env.NODE_ENV !== "production") {
-  require("dotenv").config();
-}
+require("dotenv").config({ path: require("path").join(__dirname, "../.env") });
+
 require("./utils/validateEnv")();
 const app    = require("./app");
 const logger = require("./utils/logger");
@@ -12,10 +11,6 @@ const { initRedis } = require("./store/redis");
 const PORT   = parseInt(process.env.PORT || "8080", 10);
 const server = app.listen(PORT, "0.0.0.0", () => {
   logger.info(`IPShield running on port ${PORT} [${process.env.NODE_ENV || "development"}]`);
-});
-
-require("dotenv").config({
-  path: path.join(__dirname, "../.env")
 });
 
 app.post("/login", (req, res) => {
@@ -56,11 +51,6 @@ process.on("uncaughtException", (err) => {
 async function startServer() {
   // Initialize Redis — failure is non-fatal
   await initRedis();
-
-// ... rest of your server startup
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-  });
 }
 
 startServer();
