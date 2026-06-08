@@ -147,7 +147,7 @@ footer a:hover{color:var(--accent);}
   }
 }
 
-/* ── Platform Section */
+/* Platform Section */
 .platform-section {
   background: var(--bg1);
   border-top: 1px solid var(--border);
@@ -310,7 +310,7 @@ footer a:hover{color:var(--accent);}
   font-family: monospace;
 }
 
-/* ── Platform responsive */
+/* Platform responsive */
 @media (max-width: 768px) {
   .platform-section { padding: 52px 20px; }
   .platform-row {
@@ -338,7 +338,6 @@ footer a:hover{color:var(--accent);}
 </style>
 </head>
 <body>
-
 <header>
   <div class="logo">
     <div class="logo-icon">⬡</div>
@@ -395,7 +394,7 @@ footer a:hover{color:var(--accent);}
     <div class="stat-label">Threat Feeds</div>
   </div>
   <div class="stat-item">
-    <div class="stat-num">&lt;200ms</div>
+    <div class="stat-num">&lt;100ms</div>
     <div class="stat-label">Avg Response</div>
   </div>
 </div>
@@ -406,7 +405,7 @@ footer a:hover{color:var(--accent);}
     <div class="feature-card">
       <span class="feature-icon">🎯</span>
       <div class="feature-title">Real-Time IP Scoring</div>
-      <div class="feature-desc">Score IPv4 or IPv6 address in under 200ms. Combines 10+ intelligence into a single risk score.</div>
+      <div class="feature-desc">Score IPv4 or IPv6 address in under 100ms. Combines 10+ intelligence into a single risk score.</div>
     </div>
     <div class="feature-card">
       <span class="feature-icon">🌐</span>
@@ -426,12 +425,12 @@ footer a:hover{color:var(--accent);}
     <div class="feature-card">
       <span class="feature-icon">🚫</span>
       <div class="feature-title">Blacklist & Firewall Export</div>
-      <div class="feature-desc">Maintain your own IP blacklist and export rules in 10 formats: Cisco ACL, Windows Firewall, and more.</div>
+      <div class="feature-desc">Maintain IP blacklist, export rules in 10 formats: Cisco ACL, and more.</div>
     </div>
     <div class="feature-card">
       <span class="feature-icon">📡</span>
       <div class="feature-title">SIEM Integration</div>
-      <div class="feature-desc">Push every score event to Splunk, Elastic, Microsoft Sentinel, IBM QRadar, or any generic webhook.</div>
+      <div class="feature-desc">Push every score event to Splunk, Microsoft Sentinel, or any generic webhook.</div>
     </div>
   <div class="feature-card">
       <span class="feature-icon">👁️</span>
@@ -442,13 +441,13 @@ footer a:hover{color:var(--accent);}
     <div class="feature-card">
       <span class="feature-icon">📋</span>
       <div class="feature-title">Full Audit History</div>
-      <div class="feature-desc">Every scored IP is logged with risk level, threat feed hits, geo, ISP and timestamp.</div>
+      <div class="feature-desc">Scored IPs, logged with risk level, threat feed hits, geo, and ISP.</div>
     </div>
 
     <div class="feature-card">
       <span class="feature-icon">📊</span>
       <div class="feature-title">Live API Observability</div>
-      <div class="feature-desc">Built-in telemetry dashboard shows real-time request volume, error rates and hourly traffic sparklines.</div>
+      <div class="feature-desc">Dashboard shows real-time request volume, error rates & endpoint usage.</div>
     </div>
   </div>
 </section>
@@ -730,7 +729,138 @@ footer a:hover{color:var(--accent);}
     <a href="/login">Sign In</a>
   </div>
 </footer>
+<style>
+  /* ── Animation base */
+.fade-up {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.55s ease, transform 0.55s ease;
+}
+.fade-up.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
 
+/* Stagger children */
+.stagger > * {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+.stagger.visible > *:nth-child(1) { transition-delay: 0.05s; opacity:1; transform:translateY(0); }
+.stagger.visible > *:nth-child(2) { transition-delay: 0.12s; opacity:1; transform:translateY(0); }
+.stagger.visible > *:nth-child(3) { transition-delay: 0.19s; opacity:1; transform:translateY(0); }
+.stagger.visible > *:nth-child(4) { transition-delay: 0.26s; opacity:1; transform:translateY(0); }
+.stagger.visible > *:nth-child(5) { transition-delay: 0.33s; opacity:1; transform:translateY(0); }
+.stagger.visible > *:nth-child(6) { transition-delay: 0.40s; opacity:1; transform:translateY(0); }
+.stagger.visible > *:nth-child(7) { transition-delay: 0.47s; opacity:1; transform:translateY(0); }
+.stagger.visible > *:nth-child(8) { transition-delay: 0.54s; opacity:1; transform:translateY(0); }
+.stagger.visible > *:nth-child(9) { transition-delay: 0.61s; opacity:1; transform:translateY(0); }
+
+/* Feature card hover lift */
+.feature-card {
+  transition: border-color .2s, transform .2s, box-shadow .2s;
+}
+.feature-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 32px rgba(0,217,255,0.08);
+}
+
+/* Risk pill hover */
+.risk-pill {
+  transition: transform .15s, box-shadow .15s;
+  cursor: default;
+}
+.risk-pill:hover { transform: translateY(-2px); }
+.risk-pill.critical:hover { box-shadow: 0 4px 20px rgba(255,51,85,0.25); }
+.risk-pill.high:hover     { box-shadow: 0 4px 20px rgba(255,119,0,0.25); }
+.risk-pill.medium:hover   { box-shadow: 0 4px 20px rgba(255,204,0,0.2);  }
+.risk-pill.low:hover      { box-shadow: 0 4px 20px rgba(0,232,124,0.2);  }
+
+/* Mock audit row hover */
+.mock-audit-row {
+  transition: background .15s;
+  border-radius: 4px;
+}
+.mock-audit-row:hover { background: rgba(0,217,255,0.04); }
+
+/* Mock watch row hover */
+.mock-watch-row {
+  transition: background .15s;
+  border-radius: 4px;
+}
+.mock-watch-row:hover { background: rgba(0,217,255,0.04); }
+
+/* Mock endpoint row hover */
+.mock-endpoint-row {
+  transition: background .15s;
+  border-radius: 4px;
+}
+.mock-endpoint-row:hover { background: rgba(0,217,255,0.04); }
+
+/* Stat card hover */
+.mock-stat-card {
+  transition: border-color .2s, transform .2s;
+}
+.mock-stat-card:hover {
+  border-color: rgba(0,217,255,0.3);
+  transform: translateY(-2px);
+}
+
+/* Hero badge glow sweep */
+@keyframes badge-sweep {
+  0%   { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+.hero-badge {
+  background-size: 200% auto;
+  animation: badge-sweep 4s linear infinite;
+}
+
+/* Progress bar fill animation */
+.mock-bar {
+  width: 0% !important;
+  transition: width 1s cubic-bezier(.4,0,.2,1);
+}
+.mock-bar.animated { width: var(--target-width) !important; }
+
+/* Scan line on mock panels */
+@keyframes scanline {
+  0%   { top: 0%; }
+  100% { top: 100%; }
+}
+.platform-mock {
+  position: relative;
+  overflow: hidden;
+}
+.platform-mock::after {
+  content: '';
+  position: absolute;
+  left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(0,217,255,0.15), transparent);
+  animation: scanline 4s linear infinite;
+  pointer-events: none;
+}
+
+/* CTA button pulse */
+@keyframes btn-glow {
+  0%,100% { box-shadow: 0 0 12px rgba(0,217,255,0.3); }
+  50%     { box-shadow: 0 0 28px rgba(0,217,255,0.6); }
+}
+.btn-primary {
+  animation: btn-glow 3s ease-in-out infinite;
+}
+
+/* reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .fade-up, .stagger > * { transition: none; opacity: 1; transform: none; }
+  .mock-bar { transition: none; }
+  .platform-mock::after { animation: none; }
+  .btn-primary { animation: none; }
+  .hero-badge { animation: none; }
+}
+</style>
 <script>
 async function loadPublicStats() {
   try {
@@ -842,6 +972,145 @@ loadPublicStats();
       btn.textContent = "Submit Request →";
     }
   }
+
+  // landing page animation
+  (function () {
+
+  // Scroll observer — fade-up and stagger 
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add("visible");
+
+        // Trigger progress bars inside this element
+        entry.target.querySelectorAll(".mock-bar[data-width]").forEach(bar => {
+          requestAnimationFrame(() => {
+            bar.style.setProperty("--target-width", bar.dataset.width);
+            bar.classList.add("animated");
+          });
+        });
+
+        // Trigger count-up spans inside this element
+        entry.target.querySelectorAll("[data-countup]").forEach(el => {
+          countUp(el);
+        });
+
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.15 });
+
+  // Apply fade-up to top-level sections 
+  document.querySelectorAll(
+    ".hero, .stats-bar, .features, .platform-section, .demo-section, .cta"
+  ).forEach(el => {
+    el.classList.add("fade-up");
+    observer.observe(el);
+  });
+
+  // Apply stagger to feature cards grid 
+  const grid = document.querySelector(".features-grid");
+  if (grid) {
+    grid.classList.add("stagger");
+    observer.observe(grid);
+  }
+
+  // Apply stagger to platform rows individually 
+  document.querySelectorAll(".platform-row").forEach(row => {
+    row.classList.add("fade-up");
+    observer.observe(row);
+  });
+
+  // Convert mock bars to use data-width 
+  //    (so CSS animation can control them)
+  document.querySelectorAll(".mock-bar").forEach(bar => {
+    // Extract current inline width e.g. "width:94%"
+    const match = bar.style.width ? bar.style.width.match(/(\d+)%/) : null;
+    if (match) {
+      bar.dataset.width = match[1] + "%";
+      // Reset to 0 so animation plays when observed
+      bar.style.removeProperty("width");
+    }
+  });
+
+  // Count-up utility 
+  function countUp(el) {
+    const target   = parseFloat(el.dataset.countup);
+    const suffix   = el.dataset.suffix || "";
+    const prefix   = el.dataset.prefix || "";
+    const decimals = el.dataset.decimals ? parseInt(el.dataset.decimals) : 0;
+    const duration = 1200;
+    const start    = performance.now();
+
+    function step(now) {
+      const progress = Math.min((now - start) / duration, 1);
+      // Ease out cubic
+      const eased = 1 - Math.pow(1 - progress, 3);
+      const val   = (target * eased).toFixed(decimals);
+      el.textContent = prefix + val + suffix;
+      if (progress < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+
+  // Wire count-up to stats bar numbers 
+  //    Only for numbers we know — skip "4" and "<200ms"
+  const statNums = document.querySelectorAll(".stat-num");
+  statNums.forEach(el => {
+    const text = el.textContent.trim();
+    // 450k → countup to 450 with suffix k
+    if (/^\d+(\.\d+)?k$/.test(text)) {
+      const num = parseFloat(text);
+      el.dataset.countup  = num;
+      el.dataset.suffix   = "k";
+      el.dataset.decimals = "1";
+      el.textContent      = "0k";
+      observer.observe(el.closest(".stats-bar") || el);
+    }
+    // 30k
+    else if (/^\d+k$/.test(text)) {
+      const num = parseInt(text);
+      el.dataset.countup = num;
+      el.dataset.suffix  = "k";
+      el.textContent     = "0k";
+    }
+  });
+
+  // Wire count-up to telemetry mock stats 
+  const telemetryMap = [
+    { selector: null, text: "12.4k", target: 12.4, suffix: "k", decimals: 1 },
+    { selector: null, text: "0.3%",  target: 0.3,  suffix: "%", decimals: 1 },
+    { selector: null, text: "84ms",  target: 84,   suffix: "ms", decimals: 0 },
+    { selector: null, text: "99.9%", target: 99.9, suffix: "%", decimals: 1 },
+  ];
+
+  document.querySelectorAll(".mock-stat-val").forEach((el, i) => {
+    const map = telemetryMap[i];
+    if (!map) return;
+    el.dataset.countup  = map.target;
+    el.dataset.suffix   = map.suffix;
+    el.dataset.decimals = map.decimals;
+    el.textContent      = "0" + map.suffix;
+  });
+
+  // Observe telemetry section for count-up trigger 
+  const telSection = document.querySelector(".platform-section");
+  if (telSection) observer.observe(telSection);
+
+  // Hero fade in immediately on load 
+  window.addEventListener("load", () => {
+    const hero = document.querySelector(".hero");
+    if (hero) {
+      setTimeout(() => hero.classList.add("visible"), 80);
+    }
+    const statsBar = document.querySelector(".stats-bar");
+    if (statsBar) {
+      setTimeout(() => statsBar.classList.add("visible"), 200);
+    }
+  });
+
+})();
+
 </script>
 </body>
 </html>
