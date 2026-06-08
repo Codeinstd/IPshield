@@ -29,9 +29,8 @@ router.get("/", requireAuth, async (req, res) => {
     });
 
   } catch (err) {
-    console.error("[stats] ERROR:", err.message);
-    res.json({ CRITICAL: 0, HIGH: 0, MEDIUM: 0, LOW: 0, total: 0 });
-  }
+  next(err);
+}
 });
 
 module.exports = router;

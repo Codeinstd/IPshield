@@ -50,9 +50,8 @@ async function saveAuditLog(db, result) {
       ]
     );
   } catch (err) {
-    // Never let audit logging crash a score request
-    console.error("[audit] Failed to save:", err.message);
-  }
+  next(err);
+}
 }
 
 // Requires `analyst` role: this endpoint writes to the blacklist.

@@ -165,9 +165,8 @@ router.get("/dashboard", requireAuth, requireRole("readonly"), async (req, res) 
       watchlistAlerts: watchlistRes.rows,
     });
   } catch (err) {
-    console.error("[threat/dashboard] Error:", err.message);
-    res.status(500).json({ error: "Failed to load threat dashboard" });
-  }
+  next(err);
+}
 });
 
 // GET /threat/timeline 
@@ -201,9 +200,8 @@ router.get("/timeline", requireAuth, requireRole("readonly"), async (req, res) =
       })),
     });
   } catch (err) {
-    console.error("[threat/timeline] Error:", err.message);
-    res.status(500).json({ error: "Failed to load timeline" });
-  }
+  next(err);
+}
 });
 
 module.exports = router;

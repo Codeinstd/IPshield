@@ -69,9 +69,8 @@ router.post("/batch-async",
         statusUrl: `/api/score/batch-async/${job.id}`,
       });
     } catch (err) {
-      console.error("[batchAsync] Queue error:", err.message);
-      res.status(500).json({ error: "Failed to enqueue batch job" });
-    }
+  next(err);
+}
   }
 );
 
@@ -121,9 +120,8 @@ router.get("/batch-async/:jobId",
       await queue.close();
       res.json(response);
     } catch (err) {
-      console.error("[batchAsync] Status error:", err.message);
-      res.status(500).json({ error: "Failed to get job status" });
-    }
+  next(err);
+}
   }
 );
 

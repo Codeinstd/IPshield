@@ -60,9 +60,9 @@ async function setAdminPassword() {
     console.log(`  Password: ${password}`);
 
   } catch (err) {
-    console.error("Error:", err.message);
-    process.exit(1);
-  } finally {
+  next(err);
+}
+  finally {
     process.exit(0);
   }
 }

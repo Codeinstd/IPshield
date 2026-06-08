@@ -259,9 +259,8 @@ async function sendToSIEM(result) {
     logger.info(`SIEM: forwarded ${result.ip} (score:${result.score}) → ${cfg.type}`);
     return { sent: true, status: res.status };
   } catch (err) {
-    logger.error(`SIEM webhook failed for ${result.ip}:`, err.message);
-    return { sent: false, reason: err.message };
-  }
+  next(err);
+}
 }
 
 // Test webhook

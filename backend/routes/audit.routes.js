@@ -108,8 +108,7 @@ router.get("/search", requireAuth, requireRole('readonly'),
         entries: rowsRes.rows,
       });
     } catch (err) {
-      console.error("Audit search error:", err.message);
-      res.status(500).json({ error: "Search failed" });
+      next(err);
     }
   }
 );
@@ -128,8 +127,7 @@ router.get("/threats", requireAuth, requireRole('readonly'), async (req, res) =>
     );
     res.json({ total: result.rows.length, threats: result.rows });
   } catch (err) {
-    console.error("Threats error:", err.message);
-    res.json({ total: 0, threats: [] });
+    next(err);
   }
 });
 
@@ -155,9 +153,8 @@ router.get("/breakdown", requireAuth, requireRole('readonly'), async (req, res) 
       topISPs:      ispsRes.rows,
     });
   } catch (err) {
-    console.error("Breakdown error:", err.message);
-    res.status(500).json({ error: "Breakdown failed" });
-  }
+      next(err);
+    }
 });
 
 module.exports = router;

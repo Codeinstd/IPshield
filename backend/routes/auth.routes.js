@@ -114,8 +114,8 @@ router.get("/me", async (req, res) => {
       role:  decoded.role,
     });
   } catch (err) {
-    res.status(401).json({ error: "Invalid or expired token" });
-  }
+  next(err);
+}
 });
 
 module.exports = router;

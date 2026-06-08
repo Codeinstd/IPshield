@@ -23,8 +23,8 @@ router.get("/targets", requireAuth, requireRole("readonly"), async (req, res) =>
     const targets = await listTargets();
     res.json({ total: targets.length, targets });
   } catch (err) {
-    res.status(500).json({ error: "Failed to list SIEM targets" });
-  }
+  next(err);
+}
 });
 
 // POST /siem/targets 
@@ -47,11 +47,8 @@ router.post("/targets",
       const target = await createTarget(req.body);
       res.status(201).json(target);
     } catch (err) {
-      if (err.message?.includes("unique")) {
-        return res.status(409).json({ error: "A target with this name already exists" });
-      }
-      res.status(500).json({ error: "Failed to create SIEM target" });
-    }
+  next(err);
+}
   }
 );
 
@@ -77,8 +74,8 @@ router.put("/targets/:id",
       if (!target) return res.status(404).json({ error: "Target not found" });
       res.json(target);
     } catch (err) {
-      res.status(500).json({ error: "Failed to update SIEM target" });
-    }
+  next(err);
+}
   }
 );
 
@@ -94,8 +91,8 @@ router.delete("/targets/:id",
       if (!ok) return res.status(404).json({ error: "Target not found" });
       res.json({ message: "SIEM target removed" });
     } catch (err) {
-      res.status(500).json({ error: "Failed to delete SIEM target" });
-    }
+  next(err);
+}
   }
 );
 
@@ -114,8 +111,8 @@ router.post("/targets/:id/test",
         ...result,
       });
     } catch (err) {
-      res.status(500).json({ error: "Test failed" });
-    }
+  next(err);
+}
   }
 );
 

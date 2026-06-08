@@ -60,148 +60,147 @@
     } catch (_) {}
   }
 
-  // Switch API version
-  function switchAPIVersion(version) {
-  if (version !== "v1" && version !== "v2")  
-  return;
-  apiVersion = version;
-  API        = `/api/${version}`;
-  localStorage.setItem("ipshield_api_version", version);
- 
-  // Update version badge in header
-  const badge = document.getElementById("apiBadge");
-  if (badge) {
-    badge.textContent       = version.toUpperCase();
-    badge.style.color       = version === "v2" ?   "var(--accent)" : "var(--accent2)";
-    badge.style.borderColor = version === "v2" ?   "var(--accent)" : "var(--accent2)";
-    badge.style.background  = version === "v2" ?   "rgba(0,217,255,0.1)" : "rgba(0,217,255,0.1)";
-  }
-
-  // Update version label
-  document.getElementById(
-    "dashboard-version"
-  ).textContent = `${version}.0.0`;
-
-
-    // Show/hide v2-only features
-    const v2Only = document.querySelectorAll(".v2-only");
-    v2Only.forEach(el => {
-      el.style.display = version === "v2" ? "" : "none";
-    });
+    // Switch API version
+    function switchAPIVersion(version) {
+    if (version !== "v1" && version !== "v2")  
+    return;
+    apiVersion = version;
+    API        = `/api/${version}`;
+    localStorage.setItem("ipshield_api_version", version);
   
-    // Reload stats with new API version
-    loadStats();
-    loadWatchlist();
-    checkAdminAccess();
-  
-    toast(
-    version === "v2"
-      ? "Switched to v2 — All features enabled"
-      : "Switched to v1 — Core features only",
-    "success"
-  );
+    // Update version badge in header
+    const badge = document.getElementById("apiBadge");
+    if (badge) {
+      badge.textContent       = version.toUpperCase();
+      badge.style.color       = version === "v2" ?   "var(--accent)" : "var(--accent2)";
+      badge.style.borderColor = version === "v2" ?   "var(--accent)" : "var(--accent2)";
+      badge.style.background  = version === "v2" ?   "rgba(0,217,255,0.1)" : "rgba(0,217,255,0.1)";
+    }
 
-  buildHamburgerMenu();
-}
+    // Update version label
+    document.getElementById(
+      "dashboard-version"
+    ).textContent = `${version}.0.0`;
 
-  // responsive dashboard nav 
-  function buildHamburgerMenu() {
-  const hamburger  = document.getElementById("mainHamburger");
-  const drawer     = document.getElementById("navDrawer");
-  const overlay    = document.getElementById("navOverlay");
-  const drawerBody = document.getElementById("navDrawerBody");
-  const drawerVer  = document.getElementById("drawer-version");
 
-  if (!hamburger || !drawer || !drawerBody) return;
-
-  // Sync version label into drawer
-  const ver = document.getElementById("dashboard-version");
-  if (drawerVer && ver) drawerVer.textContent = ver.textContent;
-
-  // Rebuild drawer buttons @ every call ──
-  drawerBody.innerHTML = "";
-  const headerRight = document.getElementById("headerRight");
-  if (headerRight) {
-    headerRight.querySelectorAll("button").forEach(btn => {
-      // Skip hidden buttons
-      if (btn.style.display === "none") return;
-
-      const clone = document.createElement("button");
-      clone.textContent = btn.textContent;
-      clone.className   = "btn btn-ghost";
-
-      // Copy inline styles
-      if (btn.id === "apiBadge") {
-        clone.style.cssText = btn.style.cssText;
-      }
-
-      clone.addEventListener("click", () => {
-        _closeDrawer();
-        setTimeout(() => btn.click(), 320);
+      // Show/hide v2-only features
+      const v2Only = document.querySelectorAll(".v2-only");
+      v2Only.forEach(el => {
+        el.style.display = version === "v2" ? "" : "none";
       });
+    
+      // Reload stats with new API version
+      loadStats();
+      loadWatchlist();
+      checkAdminAccess();
+    
+      toast(
+      version === "v2"
+        ? "Switched to v2 — All features enabled"
+        : "Switched to v1 — Core features only",
+      "success"
+    );
 
-      drawerBody.appendChild(clone);
+    buildHamburgerMenu();
+  }
+
+    // responsive dashboard nav 
+    function buildHamburgerMenu() {
+    const hamburger  = document.getElementById("mainHamburger");
+    const drawer     = document.getElementById("navDrawer");
+    const overlay    = document.getElementById("navOverlay");
+    const drawerBody = document.getElementById("navDrawerBody");
+    const drawerVer  = document.getElementById("drawer-version");
+
+    if (!hamburger || !drawer || !drawerBody) return;
+
+    // Sync version label into drawer
+    const ver = document.getElementById("dashboard-version");
+    if (drawerVer && ver) drawerVer.textContent = ver.textContent;
+
+    // Rebuild drawer buttons @ every call ──
+    drawerBody.innerHTML = "";
+    const headerRight = document.getElementById("headerRight");
+    if (headerRight) {
+      headerRight.querySelectorAll("button").forEach(btn => {
+        // Skip hidden buttons
+        if (btn.style.display === "none") return;
+
+        const clone = document.createElement("button");
+        clone.textContent = btn.textContent;
+        clone.className   = "btn btn-ghost";
+
+        // Copy inline styles
+        if (btn.id === "apiBadge") {
+          clone.style.cssText = btn.style.cssText;
+        }
+
+        clone.addEventListener("click", () => {
+          _closeDrawer();
+          setTimeout(() => btn.click(), 320);
+        });
+
+        drawerBody.appendChild(clone);
+      });
+    }
+
+    // Remove old listeners 
+    const newHamburger = hamburger.cloneNode(true);
+    hamburger.parentNode.replaceChild(newHamburger, hamburger);
+
+    // Wire fresh listeners ──
+    newHamburger.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const drawer  = document.getElementById("navDrawer");
+      const isOpen  = drawer.classList.contains("open");
+      isOpen ? _closeDrawer() : _openDrawer();
     });
+
+    // Wire close button
+    const closeBtn = document.getElementById("navDrawerClose");
+    if (closeBtn) {
+      const newClose = closeBtn.cloneNode(true);
+      closeBtn.parentNode.replaceChild(newClose, closeBtn);
+      newClose.addEventListener("click", _closeDrawer);
+    }
+
+    // Wire overlay
+    if (overlay) {
+      const newOverlay = overlay.cloneNode(true);
+      overlay.parentNode.replaceChild(newOverlay, overlay);
+      newOverlay.addEventListener("click", _closeDrawer);
+    }
   }
 
-  // Remove old listeners 
-  const newHamburger = hamburger.cloneNode(true);
-  hamburger.parentNode.replaceChild(newHamburger, hamburger);
+  //OpenDrawer:
+  function _openDrawer() {
+    const hamburger = document.getElementById("mainHamburger");
+    const drawer    = document.getElementById("navDrawer");
+    const overlay   = document.getElementById("navOverlay");
+    if (!drawer) return;
 
-  // Wire fresh listeners ──
-  newHamburger.addEventListener("click", (e) => {
-    e.stopPropagation();
-    const drawer  = document.getElementById("navDrawer");
-    const isOpen  = drawer.classList.contains("open");
-    isOpen ? _closeDrawer() : _openDrawer();
-  });
-
-  // Wire close button
-  const closeBtn = document.getElementById("navDrawerClose");
-  if (closeBtn) {
-    const newClose = closeBtn.cloneNode(true);
-    closeBtn.parentNode.replaceChild(newClose, closeBtn);
-    newClose.addEventListener("click", _closeDrawer);
+    if (hamburger) hamburger.setAttribute("aria-expanded", "true");
+    drawer.classList.add("open");
+    drawer.removeAttribute("aria-hidden");
+    if (overlay) overlay.classList.add("open");
+    document.body.style.overflow = "hidden";
   }
 
-  // Wire overlay
-  if (overlay) {
-    const newOverlay = overlay.cloneNode(true);
-    overlay.parentNode.replaceChild(newOverlay, overlay);
-    newOverlay.addEventListener("click", _closeDrawer);
+  //CloseDrawer:
+  function _closeDrawer() {
+    const hamburger = document.getElementById("mainHamburger");
+    const drawer    = document.getElementById("navDrawer");
+    const overlay   = document.getElementById("navOverlay");
+    if (!drawer) return;
+
+    if (hamburger) hamburger.setAttribute("aria-expanded", "false");
+    drawer.classList.remove("open");
+    drawer.setAttribute("aria-hidden", "true");
+    if (overlay) overlay.classList.remove("open");
+    document.body.style.overflow = "";
+    if (hamburger) hamburger.focus();
   }
-}
 
-//OpenDrawer:
-function _openDrawer() {
-  const hamburger = document.getElementById("mainHamburger");
-  const drawer    = document.getElementById("navDrawer");
-  const overlay   = document.getElementById("navOverlay");
-  if (!drawer) return;
-
-  if (hamburger) hamburger.setAttribute("aria-expanded", "true");
-  drawer.classList.add("open");
-  drawer.removeAttribute("aria-hidden");
-  if (overlay) overlay.classList.add("open");
-  document.body.style.overflow = "hidden";
-}
-
-//CloseDrawer:
-function _closeDrawer() {
-  const hamburger = document.getElementById("mainHamburger");
-  const drawer    = document.getElementById("navDrawer");
-  const overlay   = document.getElementById("navOverlay");
-  if (!drawer) return;
-
-  if (hamburger) hamburger.setAttribute("aria-expanded", "false");
-  drawer.classList.remove("open");
-  drawer.setAttribute("aria-hidden", "true");
-  if (overlay) overlay.classList.remove("open");
-  document.body.style.overflow = "";
-  if (hamburger) hamburger.focus();
-}
-
-  
   // Extra UI 
   function injectExtraUI() {
   const headerRight = document.querySelector(".header-right");
@@ -386,417 +385,418 @@ function _closeDrawer() {
   }
 
   // Versioning Panel
-  async function showVersionPanel() {
-  document.getElementById("versionModal")?.remove();
- 
-  const overlay = document.createElement("div");
-  overlay.id = "versionModal";
-  overlay.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:10000;display:flex;align-items:center;justify-content:center;padding:24px;";
- 
-  const modal = document.createElement("div");
-  modal.style.cssText = "background:var(--bg1);border:1px solid var(--border);border-radius:12px;width:100%;max-width:680px;overflow:hidden;max-height:90vh;display:flex;flex-direction:column;";
- 
-  const features = [
-    { label:"IP Scoring (single + batch)",         v1:true,  v2:true  },
-    { label:"Threat Feeds (Feodo, Spamhaus, OTX)",  v1:true,  v2:true  },
-    { label:"WHOIS / RDAP Deep Dive",               v1:true,  v2:true  },
-    { label:"Reverse DNS + FCrDNS Verification",    v1:true,  v2:true  },
-    { label:"Geo Map (CartoDB tiles)",              v1:true,  v2:true  },
-    { label:"Watchlist & Score Monitoring",         v1:true,  v2:true  },
-    { label:"Audit Log (search, filter, sort)",     v1:true,  v2:true  },
-    { label:"Score Timeline Chart",                 v1:true,  v2:true  },
-    { label:"PDF Threat Reports",                   v1:true,  v2:true  },
-    { label:"Firewall Rule Export (10 formats)",    v1:true,  v2:true  },
-    { label:"SIEM Webhook Integration",             v1:true,  v2:true  },
-    { label:"Rate Limit Feedback UI",               v1:true,  v2:true  },
-    { label:"Swagger Interactive API Docs",         v1:true,  v2:true  },
-    { label:"IP Blacklist Management",              v1:false, v2:true  },
-    { label:"Blacklist Export (8 formats)",         v1:false, v2:true  },
-    { label:"Blacklist Status in Score Results",    v1:false, v2:true  },
-    { label:"Case Management",                      v1:false, v2:true  },
-    { label:"Case IP Attachments",                  v1:false, v2:true  },
-    { label:"Case Investigation Notes",             v1:false, v2:true  },
-    { label:"Quick Attach IP to Case",              v1:false, v2:true  },
-  ];
- 
-  modal.innerHTML = `
-    <!-- Header -->
-    <div style="padding:20px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
+    async function showVersionPanel() {
+    document.getElementById("versionModal")?.remove();
+  
+    const overlay = document.createElement("div");
+    overlay.id = "versionModal";
+    overlay.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:10000;display:flex;align-items:center;justify-content:center;padding:24px;";
+  
+    const modal = document.createElement("div");
+    modal.style.cssText = "background:var(--bg1);border:1px solid var(--border);border-radius:12px;width:100%;max-width:680px;overflow:hidden;max-height:90vh;display:flex;flex-direction:column;";
+  
+    const features = [
+      { label:"IP Scoring (single + batch)",         v1:true,  v2:true  },
+      { label:"Threat Feeds (Feodo, Spamhaus, OTX)",  v1:true,  v2:true  },
+      { label:"WHOIS / RDAP Deep Dive",               v1:true,  v2:true  },
+      { label:"Reverse DNS + FCrDNS Verification",    v1:true,  v2:true  },
+      { label:"Geo Map (CartoDB tiles)",              v1:true,  v2:true  },
+      { label:"Watchlist & Score Monitoring",         v1:true,  v2:true  },
+      { label:"Audit Log (search, filter, sort)",     v1:true,  v2:true  },
+      { label:"Score Timeline Chart",                 v1:true,  v2:true  },
+      { label:"PDF Threat Reports",                   v1:true,  v2:true  },
+      { label:"Firewall Rule Export (10 formats)",    v1:true,  v2:true  },
+      { label:"SIEM Webhook Integration",             v1:true,  v2:true  },
+      { label:"Rate Limit Feedback UI",               v1:true,  v2:true  },
+      { label:"Swagger Interactive API Docs",         v1:true,  v2:true  },
+      { label:"IP Blacklist Management",              v1:false, v2:true  },
+      { label:"Blacklist Export (8 formats)",         v1:false, v2:true  },
+      { label:"Blacklist Status in Score Results",    v1:false, v2:true  },
+      { label:"Case Management",                      v1:false, v2:true  },
+      { label:"Case IP Attachments",                  v1:false, v2:true  },
+      { label:"Case Investigation Notes",             v1:false, v2:true  },
+      { label:"Quick Attach IP to Case",              v1:false, v2:true  },
+    ];
+  
+    modal.innerHTML = `
+      <!-- Header -->
+      <div style="padding:20px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
+        <div>
+          <div style="font-size:14px;font-weight:700;color:var(--text);">IPshield Version</div>
+          <div style="font-size:11px;color:var(--text3);margin-top:2px;">
+            Currently using <strong style="color:${apiVersion === "v2" ? "var(--accent)" : "var(--accent2)"};">${apiVersion.toUpperCase()}</strong>
+            — preference saved across sessions
+          </div>
+        </div>
+        <button id="verClose" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:20px;padding:4px;">✕</button>
+      </div>
+  
+      <!-- Version toggle cards -->
       <div>
-        <div style="font-size:14px;font-weight:700;color:var(--text);">IPshield Version</div>
-        <div style="font-size:11px;color:var(--text3);margin-top:2px;">
-          Currently using <strong style="color:${apiVersion === "v2" ? "var(--accent)" : "var(--accent2)"};">${apiVersion.toUpperCase()}</strong>
-          — preference saved across sessions
+  
+        <!-- v1 -->
+        <div id="v1Card" style="padding:20px 24px;border-right:1px solid var(--border);border-bottom:1px solid var(--border);cursor:pointer;
+              background:${apiVersion === "v1" ? "rgba(61,122,107,0.08)" : "transparent"};
+              border-left:3px solid ${apiVersion === "v1" ? "var(--accent2)" : "transparent"};"
+              data-version="v1">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;pointer-events:none;">
+            <span style="font-size:20px;font-weight:800;color:#0099cc;">v1</span>
+            <span style="font-size:10px;padding:2px 8px;border-radius:3px;background:rgba(0,217,255,0.12);color:#0099cc;font-weight:700;">STABLE</span>
+            ${apiVersion === "v1" ? `<span style="font-size:10px;padding:2px 8px;border-radius:3px;background:rgba(0,232,124,0.1);color:var(--low);font-weight:700;">ACTIVE</span>` : ""}
+          </div>
+          <div style="font-size:11px;color:var(--text2);line-height:1.6;pointer-events:none;">
+            Core intelligence — scoring, WHOIS, watchlist, audit, SIEM and PDF reports.
+          </div>
+          <div style="margin-top:12px;display:flex;gap:8px;pointer-events:none;">
+            <span style="font-size:10px;background:var(--bg);padding:3px 8px;border-radius:4px;color:var(--text2);border:0.8px solid var(--border);border-radius:4px;">/api/v1</span>
+          </div>
+        </div>
+  
+        <!-- v2 -->
+        <div id="v2Card" style="padding:20px 24px;border-bottom:1px solid var(--border);cursor:pointer;
+              background:${apiVersion === "v2" ? "rgba(0,217,255,0.06)" : "transparent"};
+              border-left:3px solid ${apiVersion === "v2" ? "var(--accent)" : "transparent"};"
+              data-version="v2">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;pointer-events:none;">
+            <span style="font-size:20px;font-weight:800;color:var(--accent);">v2</span>
+            <span style="font-size:10px;padding:2px 8px;border-radius:3px;background:rgba(0,217,255,0.12);color:var(--accent);font-weight:700;">LATEST</span>
+            <span style="font-size:10px;padding:2px 8px;border-radius:3px;background:var(--bg2);color:var(--text2);font-weight:700;">DEFAULT</span>
+            ${apiVersion === "v2" ? `<span style="font-size:10px;padding:2px 8px;border-radius:3px;background:rgba(0,232,124,0.1);color:var(--low);font-weight:700;">ACTIVE</span>` : ""}
+          </div>
+          <div style="font-size:11px;color:var(--text2);line-height:1.6;pointer-events:none;">
+            Full platform — everything in v1 plus Blacklist and Case Management.
+          </div>
+          <div style="margin-top:12px;display:flex;gap:8px;pointer-events:none;">
+            <span style="font-size:10px;background:var(--bg);padding:3px 8px;border-radius:4px;color:var(--text2);border:0.8px solid var(--border);border-radius:4px;">/api/v2</span>
+            <span style="font-size:10px;background:var(--bg);padding:3px 8px;border-radius:4px;color:var(--text2);border:0.8px solid var(--border);border-radius:4px;">/api</span>
+          </div>
         </div>
       </div>
-      <button id="verClose" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:20px;padding:4px;">✕</button>
-    </div>
- 
-    <!-- Version toggle cards -->
-    <div>
- 
-      <!-- v1 -->
-      <div id="v1Card" style="padding:20px 24px;border-right:1px solid var(--border);border-bottom:1px solid var(--border);cursor:pointer;
-            background:${apiVersion === "v1" ? "rgba(61,122,107,0.08)" : "transparent"};
-            border-left:3px solid ${apiVersion === "v1" ? "var(--accent2)" : "transparent"};"
-            data-version="v1">
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;pointer-events:none;">
-          <span style="font-size:20px;font-weight:800;color:#0099cc;">v1</span>
-          <span style="font-size:10px;padding:2px 8px;border-radius:3px;background:rgba(0,217,255,0.12);color:#0099cc;font-weight:700;">STABLE</span>
-          ${apiVersion === "v1" ? `<span style="font-size:10px;padding:2px 8px;border-radius:3px;background:rgba(0,232,124,0.1);color:var(--low);font-weight:700;">ACTIVE</span>` : ""}
-        </div>
-        <div style="font-size:11px;color:var(--text2);line-height:1.6;pointer-events:none;">
-          Core intelligence — scoring, WHOIS, watchlist, audit, SIEM and PDF reports.
-        </div>
-        <div style="margin-top:12px;display:flex;gap:8px;pointer-events:none;">
-          <span style="font-size:10px;background:var(--bg);padding:3px 8px;border-radius:4px;color:var(--text2);border:0.8px solid var(--border);border-radius:4px;">/api/v1</span>
-        </div>
+  
+      <!-- Feature comparison -->
+      <div style="overflow-y:auto;flex:1;">
+        <table style="width:100%;border-collapse:collapse;font-size:11px;">
+          <thead>
+            <tr style="background:var(--bg2);position:sticky;top:0;z-index:1;">
+              <th style="padding:10px 16px;text-align:left;color:var(--text);font-weight:700;font-size:10px;letter-spacing:1px;">FEATURE</th>
+              <th style="padding:10px 20px;text-align:center;color:var(--accent2);font-weight:700;font-size:10px;width:80px;">V1</th>
+              <th style="padding:10px 20px;text-align:center;color:var(--accent);font-weight:700;font-size:10px;width:80px;">V2</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${features.map((f, i) => `
+              <tr style="border-top:1px solid var(--border);${i % 2 !== 0 ? "background:var(--bg);" : ""}${!f.v1 ? "background:rgba(0,217,255,0.02);" : ""}">
+                <td style="padding:9px 16px;color:${!f.v1 ? "var(--accent)" : "var(--text2)"};${!f.v1 ? "font-weight:600;" : ""}">
+                  ${!f.v1 ? '<span style="color:var(--accent);margin-right:4px;">✦</span>' : ""}${escHtml(f.label)}
+                </td>
+                <td style="padding:9px 16px;text-align:center;">
+                  ${f.v1 ? `<span style="color:var(--critical);font-size:15px;font-weight:700;">✓</span>` : `<span style="color:var(--text3);font-size:13px;">—</span>`}
+                </td>
+                <td style="padding:9px 16px;text-align:center;">
+                  ${f.v2 ? `<span style="color:var(--low);font-size:15px;font-weight:700;">✓</span>` : `<span style="color:var(--text3);font-size:13px;">—</span>`}
+                </td>
+              </tr>`).join("")}
+          </tbody>
+        </table>
       </div>
- 
-      <!-- v2 -->
-      <div id="v2Card" style="padding:20px 24px;border-bottom:1px solid var(--border);cursor:pointer;
-            background:${apiVersion === "v2" ? "rgba(0,217,255,0.06)" : "transparent"};
-            border-left:3px solid ${apiVersion === "v2" ? "var(--accent)" : "transparent"};"
-            data-version="v2">
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;pointer-events:none;">
-          <span style="font-size:20px;font-weight:800;color:var(--accent);">v2</span>
-          <span style="font-size:10px;padding:2px 8px;border-radius:3px;background:rgba(0,217,255,0.12);color:var(--accent);font-weight:700;">LATEST</span>
-          <span style="font-size:10px;padding:2px 8px;border-radius:3px;background:var(--bg2);color:var(--text2);font-weight:700;">DEFAULT</span>
-          ${apiVersion === "v2" ? `<span style="font-size:10px;padding:2px 8px;border-radius:3px;background:rgba(0,232,124,0.1);color:var(--low);font-weight:700;">ACTIVE</span>` : ""}
+  
+      <!-- Footer with docs links -->
+      <div style="padding:12px 24px;border-top:1px solid var(--border);background:var(--bg1);display:flex;justify-content:space-between;align-items:center;flex-shrink:0;flex-wrap:wrap;gap:8px;">
+        <div style="font-size:10px;color:var(--text3);">↑ Click a version card to switch</div>
+        <div style="display:flex;gap:8px;">
+          <a href="/api/v1/docs" target="_blank"
+            style="font-size:11px;color:var(--accent2);text-decoration:none;padding:4px 10px;border:1px solid var(--accent2);border-radius:4px;">
+            v1 Docs ↗
+          </a>
+          <a href="/api/v2/docs" target="_blank"
+            style="font-size:11px;color:var(--accent);text-decoration:none;padding:4px 10px;border:1px solid var(--accent);border-radius:4px;">
+            v2 Docs ↗
+          </a>
         </div>
-        <div style="font-size:11px;color:var(--text2);line-height:1.6;pointer-events:none;">
-          Full platform — everything in v1 plus Blacklist and Case Management.
-        </div>
-        <div style="margin-top:12px;display:flex;gap:8px;pointer-events:none;">
-          <span style="font-size:10px;background:var(--bg);padding:3px 8px;border-radius:4px;color:var(--text2);border:0.8px solid var(--border);border-radius:4px;">/api/v2</span>
-          <span style="font-size:10px;background:var(--bg);padding:3px 8px;border-radius:4px;color:var(--text2);border:0.8px solid var(--border);border-radius:4px;">/api</span>
-        </div>
-      </div>
-    </div>
- 
-    <!-- Feature comparison -->
-    <div style="overflow-y:auto;flex:1;">
-      <table style="width:100%;border-collapse:collapse;font-size:11px;">
-        <thead>
-          <tr style="background:var(--bg2);position:sticky;top:0;z-index:1;">
-            <th style="padding:10px 16px;text-align:left;color:var(--text);font-weight:700;font-size:10px;letter-spacing:1px;">FEATURE</th>
-            <th style="padding:10px 20px;text-align:center;color:var(--accent2);font-weight:700;font-size:10px;width:80px;">V1</th>
-            <th style="padding:10px 20px;text-align:center;color:var(--accent);font-weight:700;font-size:10px;width:80px;">V2</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${features.map((f, i) => `
-            <tr style="border-top:1px solid var(--border);${i % 2 !== 0 ? "background:var(--bg);" : ""}${!f.v1 ? "background:rgba(0,217,255,0.02);" : ""}">
-              <td style="padding:9px 16px;color:${!f.v1 ? "var(--accent)" : "var(--text2)"};${!f.v1 ? "font-weight:600;" : ""}">
-                ${!f.v1 ? '<span style="color:var(--accent);margin-right:4px;">✦</span>' : ""}${escHtml(f.label)}
-              </td>
-              <td style="padding:9px 16px;text-align:center;">
-                ${f.v1 ? `<span style="color:var(--critical);font-size:15px;font-weight:700;">✓</span>` : `<span style="color:var(--text3);font-size:13px;">—</span>`}
-              </td>
-              <td style="padding:9px 16px;text-align:center;">
-                ${f.v2 ? `<span style="color:var(--low);font-size:15px;font-weight:700;">✓</span>` : `<span style="color:var(--text3);font-size:13px;">—</span>`}
-              </td>
-            </tr>`).join("")}
-        </tbody>
-      </table>
-    </div>
- 
-    <!-- Footer with docs links -->
-    <div style="padding:12px 24px;border-top:1px solid var(--border);background:var(--bg1);display:flex;justify-content:space-between;align-items:center;flex-shrink:0;flex-wrap:wrap;gap:8px;">
-      <div style="font-size:10px;color:var(--text3);">↑ Click a version card to switch</div>
-      <div style="display:flex;gap:8px;">
-        <a href="/api/v1/docs" target="_blank"
-          style="font-size:11px;color:var(--accent2);text-decoration:none;padding:4px 10px;border:1px solid var(--accent2);border-radius:4px;">
-          v1 Docs ↗
-        </a>
-        <a href="/api/v2/docs" target="_blank"
-          style="font-size:11px;color:var(--accent);text-decoration:none;padding:4px 10px;border:1px solid var(--accent);border-radius:4px;">
-          v2 Docs ↗
-        </a>
-      </div>
-    </div>`;
- 
-  overlay.appendChild(modal);
-  document.body.appendChild(overlay);
- 
-  // Close
-  document.getElementById("verClose").addEventListener("click", () => overlay.remove());
-  overlay.addEventListener("click", e => { if (e.target === overlay) overlay.remove(); });
- 
-  // Version card click — switch API version
-  modal.querySelectorAll("[data-version]").forEach(card => {
-    card.addEventListener("mouseover", () => {
-      if (card.dataset.version !== apiVersion) card.style.opacity = "0.8";
+      </div>`;
+  
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+  
+    // Close
+    document.getElementById("verClose").addEventListener("click", () => overlay.remove());
+    overlay.addEventListener("click", e => { if (e.target === overlay) overlay.remove(); });
+  
+    // Version card click — switch API version
+    modal.querySelectorAll("[data-version]").forEach(card => {
+      card.addEventListener("mouseover", () => {
+        if (card.dataset.version !== apiVersion) card.style.opacity = "0.8";
+      });
+      card.addEventListener("mouseout", () => { card.style.opacity = "1"; });
+      card.addEventListener("click", () => {
+        const version = card.dataset.version;
+        if (version === apiVersion) return; 
+  
+        switchAPIVersion(version);
+        overlay.remove();
+      });
     });
-    card.addEventListener("mouseout", () => { card.style.opacity = "1"; });
-    card.addEventListener("click", () => {
-      const version = card.dataset.version;
-      if (version === apiVersion) return; 
- 
-      switchAPIVersion(version);
-      overlay.remove();
-    });
-  });
-}
+  }
 
   // Apply Filter
-  function applyFilters(entries) {
-  return entries.filter(e => {
-    const f = auditFilters;
+    function applyFilters(entries) {
+    return entries.filter(e => {
+      const f = auditFilters;
 
-    // Search — check IP, country, ISP
-    if (f.q && f.q.trim()) {
-      const q = f.q.trim().toLowerCase();
-      const ip      = (e.ip              || "").toLowerCase();
-      const country = (e.geo?.country    || e.country || "").toLowerCase();
-      const isp     = (e.network?.isp    || e.isp     || "").toLowerCase();
-      if (!ip.includes(q) && !country.includes(q) && !isp.includes(q)) return false;
-    }
+      // Search — check IP, country, ISP
+      if (f.q && f.q.trim()) {
+        const q = f.q.trim().toLowerCase();
+        const ip      = (e.ip              || "").toLowerCase();
+        const country = (e.geo?.country    || e.country || "").toLowerCase();
+        const isp     = (e.network?.isp    || e.isp     || "").toLowerCase();
+        if (!ip.includes(q) && !country.includes(q) && !isp.includes(q)) return false;
+      }
 
-    // Risk, handle both camelCase (session) and snake_case (DB)
-    if (f.risk) {
-      const risk = e.riskLevel || e.risk_level || "";
-      if (risk !== f.risk) return false;
-    }
+      // Risk, handle both camelCase (session) and snake_case (DB)
+      if (f.risk) {
+        const risk = e.riskLevel || e.risk_level || "";
+        if (risk !== f.risk) return false;
+      }
 
-    // Score
-    if (f.minScore > 0   && (e.score ?? 0) < f.minScore) return false;
-    if (f.maxScore < 100 && (e.score ?? 0) > f.maxScore) return false;
+      // Score
+      if (f.minScore > 0   && (e.score ?? 0) < f.minScore) return false;
+      if (f.maxScore < 100 && (e.score ?? 0) > f.maxScore) return false;
 
-    // Boolean toggles — handle both formats
-    if (f.proxy !== null) {
-      const isProxy = e.intelligence?.isProxy ?? e.is_proxy ?? false;
-      if (!!isProxy !== f.proxy) return false;
-    }
-    if (f.tor !== null) {
-      const isTor = e.intelligence?.isTor ?? e.is_tor ?? false;
-      if (!!isTor !== f.tor) return false;
-    }
-    if (f.datacenter !== null) {
-      const isDC = e.intelligence?.isDatacenter ?? e.is_dc ?? false;
-      if (!!isDC !== f.datacenter) return false;
-    }
+      // Boolean toggles — handle both formats
+      if (f.proxy !== null) {
+        const isProxy = e.intelligence?.isProxy ?? e.is_proxy ?? false;
+        if (!!isProxy !== f.proxy) return false;
+      }
+      if (f.tor !== null) {
+        const isTor = e.intelligence?.isTor ?? e.is_tor ?? false;
+        if (!!isTor !== f.tor) return false;
+      }
+      if (f.datacenter !== null) {
+        const isDC = e.intelligence?.isDatacenter ?? e.is_dc ?? false;
+        if (!!isDC !== f.datacenter) return false;
+      }
 
-    return true;
-  });
-}
-   // Inject audit controls
-  function injectAuditControls() {
-  const auditPanel = document.querySelector(".audit-panel");
-  if (!auditPanel) return;
- 
-  const controls = document.createElement("div");
-  controls.id = "auditControls";
-  controls.style.cssText = "padding:12px 16px;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:10px;";
-  controls.innerHTML = `
-    <!-- Search bar -->
-    <div style="position:relative;">
-      <input id="auditSearch" type="text" placeholder="Search IP, country, ISP…"
-        maxlength="45"
-        style="width:100%;padding:8px 36px 8px 12px;background:var(--bg1);border:1px solid var(--border);border-radius:6px;
-               color:var(--text);font-family:inherit;font-size:12px;outline:none;">
-      <button id="auditSearchClear" title="Clear search"
-        style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px;display:none;">✕</button>
-    </div>
- 
-    <!-- Risk filter chips -->
-    <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
-      <span style="font-size:10px;color:var(--text3);letter-spacing:1px;">RISK:</span>
-      ${["ALL","CRITICAL","HIGH","MEDIUM","LOW"].map(r => `
-        <button class="audit-risk-chip" data-risk="${r === "ALL" ? "" : r}"
-          style="padding:3px 10px;border-radius:12px;border:1px solid ${r==="ALL"?"var(--accent)":"var(--border)"};
-                 background:${r==="ALL"?"rgba(0,217,255,0.1)":"transparent"};
-                 color:${r==="ALL"?"var(--accent)":"var(--text3)"};
-                 font-size:10px;font-weight:600;cursor:pointer;letter-spacing:0.5px;font-family:inherit;">
-          ${r}
-        </button>`).join("")}
-    </div>
- 
-    <!-- Score range + toggles row -->
-    <div style="display:block;align-items:center;gap:6px;font-size:11px;color:var(--text3);">
-    <span>Score:</span>
-    <input id="auditMinScore" type="number" min="0" max="100" value="0"
-      inputmode="numeric"
-      style="width:44px;padding:3px 6px;background:var(--bg1);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:11px;font-family:inherit;">
-    <span>–</span>
-    <input id="auditMaxScore" type="number" min="0" max="100" value="100"
-      inputmode="numeric"
-      style="width:50px;padding:3px 6px;background:var(--bg1);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:11px;font-family:inherit;">
-  
-    <button class="audit-toggle" data-key="proxy" data-val="null"
-          style="padding:3px 8px;border-radius:4px;border:1px solid var(--border);background:transparent;color:var(--text3);font-size:10px;cursor:pointer;font-family:inherit;">
-          PROXY
-        </button>
-        <button class="audit-toggle" data-key="tor" data-val="null"
-          style="padding:3px 8px;border-radius:4px;border:1px solid var(--border);background:transparent;color:var(--text3);font-size:10px;cursor:pointer;font-family:inherit;">
-          TOR
-        </button>
-        <button class="audit-toggle" data-key="datacenter" data-val="null"
-          style="padding:3px 8px;border-radius:4px;border:1px solid var(--border);background:transparent;color:var(--text3);font-size:10px;cursor:pointer;font-family:inherit;">
-          DC
-        </button>
-      </div>
-      <div style="display:flex;gap:6px;align-items:center;">
-        <select id="auditSort"
-          style="padding:3px 8px;background:var(--bg1);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:11px;font-family:inherit;cursor:pointer;">
-          <option value="date_desc">Newest first</option>
-          <option value="date_asc">Oldest first</option>
-          <option value="score_desc">Highest score</option>
-          <option value="score_asc">Lowest score</option>
-        </select>
-        <button id="auditLoadDB" class="btn btn-ghost"
-          style="padding:3px 10px;font-size:10px;letter-spacing:1px;" title="Load full history from database">
-          ↓ DB
-        </button>
-        <button id="auditReset" class="btn btn-ghost"
-          style="padding:3px 10px;font-size:10px;letter-spacing:1px;">
-          RESET
-        </button>
-      </div>
-    </div>
- 
-    <!-- Result count -->
-    <div id="auditFilterStatus" style="font-size:10px;color:var(--text3);"></div>`;
- 
-  // Insert before audit list
-  const auditListEl = document.getElementById("auditList");
-  if (auditListEl) auditPanel.insertBefore(controls, auditListEl);
- 
-  // Wire up events
-  let searchTimer;
-  document.getElementById("auditSearch").addEventListener("input", e => {
-  const val      = e.target.value;
-  const clearBtn = document.getElementById("auditSearchClear");
-  if (clearBtn) clearBtn.style.display = val ? "block" : "none";
-  clearTimeout(searchTimer);
-  searchTimer = setTimeout(() => {
-    auditFilters.q = val.trim(); 
-    auditPage = 0;
-    renderAudit();
-  }, 300);
-});
- 
-  document.getElementById("auditSearchClear")?.addEventListener("click", () => {
-    const input = document.getElementById("auditSearch");
-    if (input) { input.value = ""; document.getElementById("auditSearchClear").style.display = "none"; }
-    auditFilters.q = ""; auditPage = 0; renderAudit();
-  });
- 
-  document.querySelectorAll(".audit-risk-chip").forEach(chip => {
-  chip.addEventListener("click", () => {
-    document.querySelectorAll(".audit-risk-chip").forEach(c => {
-      c.style.borderColor = "var(--border)";
-      c.style.background  = "transparent";
-      c.style.color       = "var(--text3)";
+      return true;
     });
-    chip.style.borderColor = "var(--accent)";
-    chip.style.background  = "rgba(0,217,255,0.1)";
-    chip.style.color       = "var(--accent)";
-    auditFilters.risk = chip.dataset.risk; 
-    auditPage = 0;
-    renderAudit(); 
-  });
-});
- 
-  document.getElementById("auditMinScore")?.addEventListener("change", e => {
-    auditFilters.minScore = parseInt(e.target.value) || 0; auditPage = 0; renderAudit();
-  });
-  document.getElementById("auditMaxScore")?.addEventListener("change", e => {
-    auditFilters.maxScore = parseInt(e.target.value) ?? 100; auditPage = 0; renderAudit();
-  });
- 
-  document.querySelectorAll(".audit-toggle").forEach(btn => {
-    btn.addEventListener("click", () => {
-      const key = btn.dataset.key;
-      const cur = auditFilters[key];
-      // Cycle: null → true → false → null
-      auditFilters[key] = cur === null ? true : cur === true ? false : null;
-      btn.style.background   = auditFilters[key] === true  ? "rgba(0,232,124,0.15)" :
-                               auditFilters[key] === false ? "rgba(255,51,85,0.15)" : "transparent";
-      btn.style.borderColor  = auditFilters[key] === true  ? "var(--low)" :
-                               auditFilters[key] === false ? "var(--critical)" : "var(--border)";
-      btn.style.color        = auditFilters[key] === true  ? "var(--low)" :
-                               auditFilters[key] === false ? "var(--critical)" : "var(--text3)";
-      auditPage = 0; renderAudit();
-    });
-  });
- 
-  document.getElementById("auditSort")?.addEventListener("change", e => {
-    auditFilters.sort = e.target.value; auditPage = 0; renderAudit();
-  });
- 
-  document.getElementById("auditLoadDB")?.addEventListener("click", async () => {
-    usingDB = true; 
-    auditPage = 0;
-    await fetchAndRenderFromDB();
-  });
- 
-  document.getElementById("auditReset")?.addEventListener("click", () => {
-    auditFilters = { q:"", risk:"", minScore:0, maxScore:100, proxy:null, tor:null, datacenter:null, sort:"date_desc" };
-    usingDB      = false;
-    auditPage    = 0;
-    // Reset UI
-    const input = document.getElementById("auditSearch");
-    if (input) input.value = "";
-    document.querySelectorAll(".audit-risk-chip").forEach((c, i) => {
-      c.style.borderColor = i===0?"var(--accent)":"var(--border)";
-      c.style.background  = i===0?"rgba(0,217,255,0.1)":"transparent";
-      c.style.color       = i===0?"var(--accent)":"var(--text3)";
-    });
-    document.querySelectorAll(".audit-toggle").forEach(b => {
-      b.style.background = "transparent"; b.style.borderColor = "var(--border)"; b.style.color = "var(--text3)";
-    });
-    const minEl = document.getElementById("auditMinScore"); if (minEl) minEl.value = "0";
-    const maxEl = document.getElementById("auditMaxScore"); if (maxEl) maxEl.value = "100";
-    const sort  = document.getElementById("auditSort");     if (sort)  sort.value  = "date_desc";
-    renderAudit();
-  });
-}
-
-  // Timeline history
-  async function showTimeline(ip) {
-  if (!ip || !isValidIP(ip)) { setBulkStatus("No IP to show history for."); return; }
- 
-  // Build modal
-  const overlay = document.createElement("div");
-  overlay.id = "timelineModal";
-  overlay.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:10000;display:flex;align-items:center;justify-content:center;padding:24px;";
- 
-  const modal = document.createElement("div");
-  modal.style.cssText = "background:var(--bg1);border:1px solid var(--border);border-radius:12px;width:100%;max-width:720px;max-height:85vh;display:flex;flex-direction:column;overflow:hidden;";
-  modal.innerHTML = `
-    <div style="padding:18px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
-      <div>
-        <div style="font-size:13px;font-weight:700;color:var(--text);">Score Timeline</div>
-        <div style="font-size:11px;color:var(--text3);margin-top:2px;font-family:'JetBrains Mono',monospace;">${escHtml(ip)}</div>
-      </div>
-      <button id="timelineClose" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:20px;padding:4px;">✕</button>
-    </div>
-    <div id="timelineContent" style="flex:1;overflow-y:auto;padding:24px;background:var(--bg2);">
-      <div style="text-align:center;color:var(--text3);font-size:12px;padding:40px 0;">
-        <div class="spinner" style="margin:0 auto 12px;"></div>
-        Loading score history…
-      </div>
-    </div>`;
- 
-  overlay.appendChild(modal);
-  document.body.appendChild(overlay);
- 
-  document.getElementById("timelineClose").addEventListener("click", () => overlay.remove());
-  overlay.addEventListener("click", e => { if (e.target === overlay) overlay.remove(); });
- 
-  // Fetch data
-  try {
-    const res  = await fetch(`${API}/timeline/${encodeURIComponent(ip)}?limit=100`, {
-      headers: { "x-api-key": API_KEY }
-    });
-    const data = await res.json();
-    renderTimeline(data, document.getElementById("timelineContent"));
-  } catch (err) {
-    document.getElementById("timelineContent").innerHTML =
-      `<div style="padding:24px;color:var(--critical);font-size:12px;">⚠ Failed to load history: ${escHtml(err.message)}</div>`;
   }
-}
+
+    // Inject audit controls
+    function injectAuditControls() {
+    const auditPanel = document.querySelector(".audit-panel");
+    if (!auditPanel) return;
+  
+    const controls = document.createElement("div");
+    controls.id = "auditControls";
+    controls.style.cssText = "padding:12px 16px;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:10px;";
+    controls.innerHTML = `
+      <!-- Search bar -->
+      <div style="position:relative;">
+        <input id="auditSearch" type="text" placeholder="Search IP, country, ISP…"
+          maxlength="45"
+          style="width:100%;padding:8px 36px 8px 12px;background:var(--bg1);border:1px solid var(--border);border-radius:6px;
+                color:var(--text);font-family:inherit;font-size:12px;outline:none;">
+        <button id="auditSearchClear" title="Clear search"
+          style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px;display:none;">✕</button>
+      </div>
+  
+      <!-- Risk filter chips -->
+      <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+        <span style="font-size:10px;color:var(--text3);letter-spacing:1px;">RISK:</span>
+        ${["ALL","CRITICAL","HIGH","MEDIUM","LOW"].map(r => `
+          <button class="audit-risk-chip" data-risk="${r === "ALL" ? "" : r}"
+            style="padding:3px 10px;border-radius:12px;border:1px solid ${r==="ALL"?"var(--accent)":"var(--border)"};
+                  background:${r==="ALL"?"rgba(0,217,255,0.1)":"transparent"};
+                  color:${r==="ALL"?"var(--accent)":"var(--text3)"};
+                  font-size:10px;font-weight:600;cursor:pointer;letter-spacing:0.5px;font-family:inherit;">
+            ${r}
+          </button>`).join("")}
+      </div>
+  
+      <!-- Score range + toggles row -->
+      <div style="display:block;align-items:center;gap:6px;font-size:11px;color:var(--text3);">
+      <span>Score:</span>
+      <input id="auditMinScore" type="number" min="0" max="100" value="0"
+        inputmode="numeric"
+        style="width:44px;padding:3px 6px;background:var(--bg1);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:11px;font-family:inherit;">
+      <span>–</span>
+      <input id="auditMaxScore" type="number" min="0" max="100" value="100"
+        inputmode="numeric"
+        style="width:50px;padding:3px 6px;background:var(--bg1);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:11px;font-family:inherit;">
+    
+      <button class="audit-toggle" data-key="proxy" data-val="null"
+            style="padding:3px 8px;border-radius:4px;border:1px solid var(--border);background:transparent;color:var(--text3);font-size:10px;cursor:pointer;font-family:inherit;">
+            PROXY
+          </button>
+          <button class="audit-toggle" data-key="tor" data-val="null"
+            style="padding:3px 8px;border-radius:4px;border:1px solid var(--border);background:transparent;color:var(--text3);font-size:10px;cursor:pointer;font-family:inherit;">
+            TOR
+          </button>
+          <button class="audit-toggle" data-key="datacenter" data-val="null"
+            style="padding:3px 8px;border-radius:4px;border:1px solid var(--border);background:transparent;color:var(--text3);font-size:10px;cursor:pointer;font-family:inherit;">
+            DC
+          </button>
+        </div>
+        <div style="display:flex;gap:6px;align-items:center;">
+          <select id="auditSort"
+            style="padding:3px 8px;background:var(--bg1);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:11px;font-family:inherit;cursor:pointer;">
+            <option value="date_desc">Newest first</option>
+            <option value="date_asc">Oldest first</option>
+            <option value="score_desc">Highest score</option>
+            <option value="score_asc">Lowest score</option>
+          </select>
+          <button id="auditLoadDB" class="btn btn-ghost"
+            style="padding:3px 10px;font-size:10px;letter-spacing:1px;" title="Load full history from database">
+            ↓ DB
+          </button>
+          <button id="auditReset" class="btn btn-ghost"
+            style="padding:3px 10px;font-size:10px;letter-spacing:1px;">
+            RESET
+          </button>
+        </div>
+      </div>
+  
+      <!-- Result count -->
+      <div id="auditFilterStatus" style="font-size:10px;color:var(--text3);"></div>`;
+  
+    // Insert before audit list
+    const auditListEl = document.getElementById("auditList");
+    if (auditListEl) auditPanel.insertBefore(controls, auditListEl);
+  
+    // Wire up events
+    let searchTimer;
+    document.getElementById("auditSearch").addEventListener("input", e => {
+    const val      = e.target.value;
+    const clearBtn = document.getElementById("auditSearchClear");
+    if (clearBtn) clearBtn.style.display = val ? "block" : "none";
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => {
+      auditFilters.q = val.trim(); 
+      auditPage = 0;
+      renderAudit();
+    }, 300);
+  });
+  
+    document.getElementById("auditSearchClear")?.addEventListener("click", () => {
+      const input = document.getElementById("auditSearch");
+      if (input) { input.value = ""; document.getElementById("auditSearchClear").style.display = "none"; }
+      auditFilters.q = ""; auditPage = 0; renderAudit();
+    });
+  
+    document.querySelectorAll(".audit-risk-chip").forEach(chip => {
+    chip.addEventListener("click", () => {
+      document.querySelectorAll(".audit-risk-chip").forEach(c => {
+        c.style.borderColor = "var(--border)";
+        c.style.background  = "transparent";
+        c.style.color       = "var(--text3)";
+      });
+      chip.style.borderColor = "var(--accent)";
+      chip.style.background  = "rgba(0,217,255,0.1)";
+      chip.style.color       = "var(--accent)";
+      auditFilters.risk = chip.dataset.risk; 
+      auditPage = 0;
+      renderAudit(); 
+    });
+  });
+  
+    document.getElementById("auditMinScore")?.addEventListener("change", e => {
+      auditFilters.minScore = parseInt(e.target.value) || 0; auditPage = 0; renderAudit();
+    });
+    document.getElementById("auditMaxScore")?.addEventListener("change", e => {
+      auditFilters.maxScore = parseInt(e.target.value) ?? 100; auditPage = 0; renderAudit();
+    });
+  
+    document.querySelectorAll(".audit-toggle").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const key = btn.dataset.key;
+        const cur = auditFilters[key];
+        // Cycle: null → true → false → null
+        auditFilters[key] = cur === null ? true : cur === true ? false : null;
+        btn.style.background   = auditFilters[key] === true  ? "rgba(0,232,124,0.15)" :
+                                auditFilters[key] === false ? "rgba(255,51,85,0.15)" : "transparent";
+        btn.style.borderColor  = auditFilters[key] === true  ? "var(--low)" :
+                                auditFilters[key] === false ? "var(--critical)" : "var(--border)";
+        btn.style.color        = auditFilters[key] === true  ? "var(--low)" :
+                                auditFilters[key] === false ? "var(--critical)" : "var(--text3)";
+        auditPage = 0; renderAudit();
+      });
+    });
+  
+    document.getElementById("auditSort")?.addEventListener("change", e => {
+      auditFilters.sort = e.target.value; auditPage = 0; renderAudit();
+    });
+  
+    document.getElementById("auditLoadDB")?.addEventListener("click", async () => {
+      usingDB = true; 
+      auditPage = 0;
+      await fetchAndRenderFromDB();
+    });
+  
+    document.getElementById("auditReset")?.addEventListener("click", () => {
+      auditFilters = { q:"", risk:"", minScore:0, maxScore:100, proxy:null, tor:null, datacenter:null, sort:"date_desc" };
+      usingDB      = false;
+      auditPage    = 0;
+      // Reset UI
+      const input = document.getElementById("auditSearch");
+      if (input) input.value = "";
+      document.querySelectorAll(".audit-risk-chip").forEach((c, i) => {
+        c.style.borderColor = i===0?"var(--accent)":"var(--border)";
+        c.style.background  = i===0?"rgba(0,217,255,0.1)":"transparent";
+        c.style.color       = i===0?"var(--accent)":"var(--text3)";
+      });
+      document.querySelectorAll(".audit-toggle").forEach(b => {
+        b.style.background = "transparent"; b.style.borderColor = "var(--border)"; b.style.color = "var(--text3)";
+      });
+      const minEl = document.getElementById("auditMinScore"); if (minEl) minEl.value = "0";
+      const maxEl = document.getElementById("auditMaxScore"); if (maxEl) maxEl.value = "100";
+      const sort  = document.getElementById("auditSort");     if (sort)  sort.value  = "date_desc";
+      renderAudit();
+    });
+  }
+
+    // Timeline history
+    async function showTimeline(ip) {
+    if (!ip || !isValidIP(ip)) { setBulkStatus("No IP to show history for."); return; }
+  
+    // Build modal
+    const overlay = document.createElement("div");
+    overlay.id = "timelineModal";
+    overlay.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:10000;display:flex;align-items:center;justify-content:center;padding:24px;";
+  
+    const modal = document.createElement("div");
+    modal.style.cssText = "background:var(--bg1);border:1px solid var(--border);border-radius:12px;width:100%;max-width:720px;max-height:85vh;display:flex;flex-direction:column;overflow:hidden;";
+    modal.innerHTML = `
+      <div style="padding:18px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+        <div>
+          <div style="font-size:13px;font-weight:700;color:var(--text);">Score Timeline</div>
+          <div style="font-size:11px;color:var(--text3);margin-top:2px;font-family:'JetBrains Mono',monospace;">${escHtml(ip)}</div>
+        </div>
+        <button id="timelineClose" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:20px;padding:4px;">✕</button>
+      </div>
+      <div id="timelineContent" style="flex:1;overflow-y:auto;padding:24px;background:var(--bg2);">
+        <div style="text-align:center;color:var(--text3);font-size:12px;padding:40px 0;">
+          <div class="spinner" style="margin:0 auto 12px;"></div>
+          Loading score history…
+        </div>
+      </div>`;
+  
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+  
+    document.getElementById("timelineClose").addEventListener("click", () => overlay.remove());
+    overlay.addEventListener("click", e => { if (e.target === overlay) overlay.remove(); });
+  
+    // Fetch data
+    try {
+      const res  = await fetch(`${API}/timeline/${encodeURIComponent(ip)}?limit=100`, {
+        headers: { "x-api-key": API_KEY }
+      });
+      const data = await res.json();
+      renderTimeline(data, document.getElementById("timelineContent"));
+    } catch (err) {
+      document.getElementById("timelineContent").innerHTML =
+        `<div style="padding:24px;color:var(--critical);font-size:12px;">⚠ Failed to load history: ${escHtml(err.message)}</div>`;
+    }
+  }
 
   // Blacklistbanner
   function blacklistBanner(bl) {
@@ -2167,30 +2167,30 @@ function _closeDrawer() {
   setTimeout(dismiss, duration);
   }
  
-// Quick block from score result 
-async function quickBlock(ip) {
-  if (!ip || !isValidIP(ip)) { setBulkStatus("No valid IP to block."); return; }
+  // Quick block from score result 
+  async function quickBlock(ip) {
+    if (!ip || !isValidIP(ip)) { setBulkStatus("No valid IP to block."); return; }
 
-  const reason   = prompt(`Reason for blocking ${ip}:`, "Manual block") ?? "Manual block";
+    const reason   = prompt(`Reason for blocking ${ip}:`, "Manual block") ?? "Manual block";
 
-  try {
-    const res  = await fetch("/api/v2/blacklist", {
-                    method: "POST",
-                    headers: authHeaders(),
-                    body: JSON.stringify({ ip, severity: "HIGH", reason, category: "Manual", added_by: "analyst" })
-                  });
-    const data = await res.json();
+    try {
+      const res  = await fetch("/api/v2/blacklist", {
+                      method: "POST",
+                      headers: authHeaders(),
+                      body: JSON.stringify({ ip, severity: "HIGH", reason, category: "Manual", added_by: "analyst" })
+                    });
+      const data = await res.json();
 
-    if (res.status === 409) {
-      toast(`${ip} is already blacklisted`, "warning");
-      return;
+      if (res.status === 409) {
+        toast(`${ip} is already blacklisted`, "warning");
+        return;
+      }
+      if (!res.ok) throw new Error(data.error || "Failed");
+      toast(`${ip} added to blacklist`, "success");
+    } catch (err) {
+      toast(`Blacklist error: ${err.message}`, "error");
     }
-    if (!res.ok) throw new Error(data.error || "Failed");
-    toast(`${ip} added to blacklist`, "success");
-  } catch (err) {
-    toast(`Blacklist error: ${err.message}`, "error");
   }
-}
  
 function renderTimeline(data, container) {
   if (!data.total || !data.history?.length) {
@@ -2424,8 +2424,8 @@ function resolveScoreColor(score) {
                   return "#00e87c";
 }
 
- // Rate Limit
-  function showAPIStatus(apiStatus) {
+// Rate Limit
+function showAPIStatus(apiStatus) {
 
   // Remove existing banner if any
   const existing = document.getElementById("apiStatusBanner");
@@ -2474,15 +2474,14 @@ function resolveScoreColor(score) {
       </div>`;
   }
 
-
   document.body.appendChild(banner);
  
   // Auto-dismiss after 10 seconds
   setTimeout(() => banner.remove(), 10000);
 }
 
-  // Firewall export 
-  function showFirewallExport() {
+// Firewall export 
+function showFirewallExport() {
 
   // Collect CRITICAL and HIGH IPs from session
   const threats = auditEntries.filter(e => e.riskLevel === "CRITICAL" || e.riskLevel === "HIGH");
@@ -2886,155 +2885,155 @@ function updateMap(geo, ip, riskLevel) {
 }
 
   // Events 
-function setupEventListeners() {
-    scoreBtn.addEventListener("click", scoreIP);
-    clearBtn.addEventListener("click", clearPanel);
-    // apiDocsBtn.addEventListener("click", () => window.open("https://ipshield.live/api/docs", "_blank"));
-    ipInput.addEventListener("keydown", e => { if (e.key === "Enter") scoreIP(); });
+  function setupEventListeners() {
+      scoreBtn.addEventListener("click", scoreIP);
+      clearBtn.addEventListener("click", clearPanel);
+      // apiDocsBtn.addEventListener("click", () => window.open("https://ipshield.live/api/docs", "_blank"));
+      ipInput.addEventListener("keydown", e => { if (e.key === "Enter") scoreIP(); });
 
-    document.querySelectorAll(".quick-chip").forEach(chip => {
-      chip.addEventListener("click", () => { ipInput.value = chip.dataset.ip; scoreIP(); });
-    });
+      document.querySelectorAll(".quick-chip").forEach(chip => {
+        chip.addEventListener("click", () => { ipInput.value = chip.dataset.ip; scoreIP(); });
+      });
 
-    // AddEvent Listener
-    document.addEventListener("click", e => {
-      if (e.target.id === "apiBadge")     showVersionPanel();
-      if (e.target.id === "siemBtn") {
-        if ((window._userRank ?? 0) >= 2) showUnifiedSIEMPanel();
-        else toast("Admin access required", "warning");
-      }
-      if (e.target.id === "blacklistBtn") {
-        if ((window._userRank ?? 0) >= 1) showBlacklistPanel();
-        else toast("Analyst access required", "warning");
-      }
-      if (e.target.id === "casesBtn") {
-        if ((window._userRank ?? 0) >= 1) showCasesPanel();
-        else toast("Analyst access required", "warning");
-      }
-      if (e.target.id === "firewallBtn")  showFirewallExport();
-      if (e.target.id === "csvBtn")       document.getElementById("csvUpload").click();
-      if (e.target.id === "exportBtn")    exportLog();
-      if (e.target.id === "addWatchBtn")  addCurrentToWatchlist();
-      if (e.target.id === "pollBtn")      triggerPoll();
-      if (e.target.id === "addToCaseBtn") {
-        if ((window._userRank ?? 0) >= 1) addIPToCase(currentIP, lastResult);
-        else toast("Analyst access required", "warning");
-      }
-      if (e.target.id === "versionBtn")   showVersionPanel();
-      if (e.target.id === "threatBtn") {
-        if ((window._userRank ?? 0) >= 1) showClustersPanel();
-        else toast("Analyst access required", "warning");
-      }
-      if (e.target.id === "rateLimitBtn") {
-        if ((window._userRank ?? 0) >= 2) showRateLimitPanel();
-        else toast("Admin access required", "warning");
-      }
-      if (e.target.id === "keyMgrBtn") {
-        if ((window._userRank ?? 0) >= 2) showKeyManagerPanel();
-        else toast("Admin access required", "warning");
-      }
-      if (e.target.id === "logoutBtn")    logout();
-    });
+      // AddEvent Listener
+      document.addEventListener("click", e => {
+        if (e.target.id === "apiBadge")     showVersionPanel();
+        if (e.target.id === "siemBtn") {
+          if ((window._userRank ?? 0) >= 2) showUnifiedSIEMPanel();
+          else toast("Admin access required", "warning");
+        }
+        if (e.target.id === "blacklistBtn") {
+          if ((window._userRank ?? 0) >= 1) showBlacklistPanel();
+          else toast("Analyst access required", "warning");
+        }
+        if (e.target.id === "casesBtn") {
+          if ((window._userRank ?? 0) >= 1) showCasesPanel();
+          else toast("Analyst access required", "warning");
+        }
+        if (e.target.id === "firewallBtn")  showFirewallExport();
+        if (e.target.id === "csvBtn")       document.getElementById("csvUpload").click();
+        if (e.target.id === "exportBtn")    exportLog();
+        if (e.target.id === "addWatchBtn")  addCurrentToWatchlist();
+        if (e.target.id === "pollBtn")      triggerPoll();
+        if (e.target.id === "addToCaseBtn") {
+          if ((window._userRank ?? 0) >= 1) addIPToCase(currentIP, lastResult);
+          else toast("Analyst access required", "warning");
+        }
+        if (e.target.id === "versionBtn")   showVersionPanel();
+        if (e.target.id === "threatBtn") {
+          if ((window._userRank ?? 0) >= 1) showClustersPanel();
+          else toast("Analyst access required", "warning");
+        }
+        if (e.target.id === "rateLimitBtn") {
+          if ((window._userRank ?? 0) >= 2) showRateLimitPanel();
+          else toast("Admin access required", "warning");
+        }
+        if (e.target.id === "keyMgrBtn") {
+          if ((window._userRank ?? 0) >= 2) showKeyManagerPanel();
+          else toast("Admin access required", "warning");
+        }
+        if (e.target.id === "logoutBtn")    logout();
+      });
 
-    document.addEventListener("change", e => {
-      if (e.target.id === "csvUpload") handleCSVUpload(e.target.files[0]);
-    });
+      document.addEventListener("change", e => {
+        if (e.target.id === "csvUpload") handleCSVUpload(e.target.files[0]);
+      });
 
-    // Find the right button id from your earlier dump — e.g. apiBadge or add a new one
-    document.getElementById("YOUR-LOGOUT-BTN-ID")?.addEventListener("click", () => {
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
-      window.location.replace("/login");
-    });
+      // Find the right button id from your earlier dump — e.g. apiBadge or add a new one
+      document.getElementById("YOUR-LOGOUT-BTN-ID")?.addEventListener("click", () => {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        window.location.replace("/login");
+      });
 
-    // Single unified click handler on resultBody — no inline onclick needed
-    resultBody.addEventListener("click", e => {
-      if (e.target.id === "watchCurrentBtn") {
-        addCurrentToWatchlist();
-        return;
-      }
+      // Single unified click handler on resultBody — no inline onclick needed
+      resultBody.addEventListener("click", e => {
+        if (e.target.id === "watchCurrentBtn") {
+          addCurrentToWatchlist();
+          return;
+        }
 
-    // Download pdfbtn
-      if (e.target.id === "downloadPdfBtn") {
-          const ip  = currentIP || ipInput.value.trim();
-          if (!ip) return;
-          const url = `${API}/report/${encodeURIComponent(ip)}?cached=true`;
+      // Download pdfbtn
+        if (e.target.id === "downloadPdfBtn") {
+            const ip  = currentIP || ipInput.value.trim();
+            if (!ip) return;
+            const url = `${API}/report/${encodeURIComponent(ip)}?cached=true`;
 
-        // Open in new tab — browser handles the PDF download
-        const a = Object.assign(document.createElement("a"), {
-          href:     url,
-          download: `ipshield-${ip}-report.pdf`
-        });
-        // Must add auth header — use fetch + blob instead of direct link
-        e.target.textContent = "Generating…";
-        e.target.disabled    = true;
-        fetch(url, { headers: { "x-api-key": API_KEY } })
-          .then(r => {
-            if (!r.ok) throw new Error("Report generation failed");
-            return r.blob();
-          })
-          .then(blob => {
-            const blobUrl = URL.createObjectURL(blob);
-            Object.assign(a, { href: blobUrl });
-            document.body.appendChild(a);
-            a.click();
-            toast(`PDF report downloaded for ${ip}`, "success");
-            document.body.removeChild(a);
-            URL.revokeObjectURL(blobUrl);
-          })
-          .catch(err => toast(`PDF error: ${err.message}`, "error"))
-          .finally(() => {
-            e.target.textContent = "↓ PDF Report";
-            e.target.disabled    = false;
+          // Open in new tab — browser handles the PDF download
+          const a = Object.assign(document.createElement("a"), {
+            href:     url,
+            download: `ipshield-${ip}-report.pdf`
           });
-      }
-
-    // Timelinebtn
-      if (e.target.id === "timelineBtn") {
-          showTimeline(currentIP || ipInput.value.trim());
+          // Must add auth header — use fetch + blob instead of direct link
+          e.target.textContent = "Generating…";
+          e.target.disabled    = true;
+          fetch(url, { headers: { "x-api-key": API_KEY } })
+            .then(r => {
+              if (!r.ok) throw new Error("Report generation failed");
+              return r.blob();
+            })
+            .then(blob => {
+              const blobUrl = URL.createObjectURL(blob);
+              Object.assign(a, { href: blobUrl });
+              document.body.appendChild(a);
+              a.click();
+              toast(`PDF report downloaded for ${ip}`, "success");
+              document.body.removeChild(a);
+              URL.revokeObjectURL(blobUrl);
+            })
+            .catch(err => toast(`PDF error: ${err.message}`, "error"))
+            .finally(() => {
+              e.target.textContent = "↓ PDF Report";
+              e.target.disabled    = false;
+            });
         }
 
-    // Blacklistbtn
-      if (e.target.id === "blockCurrentBtn") {
-          if (lastResult?.blacklisted) {
-              showBlacklistPanel(); 
-            } else {
-              quickBlock(currentIP);
+      // Timelinebtn
+        if (e.target.id === "timelineBtn") {
+            showTimeline(currentIP || ipInput.value.trim());
+          }
+
+      // Blacklistbtn
+        if (e.target.id === "blockCurrentBtn") {
+            if (lastResult?.blacklisted) {
+                showBlacklistPanel(); 
+              } else {
+                quickBlock(currentIP);
+              }
+          }
+
+
+        // Tab switching
+        const tabBtn = e.target.closest(".tab-btn");
+        if (tabBtn) {
+          const tab = tabBtn.dataset.tab;
+          const ip  = tabBtn.dataset.ip;
+          ["Signals","Network","WHOIS"].forEach(t => {
+            const content = document.getElementById(`tabContent-${t}`);
+            const btn     = resultBody.querySelector(`.tab-btn[data-tab="${t}"]`);
+            if (content) content.style.display = t === tab ? "block" : "none";
+            if (btn) {
+              btn.style.borderBottomColor = t === tab ? "var(--accent)" : "transparent";
+              btn.style.color             = t === tab ? "var(--accent)" : "var(--text3)";
             }
-        }
-
-
-      // Tab switching
-      const tabBtn = e.target.closest(".tab-btn");
-      if (tabBtn) {
-        const tab = tabBtn.dataset.tab;
-        const ip  = tabBtn.dataset.ip;
-        ["Signals","Network","WHOIS"].forEach(t => {
-          const content = document.getElementById(`tabContent-${t}`);
-          const btn     = resultBody.querySelector(`.tab-btn[data-tab="${t}"]`);
-          if (content) content.style.display = t === tab ? "block" : "none";
-          if (btn) {
-            btn.style.borderBottomColor = t === tab ? "var(--accent)" : "transparent";
-            btn.style.color             = t === tab ? "var(--accent)" : "var(--text3)";
-          }
-        });
-        if (tab === "WHOIS" && ip) {
-          const panel = document.getElementById("whoisPanel");
-          if (panel && panel.dataset.loaded === "false") {
-            panel.dataset.loaded = "true";
-            loadWhois(ip);
+          });
+          if (tab === "WHOIS" && ip) {
+            const panel = document.getElementById("whoisPanel");
+            if (panel && panel.dataset.loaded === "false") {
+              panel.dataset.loaded = "true";
+              loadWhois(ip);
+            }
           }
         }
-      }
-    });
-}
+      });
+  }
 
   // Theme 
-function toggleTheme() {
-  isDark = !isDark;
-  applyTheme(isDark);
-  localStorage.setItem("ipshield_theme", isDark ? "dark" : "light");
-}
+  function toggleTheme() {
+    isDark = !isDark;
+    applyTheme(isDark);
+    localStorage.setItem("ipshield_theme", isDark ? "dark" : "light");
+  }
  
 function applyTheme(dark) {
   const root = document.documentElement;
@@ -3382,7 +3381,7 @@ function applyTheme(dark) {
             ${apiVersion === "v1" || (window._userRank ?? 0) < 1 ? "display:none;" : ""}
             color:${d.blacklisted ? "var(--low)" : "var(--critical)"};
             border-color:${d.blacklisted ? "var(--low)" : "var(--critical)"};">
-          ${d.blacklisted ? "✓ Blacklisted" : "🚫 Block"}
+          ${d.blacklisted ? "✓ Blacklisted" : "🚫 Blacklist"}
         </button>
         <button id="addToCaseBtn" class="btn btn-ghost v2-only"
           style="padding:5px 12px;font-size:11px;
@@ -3572,38 +3571,38 @@ function applyTheme(dark) {
   // Parse current value and increment
   const current  = parseInt(el.textContent.replace(/,/g, "")) || 0;
   el.textContent = (current + 1).toLocaleString();
-}
+  }
 
   // Call stats
-async function loadStats() {
-  try {
-    const res = await fetch("/api/v1/stats", { headers: authHeaders() });
-    if (!res.ok) return;
+  async function loadStats() {
+    try {
+      const res = await fetch("/api/v1/stats", { headers: authHeaders() });
+      if (!res.ok) return;
 
-    const d    = await res.json();
-    const dist = d.riskDistribution || d;
+      const d    = await res.json();
+      const dist = d.riskDistribution || d;
 
-    const map = {
-      CRITICAL: "stat-critical",
-      HIGH:     "stat-high",
-      MEDIUM:   "stat-medium",
-      LOW:      "stat-low",
-    };
+      const map = {
+        CRITICAL: "stat-critical",
+        HIGH:     "stat-high",
+        MEDIUM:   "stat-medium",
+        LOW:      "stat-low",
+      };
 
-    Object.entries(map).forEach(([risk, elId]) => {
-      const el = document.getElementById(elId);
-      if (!el) return;
+      Object.entries(map).forEach(([risk, elId]) => {
+        const el = document.getElementById(elId);
+        if (!el) return;
 
-      // DB total + current session additions
-      const dbVal      = dist[risk] ?? d[risk] ?? 0;
-      const sessionVal = sessionStats[risk]     ?? 0;
-      el.textContent   = Number(dbVal + sessionVal).toLocaleString();
-    });
+        // DB total + current session additions
+        const dbVal      = dist[risk] ?? d[risk] ?? 0;
+        const sessionVal = sessionStats[risk]     ?? 0;
+        el.textContent   = Number(dbVal + sessionVal).toLocaleString();
+      });
 
-  } catch (err) {
-    console.error("[loadStats] error:", err.message);
+    } catch (err) {
+      console.error("[loadStats] error:", err.message);
+    }
   }
-}
   
   // initApp
   function initApp() {
@@ -3694,8 +3693,8 @@ async function loadStats() {
 
   setInterval(loadWatchlist, 1000 * 60 * 2);
 
-    // CLUSTER VISUALIZATION MODAL
-    async function showClustersPanel() {
+  // CLUSTER VISUALIZATION MODAL
+  async function showClustersPanel() {
       document.getElementById("clustersModal")?.remove();
 
       const overlay = document.createElement("div");
@@ -3971,11 +3970,11 @@ async function loadStats() {
       }
 
       loadClusters();
-    }
+  }
 
-    // SIEM TARGETS CONFIGURATION PANEL
-    async function showUnifiedSIEMPanel() {
-      document.getElementById("siemUnifiedModal")?.remove();
+  // SIEM TARGETS CONFIGURATION PANEL
+  async function showUnifiedSIEMPanel() {
+    document.getElementById("siemUnifiedModal")?.remove();
 
       const SIEM_TYPES = [
         { id:"splunk",   label:"Splunk HEC",          hint:"Authorization: Splunk {token}" },
@@ -4111,7 +4110,7 @@ async function loadStats() {
             </div>
           </div>
 
-          <!-- ── TARGETS TAB  -->
+          <!-- TARGETS TAB  -->
           <div id="siemTab-targets" style="display:none;flex-direction:column;">
             <div style="padding:12px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
               <span style="font-size:11px;color:var(--text3);">All enabled targets receive every qualifying event simultaneously</span>
@@ -4453,8 +4452,8 @@ async function loadStats() {
       });
     }
 
-    // RATE LIMIT TUNING PANEL
-    async function showRateLimitPanel() {
+  // RATE LIMIT TUNING PANEL
+  async function showRateLimitPanel() {
       document.getElementById("rateLimitModal")?.remove();
 
       const overlay = document.createElement("div");
@@ -4662,7 +4661,7 @@ async function loadStats() {
         }
   }
       loadRateLimitData();
-    }
+  }
 
     // Shared utility: human-readable time since
     function timeSince(dateStr) {

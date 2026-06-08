@@ -48,9 +48,8 @@ router.post("/",
 
       res.status(201).json(result.rows[0]);
     } catch (err) {
-      console.error("[cidr] Insert error:", err.message);
-      res.status(500).json({ error: "Failed to add CIDR block" });
-    }
+  next(err);
+}
   }
 );
 
@@ -65,8 +64,8 @@ router.get("/", requireAuth, requireRole("readonly"), async (req, res) => {
     );
     res.json({ total: result.rows.length, blocks: result.rows });
   } catch (err) {
-    res.status(500).json({ error: "Failed to list CIDR blocks" });
-  }
+  next(err);
+}
 });
 
 // GET /blacklist/cidr/check/:ip
@@ -94,9 +93,8 @@ router.get("/check/:ip",
         res.json({ blocked: false, block: null });
       }
     } catch (err) {
-      console.error("[cidr] Check error:", err.message);
-      res.status(500).json({ error: "CIDR check failed" });
-    }
+  next(err);
+}
   }
 );
 
@@ -115,8 +113,8 @@ router.delete("/:id",
       if (!result.rows.length) return res.status(404).json({ error: "CIDR block not found" });
       res.json({ message: "CIDR block removed", id: parseInt(req.params.id) });
     } catch (err) {
-      res.status(500).json({ error: "Failed to remove CIDR block" });
-    }
+  next(err);
+}
   }
 );
 

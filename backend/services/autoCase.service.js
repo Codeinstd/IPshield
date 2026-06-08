@@ -115,8 +115,8 @@ async function checkAndAutoCase(result) {
       }
     }
   } catch (err) {
-    console.error("[autoCase] Error:", err.message);
-  }
+  next(err);
+}
 
   return { autoCaseCreated, autoBlacklisted };
 }

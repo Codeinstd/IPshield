@@ -22,8 +22,8 @@ router.get("/stats", async (req, res) => {
     const stats = await getCaseStats();
     res.json(stats);
   } catch (err) {
-    res.status(500).json({ error: "Failed to load stats" });
-  }
+  next(err);
+}
 });
 
 // GET /api/cases
@@ -39,8 +39,8 @@ router.get("/", [
     const result = await listCases({ status, severity, q, limit: parseInt(limit), offset: parseInt(offset) });
     res.json(result);
   } catch (err) {
-    res.status(500).json({ error: "Failed to load cases" });
-  }
+  next(err);
+}
 });
 
 // GET /api/cases/:id
@@ -52,8 +52,8 @@ router.get("/:id", [
     if (!c) return res.status(404).json({ error: "Case not found" });
     res.json(c);
   } catch (err) {
-    res.status(500).json({ error: "Failed to load case" });
-  }
+  next(err);
+}
 });
 
 // POST /api/cases
@@ -72,8 +72,8 @@ router.post("/",  [
     logger.info(`Case created: #${c.id} — ${title}`);
     res.status(201).json(c);
   } catch (err) {
-    res.status(500).json({ error: "Failed to create case" });
-  }
+  next(err);
+}
 });
 
 // PUT /api/cases/:id
@@ -101,8 +101,8 @@ router.put("/:id", [
     logger.info(`Case updated: #${id}`);
     res.json(c);
   } catch (err) {
-    res.status(500).json({ error: "Failed to update case" });
-  }
+  next(err);
+}
 });
 
 // DELETE /api/cases/:id
@@ -115,8 +115,8 @@ router.delete("/:id", [
     logger.info(`Case deleted: #${req.params.id}`);
     res.json({ message: "Case deleted" });
   } catch (err) {
-    res.status(500).json({ error: "Failed to delete case" });
-  }
+  next(err);
+}
 });
 
 // POST /api/cases/:id/ips
@@ -137,8 +137,8 @@ router.post("/:id/ips",  [
     if (result.error)     return res.status(500).json({ error: result.error });
     res.status(201).json({ message: "IP attached to case" });
   } catch (err) {
-    res.status(500).json({ error: "Failed to attach IP" });
-  }
+  next(err);
+}
 });
 
 // DELETE /api/cases/:id/ips/:ipId
@@ -150,8 +150,8 @@ router.delete("/:id/ips/:ipId",[
     await removeCaseIP(parseInt(req.params.id), parseInt(req.params.ipId));
     res.json({ message: "IP removed from case" });
   } catch (err) {
-    res.status(500).json({ error: "Failed to remove IP" });
-  }
+  next(err);
+}
 });
 
 // POST /api/cases/:id/notes
@@ -166,8 +166,8 @@ router.post("/:id/notes", [
     if (!result) return res.status(500).json({ error: "Failed to add note" });
     res.status(201).json(result);
   } catch (err) {
-    res.status(500).json({ error: "Failed to add note" });
-  }
+  next(err);
+}
 });
 
 // DELETE /api/cases/:id/notes/:noteId
@@ -179,8 +179,8 @@ router.delete("/:id/notes/:noteId",  [
     await deleteCaseNote(parseInt(req.params.id), parseInt(req.params.noteId));
     res.json({ message: "Note deleted" });
   } catch (err) {
-    res.status(500).json({ error: "Failed to delete note" });
-  }
+  next(err);
+}
 });
 
 const caseAccountsRouter = require("./caseAccounts.routes");

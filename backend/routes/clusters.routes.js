@@ -20,8 +20,8 @@ router.get("/", requireAuth, requireRole("readonly"), async (req, res) => {
     const clusters = await getActiveClusters(limit);
     res.json({ total: clusters.length, clusters });
   } catch (err) {
-    res.status(500).json({ error: "Failed to load clusters" });
-  }
+  next(err);
+}
 });
 
 // GET /threat/clusters/:id/ips
@@ -91,9 +91,8 @@ router.get("/:id/ips",
         ips:   ipsRes.rows,
       });
     } catch (err) {
-      console.error("[clusters] IPs error:", err.message);
-      res.status(500).json({ error: "Failed to load cluster IPs" });
-    }
+  next(err);
+}
   }
 );
 
@@ -109,8 +108,8 @@ router.post("/:id/resolve",
       if (!ok) return res.status(404).json({ error: "Cluster not found" });
       res.json({ message: "Cluster resolved" });
     } catch (err) {
-      res.status(500).json({ error: "Failed to resolve cluster" });
-    }
+  next(err);
+}
   }
 );
 

@@ -59,9 +59,8 @@ router.post("/",
 
       res.status(201).json(result.rows[0]);
     } catch (err) {
-      console.error("[caseAccounts] Insert error:", err.message);
-      res.status(500).json({ error: "Failed to attach account" });
-    }
+  next(err);
+}
   }
 );
 
@@ -82,8 +81,8 @@ router.get("/",
       );
       res.json({ case_id: caseId, total: result.rows.length, accounts: result.rows });
     } catch (err) {
-      res.status(500).json({ error: "Failed to load accounts" });
-    }
+  next(err);
+}
   }
 );
 
@@ -113,8 +112,8 @@ router.delete("/:accId",
       );
       res.json({ message: "Account removed from case" });
     } catch (err) {
-      res.status(500).json({ error: "Failed to remove account" });
-    }
+  next(err);
+}
   }
 );
 

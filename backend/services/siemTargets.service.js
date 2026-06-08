@@ -9,7 +9,6 @@ const {
 } = require("./siem.service");
 
 // Local payload builders (same as siem.service.js, reused here) 
-
 const RISK_ORDER = { LOW: 0, MEDIUM: 1, HIGH: 2, CRITICAL: 3 };
 
 function meetsTargetThreshold(result, target) {

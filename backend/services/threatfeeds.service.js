@@ -27,8 +27,8 @@ async function loadFeodoFeed() {
     feedCache.feodo.ts  = Date.now();
     console.log(`✓ Feodo feed loaded: ${ips.length} C2 IPs`);
   } catch (err) {
-    console.error("Feodo feed error:", err.message);
-  }
+  next(err);
+}
 }
 
 async function loadSpamhausFeed() {
@@ -48,8 +48,8 @@ async function loadSpamhausFeed() {
     feedCache.spamhaus.ts  = Date.now();
     console.log(`✓ Spamhaus DROP feed loaded: ${ranges.length} ranges`);
   } catch (err) {
-    console.error("Spamhaus feed error:", err.message);
-  }
+  next(err);
+}
 }
 
 async function loadEmergingThreatsFeed() {
@@ -68,8 +68,8 @@ async function loadEmergingThreatsFeed() {
     feedCache.emergingThreats.ts  = Date.now();
     console.log(`✓ Emerging Threats feed loaded: ${ips.length} IPs`);
   } catch (err) {
-    console.error("Emerging Threats feed error:", err.message);
-  }
+  next(err);
+}
 }
 
 // OTX lookup (per-IP, not a bulk feed) 

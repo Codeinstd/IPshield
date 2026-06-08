@@ -55,9 +55,8 @@ router.get("/:ip", requireAuth, requireRole('readonly'), async (req, res) => {
     res.end();
 
   } catch (err) {
-    send("error", { message: "Streaming failed" });
-    res.end();
-  }
+  next(err);
+}
 });
 
 module.exports = router;

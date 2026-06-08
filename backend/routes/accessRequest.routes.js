@@ -61,8 +61,8 @@ router.post("/",
             </div>`,
         });
       } catch (err) {
-        console.error("[access-request] SMTP error:", err.message);
-      }
+          next(err);
+        }
     }
 
     // ── Slack alert (reuses your existing webhook setup)
@@ -86,7 +86,7 @@ router.post("/",
           }),
         });
       } catch (err) {
-        console.error("[access-request] Slack error:", err.message);
+        next(err);
       }
     }
 

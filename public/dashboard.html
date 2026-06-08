@@ -416,7 +416,6 @@
     <div class="version" id="drawer-version"></div>
   </div>
   <div class="nav-drawer-body" id="navDrawerBody">
-    <!-- cloned buttons by JS -->
   </div>
 </div>
 
@@ -537,7 +536,6 @@
   </main>
 </div>
 <script>
-  // ── Load stats into dashboard cards 
   async function loadDashboardStats() {
     try {
       const token = localStorage.getItem("token");
@@ -561,8 +559,8 @@
       document.getElementById("stat-low").textContent      = Number(low).toLocaleString();
 
     } catch (err) {
-      console.error("[stats] error:", err.message);
-    }
+  next(err);
+}
   }
   // Run on page load
   loadDashboardStats();
@@ -571,7 +569,6 @@
   localStorage.getItem("dashboardData") || "{}"
   );
 
-  console.log("Dashboard ready:", dashboardData);
 
 </script>
 </body>

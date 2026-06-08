@@ -5,7 +5,6 @@ const { sendAlertEmail } = require("./email.service");
 const THRESHOLD = parseInt(process.env.ALERT_THRESHOLD || "80");
 
 // Slack 
-
 async function sendSlackAlert({ title, message, ip, score, riskLevel, caseId, type, color, fields }) {
   const webhookUrl = process.env.SLACK_WEBHOOK || process.env.SLACK_WEBHOOK_URL;
   if (!webhookUrl) return { skipped: true, reason: "SLACK_WEBHOOK not set" };
@@ -111,13 +110,16 @@ async function alertIfCritical(result) {
 }
 
 // sendAlert — called from BullMQ alert worker 
-
 async function sendAlert(payload) {
-  const results = await Promise.allSettled([
-    sendSlackAlert(payload),
-    sendDiscordAlert(payload),
-    sendAlertEmail(payload),
-  ]);
+ const results = await Promise.allSettled([
+  sendSlackAlert(payload),
+  sendDiscordAlert(payload),
+  sendAlertEmail(payload),
+]);
+
+console.log("[ALERT RESULTS]", JSON.stringify(results, null, 2));
+
+return results;
 
   const delivered = results
     .filter(r => r.status === "fulfilled" && r.value?.delivered)

@@ -21,37 +21,73 @@ async function createInvite({ name, email, role = "analyst", dailyLimit = 1000, 
   const keyPreview  = key.slice(0, 8) + "••••••••••••••••";
   const inviteToken = generateInviteToken();
 
-  const res = await db.query(
+  await db.query(
     `INSERT INTO api_keys
        (key_hash, key, key_preview, name, email, role, status,
         invite_token, invited_by, invited_at, daily_limit, notes)
-     VALUES ($1,$2,$3,$4,$5,$6,'pending',$7,$8,NOW(),$9,$10)
-     RETURNING id, name, email, role, status, daily_limit, invite_token`,
+     VALUES ($1,$2,$3,$4,$5,$6,'pending',$7,$8,NOW(),$9,$10)`,
     [keyHash, key, keyPreview, name, email || null, role,
      inviteToken, invitedBy, dailyLimit, notes || null]
   );
 
-  const invite      = res.rows[0];
+  const invite = await db.query(
+    `SELECT id, name, email, role, status, daily_limit, invite_token
+     FROM api_keys WHERE key_hash = $1`,
+    [keyHash]
+  );
+
   const baseUrl     = process.env.APP_URL || "https://ipshield.live";
   const activateUrl = `${baseUrl}/activate?token=${inviteToken}`;
 
   logger.info(`[keyManager] Invite created for ${email || name} by ${invitedBy}`);
-  return { ...invite, activateUrl, rawKey: key, invite_token: inviteToken };
+
+  // Return raw key only here — it will be wiped on activation
+  return { ...invite.rows[0], activateUrl, rawKey: key, invite_token: inviteToken };
 }
 
 // Activate invite 
 async function activateInvite(inviteToken) {
-  const res = await db.query(
-    `UPDATE api_keys
-     SET status = 'active', activated_at = NOW(), invite_token = NULL
-     WHERE invite_token = $1 AND status = 'pending'
-     RETURNING id, name, email, role, status, activated_at, daily_limit`,
-    [inviteToken]
-  );
+  const client = await db.pool.connect();   
+  try {
+    await client.query("BEGIN");
 
-  if (!res.rows.length) return null;
-  logger.info(`[keyManager] Key activated: ${res.rows[0].name}`);
-  return res.rows[0];
+    // Activate the invite
+    const activateRes = await client.query(
+      `UPDATE api_keys
+       SET status = 'active', activated_at = NOW(), invite_token = NULL
+       WHERE invite_token = $1 AND status = 'pending'
+       RETURNING id, name, email, role, status, activated_at, daily_limit, key`,
+      [inviteToken]
+    );
+
+    if (!activateRes.rows.length) {
+      await client.query("ROLLBACK");
+      return null;
+    }
+
+    const row = activateRes.rows[0];
+    const rawKey = row.key; 
+
+    // Wipe raw key from DB it exits as hash
+    await client.query(
+      `UPDATE api_keys SET key = NULL WHERE id = $1`,
+      [row.id]
+    );
+
+    await client.query("COMMIT");
+
+    logger.info(`[keyManager] Key activated and raw key wiped: ${row.name}`);
+
+    // Return raw key in response — this is the ONLY time it's available
+    return { ...row, key: rawKey };
+
+  } catch (err) {
+    await client.query("ROLLBACK");
+    logger.error("[keyManager] activateInvite transaction failed:", err.message);
+    throw err;
+  } finally {
+    client.release();
+  }
 }
 
 // List keys
@@ -180,6 +216,7 @@ async function rotateKey(id) {
     `UPDATE api_keys
      SET key_hash    = $1,
          key_preview = $2,
+         key         = NULL,
          last_used   = NULL
      WHERE id = $3 AND status = 'active'
      RETURNING id, name, email`,

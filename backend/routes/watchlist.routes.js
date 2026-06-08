@@ -35,13 +35,8 @@ router.get(
         watchlist
       });
     } catch (err) {
-      logger.error("Watchlist fetch error:", err.message);
-      console.error("WATCHLIST API FAILURE:", err);
-
-      res.status(500).json({
-        error: "Failed to load watchlist"
-      });
-    }
+  next(err);
+}
   }
 );
 
@@ -152,12 +147,8 @@ router.post(
         });
       }
     } catch (err) {
-      logger.error("Watchlist add error:", err.message);
-
-      return res.status(500).json({
-        error: "Failed to add IP to watchlist"
-      });
-    }
+  next(err);
+}
   }
 );
 
@@ -192,12 +183,8 @@ router.delete(
         ip
       });
     } catch (err) {
-      logger.error("Watchlist delete error:", err.message);
-
-      res.status(500).json({
-        error: "Failed to remove IP"
-      });
-    }
+  next(err);
+}
   }
 );
 

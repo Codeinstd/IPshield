@@ -42,7 +42,7 @@ const casesRoutes     = require("./routes/cases.routes");
 const isProd = process.env.NODE_ENV === "production";
 const app    = express();
 
-// Request logger (dev only) 
+// Request logger 
 app.use((req, res, next) => {
   console.log("REQ:", req.originalUrl);
   next();

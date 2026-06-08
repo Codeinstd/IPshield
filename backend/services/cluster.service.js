@@ -107,8 +107,8 @@ async function detectClusters(result) {
       }
     }
   } catch (err) {
-    console.error("[cluster] Detection error:", err.message);
-  }
+  next(err);
+}
 
   return newClusters;
 }
@@ -145,9 +145,8 @@ async function upsertCluster({ clusterKey, clusterType, ipCount, maxScore, sever
       return { isNew: true, ...res.rows[0] };
     }
   } catch (err) {
-    console.error("[cluster] Upsert error:", err.message);
-    return { isNew: false, clusterKey };
-  }
+  next(err);
+}
 }
 
 /**
@@ -164,9 +163,8 @@ async function getActiveClusters(limit = 20) {
     );
     return res.rows;
   } catch (err) {
-    console.error("[cluster] getActiveClusters error:", err.message);
-    return [];
-  }
+  next(err);
+}
 }
 
 /**
@@ -180,9 +178,8 @@ async function resolveCluster(id) {
     );
     return true;
   } catch (err) {
-    console.error("[cluster] resolveCluster error:", err.message);
-    return false;
-  }
+  next(err);
+}
 }
 
 module.exports = { detectClusters, getActiveClusters, resolveCluster };

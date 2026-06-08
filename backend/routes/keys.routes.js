@@ -4,6 +4,7 @@ const { body, param, query, validationResult } = require("express-validator");
 const { requireAuth, requireRole } = require("../middleware/auth.js");
 const km = require("../services/keyManager.service");
 const { sendInviteEmail } = require("../services/email.service");
+const { sendAlertEmail } = require("../services/email.service");
 const db = require("../store/db");
 const ROLES = ["readonly","analyst","admin"];
 
@@ -23,11 +24,44 @@ router.get(
       const stats = await km.getKeyStats();
       res.json(stats);
     } catch (err) {
-      console.error("[keys/stats] ERROR:", err);
-      res.status(500).json({ error: err.message });
-    }
+  next(err);
+}
   }
 );
+
+// email route
+
+router.post("/access-request", async (req, res) => {
+  try {
+    console.log("[ACCESS REQUEST] HIT");
+
+    const { name, email, company } = req.body;
+
+    if (!name || !email || !company) {
+      return res.status(400).json({ error: "Missing fields" });
+    }
+
+    console.log("[ACCESS REQUEST] Sending email...");
+
+    const result = await sendAlertEmail({
+      title: "New Access Request",
+      ip: email,
+      score: 0,
+      riskLevel: "INFO",
+      type: "ACCESS_REQUEST",
+    });
+
+    console.log("[ACCESS EMAIL RESULT]", result);
+
+    return res.json({ ok: true });
+  } catch (err) {
+    console.error("[ACCESS REQUEST ERROR]", err);
+
+    return res.status(500).json({
+      error: "Failed to send access request email",
+    });
+  }
+});
 
 
 // GET /api/keys
@@ -50,9 +84,8 @@ router.get("/",
       });
       res.json(result);
        } catch (err) {
-      console.error("[keys/list] ERROR:", err);        
-      res.status(500).json({ error: "Failed to list keys" });     
-    }
+  next(err);
+}
   }
 );
 
@@ -97,10 +130,8 @@ router.post("/invite",
       });
 
     } catch (err) {
-      console.error("[keys/invite] ERROR:", err.message);
-      console.error("[keys/invite] DETAIL:", err.detail || err.stack);
-      res.status(500).json({ error: err.message });   // ← return real message to frontend
-    }
+  next(err);
+}
   }
 );
 
@@ -142,15 +173,14 @@ router.get("/activate/:token",
       res.json({ valid: true, invite: result.rows[0] });
 
     } catch (err) {
-      console.error("[activate GET] ERROR:", err.message, err.code);
-      res.status(500).json({ error: err.message, code: err.code });
-    }
+  next(err);
+}
   }
 );
 
 // POST activate
 router.post("/activate/:token",
-  [ param("token").trim().notEmpty().isLength({ min: 20, max: 120 }) ],
+  [param("token").trim().notEmpty().isLength({ min: 40, max: 60 })],
   validate,
   async (req, res) => {
     try {
@@ -163,68 +193,41 @@ router.post("/activate/:token",
         return res.status(400).json({ error: "Valid email is required" });
       }
 
+      const bcrypt       = require("bcryptjs");
+      const passwordHash = await bcrypt.hash(password, 12);
+
+      // Check token still valid
       const check = await db.query(
-        `SELECT id, name, email, role, daily_limit
-         FROM api_keys
-         WHERE invite_token = $1 AND status = 'pending'`,
+        `SELECT id FROM api_keys WHERE invite_token = $1 AND status = 'pending'`,
         [req.params.token]
       );
-
       if (!check.rows.length) {
         return res.status(404).json({ error: "Invalid or already-used invite token" });
       }
 
-      const bcrypt       = require("bcryptjs");
-      const crypto       = require("crypto");
-      const passwordHash = await bcrypt.hash(password, 12);
-      const apiKey       = "ips_" + crypto.randomBytes(32).toString("hex");
-      const keyPreview   = apiKey.slice(0, 12) + "••••••••••••";
-
-      const result = await db.query(
-        `UPDATE api_keys
-         SET status        = 'active',
-             activated_at  = NOW(),
-             invite_token  = NULL,
-             email         = $1,
-             password_hash = $2,
-             key           = $3,
-             key_preview   = $4
-         WHERE id = $5
-         RETURNING id, name, email, role, status, daily_limit`,
-        [
-          email.toLowerCase().trim(),
-          passwordHash,
-          apiKey,
-          keyPreview,
-          check.rows[0].id
-        ]
+      // Set password on record before activation
+      await db.query(
+        `UPDATE api_keys SET email = $1, password_hash = $2 WHERE id = $3`,
+        [email.toLowerCase().trim(), passwordHash, check.rows[0].id]
       );
 
-      if (!result.rows.length) {
-        return res.status(404).json({ error: "Activation failed — row not updated" });
+      // Activate — returns raw key once, then wipes it from DB
+      const activated = await km.activateInvite(req.params.token);
+      if (!activated) {
+        return res.status(404).json({ error: "Activation failed" });
       }
 
-      const activated = result.rows[0];
-
       res.json({
-        message:     "Account activated successfully.",
+        message:     "API key activated. Save your key — it will NOT be shown again.",
+        key:         activated.key,   
         name:        activated.name,
-        email:       activated.email,
         role:        activated.role,
         daily_limit: activated.daily_limit,
-        key:         apiKey,
       });
 
     } catch (err) {
-      console.error("[activate POST] ERROR:", err.message);
-      console.error("[activate POST] CODE:", err.code);
-      console.error("[activate POST] DETAIL:", err.detail);
-      res.status(500).json({
-        error:  err.message,
-        code:   err.code   || null,
-        detail: err.detail || null,
-      });
-    }
+  next(err);
+}
   }
 );
 
@@ -240,8 +243,8 @@ router.get("/:id",
       // Mask the actual key
       res.json({ ...key, key: key.key.slice(0, 8) + "••••••••••••••••••••••••" });
     } catch (err) {
-      res.status(500).json({ error: "Failed to get key" });
-    }
+  next(err);
+}
   }
 );
 
@@ -263,8 +266,8 @@ router.put("/:id",
       if (!updated) return res.status(404).json({ error: "Key not found" });
       res.json(updated);
     } catch (err) {
-      res.status(500).json({ error: "Failed to update key" });
-    }
+  next(err);
+}
   }
 );
 
@@ -278,7 +281,7 @@ router.post("/:id/revoke",
   validate,
   async (req, res) => {
     // you cannot revoke your own key (to prevent locking yourself out)
-    if (req.auth.id === parseInt(req.params.id)) {
+    if (Number(req.auth.id) === Number(req.params.id)) {
     return res.status(400).json({
       error: "You cannot revoke your own key"
     });
@@ -288,8 +291,8 @@ router.post("/:id/revoke",
       if (!ok) return res.status(404).json({ error: "Key not found or already revoked" });
       res.json({ message: "Key revoked" });
     } catch (err) {
-      res.status(500).json({ error: "Failed to revoke key" });
-    }
+  next(err);
+}
   }
 );
 
@@ -300,7 +303,7 @@ router.post("/:id/suspend",
   validate,
   async (req, res) => {
     // you cannot suspend your own key (to prevent locking yourself out)
-    if (req.auth.id === parseInt(req.params.id)) {
+    if (Number(req.auth.id) === Number(req.params.id)) {
   return res.status(400).json({
     error: "You cannot suspend your own key"
   });
@@ -309,8 +312,8 @@ router.post("/:id/suspend",
       await km.suspendKey(parseInt(req.params.id));
       res.json({ message: "Key suspended" });
     } catch (err) {
-      res.status(500).json({ error: "Failed to suspend key" });
-    }
+  next(err);
+}
   }
 );
 
@@ -321,7 +324,7 @@ router.delete("/:id",
   validate,
   async (req, res) => {
     //  prevent self-deletion
-    if (req.auth.id === parseInt(req.params.id)) {
+    if (Number(req.auth.id) === Number(req.params.id)) {
       return res.status(400).json({
         error: "You cannot delete your own admin key"
       });
@@ -336,8 +339,8 @@ router.delete("/:id",
       }
       res.json({ message: `Key "${result.rows[0].name}" permanently deleted` });
     } catch (err) {
-      res.status(500).json({ error: "Failed to delete key" });
-    }
+  next(err);
+}
   }
 );
 
@@ -352,8 +355,8 @@ router.post("/:id/reinstate",
       await km.reinstateKey(parseInt(req.params.id));
       res.json({ message: "Key reinstated" });
     } catch (err) {
-      res.status(500).json({ error: "Failed to reinstate key" });
-    }
+  next(err);
+}
   }
 );
 
@@ -365,7 +368,7 @@ router.post("/:id/rotate",
   validate,
   async (req, res) => {
     // you cannot rotate your own active key (to prevent locking yourself out)
-    if (req.auth.id === parseInt(req.params.id)) {
+    if (Number(req.auth.id) === Number(req.params.id)) {
   return res.status(400).json({
     error: "You cannot rotate your own active admin key"
   });
@@ -379,8 +382,8 @@ router.post("/:id/rotate",
         name:    result.name,
       });
     } catch (err) {
-      res.status(500).json({ error: "Failed to rotate key" });
-    }
+  next(err);
+}
   }
 );
 
@@ -401,8 +404,8 @@ router.get("/:id/usage",
       );
       res.json({ key_id: parseInt(req.params.id), days: parseInt(req.query.days || "30"), usage });
     } catch (err) {
-      res.status(500).json({ error: "Failed to load usage" });
-    }
+  next(err);
+}
   }
 );
 
