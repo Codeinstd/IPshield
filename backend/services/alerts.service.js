@@ -32,7 +32,6 @@ async function sendSlackAlert({ title, message, ip, score, riskLevel, caseId, ty
 }
 
 // Discord 
-
 async function sendDiscordAlert({ title, message, ip, score, riskLevel, caseId, type, color }) {
   if (!process.env.DISCORD_WEBHOOK) return { skipped: true, reason: "DISCORD_WEBHOOK not set" };
 
@@ -56,7 +55,6 @@ async function sendDiscordAlert({ title, message, ip, score, riskLevel, caseId, 
 
   return { delivered: true, channel: "discord" };
 }
-
 
 // alertIfCritical — called from score.controller on every score 
 async function alertIfCritical(result) {
@@ -111,15 +109,11 @@ async function alertIfCritical(result) {
 
 // sendAlert — called from BullMQ alert worker 
 async function sendAlert(payload) {
- const results = await Promise.allSettled([
-  sendSlackAlert(payload),
-  sendDiscordAlert(payload),
-  sendAlertEmail(payload),
-]);
-
-console.log("[ALERT RESULTS]", JSON.stringify(results, null, 2));
-
-return results;
+  const results = await Promise.allSettled([
+    sendSlackAlert(payload),
+    sendDiscordAlert(payload),
+    sendAlertEmail(payload),
+  ]);
 
   const delivered = results
     .filter(r => r.status === "fulfilled" && r.value?.delivered)
@@ -129,7 +123,7 @@ return results;
     .filter(r => r.status === "rejected")
     .map(r => r.reason?.message);
 
-  if (errors.length) console.error("[alert] Delivery errors:", errors);
+  console.log("[ALERT RESULTS]", JSON.stringify(results, null, 2));
 
   return { delivered, errors };
 }

@@ -1,63 +1,42 @@
-const { Resend } = require("resend");
+const nodemailer = require("nodemailer");
 
-let resend = null;
+let transporter = null;
 
-function getResend() {
-  if (resend) return resend;
-
-  if (!process.env.RESEND_API_KEY) {
-    throw new Error("RESEND_API_KEY is missing");
-  }
-
-  resend = new Resend(process.env.RESEND_API_KEY);
-  return resend;
+function getTransporter() {
+  if (transporter) return transporter;
+  transporter = nodemailer.createTransport({
+    host: process.env.SMTP_HOST || "smtp.gmail.com",
+    port: parseInt(process.env.SMTP_PORT || "465"),
+    secure: true,
+    auth: {
+      user: process.env.SMTP_USER,
+      pass: process.env.SMTP_PASS,
+    },
+  });
+  return transporter;
 }
 
 async function sendEmail({ to, subject, html }) {
-  const client = getResend();
-
-  if (!process.env.ALERT_FROM) {
-    throw new Error("ALERT_FROM is not set");
-  }
-
+  const transport = getTransporter();
   const recipients = Array.isArray(to)
-    ? to
-    : String(to)
-        .split(",")
-        .map(e => e.trim())
-        .filter(Boolean);
+    ? to.join(",")
+    : String(to).split(",").map(e => e.trim()).filter(Boolean).join(",");
 
-  console.log("[EMAIL] Sending:", {
-    from: process.env.ALERT_FROM,
-    to: recipients,
-    subject,
-  });
+  console.log("[EMAIL] Sending:", { from: process.env.ALERT_FROM, to: recipients, subject });
 
-  const result = await client.emails.send({
+  const result = await transport.sendMail({
     from: process.env.ALERT_FROM,
     to: recipients,
     subject,
     html,
   });
 
-  console.log("[EMAIL RESULT]:", result);
-
-  if (result?.error) {
-    console.error("[RESEND ERROR]:", result.error);
-    throw new Error(result.error.message || "Email send failed");
-  }
-
-  return {
-    delivered: true,
-    emailId: result.data?.id,
-  };
+  console.log("[EMAIL RESULT]:", result.messageId);
+  return { delivered: true, messageId: result.messageId };
 }
 
 async function sendAlertEmail(payload) {
-  if (!process.env.ALERT_TO) {
-    throw new Error("ALERT_TO is not configured");
-  }
-
+  if (!process.env.ALERT_TO) throw new Error("ALERT_TO is not configured");
   return sendEmail({
     to: process.env.ALERT_TO,
     subject: `[IPShield] ${payload.riskLevel || "ALERT"}: ${payload.title || payload.ip}`,
@@ -72,7 +51,4 @@ async function sendAlertEmail(payload) {
   });
 }
 
-module.exports = {
-  sendEmail,
-  sendAlertEmail,
-};
+module.exports = { sendEmail, sendAlertEmail };

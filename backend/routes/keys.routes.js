@@ -3,7 +3,6 @@ const router = express.Router();
 const { body, param, query, validationResult } = require("express-validator");
 const { requireAuth, requireRole } = require("../middleware/auth.js");
 const km = require("../services/keyManager.service");
-const { sendInviteEmail } = require("../services/email.service");
 const { sendAlertEmail } = require("../services/email.service");
 const db = require("../store/db");
 const ROLES = ["readonly","analyst","admin"];
@@ -62,7 +61,6 @@ router.post("/access-request", async (req, res) => {
     });
   }
 });
-
 
 // GET /api/keys
 router.get("/",
@@ -169,9 +167,7 @@ router.get("/activate/:token",
           error: "Invalid or expired invite token",
         });
       }
-
       res.json({ valid: true, invite: result.rows[0] });
-
     } catch (err) {
   next(err);
 }
@@ -345,7 +341,6 @@ router.delete("/:id",
 );
 
 // POST /api/keys/:id/reinstate
-
 router.post("/:id/reinstate",
   requireAuth, requireRole("admin"),
   [param("id").isInt({ min: 1 })],
@@ -361,7 +356,6 @@ router.post("/:id/reinstate",
 );
 
 // POST /api/keys/:id/rotate 
-
 router.post("/:id/rotate",
   requireAuth, requireRole("admin"),
   [param("id").isInt({ min: 1 })],
@@ -388,7 +382,6 @@ router.post("/:id/rotate",
 );
 
 // GET /api/keys/:id/usage 
-
 router.get("/:id/usage",
   requireAuth, requireRole("admin"),
   [

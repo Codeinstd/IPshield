@@ -2,7 +2,6 @@ if (process.env.NODE_ENV !== "production") {
   require("dotenv").config();
 }
 require("./utils/validateEnv")();
-
 const app    = require("./app");
 const logger = require("./utils/logger");
 const { startWorkers } = require("./jobs/workers");
@@ -58,8 +57,8 @@ async function startServer() {
   // Initialize Redis — failure is non-fatal
   await initRedis();
 
-  // ... rest of your server startup
-  app.listen(PORT, () => {
+// ... rest of your server startup
+app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
   });
 }
