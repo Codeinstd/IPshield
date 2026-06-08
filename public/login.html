@@ -10,6 +10,7 @@
 <link rel="icon" type="image/png" sizes="16x16" href="/favicon.ico/favicon-16x16.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&amp;family=Syne:wght@400;600;700;800&amp;display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
 <link rel="stylesheet" href="/leaflet.min.css">
 <style>
   :root {
@@ -126,6 +127,7 @@
     button#login-submit:hover    { opacity: 0.88; }
     button#login-submit:disabled { opacity: 0.5; cursor: not-allowed; }
 
+
     #login-error {
       display: none;
       background: #2d1b1b;
@@ -134,6 +136,7 @@
       border-radius: 6px;
       padding: 10px 14px;
       font-size: 13px;
+      font-family: 'Syne' sans-serif;
     }
 
     .footer-note {
@@ -142,7 +145,79 @@
       color: #3d4451;
       font-family: 'JetBrains Mono', monospace;
     }
-  </style>
+
+    .loading-screen {
+    position: fixed;
+    inset: 0;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    background: #0d1117;
+    z-index: 99999;
+  }
+
+    .loading-screen.show {
+      display: flex;
+    }
+
+    .loading-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      color: white;
+      animation: fadeIn 0.5s ease;
+      gap: 10px;
+    }
+
+    .loader-animation {
+      width: 180px;
+      height: 180px;
+    }
+
+    .loading-content h1 {
+      margin: 0;
+      font-size: 1.8rem;
+    }
+
+    .loading-content p {
+      margin: 0;
+      color: #cbd5e1;
+    }
+
+    .loading-content {
+      transform: translateY(-10px);
+    }
+
+    .logo {
+      width: 90px;
+      margin-bottom: 20px;
+      animation: float 1.5s ease-in-out infinite;
+    }
+
+/* @keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes float {
+  0%,100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+} */
+
+
+</style>
 </head>
 <body>
   <div class="card">
@@ -170,7 +245,19 @@
     <!-- <p class="footer-note">IPShield Admin Console</p> -->
   </div>
 
-  <script>
+  <div id="loadingScreen" class="loading-screen">
+  <div class="loading-content">
+
+    <div id="lottieLoader" class="loader-animation"></div>
+
+    <h1 style="font-family: 'Syne', sans-serif;">Signing you in</h1>
+    <p id="loadingText" style="font-family:'JetBrains Mono', monospace; font-size: small;">Verifying credentials...</p>
+
+  </div>
+</div>
+
+
+<script>
     // If already logged in, skip straight to dashboard
     if (localStorage.getItem("token")) {
       window.location.replace("/dashboard");
@@ -217,8 +304,18 @@
         }
 
         localStorage.setItem("token", data.token);
-        localStorage.setItem("user",  JSON.stringify(data.user));
-        window.location.href = "/dashboard";  // back to dashboard
+        localStorage.setItem("user", JSON.stringify(data.user));
+
+        // show loader
+        document.getElementById("loadingScreen").classList.add("show");
+
+        setTimeout(() => {
+          document.getElementById("loadingText").innerText = "Finalizing secure session...";
+        }, 1200);
+
+        setTimeout(() => {
+          window.location.href = "/dashboard";
+        }, 2500);
 
       } catch (err) {
         showError("Network error — is the server running?");
@@ -233,6 +330,16 @@
     [emailEl, passEl].forEach(el =>
       el.addEventListener("keydown", e => { if (e.key === "Enter") doLogin(); })
     );
-  </script>
+   
+</script>
+ <script>
+    const anim = lottie.loadAnimation({
+      container: document.getElementById('lottieLoader'),
+      renderer: 'svg',
+      loop: true,
+      autoplay: true,
+      path: '/animations/loading.json'
+    });
+</script>
 </body>
 </html>

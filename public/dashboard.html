@@ -567,6 +567,12 @@
   // Run on page load
   loadDashboardStats();
 
+  const dashboardData = JSON.parse(
+  localStorage.getItem("dashboardData") || "{}"
+  );
+
+  console.log("Dashboard ready:", dashboardData);
+
 </script>
 
 </body>

@@ -19,6 +19,16 @@ require("dotenv").config({
   path: path.join(__dirname, "../.env")
 });
 
+app.post("/login", (req, res) => {
+    res.json({
+        success: true,
+        token: "demo-token-123",
+        user: {
+            email: req.body.email
+        }
+    });
+});
+
 // Graceful shutdown
 function shutdown(signal) {
   logger.info(`${signal} received — shutting down gracefully`);
