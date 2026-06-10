@@ -8,30 +8,32 @@ const path       = require("path");
 const rateLimit  = require("express-rate-limit");
 
 // Route imports 
-const scoreRoutes        = require("./routes/score.routes");
-const statsRoutes        = require("./routes/stats.routes");
-const auditRoutes        = require("./routes/audit.routes");
-const streamRoutes       = require("./routes/stream.routes");
-const watchlistRoutes    = require("./routes/watchlist.routes");
-const whoisRoutes        = require("./routes/whois.routes");
-const siemRoutes         = require("./routes/siem.routes");
-const docsRoutes         = require("./routes/docs.routes");
-const authMiddleware     = require("./middleware/auth.middleware");
-const errorMiddleware    = require("./middleware/error.middleware");
-const logger             = require("./utils/logger");
-const reportRoutes       = require("./routes/report.routes");
-const timelineRoutes     = require("./routes/timeline.routes");
-const telemetryMiddleware = require("./middleware/telemetry.middleware");
-const telemetryRoutes    = require("./routes/telemetry.routes");
-const batchAsyncRoutes   = require("./routes/batchAsync.routes");
-const threatRoutes       = require("./routes/threat.routes");
-const cidrRoutes         = require("./routes/cidr.routes");
-const siemTargetsRoutes  = require("./routes/siemTargets.routes");
-const caseAccountsRoutes = require("./routes/caseAccounts.routes");
-const clusterRoutes      = require("./routes/clusters.routes");
-const keysRoutes         = require("./routes/keys.routes");
-const authRoutes         = require("./routes/auth.routes");
-const accessRequestRoutes = require("./routes/accessRequest.routes");
+const scoreRoutes           = require("./routes/score.routes");
+const statsRoutes           = require("./routes/stats.routes");
+const auditRoutes           = require("./routes/audit.routes");
+const streamRoutes          = require("./routes/stream.routes");
+const watchlistRoutes       = require("./routes/watchlist.routes");
+const whoisRoutes           = require("./routes/whois.routes");
+const siemRoutes            = require("./routes/siem.routes");
+const docsRoutes            = require("./routes/docs.routes");
+const authMiddleware        = require("./middleware/auth.middleware");
+const errorMiddleware       = require("./middleware/error.middleware");
+const logger                = require("./utils/logger");
+const reportRoutes          = require("./routes/report.routes");
+const timelineRoutes        = require("./routes/timeline.routes");
+const telemetryMiddleware   = require("./middleware/telemetry.middleware");
+const telemetryRoutes       = require("./routes/telemetry.routes");
+const batchAsyncRoutes      = require("./routes/batchAsync.routes");
+const threatRoutes          = require("./routes/threat.routes");
+const cidrRoutes            = require("./routes/cidr.routes");
+const siemTargetsRoutes     = require("./routes/siemTargets.routes");
+const caseAccountsRoutes    = require("./routes/caseAccounts.routes");
+const clusterRoutes         = require("./routes/clusters.routes");
+const keysRoutes            = require("./routes/keys.routes");
+const authRoutes            = require("./routes/auth.routes");
+const accessRequestRoutes   = require("./routes/accessRequest.routes");
+const gdprRoutes            = require("./routes/gdpr.routes");
+const mfaRoutes             = require("./routes/mfa.routes");
 
 // v2-only route imports 
 const blacklistRoutes = require("./routes/blacklist.routes");
@@ -88,7 +90,6 @@ app.use(cors({
   methods:        ["GET", "POST", "PUT", "DELETE"],
   allowedHeaders: ["Content-Type", "x-api-key", "Authorization"],
 }));
-
 
 // BODY PARSING & COMPRESSION
 app.use(compression());
@@ -178,6 +179,10 @@ async function healthHandler(req, res) {
   });
 }
 
+// MFA routes
+app.use("/api/v1/mfa", mfaRoutes);
+app.use("/api/v2/mfa", mfaRoutes);
+
 app.get("/api/health",    healthHandler);
 app.get("/api/v1/health", healthHandler);
 app.get("/api/v2/health", healthHandler);
@@ -198,6 +203,11 @@ app.use("/api/v2/auth", authRoutes);
 app.use("/api/auth",    authRoutes);
 
 app.use("/api/access-request", accessRequestRoutes);
+
+
+// GDPR Tooling
+app.use("/api/v2/gdpr", gdprRoutes);
+
 
 // Version info
 function versionInfoHandler(req, res) {

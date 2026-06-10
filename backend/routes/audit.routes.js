@@ -157,4 +157,47 @@ router.get("/breakdown", requireAuth, requireRole('readonly'), async (req, res) 
     }
 });
 
+// GET /api/v2/audit/verify
+router.get("/verify", requireAuth, requireRole("admin"), async (req, res) => {
+  const crypto = require("crypto");
+  const rows   = await db.query(
+    `SELECT id, ip, score, risk_level, scored_at, prev_hash, row_hash
+     FROM audit_log ORDER BY id ASC`
+  );
+
+  let prevHash  = "GENESIS";
+  let tampered  = 0;
+  const broken  = [];
+
+  for (const row of rows.rows) {
+    const content = JSON.stringify({
+      ip:         row.ip,
+      score:      row.score,
+      risk_level: row.risk_level,
+      scored_at:  new Date(row.scored_at).toISOString(),
+      prev_hash:  row.prev_hash,
+    });
+
+    const expected = crypto
+      .createHash("sha256")
+      .update(content)
+      .digest("hex");
+
+    if (expected !== row.row_hash || row.prev_hash !== prevHash) {
+      tampered++;
+      broken.push({ id: row.id, ip: row.ip });
+    }
+
+    prevHash = row.row_hash;
+  }
+
+  res.json({
+    total:    rows.rows.length,
+    tampered,
+    intact:   rows.rows.length - tampered,
+    broken,
+    verified: tampered === 0,
+  });
+});
+
 module.exports = router;

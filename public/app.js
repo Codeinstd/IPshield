@@ -290,6 +290,14 @@
   btn.textContent   = "🔑 Keys";
   btn.style.cssText = "padding:6px 12px;font-size:11px;";
   headerRight.prepend(btn);
+
+  // Add after logoutBtn creation:
+  const mfaBtn       = document.createElement("button");
+  mfaBtn.className   = "btn btn-ghost";
+  mfaBtn.id          = "mfaBtn";
+  mfaBtn.textContent = "🔐 MFA";
+  mfaBtn.style.cssText = "padding:6px 12px;font-size:11px;";
+  headerRight.prepend(mfaBtn);
  
   buildHamburgerMenu();
 
@@ -2424,6 +2432,251 @@ function resolveScoreColor(score) {
                   return "#00e87c";
 }
 
+// MFA panel
+async function showMFAPanel() {
+  document.getElementById("mfaModal")?.remove();
+
+  // Check current status
+  const statusRes  = await fetch("/api/v1/mfa/status", { headers: authHeaders() });
+  const statusData = await statusRes.json();
+  const isEnabled  = statusData.enabled;
+
+  const overlay = document.createElement("div");
+  overlay.id    = "mfaModal";
+  overlay.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:10000;display:flex;align-items:center;justify-content:center;padding:24px;";
+
+  const modal = document.createElement("div");
+  modal.style.cssText = "background:var(--bg1);border:1px solid var(--border);border-radius:12px;width:100%;max-width:480px;overflow:hidden;";
+
+  modal.innerHTML = `
+    <div style="padding:20px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+      <div>
+        <div style="font-size:14px;font-weight:700;color:var(--text);">🔐 Two-Factor Authentication</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:2px;">
+          Status: <span style="color:${isEnabled ? "var(--low)" : "var(--text3)"};">
+            ${isEnabled ? "● Enabled" : "○ Disabled"}
+          </span>
+        </div>
+      </div>
+      <button id="mfaModalClose" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:20px;">✕</button>
+    </div>
+
+    <div id="mfaModalBody" style="padding:24px;">
+      ${isEnabled ? renderMFADisableView() : renderMFASetupView()}
+    </div>`;
+
+  overlay.appendChild(modal);
+  document.body.appendChild(overlay);
+
+  document.getElementById("mfaModalClose").addEventListener("click", () => overlay.remove());
+  overlay.addEventListener("click", e => { if (e.target === overlay) overlay.remove(); });
+
+  if (!isEnabled) {
+    // Kick off QR setup
+    loadMFASetup();
+  }
+}
+
+function renderMFASetupView() {
+  return `
+    <div id="mfaSetupStep1">
+      <div style="text-align:center;padding:20px 0;">
+        <div class="spinner" style="margin:0 auto 12px;"></div>
+        <div style="font-size:12px;color:var(--text2);">Generating your setup code…</div>
+      </div>
+    </div>`;
+}
+
+function renderMFADisableView() {
+  return `
+    <div style="text-align:center;margin-bottom:20px;">
+      <div style="font-size:32px;margin-bottom:10px;">✓</div>
+      <div style="font-size:13px;color:var(--text2);line-height:1.7;">
+        Two-factor authentication is active on your account.<br>
+        You will be asked for a code on every login.
+      </div>
+    </div>
+    <div style="background:rgba(255,51,85,0.06);border:1px solid rgba(255,51,85,0.2);
+                border-radius:8px;padding:16px;margin-bottom:20px;">
+      <div style="font-size:11px;color:var(--critical);font-weight:700;margin-bottom:6px;">
+        ⚠ Disable MFA
+      </div>
+      <div style="font-size:11px;color:var(--text2);margin-bottom:12px;line-height:1.6;">
+        Enter your current authenticator code to disable MFA.
+        Your account will be less secure without it.
+      </div>
+      <input type="text" id="disableMfaCode" placeholder="000000" maxlength="6"
+        inputmode="numeric" autocomplete="one-time-code"
+        style="width:100%;padding:10px 14px;background:var(--bg2);border:1px solid var(--border);
+               border-radius:6px;color:var(--text);font-family:'JetBrains Mono',monospace;
+               font-size:18px;text-align:center;letter-spacing:6px;outline:none;
+               margin-bottom:10px;">
+      <div id="disableMfaError" style="display:none;font-size:11px;color:var(--critical);margin-bottom:8px;"></div>
+      <button id="disableMfaBtn" onclick="disableMFA()"
+        style="width:100%;padding:10px;border-radius:6px;border:1px solid var(--critical);
+               background:rgba(255,51,85,0.1);color:var(--critical);cursor:pointer;
+               font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;">
+        Disable MFA
+      </button>
+    </div>`;
+}
+
+async function loadMFASetup() {
+  try {
+    const res  = await fetch("/api/v1/mfa/setup", { headers: authHeaders() });
+    const data = await res.json();
+
+    if (!res.ok) {
+      document.getElementById("mfaSetupStep1").innerHTML =
+        `<div style="color:var(--critical);font-size:12px;text-align:center;">⚠ ${escHtml(data.error)}</div>`;
+      return;
+    }
+
+    document.getElementById("mfaSetupStep1").innerHTML = `
+      <div style="text-align:center;margin-bottom:20px;">
+        <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:6px;">
+          Step 1 — Scan this QR code
+        </div>
+        <div style="font-size:12px;color:var(--text2);margin-bottom:16px;line-height:1.6;">
+          Open your authenticator app (Google Authenticator, Authy, 1Password)
+          and scan the code below.
+        </div>
+        <img src="${data.qrCode}" alt="MFA QR Code"
+          style="width:180px;height:180px;border-radius:8px;border:4px solid #fff;
+                 display:block;margin:0 auto 16px;">
+        <div style="font-size:10px;color:var(--text3);margin-bottom:4px;">
+          Can't scan? Enter this key manually:
+        </div>
+        <code style="font-size:11px;color:var(--accent);background:var(--bg2);
+                     padding:6px 12px;border-radius:4px;letter-spacing:2px;
+                     display:inline-block;">${data.secret}</code>
+      </div>
+
+      <div style="border-top:1px solid var(--border);padding-top:20px;">
+        <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:6px;">
+          Step 2 — Verify the code
+        </div>
+        <div style="font-size:12px;color:var(--text2);margin-bottom:14px;">
+          Enter the 6-digit code from your app to confirm setup.
+        </div>
+        <input type="text" id="setupMfaCode" placeholder="000000" maxlength="6"
+          inputmode="numeric" autocomplete="one-time-code"
+          style="width:100%;padding:12px 14px;background:var(--bg2);
+                 border:1px solid var(--border);border-radius:8px;
+                 color:var(--text);font-family:'JetBrains Mono',monospace;
+                 font-size:22px;text-align:center;letter-spacing:8px;
+                 outline:none;margin-bottom:10px;">
+        <div id="setupMfaError"
+          style="display:none;font-size:11px;color:var(--critical);margin-bottom:8px;"></div>
+        <button id="verifyMfaBtn" onclick="verifyMFASetup()"
+          style="width:100%;padding:12px;border-radius:8px;border:none;cursor:pointer;
+                 font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;
+                 letter-spacing:1px;background:var(--accent);color:#000;">
+          Enable MFA →
+        </button>
+      </div>`;
+
+    // Auto submit on 6 digits
+    document.getElementById("setupMfaCode")?.addEventListener("input", function() {
+      this.value = this.value.replace(/\D/g, "");
+      if (this.value.length === 6) verifyMFASetup();
+    });
+
+  } catch (err) {
+    document.getElementById("mfaSetupStep1").innerHTML =
+      `<div style="color:var(--critical);font-size:12px;text-align:center;">
+        ⚠ ${escHtml(err.message)}
+      </div>`;
+  }
+}
+
+async function verifyMFASetup() {
+  const code   = document.getElementById("setupMfaCode")?.value.trim();
+  const errEl  = document.getElementById("setupMfaError");
+  const btn    = document.getElementById("verifyMfaBtn");
+
+  errEl.style.display = "none";
+  if (!code || code.length !== 6) {
+    errEl.textContent  = "Enter the 6-digit code from your app.";
+    errEl.style.display = "block";
+    return;
+  }
+
+  btn.disabled    = true;
+  btn.textContent = "Verifying…";
+
+  const res  = await fetch("/api/v1/mfa/verify-setup", {
+    method:  "POST",
+    headers: { ...authHeaders(), "Content-Type": "application/json" },
+    body:    JSON.stringify({ token: code }),
+  });
+  const data = await res.json();
+
+  if (!res.ok) {
+    errEl.textContent  = data.error || "Invalid code";
+    errEl.style.display = "block";
+    btn.disabled    = false;
+    btn.textContent = "Enable MFA →";
+    document.getElementById("setupMfaCode").value = "";
+    document.getElementById("setupMfaCode").focus();
+    return;
+  }
+
+  // Success — show confirmation
+  document.getElementById("mfaModalBody").innerHTML = `
+    <div style="text-align:center;padding:20px 0;">
+      <div style="font-size:48px;margin-bottom:16px;">✓</div>
+      <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;
+                  color:var(--low);margin-bottom:8px;">MFA Enabled!</div>
+      <div style="font-size:12px;color:var(--text2);line-height:1.7;margin-bottom:24px;">
+        Your account is now protected with two-factor authentication.<br>
+        You'll need your authenticator app on every login.
+      </div>
+      <button onclick="document.getElementById('mfaModal').remove()"
+        style="padding:12px 32px;border-radius:8px;border:none;cursor:pointer;
+               font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;
+               background:var(--accent);color:#000;">
+        Done →
+      </button>
+    </div>`;
+
+  toast("MFA enabled successfully", "success");
+}
+
+async function disableMFA() {
+  const code  = document.getElementById("disableMfaCode")?.value.trim();
+  const errEl = document.getElementById("disableMfaError");
+  const btn   = document.getElementById("disableMfaBtn");
+
+  errEl.style.display = "none";
+  if (!code || code.length !== 6) {
+    errEl.textContent  = "Enter your 6-digit authenticator code.";
+    errEl.style.display = "block";
+    return;
+  }
+
+  btn.disabled    = true;
+  btn.textContent = "Disabling…";
+
+  const res  = await fetch("/api/v1/mfa/disable", {
+    method:  "POST",
+    headers: { ...authHeaders(), "Content-Type": "application/json" },
+    body:    JSON.stringify({ token: code }),
+  });
+  const data = await res.json();
+
+  if (!res.ok) {
+    errEl.textContent  = data.error || "Invalid code";
+    errEl.style.display = "block";
+    btn.disabled    = false;
+    btn.textContent = "Disable MFA";
+    return;
+  }
+
+  document.getElementById("mfaModal").remove();
+  toast("MFA disabled", "info");
+}
+
 // Rate Limit
 function showAPIStatus(apiStatus) {
 
@@ -2741,7 +2994,6 @@ async function fetchAndRenderFromDB() {
 }
  
 // Main renderAudit 
- 
 function renderAudit() {
   if (usingDB) { fetchAndRenderFromDB(); return; }
 
@@ -2933,6 +3185,8 @@ function updateMap(geo, ip, riskLevel) {
           else toast("Admin access required", "warning");
         }
         if (e.target.id === "logoutBtn")    logout();
+
+        if (e.target.id === "mfaBtn") showMFAPanel();
       });
 
       document.addEventListener("change", e => {
@@ -4713,7 +4967,8 @@ function applyTheme(dark) {
       casesBtn:       "analyst",    // analyst + admin
       threatBtn:      "analyst",    // analyst + admin
       rateLimitBtn:   "admin",      // admin only
-      keyMgrBtn:      "admin",      // admin only
+      keyMgrBtn:      "admin", 
+      mfaBtn:         "readonly",   // admin only
     };
 
     const rankOf = { readonly: 0, analyst: 1, admin: 2 };

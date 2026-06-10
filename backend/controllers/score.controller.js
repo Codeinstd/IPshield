@@ -47,48 +47,67 @@ exports.scoreIP = async (req, res, next) => {
 
     // Persist to audit_log
     // AFTER — matches all table columns:
-try {
-  await db.query(
-    `INSERT INTO audit_log (
-      ip, score, risk_level, action,
-      is_proxy, is_tor, is_dc,
-      country, city, isp, asn,
-      is_feodo, is_spamhaus, is_et, otx_pulses,
-      cached, processing_ms, api_version,
-      scored_at
-    ) VALUES (
-      $1,$2,$3,$4,
-      $5,$6,$7,
-      $8,$9,$10,$11,
-      $12,$13,$14,$15,
-      $16,$17,$18,
-      NOW()
-    )`,
-    [
-      result.ip,
-      result.score,
-      result.riskLevel,
-      result.action                          || null,
-      result.intelligence?.isProxy           || false,
-      result.intelligence?.isTor             || false,
-      result.intelligence?.isDatacenter      || false,
-      result.geo?.country                    || null,
-      result.geo?.city                       || null,
-      result.network?.isp                    || null,
-      result.network?.asn                    || null,
-      result.threatFeeds?.feodo              || false,
-      result.threatFeeds?.spamhaus           || false,
-      result.threatFeeds?.emergingThreats    || false,
-      result.threatFeeds?.otx?.pulseCount    || 0,
-      result.meta?.cached                    || false,
-      result.meta?.processingMs              || null,
-      "v2",
-    ]
-  );
-} catch (dbErr) {
-  logger.error("[audit_log] insert error:", dbErr.message);
-}
+    try {
+    async function saveAuditWithHash(db, result) {
+      const crypto = require("crypto");
 
+      // Get the last row's hash
+      const lastRow = await db.query(
+        `SELECT row_hash FROM audit_log ORDER BY id DESC LIMIT 1`
+      );
+      const prevHash = lastRow.rows[0]?.row_hash || "GENESIS";
+
+      // Build content string
+      const content = JSON.stringify({
+        ip:         result.ip,
+        score:      result.score,
+        risk_level: result.riskLevel,
+        scored_at:  new Date().toISOString(),
+        prev_hash:  prevHash,
+      });
+
+      // Hash it
+      const rowHash = crypto
+        .createHash("sha256")
+        .update(content)
+        .digest("hex");
+
+      await db.query(
+        `INSERT INTO audit_log (
+          ip, score, risk_level, action,
+          is_proxy, is_tor, is_dc,
+          country, city, isp, asn,
+          is_feodo, is_spamhaus, is_et, otx_pulses,
+          cached, processing_ms, api_version,
+          prev_hash, row_hash, scored_at
+        ) VALUES (
+          $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,
+          $12,$13,$14,$15,$16,$17,$18,$19,$20,NOW()
+        )`,
+        [
+          result.ip, result.score, result.riskLevel, result.action || null,
+          result.intelligence?.isProxy      || false,
+          result.intelligence?.isTor        || false,
+          result.intelligence?.isDatacenter || false,
+          result.geo?.country   || null,
+          result.geo?.city      || null,
+          result.network?.isp   || null,
+          result.network?.asn   || null,
+          result.threatFeeds?.feodo            || false,
+          result.threatFeeds?.spamhaus         || false,
+          result.threatFeeds?.emergingThreats  || false,
+          result.threatFeeds?.otx?.pulseCount  || 0,
+          result.meta?.cached      || false,
+          result.meta?.processingMs || null,
+          "v2",
+          prevHash,
+          rowHash,
+        ]
+      );
+    }
+    } catch (dbErr) {
+      logger.error("[audit_log] insert error:", dbErr.message);
+    }
     addAudit(result);
     checkAndAutoCase(result).catch(() => {});
     detectClusters(result).catch(() => {});     
@@ -117,6 +136,30 @@ exports.scoreBatch = async (req, res, next) => {
         // Persist to audit_log
        // Inside scoreBatch — AFTER:
 try {
+async function saveAuditWithHash(db, result) {
+  const crypto = require("crypto");
+
+  // Get the last row's hash
+  const lastRow = await db.query(
+    `SELECT row_hash FROM audit_log ORDER BY id DESC LIMIT 1`
+  );
+  const prevHash = lastRow.rows[0]?.row_hash || "GENESIS";
+
+  // Build content string
+  const content = JSON.stringify({
+    ip:         result.ip,
+    score:      result.score,
+    risk_level: result.riskLevel,
+    scored_at:  new Date().toISOString(),
+    prev_hash:  prevHash,
+  });
+
+  // Hash it
+  const rowHash = crypto
+    .createHash("sha256")
+    .update(content)
+    .digest("hex");
+
   await db.query(
     `INSERT INTO audit_log (
       ip, score, risk_level, action,
@@ -124,36 +167,32 @@ try {
       country, city, isp, asn,
       is_feodo, is_spamhaus, is_et, otx_pulses,
       cached, processing_ms, api_version,
-      scored_at
+      prev_hash, row_hash, scored_at
     ) VALUES (
-      $1,$2,$3,$4,
-      $5,$6,$7,
-      $8,$9,$10,$11,
-      $12,$13,$14,$15,
-      $16,$17,$18,
-      NOW()
+      $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,
+      $12,$13,$14,$15,$16,$17,$18,$19,$20,NOW()
     )`,
     [
-      result.ip,
-      result.score,
-      result.riskLevel,
-      result.action                          || null,
-      result.intelligence?.isProxy           || false,
-      result.intelligence?.isTor             || false,
-      result.intelligence?.isDatacenter      || false,
-      result.geo?.country                    || null,
-      result.geo?.city                       || null,
-      result.network?.isp                    || null,
-      result.network?.asn                    || null,
-      result.threatFeeds?.feodo              || false,
-      result.threatFeeds?.spamhaus           || false,
-      result.threatFeeds?.emergingThreats    || false,
-      result.threatFeeds?.otx?.pulseCount    || 0,
-      result.meta?.cached                    || false,
-      result.meta?.processingMs              || null,
+      result.ip, result.score, result.riskLevel, result.action || null,
+      result.intelligence?.isProxy      || false,
+      result.intelligence?.isTor        || false,
+      result.intelligence?.isDatacenter || false,
+      result.geo?.country   || null,
+      result.geo?.city      || null,
+      result.network?.isp   || null,
+      result.network?.asn   || null,
+      result.threatFeeds?.feodo            || false,
+      result.threatFeeds?.spamhaus         || false,
+      result.threatFeeds?.emergingThreats  || false,
+      result.threatFeeds?.otx?.pulseCount  || 0,
+      result.meta?.cached      || false,
+      result.meta?.processingMs || null,
       "v2",
+      prevHash,
+      rowHash,
     ]
   );
+}
 } catch (_) {}
 
         addAudit(result);

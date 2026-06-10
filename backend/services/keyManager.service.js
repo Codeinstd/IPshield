@@ -304,7 +304,6 @@ async function getKeyUsage(keyId, days = 30) {
 }
 
 // Reset daily counters (call from a nightly cron)
-
 async function resetDailyCounters() {
   await db.query(
     `UPDATE api_keys

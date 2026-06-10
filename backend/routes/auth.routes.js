@@ -70,16 +70,44 @@ if (email && password) {
     return res.status(401).json({ error: "Invalid email or password" });
   }
 
+  // Check MFA
+  if (user.mfa_enabled) {
+    const { token: totpToken } = req.body;
+
+  if (!totpToken) {
+    // Signal to frontend that MFA code is needed
+    // Return a short-lived challenge token so frontend
+    // can submit the TOTP code in a second step
+    const challengeToken = jwt.sign(
+      { id: user.id, mfaChallenge: true },
+      process.env.JWT_SECRET,
+      { expiresIn: "5m" }   // only valid 5 minutes for MFA entry
+    );
+    return res.status(200).json({
+      mfaRequired:    true,
+      challengeToken, // frontend sends this back with the TOTP code
+    });
+  }
+
+    // Verify the TOTP code
+    const { verifyToken } = require("../services/mfa.service");
+    const valid = verifyToken(totpToken, user.mfa_secret);
+    if (!valid) {
+      return res.status(401).json({ error: "Invalid MFA code" });
+    }
+  }
+
+  // Issue full JWT
   const token = jwt.sign(
     { id: user.id, name: user.name, email: user.email, role: user.role },
     process.env.JWT_SECRET,
     { expiresIn: "7d" }
   );
-
   return res.json({
     token,
     user: { id: user.id, name: user.name, email: user.email, role: user.role },
   });
+  
 }
 
     return res.status(400).json({ error: "Provide apiKey or email + password" });
@@ -91,6 +119,61 @@ if (email && password) {
     error:  "Login failed",
     detail: err.message, 
   });
+  }
+});
+
+// POST /api/v1/auth/login/mfa — submit TOTP code after challenge
+router.post("/login/mfa", async (req, res) => {
+  try {
+    const { challengeToken, totpToken } = req.body;
+
+    if (!challengeToken || !totpToken) {
+      return res.status(400).json({ error: "challengeToken and totpToken required" });
+    }
+
+    let decoded;
+    try {
+      decoded = jwt.verify(challengeToken, process.env.JWT_SECRET);
+    } catch (_) {
+      return res.status(401).json({ error: "Challenge expired — please log in again" });
+    }
+
+    if (!decoded.mfaChallenge) {
+      return res.status(400).json({ error: "Invalid challenge token" });
+    }
+
+    const result = await db.query(
+      `SELECT id, name, email, role, status, mfa_secret
+       FROM api_keys WHERE id = $1 AND status = 'active'`,
+      [decoded.id]
+    );
+
+    if (!result.rows.length) {
+      return res.status(401).json({ error: "User not found" });
+    }
+
+    const user  = result.rows[0];
+    const { verifyToken } = require("../services/mfa.service");
+    const valid = verifyToken(totpToken, user.mfa_secret);
+
+    if (!valid) {
+      return res.status(401).json({ error: "Invalid MFA code" });
+    }
+
+    const token = jwt.sign(
+      { id: user.id, name: user.name, email: user.email, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
+
+    res.json({
+      token,
+      user: { id: user.id, name: user.name, email: user.email, role: user.role },
+    });
+
+  } catch (err) {
+    console.error("[auth/login/mfa]", err.message);
+    res.status(500).json({ error: "MFA verification failed" });
   }
 });
 
