@@ -310,6 +310,14 @@ app.get("/login", (req, res) => {
   res.sendFile(path.join(__dirname, "../public", "login.html"));
 });
 
+
+app.use((req, res, next) => {
+  if (req.path === "/mfa-setup") {
+    return res.status(404).end();
+  }
+  next();
+});
+
 app.get(/.*/, (req, res) => {
   res.sendFile(path.join(__dirname, "../public", "index.html"));
 });
