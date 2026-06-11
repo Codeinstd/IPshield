@@ -9,10 +9,11 @@ router.post("/login", async (req, res) => {
   try {
     const { email, password, apiKey } = req.body;
 
-    //  Login with API key directly 
+    // API key login
     if (apiKey) {
       const keyHash = hashKey(apiKey);
-      const result  = await db.query(
+
+      const result = await db.query(
         `SELECT id, name, email, role, status
          FROM api_keys
          WHERE key_hash = $1`,
@@ -27,38 +28,48 @@ router.post("/login", async (req, res) => {
 
       if (key.status !== "active") {
         return res.status(403).json({
-          error: `Account is ${key.status}`
+          error: `Account is ${key.status}`,
         });
       }
-
       const token = jwt.sign(
-        { id: key.id, name: key.name, email: key.email, role: key.role },
+        {
+          id: key.id,
+          name: key.name,
+          email: key.email,
+          role: key.role,
+        },
         process.env.JWT_SECRET,
         { expiresIn: "7d" }
       );
 
       return res.json({
         token,
-        user: { id: key.id, name: key.name, email: key.email, role: key.role },
+        user: {
+          id: key.id,
+          name: key.name,
+          email: key.email,
+          role: key.role,
+        },
       });
     }
-    // Login with email + password 
+
+    // Email + Password login
     if (email && password) {
       const result = await db.query(
-      `SELECT
-          id,
-          name,
-          email,
-          role,
-          status,
-          password_hash,
-          mfa_enabled,
-          mfa_secret
-      FROM api_keys
-      WHERE LOWER(email) = LOWER($1)
-        AND status = 'active'`,
-      [email.trim()]
-    );
+        `SELECT
+            id,
+            name,
+            email,
+            role,
+            status,
+            password_hash,
+            mfa_enabled,
+            mfa_secret
+         FROM api_keys
+         WHERE LOWER(email) = LOWER($1)
+           AND status = 'active'`,
+        [email.trim()]
+      );
 
       if (!result.rows.length) {
         return res.status(401).json({ error: "Invalid email or password" });
@@ -68,45 +79,19 @@ router.post("/login", async (req, res) => {
 
       if (!user.password_hash) {
         return res.status(401).json({
-          error: "Password not set — use your activation link to set a password first"
+          error:
+            "Password not set — use your activation link to set a password first",
         });
       }
 
-      const bcrypt  = require("bcryptjs");
+      const bcrypt = require("bcryptjs");
       const isValid = await bcrypt.compare(password, user.password_hash);
 
       if (!isValid) {
         return res.status(401).json({ error: "Invalid email or password" });
       }
 
-      // Check MFA
-      if (user.mfa_enabled) {
-        const { token: totpToken } = req.body;
-
-      if (!totpToken) {
-        // Signal to frontend that MFA code is needed
-        // Return a short-lived challenge token so frontend
-        // can submit the TOTP code in a second step
-        const challengeToken = jwt.sign(
-          { id: user.id, mfaChallenge: true },
-          process.env.JWT_SECRET,
-          { expiresIn: "5m" }   // only valid 5 minutes for MFA entry
-        );
-        return res.status(200).json({
-          mfaRequired:    true,
-          challengeToken, // frontend sends this back with the TOTP code
-        });
-      }
-
-        // Verify the TOTP code
-        const { verifyToken } = require("../services/mfa.service");
-        const valid = verifyToken(totpToken, user.mfa_secret);
-        if (!valid) {
-          return res.status(401).json({ error: "Invalid MFA code" });
-        }
-      }
-
-      // MFA Enforcement
+      // Force MFA setuo
       if (!user.mfa_enabled) {
         return res.status(200).json({
           mfaSetupRequired: true,
@@ -114,33 +99,68 @@ router.post("/login", async (req, res) => {
             id: user.id,
             email: user.email,
             name: user.name,
-            role: user.role
-          }
+            role: user.role,
+          },
         });
       }
 
-      // Issue full JWT
+      // MFA login flow
+      const { token: totpToken } = req.body;
+
+      if (!totpToken) {
+        const challengeToken = jwt.sign(
+          { id: user.id, mfaChallenge: true },
+          process.env.JWT_SECRET,
+          { expiresIn: "5m" }
+        );
+
+        return res.status(200).json({
+          mfaRequired: true,
+          challengeToken,
+        });
+      }
+
+      const { verifyToken } = require("../services/mfa.service");
+      const valid = verifyToken(totpToken, user.mfa_secret);
+
+      if (!valid) {
+        return res.status(401).json({ error: "Invalid MFA code" });
+      }
+
+      // Issue jwt
       const token = jwt.sign(
-        { id: user.id, name: user.name, email: user.email, role: user.role },
+        {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          role: user.role,
+        },
         process.env.JWT_SECRET,
         { expiresIn: "7d" }
       );
+
       return res.json({
         token,
-        user: { id: user.id, name: user.name, email: user.email, role: user.role },
+        user: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          role: user.role,
+        },
       });
-      
     }
 
-    return res.status(400).json({ error: "Provide apiKey or email + password" });
-
+    return res
+      .status(400)
+      .json({ error: "Provide apiKey or email + password" });
   } catch (err) {
     console.error("[auth/login] ERROR:", err.message);
     console.error("[auth/login] STACK:", err.stack);
+
     res.status(500).json({
-    error:  "Login failed",
-    detail: err.message, 
-  });
+      error: "Login failed",
+      detail: err.message,
+    });
   }
 });
 
