@@ -216,7 +216,6 @@
 </style>
 </head>
 <body>
-<!-- AFTER — mfaStep  -->
 <div id="loginStep" class="card">
   <div class="logo">
     <div class="logo-icon">⬡</div>
@@ -240,7 +239,6 @@
 
   <button id="login-submit">Sign in</button>
 </div>
-
 <!-- MFA step  -->
 <div id="mfaStep" class="card" style="display:none;">
   <div class="logo">
@@ -295,7 +293,6 @@
     ← Back to login
   </button>
 </div>
-
 <div id="loadingScreen" class="loading-screen">
   <div class="loading-content">
     <div id="lottieLoader" class="loader-animation"></div>
@@ -315,14 +312,14 @@
   // Show / hide steps 
   function showMFAStep() {
     document.getElementById("loginStep").style.display = "none";
-    document.getElementById("mfaStep").style.display   = "block";
+    document.getElementById("mfaStep").style.display   = "flex";
     const input = document.getElementById("mfaCode");
     if (input) { input.value = ""; input.focus(); }
   }
 
   function showLoginStep() {
     document.getElementById("mfaStep").style.display   = "none";
-    document.getElementById("loginStep").style.display = "block";
+    document.getElementById("loginStep").style.display = "flex";
     sessionStorage.removeItem("mfa_challenge");
     const errEl = document.getElementById("mfaError");
     if (errEl) errEl.style.display = "none";
@@ -381,6 +378,11 @@
         return;
       }
 
+      if (data.mfaSetupRequired) {
+      window.location.href = "/mfa-setup";
+      return;
+    }
+
       // Success
       if (data.token) localStorage.setItem("token", data.token);
       if (data.user)  localStorage.setItem("user",  JSON.stringify(data.user));
@@ -409,6 +411,7 @@
     if (!/^\d{6}$/.test(code)) {
       errEl.textContent   = "Enter the 6-digit code from your authenticator app.";
       errEl.style.display = "block";
+      errEl.style.fontFamily = "JetBrains Mono";
       return;
     }
 
@@ -475,6 +478,7 @@
     if (e.key === "Enter") handleMFA();
   });
 </script>
+
  <script>
     const anim = lottie.loadAnimation({
       container: document.getElementById('lottieLoader'),

@@ -43,72 +43,94 @@ router.post("/login", async (req, res) => {
       });
     }
     // Login with email + password 
-if (email && password) {
-  const result = await db.query(
-    `SELECT id, name, email, role, status, password_hash
-     FROM api_keys
-     WHERE LOWER(email) = LOWER($1) AND status = 'active'`,
-    [email.trim()]
-  );
-
-  if (!result.rows.length) {
-    return res.status(401).json({ error: "Invalid email or password" });
-  }
-
-  const user = result.rows[0];
-
-  if (!user.password_hash) {
-    return res.status(401).json({
-      error: "Password not set — use your activation link to set a password first"
-    });
-  }
-
-  const bcrypt  = require("bcryptjs");
-  const isValid = await bcrypt.compare(password, user.password_hash);
-
-  if (!isValid) {
-    return res.status(401).json({ error: "Invalid email or password" });
-  }
-
-  // Check MFA
-  if (user.mfa_enabled) {
-    const { token: totpToken } = req.body;
-
-  if (!totpToken) {
-    // Signal to frontend that MFA code is needed
-    // Return a short-lived challenge token so frontend
-    // can submit the TOTP code in a second step
-    const challengeToken = jwt.sign(
-      { id: user.id, mfaChallenge: true },
-      process.env.JWT_SECRET,
-      { expiresIn: "5m" }   // only valid 5 minutes for MFA entry
+    if (email && password) {
+      const result = await db.query(
+      `SELECT
+          id,
+          name,
+          email,
+          role,
+          status,
+          password_hash,
+          mfa_enabled,
+          mfa_secret
+      FROM api_keys
+      WHERE LOWER(email) = LOWER($1)
+        AND status = 'active'`,
+      [email.trim()]
     );
-    return res.status(200).json({
-      mfaRequired:    true,
-      challengeToken, // frontend sends this back with the TOTP code
-    });
-  }
 
-    // Verify the TOTP code
-    const { verifyToken } = require("../services/mfa.service");
-    const valid = verifyToken(totpToken, user.mfa_secret);
-    if (!valid) {
-      return res.status(401).json({ error: "Invalid MFA code" });
+      if (!result.rows.length) {
+        return res.status(401).json({ error: "Invalid email or password" });
+      }
+
+      const user = result.rows[0];
+
+      if (!user.password_hash) {
+        return res.status(401).json({
+          error: "Password not set — use your activation link to set a password first"
+        });
+      }
+
+      const bcrypt  = require("bcryptjs");
+      const isValid = await bcrypt.compare(password, user.password_hash);
+
+      if (!isValid) {
+        return res.status(401).json({ error: "Invalid email or password" });
+      }
+
+      // Check MFA
+      if (user.mfa_enabled) {
+        const { token: totpToken } = req.body;
+
+      if (!totpToken) {
+        // Signal to frontend that MFA code is needed
+        // Return a short-lived challenge token so frontend
+        // can submit the TOTP code in a second step
+        const challengeToken = jwt.sign(
+          { id: user.id, mfaChallenge: true },
+          process.env.JWT_SECRET,
+          { expiresIn: "5m" }   // only valid 5 minutes for MFA entry
+        );
+        return res.status(200).json({
+          mfaRequired:    true,
+          challengeToken, // frontend sends this back with the TOTP code
+        });
+      }
+
+        // Verify the TOTP code
+        const { verifyToken } = require("../services/mfa.service");
+        const valid = verifyToken(totpToken, user.mfa_secret);
+        if (!valid) {
+          return res.status(401).json({ error: "Invalid MFA code" });
+        }
+      }
+
+      // MFA Enforcement
+      if (!user.mfa_enabled) {
+        return res.status(200).json({
+          mfaSetupRequired: true,
+          user: {
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            role: user.role
+          }
+        });
+      }
+
+      // Issue full JWT
+      const token = jwt.sign(
+        { id: user.id, name: user.name, email: user.email, role: user.role },
+        process.env.JWT_SECRET,
+        { expiresIn: "7d" }
+      );
+      return res.json({
+        token,
+        user: { id: user.id, name: user.name, email: user.email, role: user.role },
+      });
+      
     }
-  }
-
-  // Issue full JWT
-  const token = jwt.sign(
-    { id: user.id, name: user.name, email: user.email, role: user.role },
-    process.env.JWT_SECRET,
-    { expiresIn: "7d" }
-  );
-  return res.json({
-    token,
-    user: { id: user.id, name: user.name, email: user.email, role: user.role },
-  });
-  
-}
 
     return res.status(400).json({ error: "Provide apiKey or email + password" });
 
