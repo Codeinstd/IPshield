@@ -29,7 +29,6 @@ router.get(
 );
 
 // email route
-
 router.post("/access-request", async (req, res) => {
   try {
     console.log("[ACCESS REQUEST] HIT");
@@ -128,7 +127,7 @@ router.post("/invite",
       });
 
     } catch (err) {
-  next(err);
+  next();
 }
   }
 );

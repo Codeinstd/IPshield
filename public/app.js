@@ -2676,6 +2676,7 @@ async function disableMFA() {
   document.getElementById("mfaModal").remove();
   toast("MFA disabled", "info");
 }
+window.disableMFA = disableMFA;
 
 // Rate Limit
 function showAPIStatus(apiStatus) {

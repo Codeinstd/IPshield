@@ -216,8 +216,9 @@
 </style>
 </head>
 <body>
-  <div id="loginStep" class="card">
-    <div class="logo">
+<!-- AFTER — mfaStep  -->
+<div id="loginStep" class="card">
+  <div class="logo">
     <div class="logo-icon">⬡</div>
     <div>
       <div class="logo-text">IP<span>Shield</span></div>
@@ -225,336 +226,254 @@
     </div>
   </div>
 
+  <div>
+    <label for="auth-email">Email</label>
+    <input id="auth-email" type="email" placeholder="you@example.com" autocomplete="email" />
+  </div>
+
+  <div>
+    <label for="auth-password">Password</label>
+    <input id="auth-password" type="password" placeholder="••••••••" autocomplete="current-password" />
+  </div>
+
+  <div id="login-error"></div>
+
+  <button id="login-submit">Sign in</button>
+</div>
+
+<!-- MFA step  -->
+<div id="mfaStep" class="card" style="display:none;">
+  <div class="logo">
+    <div class="logo-icon">⬡</div>
     <div>
-      <label for="auth-email">Email</label>
-      <input id="auth-email" type="email" placeholder="you@example.com" autocomplete="email" />
+      <div class="logo-text">IP<span>Shield</span></div>
+      <div class="logo-sub">Risk Intelligence</div>
     </div>
+  </div>
 
-    <div>
-      <label for="auth-password">Password</label>
-      <input id="auth-password" type="password" placeholder="••••••••" autocomplete="current-password" />
-    </div>
-
-    <div id="login-error"></div>
-
-    <button id="login-submit">Sign in</button>
-    <!-- <p class="footer-note">IPShield Admin Console</p> -->
-
-    <!-- MFA step — hidden until needed -->
-<div id="mfaStep" style="display:none;">
-  <div style="text-align:center;margin-bottom:24px;">
+  <div style="text-align:center;margin-bottom:8px;">
     <div style="font-size:32px;margin-bottom:12px;">🔐</div>
-    <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:800;margin-bottom:6px;">
+    <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:800;margin-bottom:6px;color:#c9d8e8;">
       Two-Factor Authentication
     </div>
-    <div style="font-size:12px;color:var(--text2);line-height:1.7;">
+    <div style="font-size:12px;color:#6a8fa8;line-height:1.7;">
       Enter the 6-digit code from your authenticator app
     </div>
   </div>
 
-  <div id="mfaError" style="display:none;padding:10px 14px;background:rgba(255,51,85,0.1);
-    border:1px solid rgba(255,51,85,0.3);border-radius:8px;font-size:12px;
-    color:var(--critical);margin-bottom:16px;"></div>
+  <div id="mfaError"
+    style="display:none;padding:10px 14px;background:rgba(255,51,85,0.1);
+           border:1px solid rgba(255,51,85,0.3);border-radius:8px;font-size:12px;
+           color:#ff3355;"></div>
 
-  <div style="margin-bottom:20px;">
-    <label style="display:block;font-size:10px;color:var(--text3);
+  <div>
+    <label style="display:block;font-size:10px;color:#3d5a72;
       letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;">
       Authenticator Code
     </label>
     <input type="text" id="mfaCode"
-      placeholder="000 000"
-      maxlength="7"
+      placeholder="000000"
+      maxlength="6"
       inputmode="numeric"
       autocomplete="one-time-code"
-      style="width:100%;padding:14px;background:var(--bg2);border:1px solid var(--border);
-        border-radius:8px;color:var(--text);font-family:'JetBrains Mono',monospace;
-        font-size:24px;outline:none;text-align:center;letter-spacing:8px;">
+      style="width:100%;padding:14px;background:#0d1117;border:1px solid #30363d;
+        border-radius:8px;color:#e6edf3;font-family:'JetBrains Mono',monospace;
+        font-size:28px;outline:none;text-align:center;letter-spacing:10px;">
   </div>
 
-  <button id="mfaBtn" onclick="handleMFA()"
+  <button id="mfaBtn"
     style="width:100%;padding:13px;border-radius:8px;border:none;cursor:pointer;
       font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;
-      letter-spacing:1px;text-transform:uppercase;background:var(--accent);
-      color:#000;margin-bottom:12px;">
+      letter-spacing:1px;text-transform:uppercase;background:#00d9ff;color:#000;">
     Verify →
   </button>
 
-  <button onclick="showLoginStep()"
+  <button id="mfaBackBtn"
     style="width:100%;padding:10px;border-radius:8px;background:transparent;
-      color:var(--text2);border:1px solid var(--border);
+      color:#6a8fa8;border:1px solid #21262d;
       font-family:'JetBrains Mono',monospace;font-size:12px;cursor:pointer;">
     ← Back to login
   </button>
 </div>
 
-  </div>
-
-  <div id="loadingScreen" class="loading-screen">
+<div id="loadingScreen" class="loading-screen">
   <div class="loading-content">
-
     <div id="lottieLoader" class="loader-animation"></div>
-
     <h1 style="font-family: 'Syne', sans-serif;">Signing you in</h1>
     <p id="loadingText" style="font-family:'JetBrains Mono', monospace; font-size: small;">Verifying credentials...</p>
-
   </div>
 </div>
-
 <script>
-const loginBtn = document.getElementById("login-submit");
-const emailEl = document.getElementById("auth-email");
-const passwordEl = document.getElementById("auth-password");
+  const loginBtn   = document.getElementById("login-submit");
+  const emailEl    = document.getElementById("auth-email");
+  const passwordEl = document.getElementById("auth-password");
+  const mfaBtn     = document.getElementById("mfaBtn");
+  const mfaBackBtn = document.getElementById("mfaBackBtn");
 
   let mfaSubmitting = false;
 
+  // Show / hide steps 
+  function showMFAStep() {
+    document.getElementById("loginStep").style.display = "none";
+    document.getElementById("mfaStep").style.display   = "block";
+    const input = document.getElementById("mfaCode");
+    if (input) { input.value = ""; input.focus(); }
+  }
+
+  function showLoginStep() {
+    document.getElementById("mfaStep").style.display   = "none";
+    document.getElementById("loginStep").style.display = "block";
+    sessionStorage.removeItem("mfa_challenge");
+    const errEl = document.getElementById("mfaError");
+    if (errEl) errEl.style.display = "none";
+  }
+
+  // Login
   async function handleLogin(e) {
     e?.preventDefault();
 
-    const errEl = document.getElementById("login-error");
-    const btn = document.getElementById("login-submit");
-
-    const email = emailEl.value.trim().toLowerCase();
+    const errEl    = document.getElementById("login-error");
+    const btn      = document.getElementById("login-submit");
+    const email    = emailEl.value.trim().toLowerCase();
     const password = passwordEl.value;
 
     errEl.style.display = "none";
 
     if (!email || !password) {
-      errEl.textContent = "Email and password are required.";
+      errEl.textContent   = "Email and password are required.";
       errEl.style.display = "block";
       return;
     }
 
-    btn.disabled = true;
+    btn.disabled    = true;
     btn.textContent = "Signing in…";
 
     try {
       const res = await fetch("/api/v1/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          email,
-          password
-        })
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body:    JSON.stringify({ email, password }),
       });
 
-      let data = {};
-
-      try {
-        data = await res.json();
-      } catch {
-        data = {};
-      }
+      const data = await res.json().catch(() => ({}));
 
       if (!res.ok) {
-        errEl.textContent = data.error || "Login failed";
+        errEl.textContent   = data.error || "Login failed";
         errEl.style.display = "block";
-
-        btn.disabled = false;
-        btn.textContent = "Sign In →";
+        btn.disabled        = false;
+        btn.textContent     = "Sign in";
         return;
       }
 
-      // MFA Required
+      // MFA required 
       if (data.mfaRequired) {
         if (!data.challengeToken) {
-          errEl.textContent = "Authentication error. Please try again.";
+          errEl.textContent   = "Authentication error. Please try again.";
           errEl.style.display = "block";
-
-          btn.disabled = false;
-          btn.textContent = "Sign In →";
+          btn.disabled        = false;
+          btn.textContent     = "Sign in";
           return;
         }
-
-        sessionStorage.setItem(
-          "mfa_challenge",
-          data.challengeToken
-        );
-
+        sessionStorage.setItem("mfa_challenge", data.challengeToken);
+        btn.disabled    = false;
+        btn.textContent = "Sign in";
         showMFAStep();
-
-        btn.disabled = false;
-        btn.textContent = "Sign In →";
         return;
       }
 
       // Success
-      if (data.token) {
-        localStorage.setItem("token", data.token);
-      }
-
-      if (data.user) {
-        localStorage.setItem(
-          "user",
-          JSON.stringify(data.user)
-        );
-      }
-
+      if (data.token) localStorage.setItem("token", data.token);
+      if (data.user)  localStorage.setItem("user",  JSON.stringify(data.user));
       window.location.href = "/dashboard";
 
     } catch (err) {
-      console.error("Login error:", err);
-
-      errEl.textContent =
-        "Network error. Please try again.";
-
+      errEl.textContent   = "Network error. Please try again.";
       errEl.style.display = "block";
-
-      btn.disabled = false;
-      btn.textContent = "Sign In →";
+      btn.disabled        = false;
+      btn.textContent     = "Sign in";
     }
   }
 
-  function showMFAStep() {
-    document.getElementById("loginStep").style.display = "none";
-    document.getElementById("mfaStep").style.display = "block";
-
-    const input = document.getElementById("mfaCode");
-    input?.focus();
-  }
-
-  function showLoginStep() {
-    document.getElementById("mfaStep").style.display = "none";
-    document.getElementById("loginStep").style.display = "block";
-
-    sessionStorage.removeItem("mfa_challenge");
-  }
-
+  // MFA verify 
   async function handleMFA() {
     if (mfaSubmitting) return;
 
-    const errEl = document.getElementById("mfaError");
-    const btn = document.getElementById("mfaBtn");
-    const input = document.getElementById("mfaCode");
-
-    const code = input.value.trim().replace(/\s/g, "");
+    const errEl    = document.getElementById("mfaError");
+    const btn      = document.getElementById("mfaBtn");
+    const input    = document.getElementById("mfaCode");
+    const code     = input.value.replace(/\D/g, "");
     const challenge = sessionStorage.getItem("mfa_challenge");
 
     errEl.style.display = "none";
 
     if (!/^\d{6}$/.test(code)) {
-      errEl.textContent =
-        "Enter a valid 6-digit code from your authenticator app.";
-
+      errEl.textContent   = "Enter the 6-digit code from your authenticator app.";
       errEl.style.display = "block";
       return;
     }
 
     if (!challenge) {
-      errEl.textContent =
-        "Session expired. Please log in again.";
-
+      errEl.textContent   = "Session expired. Please log in again.";
       errEl.style.display = "block";
-
       showLoginStep();
       return;
     }
 
-    mfaSubmitting = true;
-
-    btn.disabled = true;
+    mfaSubmitting   = true;
+    btn.disabled    = true;
     btn.textContent = "Verifying…";
 
     try {
       const res = await fetch("/api/v1/auth/login/mfa", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          challengeToken: challenge,
-          totpToken: code
-        })
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body:    JSON.stringify({ challengeToken: challenge, totpToken: code }),
       });
 
-      let data = {};
-
-      try {
-        data = await res.json();
-      } catch {
-        data = {};
-      }
+      const data = await res.json().catch(() => ({}));
 
       if (!res.ok) {
-        errEl.textContent =
-          data.error || "Invalid verification code";
-
+        errEl.textContent   = data.error || "Invalid verification code";
         errEl.style.display = "block";
-
-        input.value = "";
+        input.value         = "";
         input.focus();
-
-        btn.disabled = false;
-        btn.textContent = "Verify →";
-
+        btn.disabled        = false;
+        btn.textContent     = "Verify →";
         return;
       }
 
       sessionStorage.removeItem("mfa_challenge");
-
-      if (data.token) {
-        localStorage.setItem("token", data.token);
-      }
-
-      if (data.user) {
-        localStorage.setItem(
-          "user",
-          JSON.stringify(data.user)
-        );
-      }
-
+      if (data.token) localStorage.setItem("token", data.token);
+      if (data.user)  localStorage.setItem("user",  JSON.stringify(data.user));
       window.location.href = "/dashboard";
 
     } catch (err) {
-      console.error("MFA error:", err);
-
-      errEl.textContent =
-        "Network error. Please try again.";
-
+      errEl.textContent   = "Network error. Please try again.";
       errEl.style.display = "block";
-
-      btn.disabled = false;
-      btn.textContent = "Verify →";
-
+      btn.disabled        = false;
+      btn.textContent     = "Verify →";
     } finally {
       mfaSubmitting = false;
     }
   }
 
-  // Login button
-  loginBtn?.addEventListener("click", handleLogin);
+  // Wire events
+  loginBtn?.addEventListener("click",  handleLogin);
+  mfaBtn?.addEventListener("click",    handleMFA);
+  mfaBackBtn?.addEventListener("click", showLoginStep);
 
-  // Enter submits login
   [emailEl, passwordEl].forEach(el => {
-    el?.addEventListener("keydown", e => {
-      if (e.key === "Enter") {
-        handleLogin(e);
-      }
-    });
+    el?.addEventListener("keydown", e => { if (e.key === "Enter") handleLogin(e); });
   });
 
-  // MFA auto-submit at 6 digits
-  document
-    .getElementById("mfaCode")
-    ?.addEventListener("input", function () {
-      const digits = this.value.replace(/\D/g, "");
+  document.getElementById("mfaCode")?.addEventListener("input", function() {
+    this.value = this.value.replace(/\D/g, "");
+    if (this.value.length === 6) handleMFA();
+  });
 
-      this.value = digits;
-
-      if (digits.length === 6) {
-        handleMFA();
-      }
-    });
-
-  // Enter submits MFA
-  document
-    .getElementById("mfaCode")
-    ?.addEventListener("keydown", e => {
-      if (e.key === "Enter") {
-        handleMFA();
-      }
-    });
+  document.getElementById("mfaCode")?.addEventListener("keydown", e => {
+    if (e.key === "Enter") handleMFA();
+  });
 </script>
  <script>
     const anim = lottie.loadAnimation({
