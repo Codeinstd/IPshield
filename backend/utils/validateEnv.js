@@ -7,7 +7,7 @@ function validateEnv() {
     console.warn("⚠ Missing env vars:", missing.join(", "));
     console.warn("App will start but some features may not work.");
   } else {
-    console.log("✓ Environment validated");
+    // console.log("✓ Environment validated");
   }
 }
 

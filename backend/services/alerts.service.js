@@ -109,11 +109,11 @@ async function alertIfCritical(result) {
 
 // sendAlert — called from BullMQ alert worker 
 async function sendAlert(payload) {
-  const results = await Promise.allSettled([
-    sendSlackAlert(payload),
-    sendDiscordAlert(payload),
-    sendAlertEmail(payload),2
-  ]);
+ const results = await Promise.allSettled([
+  sendSlackAlert(payload),
+  sendDiscordAlert(payload),
+  sendAlertEmail(payload),
+]);
 
   const delivered = results
     .filter(r => r.status === "fulfilled" && r.value?.delivered)

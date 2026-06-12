@@ -16,6 +16,11 @@ function getTransporter() {
 }
 
 async function sendEmail({ to, subject, html }) {
+   console.log("[EMAIL DEBUG] ENV AT CALL TIME:", {
+    ALERT_FROM: process.env.ALERT_FROM,
+    ALERT_TO:   process.env.ALERT_TO,
+    SMTP_USER:  process.env.SMTP_USER,
+  });
   const transport  = getTransporter();
   const fromAddr   = process.env.ALERT_FROM;
   const recipients = Array.isArray(to)
