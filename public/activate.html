@@ -453,9 +453,16 @@
 
       // Pre-fill email if known
       if (invite.email) {
-        document.getElementById("emailInput").value    = invite.email;
-        document.getElementById("emailInput").disabled = false;
-      }
+      const emailInput = document.getElementById("emailInput");
+      emailInput.value    = invite.email;
+      emailInput.disabled = true;
+
+      // Add locked hint below the input
+      const hint = document.createElement("div");
+      hint.style.cssText = "font-size:10px;color:var(--text3);margin-top:4px;";
+      hint.textContent   = "Email is locked to your invite";
+      emailInput.parentNode.appendChild(hint);
+    }
 
       document.getElementById("inviteInfo").style.display = "block";
       show("activateForm");
