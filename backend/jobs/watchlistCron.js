@@ -1,4 +1,3 @@
-
 const cron = require("node-cron");
 const { getWatchlistQueue } = require("./queues");
 

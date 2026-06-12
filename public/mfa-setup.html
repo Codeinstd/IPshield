@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IPShield — Set Up Two-Factor Authentication</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon.ico/favicon-32x32.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg1:      #0d1117;
+      --bg2:      #111820;
+      --border:   #1e2d3d;
+      --accent:   #02bfe0;
+      --text:     #c9d8e8;
+      --text2:    #6a8fa8;
+      --text3:    #3d5a72;
+      --critical: #ff3355;
+      --low:      #01cd6e;
+      --glow-a:   0 0 20px rgba(0,217,255,0.25);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg1);
+      font-family: 'Segoe UI', system-ui, monospace;
+      padding: 24px;
+    }
+
+    .card {
+      background: #161b22;
+      border: 1px solid #21262d;
+      border-radius: 12px;
+      padding: 40px 36px;
+      width: 100%;
+      max-width: 440px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .logo            { display: flex; align-items: center; gap: 12px; }
+    .logo-icon       {
+      width: 32px; height: 32px;
+      border: 2px solid var(--accent); border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--accent); font-size: 18px; font-weight: 700;
+      box-shadow: var(--glow-a);
+    }
+    .logo-text       { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 22px; letter-spacing: -0.5px; }
+    .logo-text span  { color: var(--accent); }
+    .logo-sub        { font-size: 10px; color: var(--text3); letter-spacing: 3px; margin-top: 1px; }
+
+    .step-header {
+      font-family: 'Syne', sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+    .step-sub {
+      font-size: 12px;
+      color: var(--text2);
+      line-height: 1.7;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px 14px;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 22px;
+      text-align: center;
+      letter-spacing: 8px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    input:focus { border-color: var(--accent); }
+
+    .btn-primary {
+      width: 100%;
+      padding: 13px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      background: var(--accent);
+      color: #000;
+      transition: opacity 0.2s;
+    }
+    .btn-primary:hover    { opacity: 0.88; }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .error-box {
+      display: none;
+      padding: 10px 14px;
+      background: rgba(255,51,85,0.1);
+      border: 1px solid rgba(255,51,85,0.3);
+      border-radius: 8px;
+      font-size: 12px;
+      color: var(--critical);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Backup codes grid */
+    .backup-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+    }
+    .backup-code {
+      padding: 8px 12px;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      color: var(--accent);
+      text-align: center;
+      letter-spacing: 2px;
+    }
+
+    .copy-btn {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      background: transparent;
+      color: var(--text2);
+      border: 1px solid var(--border);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .copy-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    .warn-box {
+      padding: 12px 16px;
+      background: rgba(255,119,0,0.08);
+      border: 1px solid rgba(255,119,0,0.25);
+      border-radius: 8px;
+      font-size: 11px;
+      color: #ff9944;
+      line-height: 1.6;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .spinner {
+      width: 32px; height: 32px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      margin: 0 auto;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+<div class="card">
+  <div class="logo">
+    <div class="logo-icon">⬡</div>
+    <div>
+      <div class="logo-text">IP<span>Shield</span></div>
+      <div class="logo-sub">Risk Intelligence</div>
+    </div>
+  </div>
+
+  <!-- Loading state -->
+  <div id="loadingState" style="text-align:center;padding:20px 0;">
+    <div class="spinner" style="margin-bottom:12px;"></div>
+    <div style="font-size:12px;color:var(--text2);">Generating your setup code…</div>
+  </div>
+
+  <!-- Setup form — hidden until QR loaded -->
+  <div id="setupState" style="display:none;flex-direction:column;gap:20px;">
+    <div>
+      <div class="step-header">Step 1 — Scan this QR code</div>
+      <div class="step-sub" style="margin-top:4px;">
+        Open Google Authenticator, Authy, or 1Password and scan the code below.
+      </div>
+    </div>
+
+    <div style="text-align:center;">
+      <img id="qrImg" src="" alt="MFA QR Code"
+        style="width:180px;height:180px;border-radius:8px;border:4px solid #fff;display:inline-block;" />
+    </div>
+
+    <div style="text-align:center;">
+      <div style="font-size:10px;color:var(--text3);margin-bottom:6px;letter-spacing:1px;">
+        Can't scan? Enter this key manually:
+      </div>
+      <code id="secretCode"
+        style="font-size:12px;color:var(--accent);background:var(--bg2);
+               padding:8px 14px;border-radius:6px;letter-spacing:2px;display:inline-block;
+               word-break:break-all;"></code>
+    </div>
+
+    <div style="border-top:1px solid var(--border);padding-top:20px;">
+      <div class="step-header">Step 2 — Verify the code</div>
+      <div class="step-sub" style="margin-top:4px;margin-bottom:14px;">
+        Enter the 6-digit code from your app to confirm setup.
+      </div>
+      <input type="text" id="setupCode"
+        placeholder="000000" maxlength="6"
+        inputmode="numeric" autocomplete="one-time-code" />
+    </div>
+
+    <div id="setupError" class="error-box"></div>
+
+    <button id="verifyBtn" class="btn-primary">Enable MFA →</button>
+  </div>
+
+  <!-- Success state — shows backup codes -->
+  <div id="successState" style="display:none;flex-direction:column;gap:20px;">
+    <div style="text-align:center;">
+      <div style="font-size:48px;margin-bottom:12px;">✓</div>
+      <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;
+                  color:var(--low);margin-bottom:8px;">MFA Enabled!</div>
+      <div style="font-size:12px;color:var(--text2);line-height:1.7;">
+        Your account is now protected.<br>
+        You'll need your authenticator app on every login.
+      </div>
+    </div>
+
+    <div class="warn-box">
+      ⚠ Save these backup codes now. They won't be shown again.<br>
+      Each code can only be used once if you lose access to your app.
+    </div>
+
+    <div id="backupGrid" class="backup-grid"></div>
+
+    <button class="copy-btn" id="copyCodesBtn">Copy all backup codes</button>
+
+    <button class="btn-primary" id="continueBtn">Continue to dashboard →</button>
+  </div>
+
+  <!-- Error state -->
+  <div id="errorState" style="display:none;text-align:center;padding:20px 0;">
+    <div style="font-size:32px;margin-bottom:12px;">⚠</div>
+    <div id="errorMsg" style="font-size:13px;color:var(--critical);font-family:'JetBrains Mono',monospace;"></div>
+    <button onclick="location.reload()"
+      style="margin-top:20px;padding:10px 24px;border-radius:8px;border:1px solid var(--border);
+             background:transparent;color:var(--text2);font-family:'JetBrains Mono',monospace;
+             font-size:12px;cursor:pointer;">
+      Try again
+    </button>
+  </div>
+</div>
+
+<script>
+  // Grab the JWT from localStorage (set during login mfaSetupRequired flow)
+  function authHeaders() {
+    const token = localStorage.getItem("token");
+    return token ? { "Authorization": `Bearer ${token}` } : {};
+  }
+
+  let backupCodesList = [];
+
+  function show(id) {
+    ["loadingState", "setupState", "successState", "errorState"].forEach(s => {
+      const el = document.getElementById(s);
+      el.style.display = s === id ? "flex" : "none";
+    });
+  }
+
+  // Load QR on page ready
+  async function loadSetup() {
+    try {
+      const res  = await fetch("/api/v1/mfa/setup", { headers: authHeaders() });
+      const data = await res.json();
+
+      if (!res.ok) {
+        document.getElementById("errorMsg").textContent = data.error || "Setup failed";
+        show("errorState");
+        return;
+      }
+
+      document.getElementById("qrImg").src       = data.qrCode;
+      document.getElementById("secretCode").textContent = data.secret;
+      show("setupState");
+
+      // Auto-submit on 6 digits
+      document.getElementById("setupCode").addEventListener("input", function () {
+        this.value = this.value.replace(/\D/g, "");
+        if (this.value.length === 6) verifySetup();
+      });
+      document.getElementById("setupCode").addEventListener("keydown", e => {
+        if (e.key === "Enter") verifySetup();
+      });
+      document.getElementById("setupCode").focus();
+
+    } catch (err) {
+      document.getElementById("errorMsg").textContent = err.message;
+      show("errorState");
+    }
+  }
+
+  // Verify the TOTP code and enable MFA 
+  async function verifySetup() {
+    const code   = document.getElementById("setupCode").value.trim();
+    const errEl  = document.getElementById("setupError");
+    const btn    = document.getElementById("verifyBtn");
+
+    errEl.style.display = "none";
+
+    if (!code || code.length !== 6) {
+      errEl.textContent   = "Enter the 6-digit code from your app.";
+      errEl.style.display = "block";
+      return;
+    }
+
+    btn.disabled    = true;
+    btn.textContent = "Verifying…";
+
+    try {
+      const res  = await fetch("/api/v1/mfa/verify-setup", {
+        method:  "POST",
+        headers: { ...authHeaders(), "Content-Type": "application/json" },
+        body:    JSON.stringify({ token: code }),
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        errEl.textContent   = data.error || "Invalid code";
+        errEl.style.display = "block";
+        document.getElementById("setupCode").value = "";
+        document.getElementById("setupCode").focus();
+        return;
+      }
+
+      // Show backup codes
+      backupCodesList = data.backupCodes || [];
+      const grid = document.getElementById("backupGrid");
+      grid.innerHTML = backupCodesList
+        .map(c => `<div class="backup-code">${c}</div>`)
+        .join("");
+
+      show("successState");
+
+    } catch (err) {
+      errEl.textContent   = "Network error — " + err.message;
+      errEl.style.display = "block";
+    } finally {
+      btn.disabled    = false;
+      btn.textContent = "Enable MFA →";
+    }
+  }
+
+  // Copy backup codes to clipboard
+  document.getElementById("copyCodesBtn").addEventListener("click", async () => {
+    const text = backupCodesList.join("\n");
+    try {
+      await navigator.clipboard.writeText(text);
+      const btn = document.getElementById("copyCodesBtn");
+      btn.textContent = "Copied ✓";
+      setTimeout(() => { btn.textContent = "Copy all backup codes"; }, 2000);
+    } catch {
+      alert("Copy failed — please manually copy the codes above.");
+    }
+  });
+
+  document.getElementById("continueBtn").addEventListener("click", () => {
+    window.location.href = "/dashboard";
+  });
+
+  document.getElementById("verifyBtn").addEventListener("click", verifySetup);
+
+  // Kick off on load
+  loadSetup();
+</script>
+</body>
+</html>

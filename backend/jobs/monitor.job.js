@@ -1,4 +1,3 @@
-
 const { getWatchlist, updateWatchlistEntry } = require("../store/watchlist.store");
 const { getFullIntel } = require("../services/ipIntel.service");
 const { alertIfCritical } = require("../services/alerts.service");

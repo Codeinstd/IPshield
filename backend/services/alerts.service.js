@@ -112,7 +112,7 @@ async function sendAlert(payload) {
   const results = await Promise.allSettled([
     sendSlackAlert(payload),
     sendDiscordAlert(payload),
-    sendAlertEmail(payload),
+    sendAlertEmail(payload),2
   ]);
 
   const delivered = results

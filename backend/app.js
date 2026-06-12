@@ -1,3 +1,8 @@
+console.log("=== ENV CHECK ===");
+console.log("ALERT_FROM:", process.env.ALERT_FROM);
+console.log("ALERT_TO:", process.env.ALERT_TO);
+console.log("SMTP_USER:", process.env.SMTP_USER);
+console.log("=================");
 
 const express    = require("express");
 const cors       = require("cors");
@@ -310,12 +315,8 @@ app.get("/login", (req, res) => {
   res.sendFile(path.join(__dirname, "../public", "login.html"));
 });
 
-
-app.use((req, res, next) => {
-  if (req.path === "/mfa-setup") {
-    return res.status(404).end();
-  }
-  next();
+app.get("/mfa-setup", (req, res) => {
+  res.sendFile(path.join(__dirname, "../public", "mfa-setup.html"));
 });
 
 app.get(/.*/, (req, res) => {

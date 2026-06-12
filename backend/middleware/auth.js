@@ -18,7 +18,6 @@ async function resolveApiKey(rawKey) {
 async function requireAuth(req, res, next) {
   try {
     const authHeader = req.headers.authorization;
-
     
     // JWT (PRIMARY SYSTEM)
     if (authHeader?.startsWith("Bearer ")) {
@@ -34,7 +33,6 @@ async function requireAuth(req, res, next) {
 
       return next();
     }
-
    
     // API KEY (SECONDARY SYSTEM)
     const rawKey = req.headers["x-api-key"];

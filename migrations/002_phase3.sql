@@ -1,5 +1,3 @@
--- IPShield Phase 3 schema additions
--- Run: psql $DATABASE_URL -f migrations/002_phase3.sql
 
 BEGIN;
 

@@ -1,38 +1,72 @@
+
 const nodemailer = require("nodemailer");
 
 let transporter = null;
 
 function getTransporter() {
-  if (transporter) return transporter;
-  transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST || "smtp.gmail.com",
-    port: parseInt(process.env.SMTP_PORT || "465"),
+  return nodemailer.createTransport({
+    host:   process.env.SMTP_HOST || "smtp.gmail.com",
+    port:   parseInt(process.env.SMTP_PORT || "465"),
     secure: true,
     auth: {
       user: process.env.SMTP_USER,
       pass: process.env.SMTP_PASS,
     },
   });
-  return transporter;
 }
 
 async function sendEmail({ to, subject, html }) {
-  const transport = getTransporter();
+  const transport  = getTransporter();
+  const fromAddr   = process.env.ALERT_FROM;
   const recipients = Array.isArray(to)
     ? to.join(",")
     : String(to).split(",").map(e => e.trim()).filter(Boolean).join(",");
 
-  console.log("[EMAIL] Sending:", { from: process.env.ALERT_FROM, to: recipients, subject });
+  if (!fromAddr) throw new Error("ALERT_FROM is not configured");
+  if (!recipients) throw new Error("No recipients specified");
+
+  console.log("[EMAIL] from:", fromAddr, "→ to:", recipients);
 
   const result = await transport.sendMail({
-    from: process.env.ALERT_FROM,
-    to: recipients,
+    from: fromAddr,
+    to:   recipients,
     subject,
     html,
   });
 
   console.log("[EMAIL RESULT]:", result.messageId);
   return { delivered: true, messageId: result.messageId };
+}
+
+async function sendInviteEmail(invite) {
+  if (!invite.email) return;  // skip if no email on the invite
+
+  return sendEmail({
+    to: invite.email,
+    subject: `You've been invited to IPShield`,
+    html: `
+      <div style="font-family:monospace;max-width:480px;margin:0 auto;">
+        <h2 style="color:#02bfe0;">You're invited to IPShield</h2>
+        <p>Hi ${invite.name},</p>
+        <p>You've been granted <b>${invite.role}</b> access to IPShield Risk Intelligence.</p>
+        <p>Click the link below to activate your account and set your password:</p>
+        <p style="margin:24px 0;">
+          <a href="${invite.activateUrl}"
+             style="background:#02bfe0;color:#000;padding:12px 24px;
+                    border-radius:6px;text-decoration:none;font-weight:700;">
+            Activate Account →
+          </a>
+        </p>
+        <p style="font-size:12px;color:#666;">
+          Or copy this link:<br>
+          <code>${invite.activateUrl}</code>
+        </p>
+        <p style="font-size:11px;color:#999;">
+          This link expires in 7 days. If you weren't expecting this, ignore this email.
+        </p>
+      </div>
+    `,
+  });
 }
 
 async function sendAlertEmail(payload) {
@@ -51,4 +85,4 @@ async function sendAlertEmail(payload) {
   });
 }
 
-module.exports = { sendEmail, sendAlertEmail };
+module.exports = { sendEmail, sendAlertEmail, sendInviteEmail };

@@ -1,11 +1,9 @@
-
 const crypto = require("crypto");
 const { hashKey } = require("../utils/keyHash");
 const db     = require("../store/db");
 const logger = require("../utils/logger");
 
 // Helpers 
-
 function generateKey() {
   return crypto.randomBytes(32).toString("hex");
 }
@@ -14,7 +12,7 @@ function generateInviteToken() {
   return crypto.randomBytes(24).toString("hex");
 }
 
-// Create invite 
+// Create invite
 async function createInvite({ name, email, role = "analyst", dailyLimit = 1000, notes, invitedBy = "admin" }) {
   const key         = generateKey();
   const keyHash     = hashKey(key);
@@ -24,14 +22,16 @@ async function createInvite({ name, email, role = "analyst", dailyLimit = 1000, 
   await db.query(
     `INSERT INTO api_keys
        (key_hash, key, key_preview, name, email, role, status,
-        invite_token, invited_by, invited_at, daily_limit, notes)
-     VALUES ($1,$2,$3,$4,$5,$6,'pending',$7,$8,NOW(),$9,$10)`,
+        invite_token, invited_by, invited_at, daily_limit, notes,
+        invite_expires_at)
+     VALUES ($1,$2,$3,$4,$5,$6,'pending',$7,$8,NOW(),$9,$10,
+        NOW() + INTERVAL '7 days')`,
     [keyHash, key, keyPreview, name, email || null, role,
      inviteToken, invitedBy, dailyLimit, notes || null]
   );
 
   const invite = await db.query(
-    `SELECT id, name, email, role, status, daily_limit, invite_token
+    `SELECT id, name, email, role, status, daily_limit, invite_token, invite_expires_at
      FROM api_keys WHERE key_hash = $1`,
     [keyHash]
   );
@@ -39,58 +39,43 @@ async function createInvite({ name, email, role = "analyst", dailyLimit = 1000, 
   const baseUrl     = process.env.APP_URL || "https://ipshield.live";
   const activateUrl = `${baseUrl}/activate?token=${inviteToken}`;
 
-  logger.info(`[keyManager] Invite created for ${email || name} by ${invitedBy}`);
+  logger.info(`[keyManager] Invite created for ${email || name} by ${invitedBy} — expires in 7 days`);
 
-  // Return raw key only here — it will be wiped on activation
   return { ...invite.rows[0], activateUrl, rawKey: key, invite_token: inviteToken };
 }
 
 // Activate invite 
 async function activateInvite(inviteToken) {
-  const client = await db.pool.connect();   
-  try {
-    await client.query("BEGIN");
-
-    // Activate the invite
+  return db.transaction(async (client) => {
     const activateRes = await client.query(
       `UPDATE api_keys
-       SET status = 'active', activated_at = NOW(), invite_token = NULL
-       WHERE invite_token = $1 AND status = 'pending'
+       SET status = 'active', activated_at = NOW(), invite_token = NULL,
+           invite_expires_at = NULL
+       WHERE invite_token = $1
+         AND status = 'pending'
+         AND invite_expires_at > NOW()
        RETURNING id, name, email, role, status, activated_at, daily_limit, key`,
       [inviteToken]
     );
 
-    if (!activateRes.rows.length) {
-      await client.query("ROLLBACK");
-      return null;
-    }
+    if (!activateRes.rows.length) return null;
 
-    const row = activateRes.rows[0];
-    const rawKey = row.key; 
+    const row    = activateRes.rows[0];
+    const rawKey = row.key;
 
-    // Wipe raw key from DB it exits as hash
+    // Wipe raw key — lives only as key_hash from this point
     await client.query(
       `UPDATE api_keys SET key = NULL WHERE id = $1`,
       [row.id]
     );
 
-    await client.query("COMMIT");
-
     logger.info(`[keyManager] Key activated and raw key wiped: ${row.name}`);
-
-    // Return raw key in response — this is the ONLY time it's available
     return { ...row, key: rawKey };
-
-  } catch (err) {
-    await client.query("ROLLBACK");
-    logger.error("[keyManager] activateInvite transaction failed:", err.message);
-    throw err;
-  } finally {
-    client.release();
-  }
+  });
 }
 
-// List keys
+// List keys 
+
 async function listKeys({ status, role, limit = 100, offset = 0 } = {}) {
   const conditions = [];
   const values     = [];
@@ -114,6 +99,7 @@ async function listKeys({ status, role, limit = 100, offset = 0 } = {}) {
       notes,
       last_used,
       invited_at,
+      invite_expires_at,
       activated_at,
       revoked_at,
       revoke_reason
@@ -133,8 +119,7 @@ async function listKeys({ status, role, limit = 100, offset = 0 } = {}) {
   `;
   values.push(limit, offset);
 
-  const result = await db.query(sql, values);
-
+  const result   = await db.query(sql, values);
   const countSql = `SELECT COUNT(*) FROM api_keys ${where}`;
   const countRes = await db.query(countSql, values.slice(0, -2));
 
@@ -144,12 +129,13 @@ async function listKeys({ status, role, limit = 100, offset = 0 } = {}) {
   };
 }
 
-// Get single key (admin — includes full key) 
+//Get single key 
+
 async function getKey(id) {
   const res = await db.query(
     `SELECT id, name, email, role, status, key, daily_limit, daily_used,
-            total_used, invited_by, invited_at, activated_at,
-            revoked_at, revoke_reason, last_used, notes
+            total_used, invited_by, invited_at, invite_expires_at,
+            activated_at, revoked_at, revoke_reason, last_used, notes
      FROM api_keys WHERE id = $1`,
     [id]
   );
@@ -157,16 +143,17 @@ async function getKey(id) {
 }
 
 // Update key 
+
 async function updateKey(id, { name, email, role, dailyLimit, notes }) {
   const sets   = [];
   const params = [];
   let   i      = 1;
 
-  if (name       !== undefined) { sets.push(`name = $${i++}`);        params.push(name); }
-  if (email      !== undefined) { sets.push(`email = $${i++}`);       params.push(email); }
-  if (role       !== undefined) { sets.push(`role = $${i++}`);        params.push(role); }
+  if (name       !== undefined) { sets.push(`name        = $${i++}`); params.push(name); }
+  if (email      !== undefined) { sets.push(`email       = $${i++}`); params.push(email); }
+  if (role       !== undefined) { sets.push(`role        = $${i++}`); params.push(role); }
   if (dailyLimit !== undefined) { sets.push(`daily_limit = $${i++}`); params.push(dailyLimit); }
-  if (notes      !== undefined) { sets.push(`notes = $${i++}`);       params.push(notes); }
+  if (notes      !== undefined) { sets.push(`notes       = $${i++}`); params.push(notes); }
 
   if (!sets.length) return getKey(id);
 
@@ -179,6 +166,7 @@ async function updateKey(id, { name, email, role, dailyLimit, notes }) {
 }
 
 // Revoke key 
+
 async function revokeKey(id, reason = "Revoked by admin") {
   const res = await db.query(
     `UPDATE api_keys
@@ -191,7 +179,8 @@ async function revokeKey(id, reason = "Revoked by admin") {
   return res.rows.length > 0;
 }
 
-// Suspend / reinstate 
+// Suspend / reinstate
+
 async function suspendKey(id) {
   await db.query(
     `UPDATE api_keys SET status = 'suspended' WHERE id = $1 AND status = 'active'`,
@@ -206,7 +195,8 @@ async function reinstateKey(id) {
   );
 }
 
-// Rotate key (generate new key value, keep metadata) 
+// Rotate key 
+
 async function rotateKey(id) {
   const newKey     = generateKey();
   const newHash    = hashKey(newKey);
@@ -227,18 +217,16 @@ async function rotateKey(id) {
   return { ...res.rows[0], newKey };
 }
 
-// Usage tracking 
+// Usage tracking
+
 async function recordUsage(keyId, { isScore = false, isCacheHit = false, isError = false } = {}) {
   try {
-    // Reset daily counter if it's a new day
     await db.query(
       `UPDATE api_keys
        SET daily_used = 0, last_reset = CURRENT_DATE
        WHERE id = $1 AND last_reset < CURRENT_DATE`,
       [keyId]
     );
-
-    // Increment counters
     await db.query(
       `UPDATE api_keys
        SET daily_used = daily_used + 1,
@@ -247,8 +235,6 @@ async function recordUsage(keyId, { isScore = false, isCacheHit = false, isError
        WHERE id = $1`,
       [keyId]
     );
-
-    // Upsert daily log
     await db.query(
       `INSERT INTO key_usage_log (key_id, date, requests, scores, cache_hits, errors)
        VALUES ($1, CURRENT_DATE, 1, $2, $3, $4)
@@ -257,17 +243,15 @@ async function recordUsage(keyId, { isScore = false, isCacheHit = false, isError
          scores     = key_usage_log.scores     + $2,
          cache_hits = key_usage_log.cache_hits + $3,
          errors     = key_usage_log.errors     + $4`,
-      [keyId,
-       isScore    ? 1 : 0,
-       isCacheHit ? 1 : 0,
-       isError    ? 1 : 0]
+      [keyId, isScore ? 1 : 0, isCacheHit ? 1 : 0, isError ? 1 : 0]
     );
   } catch (_) {
     // Never let usage tracking crash a request
   }
 }
 
-// Check daily limit
+// Daily limit check
+
 async function checkDailyLimit(keyId) {
   const res = await db.query(
     `SELECT daily_used, daily_limit, last_reset FROM api_keys WHERE id = $1`,
@@ -277,7 +261,6 @@ async function checkDailyLimit(keyId) {
 
   const { daily_used, daily_limit, last_reset } = res.rows[0];
 
-  // Reset if new day
   if (last_reset < new Date().toISOString().slice(0, 10)) {
     return { allowed: true, used: 0, limit: daily_limit, remaining: daily_limit };
   }
@@ -291,7 +274,8 @@ async function checkDailyLimit(keyId) {
   };
 }
 
-// Usage stats for a key 
+// Key usage history 
+
 async function getKeyUsage(keyId, days = 30) {
   const res = await db.query(
     `SELECT date, requests, scores, cache_hits, errors
@@ -303,7 +287,7 @@ async function getKeyUsage(keyId, days = 30) {
   return res.rows;
 }
 
-// Reset daily counters (call from a nightly cron)
+// Reset daily counters (nightly cron) 
 async function resetDailyCounters() {
   await db.query(
     `UPDATE api_keys
@@ -313,19 +297,23 @@ async function resetDailyCounters() {
   logger.info("[keyManager] Daily counters reset");
 }
 
-// Summary stats for admin dashboard 
+// Admin dashboard stats 
+
 async function getKeyStats() {
   const result = await db.query(`
     SELECT
-      COUNT(*)                                        AS total,
-      COUNT(*) FILTER (WHERE status = 'active')      AS active,
-      COUNT(*) FILTER (WHERE status = 'pending')     AS pending,
-      COUNT(*) FILTER (WHERE status = 'suspended')   AS suspended,
-      COUNT(*) FILTER (WHERE status = 'revoked')     AS revoked,
+      COUNT(*)                                          AS total,
+      COUNT(*) FILTER (WHERE status = 'active')        AS active,
+      COUNT(*) FILTER (WHERE status = 'pending')       AS pending,
+      COUNT(*) FILTER (WHERE status = 'suspended')     AS suspended,
+      COUNT(*) FILTER (WHERE status = 'revoked')       AS revoked,
+      COUNT(*) FILTER (
+        WHERE status = 'pending'
+          AND invite_expires_at < NOW())               AS expired_invites,
       COALESCE(SUM(COALESCE(daily_used, 0))
         FILTER (WHERE DATE(COALESCE(last_used, NOW())) = CURRENT_DATE), 0)
-                                                     AS requests_today,
-      COALESCE(SUM(COALESCE(daily_used, 0)), 0)      AS total_requests
+                                                       AS requests_today,
+      COALESCE(SUM(COALESCE(daily_used, 0)), 0)        AS total_requests
     FROM api_keys
   `);
 
@@ -336,24 +324,25 @@ async function getKeyStats() {
     pending:        parseInt(row.pending),
     suspended:      parseInt(row.suspended),
     revoked:        parseInt(row.revoked),
+    expiredInvites: parseInt(row.expired_invites),
     requestsToday:  parseInt(row.requests_today),
     totalRequests:  parseInt(row.total_requests),
   };
 }
 
 module.exports = {
-  createInvite, 
+  createInvite,
   activateInvite,
-  listKeys, 
-  getKey, 
-  updateKey, 
-  revokeKey, 
-  suspendKey, 
-  reinstateKey, 
+  listKeys,
+  getKey,
+  updateKey,
+  revokeKey,
+  suspendKey,
+  reinstateKey,
   rotateKey,
-  recordUsage, 
-  checkDailyLimit, 
-  getKeyUsage, 
-  resetDailyCounters, 
+  recordUsage,
+  checkDailyLimit,
+  getKeyUsage,
+  resetDailyCounters,
   getKeyStats,
 };

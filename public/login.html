@@ -4,42 +4,30 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>IPShield — Login</title>
-  <!-- Favicon metadata -->
-<link rel="icon" type="image/png" sizes="32x32" href="/favicon.ico/favicon-32x32.png">
-<link rel="icon" type="image/png" sizes="96x96" href="/favicon.ico/favicon-96x96.png">
-<link rel="icon" type="image/png" sizes="16x16" href="/favicon.ico/favicon-16x16.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&amp;family=Syne:wght@400;600;700;800&amp;display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
-<link rel="stylesheet" href="/leaflet.min.css">
-<style>
-  :root {
-    --bg:         #080c0f;
-    --bg1:        #0d1117;
-    --bg2:        #111820;
-    --bg3:        #162030;
-    --border:     #1e2d3d;
-    --border2:    #243447;
-    --accent:     #02bfe0 ;
-    --accent2:    #0099cc;
-    --text:       #c9d8e8;
-    --text2:      #6a8fa8;
-    --text3:      #3d5a72;
-    --critical:   #ff3355;
-    --high:       #ff7700;
-    --medium:     #ffcc00;
-    --low:        #01cd6e;
-    --info:       #00d9ff;
-    --glow-c:     0 0 20px rgba(255,51,85,0.4);
-    --glow-h:     0 0 20px rgba(255,119,0,0.4);
-    --glow-m:     0 0 20px rgba(255,204,0,0.3);
-    --glow-l:     0 0 20px rgba(0,232,124,0.3);
-    --glow-a:     0 0 20px rgba(0,217,255,0.25);
-    --panel:    rgba(13, 17, 23, 0.72);
-    --panel-border: rgba(255, 255, 255, 0.06); 
-    --shadow: 0 10px 40px rgba(0, 0, 0, 0.45);
-    --radius: 18px;
-  }
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon.ico/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="96x96" href="/favicon.ico/favicon-96x96.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon.ico/favicon-16x16.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
+  <link rel="stylesheet" href="/leaflet.min.css">
+  <style>
+    :root {
+      --bg:          #080c0f;
+      --bg1:         #0d1117;
+      --bg2:         #111820;
+      --bg3:         #162030;
+      --border:      #1e2d3d;
+      --border2:     #243447;
+      --accent:      #02bfe0;
+      --accent2:     #0099cc;
+      --text:        #c9d8e8;
+      --text2:       #6a8fa8;
+      --text3:       #3d5a72;
+      --critical:    #ff3355;
+      --low:         #01cd6e;
+      --glow-a:      0 0 20px rgba(0,217,255,0.25);
+    }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -48,7 +36,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      background: #0d1117;
+      background: var(--bg1);
       font-family: 'Segoe UI', system-ui, monospace;
     }
 
@@ -64,35 +52,23 @@
       gap: 20px;
     }
 
-    .logo { display: flex; align-items: center; gap: 12px; }
-      .logo-icon {
-        width: 32px; height: 32px;
-        border: 2px solid var(--accent); border-radius: 6px;
-        display: flex; align-items: center; justify-content: center;
-        color: var(--accent); font-size: 18px; font-weight: 700;
-        box-shadow: var(--glow-a);
-        animation: pulse-border 3s ease-in-out infinite;
-      }
-
-      .logo-text { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 22px; letter-spacing: -0.5px; }
-      .logo-text span { color: var(--accent); }
-      .logo-sub { font-size: 10px; color: var(--text3); letter-spacing: 3px; margin-top: 1px; }
-
-    .logo {
-      text-align: center;
-      font-size: 22px;
-      font-weight: 700;
-      color: #c9d8e8;
-      letter-spacing: 1px;
+    .logo            { display: flex; align-items: center; gap: 12px; }
+    .logo-icon       {
+      width: 32px; height: 32px;
+      border: 2px solid var(--accent); border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--accent); font-size: 18px; font-weight: 700;
+      box-shadow: var(--glow-a);
     }
-    .logo span { color: #00d9ff; }
+    .logo-text       { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 22px; letter-spacing: -0.5px; }
+    .logo-text span  { color: var(--accent); }
+    .logo-sub        { font-size: 10px; color: var(--text3); letter-spacing: 3px; margin-top: 1px; }
 
     label {
       display: block;
       font-size: 12px;
       color: #8b949e;
       margin-bottom: 6px;
-      /* text-transform: uppercase; */
       letter-spacing: 0.5px;
       font-family: 'JetBrains Mono', monospace;
     }
@@ -109,12 +85,12 @@
       transition: border-color 0.2s;
       font-family: 'JetBrains Mono', monospace;
     }
-    input:focus { border-color: #00d9ff; }
+    input:focus { border-color: var(--accent); }
 
-    button#login-submit {
+    .btn-primary {
       width: 100%;
       padding: 11px;
-      background: #00d9ff;
+      background: var(--accent);
       color: #000;
       border: none;
       border-radius: 6px;
@@ -124,11 +100,24 @@
       transition: opacity 0.2s;
       font-family: 'JetBrains Mono', monospace;
     }
-    button#login-submit:hover    { opacity: 0.88; }
-    button#login-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-primary:hover    { opacity: 0.88; }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
 
+    .btn-ghost {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      background: transparent;
+      color: var(--text2);
+      border: 1px solid #21262d;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .btn-ghost:hover { border-color: var(--border2); color: var(--text); }
 
-    #login-error {
+    .error-box {
       display: none;
       background: #2d1b1b;
       border: 1px solid #6e2020;
@@ -136,30 +125,67 @@
       border-radius: 6px;
       padding: 10px 14px;
       font-size: 13px;
-      font-family: 'Syne' sans-serif;
-    }
-
-    .footer-note {
-      text-align: center;
-      font-size: 11px;
-      color: #3d4451;
       font-family: 'JetBrains Mono', monospace;
     }
 
-    .loading-screen {
-    position: fixed;
-    inset: 0;
-    display: none;
-    justify-content: center;
-    align-items: center;
-    background: #0d1117;
-    z-index: 99999;
-  }
-
-    .loading-screen.show {
-      display: flex;
+    .mfa-error {
+      display: none;
+      padding: 10px 14px;
+      background: rgba(255,51,85,0.1);
+      border: 1px solid rgba(255,51,85,0.3);
+      border-radius: 8px;
+      font-size: 12px;
+      color: var(--critical);
+      font-family: 'JetBrains Mono', monospace;
     }
 
+    /* MFA code input — large centred digits */
+    .code-input {
+      width: 100%;
+      padding: 14px;
+      background: #0d1117;
+      border: 1px solid #30363d;
+      border-radius: 8px;
+      color: #e6edf3;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 28px;
+      outline: none;
+      text-align: center;
+      letter-spacing: 10px;
+      transition: border-color 0.2s, letter-spacing 0.15s, font-size 0.15s;
+    }
+    .code-input:focus { border-color: var(--accent); }
+
+    /* Backup code mode — smaller text, less spacing, fits 8 chars */
+    .code-input.backup-mode {
+      font-size: 20px;
+      letter-spacing: 4px;
+    }
+
+    .backup-toggle {
+      text-align: center;
+      font-size: 11px;
+      color: var(--text3);
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .backup-toggle a {
+      color: var(--accent);
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .backup-toggle a:hover { text-decoration: underline; }
+
+    /* Loading overlay */
+    .loading-screen {
+      position: fixed;
+      inset: 0;
+      display: none;
+      justify-content: center;
+      align-items: center;
+      background: var(--bg1);
+      z-index: 99999;
+    }
+    .loading-screen.show { display: flex; }
     .loading-content {
       display: flex;
       flex-direction: column;
@@ -167,55 +193,15 @@
       justify-content: center;
       text-align: center;
       color: white;
-      animation: fadeIn 0.5s ease;
       gap: 10px;
-    }
-
-    .loader-animation {
-      width: 180px;
-      height: 180px;
-    }
-
-    .loading-content h1 {
-      margin: 0;
-      font-size: 1.8rem;
-    }
-
-    .loading-content p {
-      margin: 0;
-      color: #cbd5e1;
-    }
-
-    .loading-content {
       transform: translateY(-10px);
     }
-
-   
-
-/* @keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(15px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes float {
-  0%,100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
-} */
-
-
-</style>
+    .loader-animation { width: 180px; height: 180px; }
+  </style>
 </head>
 <body>
+
+<!-- ── Step 1: Email + Password  -->
 <div id="loginStep" class="card">
   <div class="logo">
     <div class="logo-icon">⬡</div>
@@ -235,11 +221,12 @@
     <input id="auth-password" type="password" placeholder="••••••••" autocomplete="current-password" />
   </div>
 
-  <div id="login-error"></div>
+  <div id="login-error" class="error-box"></div>
 
-  <button id="login-submit">Sign in</button>
+  <button id="login-submit" class="btn-primary">Sign in</button>
 </div>
-<!-- MFA step  -->
+
+<!-- ── Step 2: MFA code  -->
 <div id="mfaStep" class="card" style="display:none;">
   <div class="logo">
     <div class="logo-icon">⬡</div>
@@ -249,83 +236,115 @@
     </div>
   </div>
 
-  <div style="text-align:center;margin-bottom:8px;">
+  <div style="text-align:center;">
     <div style="font-size:32px;margin-bottom:12px;">🔐</div>
-    <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:800;margin-bottom:6px;color:#c9d8e8;">
+    <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:800;
+                margin-bottom:6px;color:var(--text);">
       Two-Factor Authentication
     </div>
-    <div style="font-size:12px;color:#6a8fa8;line-height:1.7;">
+    <div id="mfaSubtext" style="font-size:12px;color:var(--text2);line-height:1.7;">
       Enter the 6-digit code from your authenticator app
     </div>
   </div>
 
-  <div id="mfaError"
-    style="display:none;padding:10px 14px;background:rgba(255,51,85,0.1);
-           border:1px solid rgba(255,51,85,0.3);border-radius:8px;font-size:12px;
-           color:#ff3355;"></div>
+  <div id="mfaError" class="mfa-error"></div>
 
   <div>
-    <label style="display:block;font-size:10px;color:#3d5a72;
+    <label id="mfaCodeLabel" style="display:block;font-size:10px;color:var(--text3);
       letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;">
       Authenticator Code
     </label>
-    <input type="text" id="mfaCode"
+    <!-- FIX: maxlength="8" to allow backup codes (was 6) -->
+    <input type="text" id="mfaCode" class="code-input"
       placeholder="000000"
-      maxlength="6"
-      inputmode="numeric"
-      autocomplete="one-time-code"
-      style="width:100%;padding:14px;background:#0d1117;border:1px solid #30363d;
-        border-radius:8px;color:#e6edf3;font-family:'JetBrains Mono',monospace;
-        font-size:28px;outline:none;text-align:center;letter-spacing:10px;">
+      maxlength="8"
+      inputmode="text"
+      autocomplete="one-time-code" />
   </div>
 
-  <button id="mfaBtn"
-    style="width:100%;padding:13px;border-radius:8px;border:none;cursor:pointer;
-      font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;
-      letter-spacing:1px;text-transform:uppercase;background:#00d9ff;color:#000;">
+  <button id="mfaBtn" class="btn-primary" style="border-radius:8px;font-size:13px;
+    font-weight:600;letter-spacing:1px;text-transform:uppercase;">
     Verify →
   </button>
 
-  <button id="mfaBackBtn"
-    style="width:100%;padding:10px;border-radius:8px;background:transparent;
-      color:#6a8fa8;border:1px solid #21262d;
-      font-family:'JetBrains Mono',monospace;font-size:12px;cursor:pointer;">
-    ← Back to login
-  </button>
+  <!-- Toggle between TOTP and backup code mode -->
+  <div class="backup-toggle">
+    <span id="toggleHint">Lost access to your app?</span>
+    <a id="toggleBackup"> Use a backup code</a>
+  </div>
+
+  <button id="mfaBackBtn" class="btn-ghost">← Back to login</button>
 </div>
+
+<!-- ── Loading overlay -->
 <div id="loadingScreen" class="loading-screen">
   <div class="loading-content">
     <div id="lottieLoader" class="loader-animation"></div>
-    <h1 style="font-family: 'Syne', sans-serif;">Signing you in</h1>
-    <p id="loadingText" style="font-family:'JetBrains Mono', monospace; font-size: small;">Verifying credentials...</p>
+    <h1 style="font-family:'Syne',sans-serif;">Signing you in</h1>
+    <p style="font-family:'JetBrains Mono',monospace;font-size:small;color:#cbd5e1;">
+      Verifying credentials…
+    </p>
   </div>
 </div>
+
 <script>
   const loginBtn   = document.getElementById("login-submit");
   const emailEl    = document.getElementById("auth-email");
   const passwordEl = document.getElementById("auth-password");
   const mfaBtn     = document.getElementById("mfaBtn");
   const mfaBackBtn = document.getElementById("mfaBackBtn");
+  const toggleBtn  = document.getElementById("toggleBackup");
+  const codeInput  = document.getElementById("mfaCode");
 
   let mfaSubmitting = false;
+  let backupMode    = false;  // false = TOTP (6 digits), true = backup code (8 chars)
 
-  // Show / hide steps 
+  // Toggle between TOTP and backup code mode 
+  function setBackupMode(enabled) {
+    backupMode = enabled;
+    codeInput.value       = "";
+    codeInput.placeholder = enabled ? "A3F2C9B1" : "000000";
+    codeInput.maxLength   = enabled ? 8 : 8;  // keep 8 for both — TOTP stops at 6 naturally
+    codeInput.inputMode   = enabled ? "text" : "numeric";
+    codeInput.classList.toggle("backup-mode", enabled);
+
+    document.getElementById("mfaSubtext").textContent = enabled
+      ? "Enter one of your 8-character backup codes"
+      : "Enter the 6-digit code from your authenticator app";
+
+    document.getElementById("mfaCodeLabel").textContent = enabled
+      ? "Backup Code"
+      : "Authenticator Code";
+
+    document.getElementById("toggleHint").textContent = enabled
+      ? "Have your app?"
+      : "Lost access to your app?";
+
+    toggleBtn.textContent = enabled
+      ? " Use authenticator code"
+      : " Use a backup code";
+
+    codeInput.focus();
+  }
+
+  toggleBtn.addEventListener("click", () => setBackupMode(!backupMode));
+
+  // Step visibility 
   function showMFAStep() {
     document.getElementById("loginStep").style.display = "none";
     document.getElementById("mfaStep").style.display   = "flex";
-    const input = document.getElementById("mfaCode");
-    if (input) { input.value = ""; input.focus(); }
+    setBackupMode(false);
+    document.getElementById("mfaError").style.display  = "none";
   }
 
   function showLoginStep() {
     document.getElementById("mfaStep").style.display   = "none";
     document.getElementById("loginStep").style.display = "flex";
     sessionStorage.removeItem("mfa_challenge");
-    const errEl = document.getElementById("mfaError");
-    if (errEl) errEl.style.display = "none";
+    document.getElementById("mfaError").style.display  = "none";
   }
 
-  // Login
+  // Login (step 1) 
   async function handleLogin(e) {
     e?.preventDefault();
 
@@ -346,12 +365,11 @@
     btn.textContent = "Signing in…";
 
     try {
-      const res = await fetch("/api/v1/auth/login", {
+      const res  = await fetch("/api/v1/auth/login", {
         method:  "POST",
         headers: { "Content-Type": "application/json" },
         body:    JSON.stringify({ email, password }),
       });
-
       const data = await res.json().catch(() => ({}));
 
       if (!res.ok) {
@@ -362,7 +380,6 @@
         return;
       }
 
-      // MFA required 
       if (data.mfaRequired) {
         if (!data.challengeToken) {
           errEl.textContent   = "Authentication error. Please try again.";
@@ -379,16 +396,17 @@
       }
 
       if (data.mfaSetupRequired) {
+      if (data.token) localStorage.setItem("token", data.token);  
       window.location.href = "/mfa-setup";
       return;
     }
 
-      // Success
+      // Full login success
       if (data.token) localStorage.setItem("token", data.token);
       if (data.user)  localStorage.setItem("user",  JSON.stringify(data.user));
       window.location.href = "/dashboard";
 
-    } catch (err) {
+    } catch {
       errEl.textContent   = "Network error. Please try again.";
       errEl.style.display = "block";
       btn.disabled        = false;
@@ -396,27 +414,31 @@
     }
   }
 
-  // MFA verify 
+  // MFA verify (step 2)
   async function handleMFA() {
     if (mfaSubmitting) return;
 
-    const errEl    = document.getElementById("mfaError");
-    const btn      = document.getElementById("mfaBtn");
-    const input    = document.getElementById("mfaCode");
-    const code     = input.value.replace(/\D/g, "");
+    const errEl     = document.getElementById("mfaError");
+    const btn       = document.getElementById("mfaBtn");
     const challenge = sessionStorage.getItem("mfa_challenge");
+    const code      = codeInput.value.trim().toUpperCase();
 
     errEl.style.display = "none";
 
-    if (!/^\d{6}$/.test(code)) {
-      errEl.textContent   = "Enter the 6-digit code from your authenticator app.";
+    // Validate format before sending
+    const isTotp   = /^\d{6}$/.test(code);
+    const isBackup = /^[A-Z0-9]{8}$/.test(code);
+
+    if (!isTotp && !isBackup) {
+      errEl.textContent   = backupMode
+        ? "Backup codes are 8 characters (letters and numbers)."
+        : "Enter a valid 6-digit authenticator code or switch to backup code.";
       errEl.style.display = "block";
-      errEl.style.fontFamily = "JetBrains Mono";
       return;
     }
 
     if (!challenge) {
-      errEl.textContent   = "Session expired. Please log in again.";
+      errEl.textContent   = "Session expired — please log in again.";
       errEl.style.display = "block";
       showLoginStep();
       return;
@@ -427,21 +449,18 @@
     btn.textContent = "Verifying…";
 
     try {
-      const res = await fetch("/api/v1/auth/login/mfa", {
+      const res  = await fetch("/api/v1/auth/login/mfa", {
         method:  "POST",
         headers: { "Content-Type": "application/json" },
         body:    JSON.stringify({ challengeToken: challenge, totpToken: code }),
       });
-
       const data = await res.json().catch(() => ({}));
 
       if (!res.ok) {
-        errEl.textContent   = data.error || "Invalid verification code";
+        errEl.textContent   = data.error || "Invalid code";
         errEl.style.display = "block";
-        input.value         = "";
-        input.focus();
-        btn.disabled        = false;
-        btn.textContent     = "Verify →";
+        codeInput.value     = "";
+        codeInput.focus();
         return;
       }
 
@@ -450,43 +469,50 @@
       if (data.user)  localStorage.setItem("user",  JSON.stringify(data.user));
       window.location.href = "/dashboard";
 
-    } catch (err) {
+    } catch {
       errEl.textContent   = "Network error. Please try again.";
       errEl.style.display = "block";
-      btn.disabled        = false;
-      btn.textContent     = "Verify →";
     } finally {
-      mfaSubmitting = false;
+      // Always re-enable button so user isn't stuck
+      mfaSubmitting   = false;
+      btn.disabled    = false;
+      btn.textContent = "Verify →";
     }
   }
 
-  // Wire events
-  loginBtn?.addEventListener("click",  handleLogin);
-  mfaBtn?.addEventListener("click",    handleMFA);
+  // Event wiring 
+  loginBtn?.addEventListener("click", handleLogin);
+  mfaBtn?.addEventListener("click",   handleMFA);
   mfaBackBtn?.addEventListener("click", showLoginStep);
 
-  [emailEl, passwordEl].forEach(el => {
-    el?.addEventListener("keydown", e => { if (e.key === "Enter") handleLogin(e); });
+  [emailEl, passwordEl].forEach(el =>
+    el?.addEventListener("keydown", e => { if (e.key === "Enter") handleLogin(e); })
+  );
+
+  codeInput?.addEventListener("input", function () {
+    // Auto-uppercase, strip invalid chars depending on mode
+    if (backupMode) {
+      this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, "");
+    } else {
+      this.value = this.value.replace(/\D/g, "");
+      // Auto-submit when 6 digits entered in TOTP mode
+      if (this.value.length === 6) handleMFA();
+    }
   });
 
-  document.getElementById("mfaCode")?.addEventListener("input", function() {
-    this.value = this.value.replace(/\D/g, "");
-    if (this.value.length === 6) handleMFA();
-  });
-
-  document.getElementById("mfaCode")?.addEventListener("keydown", e => {
+  codeInput?.addEventListener("keydown", e => {
     if (e.key === "Enter") handleMFA();
   });
 </script>
 
- <script>
-    const anim = lottie.loadAnimation({
-      container: document.getElementById('lottieLoader'),
-      renderer: 'svg',
-      loop: true,
-      autoplay: true,
-      path: '/animations/loading.json'
-    });
+<script>
+  lottie.loadAnimation({
+    container: document.getElementById("lottieLoader"),
+    renderer:  "svg",
+    loop:      true,
+    autoplay:  true,
+    path:      "/animations/loading.json",
+  });
 </script>
 </body>
 </html>

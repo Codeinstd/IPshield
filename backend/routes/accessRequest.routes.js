@@ -26,7 +26,7 @@ router.post("/",
     const { name, email, company } = req.body;
     const ts = new Date().toLocaleString();
 
-    // ── Email alert (resend setup)
+    // Email alert (SMTP setup)
     try {
     await sendEmail({
     to: process.env.ALERT_TO,

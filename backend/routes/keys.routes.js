@@ -1,71 +1,81 @@
-const express = require("express");
-const router = express.Router();
+const express  = require("express");
+const router   = express.Router();
 const { body, param, query, validationResult } = require("express-validator");
 const { requireAuth, requireRole } = require("../middleware/auth.js");
 const km = require("../services/keyManager.service");
-const { sendAlertEmail } = require("../services/email.service");
+const { sendEmail, sendAlertEmail, sendInviteEmail } = require("../services/email.service");
 const db = require("../store/db");
-const ROLES = ["readonly","analyst","admin"];
+
+const ROLES = ["readonly", "analyst", "admin"];
 
 function validate(req, res, next) {
   const errors = validationResult(req);
-  if (!errors.isEmpty()) return res.status(400).json({ error: "Validation failed", errors: errors.array() });
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ error: "Validation failed", errors: errors.array() });
+  }
   next();
 }
 
 // GET /api/keys/stats 
-router.get(
-  "/stats",
-  requireAuth,
-  requireRole("admin"),
+
+router.get("/stats",
+  requireAuth, requireRole("admin"),
   async (req, res) => {
     try {
       const stats = await km.getKeyStats();
       res.json(stats);
     } catch (err) {
-  next(err);
-}
+      console.error("[keys/stats]", err.message);
+      res.status(500).json({ error: err.message });
+    }
   }
 );
 
-// email route
+// POST /api/keys/access-request 
 router.post("/access-request", async (req, res) => {
   try {
-    console.log("[ACCESS REQUEST] HIT");
-
     const { name, email, company } = req.body;
 
     if (!name || !email || !company) {
       return res.status(400).json({ error: "Missing fields" });
     }
 
-    console.log("[ACCESS REQUEST] Sending email...");
+    const ts = new Date().toUTCString();
 
-    const result = await sendAlertEmail({
-      title: "New Access Request",
-      ip: email,
-      score: 0,
-      riskLevel: "INFO",
-      type: "ACCESS_REQUEST",
+    await sendEmail({
+      to:      process.env.ALERT_TO,
+      subject: `[IPShield] New Access Request — ${name}`,
+      html: `
+        <div style="background:#0d1117;padding:32px;font-family:monospace;max-width:520px;margin:0 auto;">
+          <h2 style="color:#c9d8e8;margin-bottom:20px;">
+            IP<span style="color:#00d9ff;">Shield</span> — New Access Request
+          </h2>
+          <table style="width:100%;border-collapse:collapse;font-size:13px;">
+            ${[["Name", name], ["Email", email], ["Organisation", company], ["Submitted", ts]]
+              .map(([k, v]) => `
+                <tr>
+                  <td style="padding:8px 12px;color:#4a6278;border-bottom:1px solid #1e2d3d;width:120px;">${k}</td>
+                  <td style="padding:8px 12px;color:#c9d8e8;border-bottom:1px solid #1e2d3d;">${v}</td>
+                </tr>`)
+              .join("")}
+          </table>
+        </div>`,
     });
-
-    console.log("[ACCESS EMAIL RESULT]", result);
 
     return res.json({ ok: true });
-  } catch (err) {
-    console.error("[ACCESS REQUEST ERROR]", err);
 
-    return res.status(500).json({
-      error: "Failed to send access request email",
-    });
+  } catch (err) {
+    console.error("[access-request]", err.message);
+    return res.status(500).json({ error: "Failed to send access request email" });
   }
 });
 
-// GET /api/keys
+// GET /api/keys 
+
 router.get("/",
   requireAuth, requireRole("admin"),
   [
-    query("status").optional().isIn(["pending","active","revoked","suspended"]),
+    query("status").optional().isIn(["pending", "active", "revoked", "suspended"]),
     query("role").optional().isIn(ROLES),
     query("limit").optional().isInt({ min: 1, max: 200 }),
     query("offset").optional().isInt({ min: 0 }),
@@ -80,13 +90,15 @@ router.get("/",
         offset: parseInt(req.query.offset || "0"),
       });
       res.json(result);
-       } catch (err) {
-  next(err);
-}
+    } catch (err) {
+      console.error("[keys/list]", err.message);
+      res.status(500).json({ error: err.message });
+    }
   }
 );
 
 // POST /api/keys/invite 
+
 router.post("/invite",
   requireAuth, requireRole("admin"),
   [
@@ -102,17 +114,17 @@ router.post("/invite",
       const invite = await km.createInvite({
         name:       req.body.name,
         email:      req.body.email,
-        role:       req.body.role || "analyst",   // ← explicit fallback, never undefined
+        role:       req.body.role || "analyst",
         dailyLimit: req.body.dailyLimit,
         notes:      req.body.notes,
         invitedBy:  req.auth?.name || req.auth?.email || "admin",
       });
 
-    if (invite.email) {
-  sendInviteEmail(invite).catch(err => {
-    console.error("[invite/email]", err.message);
-  });
-}
+      if (invite.email) {
+        sendInviteEmail(invite).catch(err => {
+          console.error("[invite/email]", err.message);
+        });
+      }
 
       res.status(201).json({
         id:           invite.id,
@@ -123,66 +135,88 @@ router.post("/invite",
         daily_limit:  invite.daily_limit,
         activateUrl:  invite.activateUrl,
         invite_token: invite.invite_token,
+        expiresAt:    invite.invite_expires_at,
         message:      "Invite created. Share the activateUrl with the recipient.",
       });
 
     } catch (err) {
-  next();
-}
+      console.error("[keys/invite]", err.message);
+      res.status(500).json({ error: err.message });
+    }
   }
 );
 
-// GET /api/keys/me — returns current key info (any authenticated user)
+// GET /api/keys/me 
+
 router.get("/me", requireAuth, async (req, res) => {
-  if (!req.auth) {
-    return res.status(401).json({ error: "Unauthorized" });
-  }
+  if (!req.auth) return res.status(401).json({ error: "Unauthorized" });
   res.json(req.auth);
 });
 
-// POST activate route:
+// GET /api/keys/activate/:token 
+// Validates token and returns invite metadata for the activation form
 router.get("/activate/:token",
-  [ param("token").trim().notEmpty().isLength({ min: 20, max: 120 }) ],
+  [param("token").trim().notEmpty().isLength({ min: 20, max: 120 })],
   validate,
   async (req, res) => {
     try {
       const result = await db.query(
-        `SELECT name, email, role, daily_limit, invited_at
-         FROM api_keys 
-         WHERE invite_token = $1 AND status = 'pending'`,
+        `SELECT name, email, role, daily_limit, invited_at, invite_expires_at
+         FROM api_keys
+         WHERE invite_token = $1
+           AND status = 'pending'
+           AND invite_expires_at > NOW()`,
         [req.params.token]
       );
 
       if (!result.rows.length) {
-        // Extra debug info 
-        const anyMatch = await db.query(
-          `SELECT id, status, left(invite_token,8) as preview 
-           FROM api_keys 
-           WHERE left(invite_token, 8) = left($1, 8)`,
+        // Check if it exists but is expired — give a clearer error
+        const expired = await db.query(
+          `SELECT id FROM api_keys
+           WHERE invite_token = $1
+             AND status = 'pending'
+             AND invite_expires_at <= NOW()`,
           [req.params.token]
         );
+
+        if (expired.rows.length) {
+          return res.status(410).json({
+            valid: false,
+            error: "This invite link has expired — ask an admin to send a new one",
+          });
+        }
+
         return res.status(404).json({
           valid: false,
-          error: "Invalid or expired invite token",
+          error: "Invalid or already-used invite link",
         });
       }
-      res.json({ valid: true, invite: result.rows[0] });
+
+      // Don't expose daily_limit — not needed on the activation form
+      const { name, email, role, invited_at } = result.rows[0];
+      res.json({ valid: true, invite: { name, email, role, invited_at } });
+
     } catch (err) {
-  next(err);
-}
+      console.error("[activate/get]", err.message);
+      res.status(500).json({ error: err.message });
+    }
   }
 );
 
-// POST activate
+// POST /api/keys/activate/:token 
 router.post("/activate/:token",
-  [param("token").trim().notEmpty().isLength({ min: 40, max: 60 })],
+  [param("token").trim().notEmpty().isLength({ min: 20, max: 120 })],
   validate,
   async (req, res) => {
     try {
       const { email, password } = req.body;
 
+      // Password validation — length + upper bound
       if (!password || password.length < 8) {
         return res.status(400).json({ error: "Password must be at least 8 characters" });
+      }
+      if (password.length > 128) {
+        return res.status(400).json({ error: "Password is too long" });
       }
       if (!email || !email.includes("@")) {
         return res.status(400).json({ error: "Valid email is required" });
@@ -191,42 +225,63 @@ router.post("/activate/:token",
       const bcrypt       = require("bcryptjs");
       const passwordHash = await bcrypt.hash(password, 12);
 
-      // Check token still valid
+      // Check token is still valid and not expired
       const check = await db.query(
-        `SELECT id FROM api_keys WHERE invite_token = $1 AND status = 'pending'`,
+        `SELECT id FROM api_keys
+         WHERE invite_token = $1
+           AND status = 'pending'
+           AND invite_expires_at > NOW()`,
         [req.params.token]
       );
+
       if (!check.rows.length) {
+        // Distinguish expired from invalid
+        const expired = await db.query(
+          `SELECT id FROM api_keys
+           WHERE invite_token = $1
+             AND status = 'pending'
+             AND invite_expires_at <= NOW()`,
+          [req.params.token]
+        );
+
+        if (expired.rows.length) {
+          return res.status(410).json({
+            error: "This invite link has expired — ask an admin to send a new one",
+          });
+        }
+
         return res.status(404).json({ error: "Invalid or already-used invite token" });
       }
 
-      // Set password on record before activation
+      // Set email + password
       await db.query(
         `UPDATE api_keys SET email = $1, password_hash = $2 WHERE id = $3`,
         [email.toLowerCase().trim(), passwordHash, check.rows[0].id]
       );
 
-      // Activate — returns raw key once, then wipes it from DB
+      // Activate — wipes raw key, sets status = active
       const activated = await km.activateInvite(req.params.token);
       if (!activated) {
-        return res.status(404).json({ error: "Activation failed" });
+        return res.status(404).json({ error: "Activation failed — token may have just expired" });
       }
 
       res.json({
-        message:     "API key activated. Save your key — it will NOT be shown again.",
-        key:         activated.key,   
+        message:     "Account activated. Save your API key — it will NOT be shown again.",
+        key:         activated.key,
         name:        activated.name,
         role:        activated.role,
         daily_limit: activated.daily_limit,
       });
 
     } catch (err) {
-  next(err);
-}
+      console.error("[activate/post] ERROR:", err.message);
+      console.error("[activate/post] STACK:", err.stack);
+      res.status(500).json({ error: err.message });
+    }
   }
 );
 
-// GET /api/keys/:id
+// GET /api/keys/:id 
 router.get("/:id",
   requireAuth, requireRole("admin"),
   [param("id").isInt({ min: 1 })],
@@ -235,11 +290,11 @@ router.get("/:id",
     try {
       const key = await km.getKey(parseInt(req.params.id));
       if (!key) return res.status(404).json({ error: "Key not found" });
-      // Mask the actual key
-      res.json({ ...key, key: key.key.slice(0, 8) + "••••••••••••••••••••••••" });
+      res.json({ ...key, key: key.key ? key.key.slice(0, 8) + "••••••••••••••••••••••••" : null });
     } catch (err) {
-  next(err);
-}
+      console.error("[keys/get]", err.message);
+      res.status(500).json({ error: err.message });
+    }
   }
 );
 
@@ -261,8 +316,9 @@ router.put("/:id",
       if (!updated) return res.status(404).json({ error: "Key not found" });
       res.json(updated);
     } catch (err) {
-  next(err);
-}
+      console.error("[keys/update]", err.message);
+      res.status(500).json({ error: err.message });
+    }
   }
 );
 
@@ -275,19 +331,17 @@ router.post("/:id/revoke",
   ],
   validate,
   async (req, res) => {
-    // you cannot revoke your own key (to prevent locking yourself out)
     if (Number(req.auth.id) === Number(req.params.id)) {
-    return res.status(400).json({
-      error: "You cannot revoke your own key"
-    });
-  }
+      return res.status(400).json({ error: "You cannot revoke your own key" });
+    }
     try {
       const ok = await km.revokeKey(parseInt(req.params.id), req.body.reason);
       if (!ok) return res.status(404).json({ error: "Key not found or already revoked" });
       res.json({ message: "Key revoked" });
     } catch (err) {
-  next(err);
-}
+      console.error("[keys/revoke]", err.message);
+      res.status(500).json({ error: err.message });
+    }
   }
 );
 
@@ -297,49 +351,43 @@ router.post("/:id/suspend",
   [param("id").isInt({ min: 1 })],
   validate,
   async (req, res) => {
-    // you cannot suspend your own key (to prevent locking yourself out)
     if (Number(req.auth.id) === Number(req.params.id)) {
-  return res.status(400).json({
-    error: "You cannot suspend your own key"
-  });
-}
+      return res.status(400).json({ error: "You cannot suspend your own key" });
+    }
     try {
       await km.suspendKey(parseInt(req.params.id));
       res.json({ message: "Key suspended" });
     } catch (err) {
-  next(err);
-}
+      console.error("[keys/suspend]", err.message);
+      res.status(500).json({ error: err.message });
+    }
   }
 );
 
-// DELETE /api/keys/:id
+// DELETE /api/keys/:id 
 router.delete("/:id",
   requireAuth, requireRole("admin"),
   [param("id").isInt({ min: 1 })],
   validate,
   async (req, res) => {
-    //  prevent self-deletion
     if (Number(req.auth.id) === Number(req.params.id)) {
-      return res.status(400).json({
-        error: "You cannot delete your own admin key"
-      });
+      return res.status(400).json({ error: "You cannot delete your own admin key" });
     }
     try {
       const result = await db.query(
         `DELETE FROM api_keys WHERE id = $1 RETURNING id, name`,
         [parseInt(req.params.id)]
       );
-      if (!result.rows.length) {
-        return res.status(404).json({ error: "Key not found" });
-      }
+      if (!result.rows.length) return res.status(404).json({ error: "Key not found" });
       res.json({ message: `Key "${result.rows[0].name}" permanently deleted` });
     } catch (err) {
-  next(err);
-}
+      console.error("[keys/delete]", err.message);
+      res.status(500).json({ error: err.message });
+    }
   }
 );
 
-// POST /api/keys/:id/reinstate
+// POST /api/keys/:id/reinstate 
 router.post("/:id/reinstate",
   requireAuth, requireRole("admin"),
   [param("id").isInt({ min: 1 })],
@@ -349,8 +397,9 @@ router.post("/:id/reinstate",
       await km.reinstateKey(parseInt(req.params.id));
       res.json({ message: "Key reinstated" });
     } catch (err) {
-  next(err);
-}
+      console.error("[keys/reinstate]", err.message);
+      res.status(500).json({ error: err.message });
+    }
   }
 );
 
@@ -360,12 +409,9 @@ router.post("/:id/rotate",
   [param("id").isInt({ min: 1 })],
   validate,
   async (req, res) => {
-    // you cannot rotate your own active key (to prevent locking yourself out)
     if (Number(req.auth.id) === Number(req.params.id)) {
-  return res.status(400).json({
-    error: "You cannot rotate your own active admin key"
-  });
-}
+      return res.status(400).json({ error: "You cannot rotate your own active admin key" });
+    }
     try {
       const result = await km.rotateKey(parseInt(req.params.id));
       if (!result) return res.status(404).json({ error: "Key not found or not active" });
@@ -375,8 +421,9 @@ router.post("/:id/rotate",
         name:    result.name,
       });
     } catch (err) {
-  next(err);
-}
+      console.error("[keys/rotate]", err.message);
+      res.status(500).json({ error: err.message });
+    }
   }
 );
 
@@ -394,10 +441,15 @@ router.get("/:id/usage",
         parseInt(req.params.id),
         parseInt(req.query.days || "30")
       );
-      res.json({ key_id: parseInt(req.params.id), days: parseInt(req.query.days || "30"), usage });
+      res.json({
+        key_id: parseInt(req.params.id),
+        days:   parseInt(req.query.days || "30"),
+        usage,
+      });
     } catch (err) {
-  next(err);
-}
+      console.error("[keys/usage]", err.message);
+      res.status(500).json({ error: err.message });
+    }
   }
 );
 

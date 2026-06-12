@@ -2200,942 +2200,1023 @@
     }
   }
  
-function renderTimeline(data, container) {
-  if (!data.total || !data.history?.length) {
+  function renderTimeline(data, container) {
+    if (!data.total || !data.history?.length) {
+      container.innerHTML = `
+        <div style="text-align:center;padding:40px 0;color:var(--text3);">
+          <div style="font-size:32px;margin-bottom:12px;">📊</div>
+          <div style="font-size:13px;">No scoring history found for this IP.</div>
+          <div style="font-size:11px;margin-top:6px;">Score the IP a few times to build a history.</div>
+        </div>`;
+      return;
+    }
+  
+    const stats   = data.stats;
+    const history = data.history;
+  
+    // Trend indicator
+    const trendIcon  = stats.trend === "increasing" ? "↑" : stats.trend === "decreasing" ? "↓" : "→";
+    const trendColor = stats.trend === "increasing" ? "var(--critical)"
+                    : stats.trend === "decreasing" ? "var(--low)" : "var(--text2)";
+    const changeStr  = stats.change > 0 ? `+${stats.change}` : String(stats.change);
+  
     container.innerHTML = `
-      <div style="text-align:center;padding:40px 0;color:var(--text3);">
-        <div style="font-size:32px;margin-bottom:12px;">📊</div>
-        <div style="font-size:13px;">No scoring history found for this IP.</div>
-        <div style="font-size:11px;margin-top:6px;">Score the IP a few times to build a history.</div>
-      </div>`;
-    return;
-  }
- 
-  const stats   = data.stats;
-  const history = data.history;
- 
-  // Trend indicator
-  const trendIcon  = stats.trend === "increasing" ? "↑" : stats.trend === "decreasing" ? "↓" : "→";
-  const trendColor = stats.trend === "increasing" ? "var(--critical)"
-                   : stats.trend === "decreasing" ? "var(--low)" : "var(--text2)";
-  const changeStr  = stats.change > 0 ? `+${stats.change}` : String(stats.change);
- 
-  container.innerHTML = `
-    <!-- Stats row -->
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;">
-      ${[
-        { label: "Latest",   val: stats.latest, color: scoreColor(stats.latest) },
-        { label: "Average",  val: stats.avg,    color: scoreColor(stats.avg)    },
-        { label: "Min",      val: stats.min,    color: scoreColor(stats.min)    },
-        { label: "Max",      val: stats.max,    color: scoreColor(stats.max)    }
-      ].map(s => `
-        <div style="background:var(--bg1);border-radius:8px;padding:14px;text-align:center;border:0.9px solid var(--border);">
-          <div style="font-size:22px;font-weight:800;color:${s.color};font-family:'Syne',sans-serif;">${s.val}</div>
-          <div style="font-size:10px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-top:2px;">${s.label}</div>
-        </div>`).join("")}
-    </div>
- 
-    <!-- Trend -->
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;padding:10px 14px;background:var(--bg1);border-radius:8px;border:0.9px solid var(--border);">
-      <span style="font-size:18px;color:${trendColor};font-weight:700;">${trendIcon}</span>
-      <div>
-        <span style="font-size:12px;color:var(--text);font-weight:600;">Trend: ${stats.trend.charAt(0).toUpperCase() + stats.trend.slice(1)}</span>
-        <span style="font-size:11px;color:var(--text3);margin-left:8px;">Score changed ${changeStr} points over ${data.total} scoring${data.total !== 1 ? "s" : ""}</span>
+      <!-- Stats row -->
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;">
+        ${[
+          { label: "Latest",   val: stats.latest, color: scoreColor(stats.latest) },
+          { label: "Average",  val: stats.avg,    color: scoreColor(stats.avg)    },
+          { label: "Min",      val: stats.min,    color: scoreColor(stats.min)    },
+          { label: "Max",      val: stats.max,    color: scoreColor(stats.max)    }
+        ].map(s => `
+          <div style="background:var(--bg1);border-radius:8px;padding:14px;text-align:center;border:0.9px solid var(--border);">
+            <div style="font-size:22px;font-weight:800;color:${s.color};font-family:'Syne',sans-serif;">${s.val}</div>
+            <div style="font-size:10px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-top:2px;">${s.label}</div>
+          </div>`).join("")}
       </div>
-    </div>
- 
-    <!-- Chart canvas -->
-    <div style="background:var(--bg1);border-radius:10px;border:0.9px solid var(--border);padding:16px;margin-bottom:20px;">
-      <div style="font-size:10px;color:var(--text3);letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;">// Score Over Time</div>
-      <canvas id="timelineCanvas" style="width:100%;display:block;"></canvas>
-    </div>
- 
-    <!-- History table -->
-    <div style="background:var(--bg1);border-radius:10px;border:0.9px solid var(--border);overflow:hidden;">
-      <div style="padding:12px 16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
-        <div style="font-size:10px;color:var(--text3);letter-spacing:2px;text-transform:uppercase;">// Scoring History</div>
-        <div style="font-size:11px;color:var(--text3);">${data.total} record${data.total !== 1 ? "s" : ""}</div>
-      </div>
-      <div style="max-height:200px;overflow-y:auto;">
-        <table style="width:100%;border-collapse:collapse;font-size:11px;">
-          <thead>
-            <tr style="background:var(--bg1);">
-              <th style="padding:8px 14px;text-align:left;color:var(--text3);font-weight:600;letter-spacing:1px;font-size:10px;">DATE</th>
-              <th style="padding:8px 14px;text-align:center;color:var(--text3);font-weight:600;letter-spacing:1px;font-size:10px;">SCORE</th>
-              <th style="padding:8px 14px;text-align:center;color:var(--text3);font-weight:600;letter-spacing:1px;font-size:10px;">RISK</th>
-              <th style="padding:8px 14px;text-align:center;color:var(--text3);font-weight:600;letter-spacing:1px;font-size:10px;">ACTION</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${[...history].reverse().map((h, i) => {
-              const risk   = h.risk_level || "LOW";
-              const rColor = { CRITICAL:"var(--critical)", HIGH:"var(--high)", MEDIUM:"var(--medium)", LOW:"var(--low)" }[risk] || "var(--low)";
-              const date   = new Date(h.scored_at).toLocaleString([], { month:"short", day:"numeric", hour:"2-digit", minute:"2-digit" });
-              return `<tr style="border-top:1px solid var(--border);${i === 0 ? "background:rgba(0,217,255,0.03);" : ""}">
-                <td style="padding:8px 14px;color:var(--text2);">${date}</td>
-                <td style="padding:8px 14px;text-align:center;font-weight:700;color:${scoreColor(h.score)};">${h.score}</td>
-                <td style="padding:8px 14px;text-align:center;">
-                  <span style="font-size:10px;font-weight:700;color:${rColor};padding:2px 7px;border-radius:3px;background:${rColor}22;">${risk}</span>
-                </td>
-                <td style="padding:8px 14px;text-align:center;color:var(--text2);">${h.action || "—"}</td>
-              </tr>`;
-            }).join("")}
-          </tbody>
-        </table>
-      </div>
-    </div>`;
- 
-  // Draw chart after DOM renders
-  requestAnimationFrame(() => drawTimelineChart(history, document.getElementById("timelineCanvas")));
-}
- 
-function scoreColor(score) {
-  if (score > 80) return "var(--critical)";
-  if (score > 60) return "var(--high)";
-  if (score > 30) return "var(--medium)";
-  return "var(--low)";
-}
- 
-function drawTimelineChart(history, canvas) {
-  if (!canvas) return;
- 
-  const dpr     = window.devicePixelRatio || 1;
-  const W       = canvas.parentElement.clientWidth - 32;
-  const H       = 140;
-  canvas.width  = W * dpr;
-  canvas.height = H * dpr;
-  canvas.style.width  = W + "px";
-  canvas.style.height = H + "px";
- 
-  const ctx = canvas.getContext("2d");
-  ctx.scale(dpr, dpr);
- 
-  const PAD   = { top: 12, right: 16, bottom: 28, left: 36 };
-  const chartW = W - PAD.left - PAD.right;
-  const chartH = H - PAD.top  - PAD.bottom;
- 
-  const scores   = history.map(h => h.score);
-  const minScore = 0;
-  const maxScore = 100;
- 
-  // Background
-  ctx.fillStyle = getComputedStyle(document.documentElement)
-    .getPropertyValue("--bg1").trim() || "#111820";
-  ctx.fillRect(0, 0, W, H);
- 
-  // Grid lines
-  ctx.strokeStyle = getComputedStyle(document.documentElement)
-    .getPropertyValue("--border").trim() || "#1e2d3d";
-  ctx.lineWidth = 0.5;
- 
-  [0, 25, 50, 75, 100].forEach(val => {
-    const y = PAD.top + chartH - (val / maxScore) * chartH;
-    ctx.beginPath();
-    ctx.moveTo(PAD.left, y);
-    ctx.lineTo(PAD.left + chartW, y);
-    ctx.stroke();
- 
-    // Y axis labels
-    ctx.fillStyle = getComputedStyle(document.documentElement)
-      .getPropertyValue("--text3").trim() || "#3d5a72";
-    ctx.font = `${10 * dpr / dpr}px monospace`;
-    ctx.textAlign = "right";
-    ctx.fillText(String(val), PAD.left - 6, y + 3);
-  });
- 
-  if (scores.length < 2) {
-    // Single point — just draw a dot
-    const x = PAD.left + chartW / 2;
-    const y = PAD.top + chartH - (scores[0] / maxScore) * chartH;
-    ctx.beginPath();
-    ctx.arc(x, y, 5, 0, Math.PI * 2);
-    ctx.fillStyle = resolveScoreColor(scores[0]);
-    ctx.fill();
-    return;
-  }
- 
-  // Compute point positions
-  const pts = scores.map((s, i) => ({
-    x: PAD.left + (i / (scores.length - 1)) * chartW,
-    y: PAD.top + chartH - (s / maxScore) * chartH,
-    score: s
-  }));
- 
-  // Gradient fill under line
-  const grad = ctx.createLinearGradient(0, PAD.top, 0, PAD.top + chartH);
-  grad.addColorStop(0,   "rgba(0,217,255,0.3)");
-  grad.addColorStop(1,   "rgba(0,217,255,0.0)");
- 
-  ctx.beginPath();
-  ctx.moveTo(pts[0].x, pts[0].y);
-  pts.slice(1).forEach(p => {
-    // Smooth curve using bezier
-    const prev = pts[pts.indexOf(p) - 1];
-    const cpX  = (prev.x + p.x) / 2;
-    ctx.bezierCurveTo(cpX, prev.y, cpX, p.y, p.x, p.y);
-  });
-  ctx.lineTo(pts[pts.length - 1].x, PAD.top + chartH);
-  ctx.lineTo(pts[0].x, PAD.top + chartH);
-  ctx.closePath();
-  ctx.fillStyle = grad;
-  ctx.fill();
- 
-  // Line
-  ctx.beginPath();
-  ctx.moveTo(pts[0].x, pts[0].y);
-  pts.slice(1).forEach(p => {
-    const prev = pts[pts.indexOf(p) - 1];
-    const cpX  = (prev.x + p.x) / 2;
-    ctx.bezierCurveTo(cpX, prev.y, cpX, p.y, p.x, p.y);
-  });
-  ctx.strokeStyle = "#00d9ff";
-  ctx.lineWidth   = 2;
-  ctx.stroke();
- 
-  // Data points — color by risk
-  pts.forEach((p, i) => {
-    const color = resolveScoreColor(p.score);
-    ctx.beginPath();
-    ctx.arc(p.x, p.y, scores.length > 20 ? 2.5 : 4, 0, Math.PI * 2);
-    ctx.fillStyle   = color;
-    ctx.strokeStyle = "#080c0f";
-    ctx.lineWidth   = 1.5;
-    ctx.fill();
-    ctx.stroke();
-  });
- 
-  // X axis date labels (show ~5 evenly spaced)
-  const labelCount = Math.min(5, scores.length);
-  const step       = Math.floor((scores.length - 1) / (labelCount - 1)) || 1;
-  ctx.fillStyle  = getComputedStyle(document.documentElement)
-    .getPropertyValue("--text3").trim() || "#3d5a72";
-  ctx.font       = `${9 * dpr / dpr}px monospace`;
-  ctx.textAlign  = "center";
- 
-  for (let i = 0; i < scores.length; i += step) {
-    if (i >= history.length) break;
-    const x    = PAD.left + (i / (scores.length - 1)) * chartW;
-    const date = new Date(history[i].scored_at);
-    const label = date.toLocaleDateString([], { month: "short", day: "numeric" });
-    ctx.fillText(label, x, H - 8);
-  }
-  // Always label last point
-  const lastX = PAD.left + chartW;
-  const lastDate = new Date(history[history.length - 1].scored_at);
-  ctx.fillText(lastDate.toLocaleDateString([], { month:"short", day:"numeric" }), lastX, H - 8);
-}
- 
-function resolveScoreColor(score) {
-  if (score > 80) return "#ff3355";
-  if (score > 60) return "#ff7700";
-  if (score > 30) return "#ffcc00";
-                  return "#00e87c";
-}
-
-// MFA panel
-async function showMFAPanel() {
-  document.getElementById("mfaModal")?.remove();
-
-  // Check current status
-  const statusRes  = await fetch("/api/v1/mfa/status", { headers: authHeaders() });
-  const statusData = await statusRes.json();
-  const isEnabled  = statusData.enabled;
-
-  const overlay = document.createElement("div");
-  overlay.id    = "mfaModal";
-  overlay.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:10000;display:flex;align-items:center;justify-content:center;padding:24px;";
-
-  const modal = document.createElement("div");
-  modal.style.cssText = "background:var(--bg1);border:1px solid var(--border);border-radius:12px;width:100%;max-width:480px;overflow:hidden;";
-
-  modal.innerHTML = `
-    <div style="padding:20px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
-      <div>
-        <div style="font-size:14px;font-weight:700;color:var(--text);">🔐 Two-Factor Authentication</div>
-        <div style="font-size:11px;color:var(--text3);margin-top:2px;">
-          Status: <span style="color:${isEnabled ? "var(--low)" : "var(--text3)"};">
-            ${isEnabled ? "● Enabled" : "○ Disabled"}
-          </span>
+  
+      <!-- Trend -->
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;padding:10px 14px;background:var(--bg1);border-radius:8px;border:0.9px solid var(--border);">
+        <span style="font-size:18px;color:${trendColor};font-weight:700;">${trendIcon}</span>
+        <div>
+          <span style="font-size:12px;color:var(--text);font-weight:600;">Trend: ${stats.trend.charAt(0).toUpperCase() + stats.trend.slice(1)}</span>
+          <span style="font-size:11px;color:var(--text3);margin-left:8px;">Score changed ${changeStr} points over ${data.total} scoring${data.total !== 1 ? "s" : ""}</span>
         </div>
       </div>
-      <button id="mfaModalClose" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:20px;">✕</button>
-    </div>
-
-    <div id="mfaModalBody" style="padding:24px;">
-      ${isEnabled ? renderMFADisableView() : renderMFASetupView()}
-    </div>`;
-
-  overlay.appendChild(modal);
-  document.body.appendChild(overlay);
-
-  document.getElementById("mfaModalClose").addEventListener("click", () => overlay.remove());
-  overlay.addEventListener("click", e => { if (e.target === overlay) overlay.remove(); });
-
-  if (!isEnabled) {
-    // Kick off QR setup
-    loadMFASetup();
+  
+      <!-- Chart canvas -->
+      <div style="background:var(--bg1);border-radius:10px;border:0.9px solid var(--border);padding:16px;margin-bottom:20px;">
+        <div style="font-size:10px;color:var(--text3);letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;">// Score Over Time</div>
+        <canvas id="timelineCanvas" style="width:100%;display:block;"></canvas>
+      </div>
+  
+      <!-- History table -->
+      <div style="background:var(--bg1);border-radius:10px;border:0.9px solid var(--border);overflow:hidden;">
+        <div style="padding:12px 16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
+          <div style="font-size:10px;color:var(--text3);letter-spacing:2px;text-transform:uppercase;">// Scoring History</div>
+          <div style="font-size:11px;color:var(--text3);">${data.total} record${data.total !== 1 ? "s" : ""}</div>
+        </div>
+        <div style="max-height:200px;overflow-y:auto;">
+          <table style="width:100%;border-collapse:collapse;font-size:11px;">
+            <thead>
+              <tr style="background:var(--bg1);">
+                <th style="padding:8px 14px;text-align:left;color:var(--text3);font-weight:600;letter-spacing:1px;font-size:10px;">DATE</th>
+                <th style="padding:8px 14px;text-align:center;color:var(--text3);font-weight:600;letter-spacing:1px;font-size:10px;">SCORE</th>
+                <th style="padding:8px 14px;text-align:center;color:var(--text3);font-weight:600;letter-spacing:1px;font-size:10px;">RISK</th>
+                <th style="padding:8px 14px;text-align:center;color:var(--text3);font-weight:600;letter-spacing:1px;font-size:10px;">ACTION</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${[...history].reverse().map((h, i) => {
+                const risk   = h.risk_level || "LOW";
+                const rColor = { CRITICAL:"var(--critical)", HIGH:"var(--high)", MEDIUM:"var(--medium)", LOW:"var(--low)" }[risk] || "var(--low)";
+                const date   = new Date(h.scored_at).toLocaleString([], { month:"short", day:"numeric", hour:"2-digit", minute:"2-digit" });
+                return `<tr style="border-top:1px solid var(--border);${i === 0 ? "background:rgba(0,217,255,0.03);" : ""}">
+                  <td style="padding:8px 14px;color:var(--text2);">${date}</td>
+                  <td style="padding:8px 14px;text-align:center;font-weight:700;color:${scoreColor(h.score)};">${h.score}</td>
+                  <td style="padding:8px 14px;text-align:center;">
+                    <span style="font-size:10px;font-weight:700;color:${rColor};padding:2px 7px;border-radius:3px;background:${rColor}22;">${risk}</span>
+                  </td>
+                  <td style="padding:8px 14px;text-align:center;color:var(--text2);">${h.action || "—"}</td>
+                </tr>`;
+              }).join("")}
+            </tbody>
+          </table>
+        </div>
+      </div>`;
+  
+    // Draw chart after DOM renders
+    requestAnimationFrame(() => drawTimelineChart(history, document.getElementById("timelineCanvas")));
   }
-}
+  
+  function scoreColor(score) {
+    if (score > 80) return "var(--critical)";
+    if (score > 60) return "var(--high)";
+    if (score > 30) return "var(--medium)";
+    return "var(--low)";
+  }
+  
+  function drawTimelineChart(history, canvas) {
+    if (!canvas) return;
+  
+    const dpr     = window.devicePixelRatio || 1;
+    const W       = canvas.parentElement.clientWidth - 32;
+    const H       = 140;
+    canvas.width  = W * dpr;
+    canvas.height = H * dpr;
+    canvas.style.width  = W + "px";
+    canvas.style.height = H + "px";
+  
+    const ctx = canvas.getContext("2d");
+    ctx.scale(dpr, dpr);
+  
+    const PAD   = { top: 12, right: 16, bottom: 28, left: 36 };
+    const chartW = W - PAD.left - PAD.right;
+    const chartH = H - PAD.top  - PAD.bottom;
+  
+    const scores   = history.map(h => h.score);
+    const minScore = 0;
+    const maxScore = 100;
+  
+    // Background
+    ctx.fillStyle = getComputedStyle(document.documentElement)
+      .getPropertyValue("--bg1").trim() || "#111820";
+    ctx.fillRect(0, 0, W, H);
+  
+    // Grid lines
+    ctx.strokeStyle = getComputedStyle(document.documentElement)
+      .getPropertyValue("--border").trim() || "#1e2d3d";
+    ctx.lineWidth = 0.5;
+  
+    [0, 25, 50, 75, 100].forEach(val => {
+      const y = PAD.top + chartH - (val / maxScore) * chartH;
+      ctx.beginPath();
+      ctx.moveTo(PAD.left, y);
+      ctx.lineTo(PAD.left + chartW, y);
+      ctx.stroke();
+  
+      // Y axis labels
+      ctx.fillStyle = getComputedStyle(document.documentElement)
+        .getPropertyValue("--text3").trim() || "#3d5a72";
+      ctx.font = `${10 * dpr / dpr}px monospace`;
+      ctx.textAlign = "right";
+      ctx.fillText(String(val), PAD.left - 6, y + 3);
+    });
+  
+    if (scores.length < 2) {
+      // Single point — just draw a dot
+      const x = PAD.left + chartW / 2;
+      const y = PAD.top + chartH - (scores[0] / maxScore) * chartH;
+      ctx.beginPath();
+      ctx.arc(x, y, 5, 0, Math.PI * 2);
+      ctx.fillStyle = resolveScoreColor(scores[0]);
+      ctx.fill();
+      return;
+    }
+  
+    // Compute point positions
+    const pts = scores.map((s, i) => ({
+      x: PAD.left + (i / (scores.length - 1)) * chartW,
+      y: PAD.top + chartH - (s / maxScore) * chartH,
+      score: s
+    }));
+  
+    // Gradient fill under line
+    const grad = ctx.createLinearGradient(0, PAD.top, 0, PAD.top + chartH);
+    grad.addColorStop(0,   "rgba(0,217,255,0.3)");
+    grad.addColorStop(1,   "rgba(0,217,255,0.0)");
+  
+    ctx.beginPath();
+    ctx.moveTo(pts[0].x, pts[0].y);
+    pts.slice(1).forEach(p => {
+      // Smooth curve using bezier
+      const prev = pts[pts.indexOf(p) - 1];
+      const cpX  = (prev.x + p.x) / 2;
+      ctx.bezierCurveTo(cpX, prev.y, cpX, p.y, p.x, p.y);
+    });
+    ctx.lineTo(pts[pts.length - 1].x, PAD.top + chartH);
+    ctx.lineTo(pts[0].x, PAD.top + chartH);
+    ctx.closePath();
+    ctx.fillStyle = grad;
+    ctx.fill();
+  
+    // Line
+    ctx.beginPath();
+    ctx.moveTo(pts[0].x, pts[0].y);
+    pts.slice(1).forEach(p => {
+      const prev = pts[pts.indexOf(p) - 1];
+      const cpX  = (prev.x + p.x) / 2;
+      ctx.bezierCurveTo(cpX, prev.y, cpX, p.y, p.x, p.y);
+    });
+    ctx.strokeStyle = "#00d9ff";
+    ctx.lineWidth   = 2;
+    ctx.stroke();
+  
+    // Data points — color by risk
+    pts.forEach((p, i) => {
+      const color = resolveScoreColor(p.score);
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, scores.length > 20 ? 2.5 : 4, 0, Math.PI * 2);
+      ctx.fillStyle   = color;
+      ctx.strokeStyle = "#080c0f";
+      ctx.lineWidth   = 1.5;
+      ctx.fill();
+      ctx.stroke();
+    });
+  
+    // X axis date labels (show ~5 evenly spaced)
+    const labelCount = Math.min(5, scores.length);
+    const step       = Math.floor((scores.length - 1) / (labelCount - 1)) || 1;
+    ctx.fillStyle  = getComputedStyle(document.documentElement)
+      .getPropertyValue("--text3").trim() || "#3d5a72";
+    ctx.font       = `${9 * dpr / dpr}px monospace`;
+    ctx.textAlign  = "center";
+  
+    for (let i = 0; i < scores.length; i += step) {
+      if (i >= history.length) break;
+      const x    = PAD.left + (i / (scores.length - 1)) * chartW;
+      const date = new Date(history[i].scored_at);
+      const label = date.toLocaleDateString([], { month: "short", day: "numeric" });
+      ctx.fillText(label, x, H - 8);
+    }
+    // Always label last point
+    const lastX = PAD.left + chartW;
+    const lastDate = new Date(history[history.length - 1].scored_at);
+    ctx.fillText(lastDate.toLocaleDateString([], { month:"short", day:"numeric" }), lastX, H - 8);
+  }
+  
+  function resolveScoreColor(score) {
+    if (score > 80) return "#ff3355";
+    if (score > 60) return "#ff7700";
+    if (score > 30) return "#ffcc00";
+                    return "#00e87c";
+  }
 
-function renderMFASetupView() {
-  return `
-    <div id="mfaSetupStep1">
-      <div style="text-align:center;padding:20px 0;">
+
+  // MFA Panel (dashboard) 
+  async function showMFAPanel() {
+    document.getElementById("mfaModal")?.remove();
+
+    const statusRes  = await fetch("/api/v1/mfa/status", { headers: authHeaders() });
+    const statusData = await statusRes.json();
+    const isEnabled  = statusData.enabled;
+
+    const overlay = document.createElement("div");
+    overlay.id    = "mfaModal";
+    overlay.style.cssText = `
+      position:fixed;inset:0;background:rgba(0,0,0,0.8);
+      z-index:10000;display:flex;align-items:center;
+      justify-content:center;padding:24px;`;
+
+    const modal = document.createElement("div");
+    modal.style.cssText = `
+      background:var(--bg1);border:1px solid var(--border);
+      border-radius:12px;width:100%;max-width:480px;overflow:hidden;`;
+
+    modal.innerHTML = `
+      <div style="padding:20px 24px;border-bottom:1px solid var(--border);
+                  display:flex;align-items:center;justify-content:space-between;">
+        <div>
+          <div style="font-size:14px;font-weight:700;color:var(--text);">
+            🔐 Two-Factor Authentication
+          </div>
+          <div style="font-size:11px;color:var(--text3);margin-top:2px;">
+            Status:
+            <span style="color:${isEnabled ? "var(--low)" : "var(--text3)"};">
+              ${isEnabled ? "● Enabled" : "○ Disabled"}
+            </span>
+          </div>
+        </div>
+        <button id="mfaModalClose"
+          style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:20px;">
+          ✕
+        </button>
+      </div>
+      <div id="mfaModalBody" style="padding:24px;">
+        ${isEnabled ? _renderDisableView() : _renderSetupLoading()}
+      </div>`;
+
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+
+    document.getElementById("mfaModalClose").addEventListener("click", () => overlay.remove());
+    overlay.addEventListener("click", e => { if (e.target === overlay) overlay.remove(); });
+
+    if (!isEnabled) _loadMFASetup();
+  }
+
+  // Private: render helpers 
+  function _renderSetupLoading() {
+    return `
+      <div id="mfaSetupContent" style="text-align:center;padding:20px 0;">
         <div class="spinner" style="margin:0 auto 12px;"></div>
         <div style="font-size:12px;color:var(--text2);">Generating your setup code…</div>
-      </div>
-    </div>`;
-}
+      </div>`;
+  }
 
-function renderMFADisableView() {
-  return `
-    <div style="text-align:center;margin-bottom:20px;">
-      <div style="font-size:32px;margin-bottom:10px;">✓</div>
-      <div style="font-size:13px;color:var(--text2);line-height:1.7;">
-        Two-factor authentication is active on your account.<br>
-        You will be asked for a code on every login.
+  function _renderDisableView() {
+    return `
+      <div style="text-align:center;margin-bottom:20px;">
+        <div style="font-size:32px;margin-bottom:10px;">✓</div>
+        <div style="font-size:13px;color:var(--text2);line-height:1.7;">
+          Two-factor authentication is active on your account.<br>
+          You will be asked for a code on every login.
+        </div>
       </div>
-    </div>
-    <div style="background:rgba(255,51,85,0.06);border:1px solid rgba(255,51,85,0.2);
-                border-radius:8px;padding:16px;margin-bottom:20px;">
-      <div style="font-size:11px;color:var(--critical);font-weight:700;margin-bottom:6px;">
-        ⚠ Disable MFA
-      </div>
-      <div style="font-size:11px;color:var(--text2);margin-bottom:12px;line-height:1.6;">
-        Enter your current authenticator code to disable MFA.
-        Your account will be less secure without it.
-      </div>
-      <input type="text" id="disableMfaCode" placeholder="000000" maxlength="6"
-        inputmode="numeric" autocomplete="one-time-code"
-        style="width:100%;padding:10px 14px;background:var(--bg2);border:1px solid var(--border);
-               border-radius:6px;color:var(--text);font-family:'JetBrains Mono',monospace;
-               font-size:18px;text-align:center;letter-spacing:6px;outline:none;
-               margin-bottom:10px;">
-      <div id="disableMfaError" style="display:none;font-size:11px;color:var(--critical);margin-bottom:8px;"></div>
-      <button id="disableMfaBtn" onclick="disableMFA()"
-        style="width:100%;padding:10px;border-radius:6px;border:1px solid var(--critical);
-               background:rgba(255,51,85,0.1);color:var(--critical);cursor:pointer;
-               font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;">
-        Disable MFA
-      </button>
-    </div>`;
-}
+      <div style="background:rgba(255,51,85,0.06);border:1px solid rgba(255,51,85,0.2);
+                  border-radius:8px;padding:16px;margin-bottom:20px;">
+        <div style="font-size:11px;color:var(--critical);font-weight:700;margin-bottom:6px;">
+          ⚠ Disable MFA
+        </div>
+        <div style="font-size:11px;color:var(--text2);margin-bottom:12px;line-height:1.6;">
+          Enter your current authenticator code to disable MFA.
+          Your account will be less secure without it.
+        </div>
+        <input type="text" id="disableMfaCode"
+          placeholder="000000" maxlength="6"
+          inputmode="numeric" autocomplete="one-time-code"
+          style="width:100%;padding:10px 14px;background:var(--bg2);border:1px solid var(--border);
+                border-radius:6px;color:var(--text);font-family:'JetBrains Mono',monospace;
+                font-size:18px;text-align:center;letter-spacing:6px;outline:none;
+                margin-bottom:10px;">
+        <div id="disableMfaError"
+          style="display:none;font-size:11px;color:var(--critical);margin-bottom:8px;
+                font-family:'JetBrains Mono',monospace;"></div>
+        <button id="disableMfaBtn"
+          style="width:100%;padding:10px;border-radius:6px;border:1px solid var(--critical);
+                background:rgba(255,51,85,0.1);color:var(--critical);cursor:pointer;
+                font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;">
+          Disable MFA
+        </button>
+      </div>`;
+  }
 
-async function loadMFASetup() {
-  try {
-    const res  = await fetch("/api/v1/mfa/setup", { headers: authHeaders() });
-    const data = await res.json();
+  // Setup: load QR then render form 
 
-    if (!res.ok) {
-      document.getElementById("mfaSetupStep1").innerHTML =
-        `<div style="color:var(--critical);font-size:12px;text-align:center;">⚠ ${escHtml(data.error)}</div>`;
+  async function _loadMFASetup() {
+    try {
+      const res  = await fetch("/api/v1/mfa/setup", { headers: authHeaders() });
+      const data = await res.json();
+
+      if (!res.ok) {
+        document.getElementById("mfaSetupContent").innerHTML =
+          `<div style="color:var(--critical);font-size:12px;text-align:center;">
+            ⚠ ${escHtml(data.error || "Setup failed")}
+          </div>`;
+        return;
+      }
+
+      document.getElementById("mfaSetupContent").innerHTML = `
+        <div style="text-align:center;margin-bottom:20px;">
+          <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:6px;">
+            Step 1 — Scan this QR code
+          </div>
+          <div style="font-size:12px;color:var(--text2);margin-bottom:16px;line-height:1.6;">
+            Open your authenticator app and scan the code below.
+          </div>
+          <img src="${escHtml(data.qrCode)}" alt="MFA QR Code"
+            style="width:180px;height:180px;border-radius:8px;border:4px solid #fff;
+                  display:block;margin:0 auto 16px;">
+          <div style="font-size:10px;color:var(--text3);margin-bottom:4px;">
+            Can't scan? Enter this key manually:
+          </div>
+          <code style="font-size:11px;color:var(--accent);background:var(--bg2);
+                      padding:6px 12px;border-radius:4px;letter-spacing:2px;
+                      display:inline-block;word-break:break-all;">
+            ${escHtml(data.secret)}
+          </code>
+        </div>
+
+        <div style="border-top:1px solid var(--border);padding-top:20px;">
+          <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:6px;">
+            Step 2 — Verify the code
+          </div>
+          <div style="font-size:12px;color:var(--text2);margin-bottom:14px;">
+            Enter the 6-digit code from your app to confirm setup.
+          </div>
+          <input type="text" id="setupMfaCode"
+            placeholder="000000" maxlength="6"
+            inputmode="numeric" autocomplete="one-time-code"
+            style="width:100%;padding:12px 14px;background:var(--bg2);
+                  border:1px solid var(--border);border-radius:8px;
+                  color:var(--text);font-family:'JetBrains Mono',monospace;
+                  font-size:22px;text-align:center;letter-spacing:8px;
+                  outline:none;margin-bottom:10px;transition:border-color 0.2s;">
+          <div id="setupMfaError"
+            style="display:none;font-size:11px;color:var(--critical);margin-bottom:8px;
+                  font-family:'JetBrains Mono',monospace;"></div>
+          <button id="verifyMfaBtn"
+            style="width:100%;padding:12px;border-radius:8px;border:none;cursor:pointer;
+                  font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;
+                  letter-spacing:1px;background:var(--accent);color:#000;
+                  transition:opacity 0.2s;">
+            Enable MFA →
+          </button>
+        </div>`;
+
+      // Wire events
+      document.getElementById("setupMfaCode").addEventListener("input", function () {
+        this.value = this.value.replace(/\D/g, "");
+        if (this.value.length === 6) _verifyMFASetup();
+      });
+      document.getElementById("setupMfaCode").addEventListener("keydown", e => {
+        if (e.key === "Enter") _verifyMFASetup();
+      });
+      document.getElementById("verifyMfaBtn").addEventListener("click", _verifyMFASetup);
+      document.getElementById("setupMfaCode").focus();
+
+    } catch (err) {
+      document.getElementById("mfaSetupContent").innerHTML =
+        `<div style="color:var(--critical);font-size:12px;text-align:center;">
+          ⚠ ${escHtml(err.message)}
+        </div>`;
+    }
+  }
+
+  // Verify setup TOTP 
+
+  async function _verifyMFASetup() {
+    const code  = document.getElementById("setupMfaCode")?.value.trim();
+    const errEl = document.getElementById("setupMfaError");
+    const btn   = document.getElementById("verifyMfaBtn");
+
+    errEl.style.display = "none";
+
+    if (!code || code.length !== 6) {
+      errEl.textContent   = "Enter the 6-digit code from your app.";
+      errEl.style.display = "block";
       return;
     }
 
-    document.getElementById("mfaSetupStep1").innerHTML = `
-      <div style="text-align:center;margin-bottom:20px;">
-        <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:6px;">
-          Step 1 — Scan this QR code
-        </div>
-        <div style="font-size:12px;color:var(--text2);margin-bottom:16px;line-height:1.6;">
-          Open your authenticator app (Google Authenticator, Authy, 1Password)
-          and scan the code below.
-        </div>
-        <img src="${data.qrCode}" alt="MFA QR Code"
-          style="width:180px;height:180px;border-radius:8px;border:4px solid #fff;
-                 display:block;margin:0 auto 16px;">
-        <div style="font-size:10px;color:var(--text3);margin-bottom:4px;">
-          Can't scan? Enter this key manually:
-        </div>
-        <code style="font-size:11px;color:var(--accent);background:var(--bg2);
-                     padding:6px 12px;border-radius:4px;letter-spacing:2px;
-                     display:inline-block;">${data.secret}</code>
-      </div>
+    btn.disabled    = true;
+    btn.textContent = "Verifying…";
 
-      <div style="border-top:1px solid var(--border);padding-top:20px;">
-        <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:6px;">
-          Step 2 — Verify the code
-        </div>
-        <div style="font-size:12px;color:var(--text2);margin-bottom:14px;">
-          Enter the 6-digit code from your app to confirm setup.
-        </div>
-        <input type="text" id="setupMfaCode" placeholder="000000" maxlength="6"
-          inputmode="numeric" autocomplete="one-time-code"
-          style="width:100%;padding:12px 14px;background:var(--bg2);
-                 border:1px solid var(--border);border-radius:8px;
-                 color:var(--text);font-family:'JetBrains Mono',monospace;
-                 font-size:22px;text-align:center;letter-spacing:8px;
-                 outline:none;margin-bottom:10px;">
-        <div id="setupMfaError"
-          style="display:none;font-size:11px;color:var(--critical);margin-bottom:8px;"></div>
-        <button id="verifyMfaBtn" onclick="verifyMFASetup()"
-          style="width:100%;padding:12px;border-radius:8px;border:none;cursor:pointer;
-                 font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;
-                 letter-spacing:1px;background:var(--accent);color:#000;">
-          Enable MFA →
-        </button>
-      </div>`;
-
-    // Auto submit on 6 digits
-    document.getElementById("setupMfaCode")?.addEventListener("input", function() {
-      this.value = this.value.replace(/\D/g, "");
-      if (this.value.length === 6) verifyMFASetup();
-    });
-
-  } catch (err) {
-    document.getElementById("mfaSetupStep1").innerHTML =
-      `<div style="color:var(--critical);font-size:12px;text-align:center;">
-        ⚠ ${escHtml(err.message)}
-      </div>`;
-  }
-}
-
-async function verifyMFASetup() {
-  const code   = document.getElementById("setupMfaCode")?.value.trim();
-  const errEl  = document.getElementById("setupMfaError");
-  const btn    = document.getElementById("verifyMfaBtn");
-
-  errEl.style.display = "none";
-  if (!code || code.length !== 6) {
-    errEl.textContent  = "Enter the 6-digit code from your app.";
-    errEl.style.display = "block";
-    return;
-  }
-
-  btn.disabled    = true;
-  btn.textContent = "Verifying…";
-
-  const res  = await fetch("/api/v1/mfa/verify-setup", {
-    method:  "POST",
-    headers: { ...authHeaders(), "Content-Type": "application/json" },
-    body:    JSON.stringify({ token: code }),
-  });
-  const data = await res.json();
-
-  if (!res.ok) {
-    errEl.textContent  = data.error || "Invalid code";
-    errEl.style.display = "block";
-    btn.disabled    = false;
-    btn.textContent = "Enable MFA →";
-    document.getElementById("setupMfaCode").value = "";
-    document.getElementById("setupMfaCode").focus();
-    return;
-  }
-
-  // Success — show confirmation
-  document.getElementById("mfaModalBody").innerHTML = `
-    <div style="text-align:center;padding:20px 0;">
-      <div style="font-size:48px;margin-bottom:16px;">✓</div>
-      <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;
-                  color:var(--low);margin-bottom:8px;">MFA Enabled!</div>
-      <div style="font-size:12px;color:var(--text2);line-height:1.7;margin-bottom:24px;">
-        Your account is now protected with two-factor authentication.<br>
-        You'll need your authenticator app on every login.
-      </div>
-      <button onclick="document.getElementById('mfaModal').remove()"
-        style="padding:12px 32px;border-radius:8px;border:none;cursor:pointer;
-               font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;
-               background:var(--accent);color:#000;">
-        Done →
-      </button>
-    </div>`;
-
-  toast("MFA enabled successfully", "success");
-}
-
-async function disableMFA() {
-  const code  = document.getElementById("disableMfaCode")?.value.trim();
-  const errEl = document.getElementById("disableMfaError");
-  const btn   = document.getElementById("disableMfaBtn");
-
-  errEl.style.display = "none";
-  if (!code || code.length !== 6) {
-    errEl.textContent  = "Enter your 6-digit authenticator code.";
-    errEl.style.display = "block";
-    return;
-  }
-
-  btn.disabled    = true;
-  btn.textContent = "Disabling…";
-
-  const res  = await fetch("/api/v1/mfa/disable", {
-    method:  "POST",
-    headers: { ...authHeaders(), "Content-Type": "application/json" },
-    body:    JSON.stringify({ token: code }),
-  });
-  const data = await res.json();
-
-  if (!res.ok) {
-    errEl.textContent  = data.error || "Invalid code";
-    errEl.style.display = "block";
-    btn.disabled    = false;
-    btn.textContent = "Disable MFA";
-    return;
-  }
-
-  document.getElementById("mfaModal").remove();
-  toast("MFA disabled", "info");
-}
-window.disableMFA = disableMFA;
-
-// Rate Limit
-function showAPIStatus(apiStatus) {
-
-  // Remove existing banner if any
-  const existing = document.getElementById("apiStatusBanner");
-  if (existing) existing.remove();
- 
-  if (!apiStatus || apiStatus.abuseIPDB === "ok") return;
- 
-  const banner = document.createElement("div");
-  banner.id = "apiStatusBanner";
- 
-  if (apiStatus.abuseIPDB === "rate_limited") {
-    banner.style.cssText = `
-      position:fixed;bottom:24px;right:24px;z-index:9999;
-      background:#111820;border:1px solid rgba(255,204,0,0.5);border-radius:8px;
-      padding:12px 16px;max-width:320px;box-shadow:0 4px 24px rgba(0,0,0,0.4);`;
-    banner.innerHTML = `
-      <div style="display:flex;align-items:flex-start;gap:10px;">
-        <span style="font-size:18px;">⚠</span>
-        <div>
-          <div style="font-size:12px;font-weight:700;color:#ffcc00;letter-spacing:1px;margin-bottom:4px;">ABUSEIPDB RATE LIMITED</div>
-          <div style="font-size:11px;color:#6a8fa8;line-height:1.5;">
-            Daily quota reached. Abuse scores show 0 until reset.
-            Other intel sources (Shodan, feeds, geo) are unaffected.
-          </div>
-          ${apiStatus.resetAt ? `<div style="font-size:10px;color:#3d5a72;margin-top:6px;">Resets: ${new Date(apiStatus.resetAt).toLocaleString()}</div>` : ""}
-        </div>
-        <button onclick="this.parentElement.parentElement.remove()"
-          style="background:none;border:none;color:#3d5a72;cursor:pointer;font-size:16px;padding:0;flex-shrink:0;">✕</button>
-      </div>`;
-  } else if (apiStatus.abuseIPDB === "key_error") {
-    banner.style.cssText = `
-      position:fixed;bottom:24px;right:24px;z-index:9999;
-      background:#111820;border:1px solid rgba(255,51,85,0.5);border-radius:8px;
-      padding:12px 16px;max-width:320px;box-shadow:0 4px 24px rgba(0,0,0,0.4);`;
-    banner.innerHTML = `
-      <div style="display:flex;align-items:flex-start;gap:10px;">
-        <span style="font-size:18px;">🔑</span>
-        <div>
-          <div style="font-size:12px;font-weight:700;color:#ff3355;letter-spacing:1px;margin-bottom:4px;">ABUSEIPDB KEY ERROR</div>
-          <div style="font-size:11px;color:#6a8fa8;line-height:1.5;">
-            API key is invalid or missing. Check ABUSE_IPDB_KEY in your environment variables.
-          </div>
-        </div>
-        <button onclick="this.parentElement.parentElement.remove()"
-          style="background:none;border:none;color:#3d5a72;cursor:pointer;font-size:16px;padding:0;flex-shrink:0;">✕</button>
-      </div>`;
-  }
-
-  document.body.appendChild(banner);
- 
-  // Auto-dismiss after 10 seconds
-  setTimeout(() => banner.remove(), 10000);
-}
-
-// Firewall export 
-function showFirewallExport() {
-
-  // Collect CRITICAL and HIGH IPs from session
-  const threats = auditEntries.filter(e => e.riskLevel === "CRITICAL" || e.riskLevel === "HIGH");
- 
-  if (!threats.length) {
-    setBulkStatus; toast("No CRITICAL or HIGH IPs in audit log to export.", "warning");
-    return;
-  }
- 
-  // Deduplicate IPs
-  const uniqueIPs = [...new Map(threats.map(e => [e.ip, e])).values()];
- 
-  // Build modal overlay
-  const overlay = document.createElement("div");
-  overlay.id = "firewallModal";
-  overlay.style.cssText = `
-    position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:10000;
-    display:flex;align-items:center;justify-content:center;padding:24px;`;
- 
-  const modal = document.createElement("div");
-  modal.style.cssText = `
-    background:var(--bg1);border:1px solid var(--border);border-radius:12px;
-    width:100%;max-width:680px;max-height:80vh;display:flex;flex-direction:column;`;
- 
-  // Format selector
-  const formats = [
-    { id:"iptables",  label:"iptables (Linux)" },
-    { id:"ip6tables", label:"ip6tables (IPv6)" },
-    { id:"ufw",       label:"UFW (Ubuntu)" },
-    { id:"cisco",     label:"Cisco ACL" },
-    { id:"pfsense",   label:"pfSense / OPNsense" },
-    { id:"paloalto",  label:"Palo Alto" },
-    { id:"windows",   label:"Windows Firewall" },
-    { id:"nginx",     label:"Nginx deny block" },
-    { id:"apache",    label:"Apache .htaccess" },
-    { id:"json",      label:"JSON (API use)" }
-  ];
- 
-  modal.innerHTML = `
-    <div style="padding:20px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
-      <div>
-        <div style="font-size:13px;font-weight:700;color:var(--text);">🛡 Firewall Rule Export</div>
-        <div style="font-size:11px;color:var(--text3);margin-top:2px;">${uniqueIPs.length} CRITICAL/HIGH IP${uniqueIPs.length!==1?"s":""} from audit log</div>
-      </div>
-      <button id="firewallClose" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:20px;padding:4px;">✕</button>
-    </div>
-    <div style="padding:16px 24px;border-bottom:1px solid var(--border);display:flex;gap:8px;flex-wrap:wrap;">
-      ${formats.map(f => `
-        <button class="fw-format-btn" data-format="${f.id}"
-          style="padding:5px 12px;border-radius:6px;border:1px solid ${f.id==="iptables"?"var(--accent)":"var(--border)"};
-                 background:${f.id==="iptables"?"rgba(0,217,255,0.1)":"transparent"};
-                 color:${f.id==="iptables"?"var(--accent)":"var(--text3)"};
-                 font-size:11px;cursor:pointer;font-family:inherit;">${f.label}</button>`).join("")}
-    </div>
-    <div style="padding:12px 24px;border-bottom:1px solid var(--border);display:flex;gap:8px;align-items:center;">
-      <label style="font-size:11px;color:var(--text3);">Action:</label>
-      <select id="fwAction" style="padding:4px 8px;background:var(--bg2);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:11px;font-family:inherit;">
-        <option value="DROP">DROP (silent block)</option>
-        <option value="REJECT">REJECT (send reset)</option>
-      </select>
-      <label style="font-size:11px;color:var(--text3);margin-left:8px;">Risk filter:</label>
-      <select id="fwRisk" style="padding:4px 8px;background:var(--bg2);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:11px;font-family:inherit;">
-        <option value="both">CRITICAL + HIGH</option>
-        <option value="critical">CRITICAL only</option>
-      </select>
-      <button id="fwCopy" class="btn btn-ghost" style="margin-left:auto;padding:5px 14px;font-size:11px;">Copy</button>
-      <button id="fwDownload" class="btn btn-primary" style="padding:5px 14px;font-size:11px;">Download</button>
-    </div>
-    <pre id="fwOutput" style="flex:1;overflow-y:auto;margin:0;padding:16px 24px;font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1.6;color:var(--text);background:var(--bg2);white-space:pre-wrap;word-break:break-all;"></pre>`;
- 
-  overlay.appendChild(modal);
-  document.body.appendChild(overlay);
- 
-  // Close handlers
-  document.getElementById("firewallClose").addEventListener("click", () => overlay.remove());
-  overlay.addEventListener("click", e => { if (e.target === overlay) overlay.remove(); });
- 
-  // Format switching
-  modal.querySelectorAll(".fw-format-btn").forEach(btn => {
-    btn.addEventListener("click", () => {
-      modal.querySelectorAll(".fw-format-btn").forEach(b => {
-        b.style.borderColor = "var(--border)"; b.style.background = "transparent"; b.style.color = "var(--text3)";
+    try {
+      const res  = await fetch("/api/v1/mfa/verify-setup", {
+        method:  "POST",
+        headers: { ...authHeaders(), "Content-Type": "application/json" },
+        body:    JSON.stringify({ token: code }),
       });
-      btn.style.borderColor = "var(--accent)"; btn.style.background = "rgba(0,217,255,0.1)"; btn.style.color = "var(--accent)";
-      updateOutput();
-    });
-  });
- 
-  document.getElementById("fwAction").addEventListener("change", updateOutput);
-  document.getElementById("fwRisk").addEventListener("change", updateOutput);
- 
-  document.getElementById("fwCopy").addEventListener("click", () => {
-    const text = document.getElementById("fwOutput").textContent;
-    navigator.clipboard.writeText(text).then(() => {
-      const btn = document.getElementById("fwCopy");
-      btn.textContent = "✓ Copied!";
-      setTimeout(() => { btn.textContent = "Copy"; }, 2000);
-    });
-  });
- 
-  document.getElementById("fwDownload").addEventListener("click", () => {
-    const fmt  = modal.querySelector(".fw-format-btn[style*='var(--accent)']")?.dataset.format || "iptables";
-    const text = document.getElementById("fwOutput").textContent;
-    const ext  = { iptables:"sh", ip6tables:"sh", ufw:"sh", cisco:"txt", pfsense:"txt", paloalto:"txt", windows:"ps1", nginx:"conf", apache:"htaccess", json:"json" }[fmt] || "txt";
-    const blob = new Blob([text], { type: "text/plain" });
-    const url  = URL.createObjectURL(blob);
-    const a    = Object.assign(document.createElement("a"), { href: url, download: `ipshield-firewall-${fmt}-${Date.now()}.${ext}` });
-    a.click(); URL.revokeObjectURL(url);
-    toast(`Firewall rules exported as ${fmt.toUpperCase()} (${ips.length} IPs)`, "success");
-  });
- 
-  // Generate rules
-  function updateOutput() {
-    const fmt    = modal.querySelector(".fw-format-btn[style*='var(--accent)']")?.dataset.format || "iptables";
-    const action = document.getElementById("fwAction").value;
-    const risk   = document.getElementById("fwRisk").value;
-    const ips    = uniqueIPs.filter(e => risk === "critical" ? e.riskLevel === "CRITICAL" : true).map(e => e.ip);
-    document.getElementById("fwOutput").textContent = generateRules(fmt, ips, action);
-  }
- 
-  updateOutput(); // initial render
+      const data = await res.json();
 
-  // mobile responsive
-  const MODAL_OVERLAY_STYLE = `
-  position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:10000;
-  display:flex;align-items:${window.innerWidth < 640 ? "flex-end" : "center"};
-  justify-content:center;padding:${window.innerWidth < 640 ? "0" : "24px"};`;
- 
-  const MODAL_STYLE = `
-    background:var(--bg1);border:1px solid var(--border);
-    border-radius:${window.innerWidth < 640 ? "12px 12px 0 0" : "12px"};
-    width:100%;max-width:${window.innerWidth < 640 ? "100%" : "700px"};
-    max-height:${window.innerWidth < 640 ? "92vh" : "85vh"};
-    display:flex;flex-direction:column;overflow:hidden;`;
-}
- 
-function generateRules(format, ips, action = "DROP") {
-  const ts      = new Date().toISOString();
-  const comment = `# Generated by IPShield — ${ts}\n# ${ips.length} blocked IP(s)\n`;
-  const act     = action.toLowerCase();
- 
-  switch (format) {
- 
-    case "iptables":
-      return `${comment}#!/bin/bash\n\n` +
-        ips.map(ip => `iptables -A INPUT  -s ${ip} -j ${action}\niptables -A OUTPUT -d ${ip} -j ${action}`).join("\n") +
-        `\n\necho "✓ ${ips.length} IPs blocked"`;
- 
-    case "ip6tables":
-      return `${comment}#!/bin/bash\n\n` +
-        ips.map(ip => `ip6tables -A INPUT  -s ${ip} -j ${action}\nip6tables -A OUTPUT -d ${ip} -j ${action}`).join("\n") +
-        `\n\necho "✓ ${ips.length} IPs blocked"`;
- 
-    case "ufw":
-      return `${comment}#!/bin/bash\n\n` +
-        ips.map(ip => `ufw deny from ${ip} to any\nufw deny from any to ${ip}`).join("\n") +
-        `\n\nufw reload\necho "✓ ${ips.length} IPs blocked"`;
- 
-    case "cisco":
-      return `! ${comment.replace(/#/g,"!")}` +
-        `ip access-list extended IPSHIELD_BLOCK\n` +
-        ips.map((ip, i) => ` ${(i+1)*10} deny ip host ${ip} any\n ${(i+1)*10+5} deny ip any host ${ip}`).join("\n") +
-        `\n!\ninterface GigabitEthernet0/0\n ip access-group IPSHIELD_BLOCK in`;
- 
-    case "pfsense":
-      return `# pfSense / OPNsense — import as alias then block\n# ${ts}\n\n` +
-        `# 1. Firewall > Aliases > Add\n#    Name: IPShield_Block\n#    Type: Host(s)\n#    Network(s):\n` +
-        ips.map(ip => `#    ${ip}`).join("\n") +
-        `\n\n# 2. Firewall > Rules > Add rule:\n#    Action: Block, Source: IPShield_Block`;
- 
-    case "paloalto":
-      return `# Palo Alto Networks — Dynamic Address Group\n# ${ts}\n\n` +
-        `set address IPShield_Block_${Date.now()} type ip-netmask\n` +
-        ips.map(ip => `set address "block_${ip.replace(/[.:]/g,"_")}" type ip-netmask ${ip}/32`).join("\n") +
-        `\n\nset address-group IPShield_Block_Group static [ ${ips.map(ip=>`block_${ip.replace(/[.:]/g,"_")}`).join(" ")} ]` +
-        `\nset security policy deny-ipshield from any to any source IPShield_Block_Group action deny`;
- 
-    case "windows":
-      return `# Windows Firewall — PowerShell\n# Run as Administrator\n# ${ts}\n\n` +
-        ips.map((ip, i) =>
-          `New-NetFirewallRule -DisplayName "IPShield_Block_${i+1}" -Direction Inbound  -RemoteAddress ${ip} -Action Block\n` +
-          `New-NetFirewallRule -DisplayName "IPShield_Block_${i+1}_Out" -Direction Outbound -RemoteAddress ${ip} -Action Block`
-        ).join("\n") +
-        `\n\nWrite-Host "✓ ${ips.length} IPs blocked"`;
- 
-    case "nginx":
-      return `# Nginx — add inside http {} or server {} block\n# ${ts}\n\ngeo $blocked_ip {\n    default 0;\n` +
-        ips.map(ip => `    ${ip} 1;`).join("\n") +
-        `\n}\n\n# Then in server block:\n# if ($blocked_ip) { return 403; }`;
- 
-    case "apache":
-      return `# Apache .htaccess\n# ${ts}\n\n<RequireAll>\n    Require all granted\n` +
-        ips.map(ip => `    Require not ip ${ip}`).join("\n") +
-        `\n</RequireAll>`;
- 
-    case "json":
-      return JSON.stringify({
-        generated:  ts,
-        tool:       "IPShield",
-        total:      ips.length,
-        action,
-        blocklist:  ips
-      }, null, 2);
- 
-    default:
-      return ips.join("\n");
-  }
-}
- 
-// Sort entries
-  function sortEntries(entries) {
-    const getDate = e => e.meta?.scoredAt || e.scored_at || 0;
-    return [...entries].sort((a, b) => {
-    switch (auditFilters.sort) {
-      case "score_desc": return (b.score ?? 0) - (a.score ?? 0);
-      case "score_asc":  return (a.score ?? 0) - (b.score ?? 0);
-      case "date_asc":   return new Date(getDate(a)) - new Date(getDate(b));
-      default:           return new Date(getDate(b)) - new Date(getDate(a));
+      if (!res.ok) {
+        errEl.textContent   = data.error || "Invalid code";
+        errEl.style.display = "block";
+        document.getElementById("setupMfaCode").value = "";
+        document.getElementById("setupMfaCode").focus();
+        return;
+      }
+
+      // Show backup codes with copy button
+      const codes = (data.backupCodes || []).map(c => escHtml(c));
+      document.getElementById("mfaModalBody").innerHTML = `
+        <div style="text-align:center;margin-bottom:20px;">
+          <div style="font-size:48px;margin-bottom:12px;">✓</div>
+          <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;
+                      color:var(--low);margin-bottom:8px;">MFA Enabled!</div>
+          <div style="font-size:12px;color:var(--text2);line-height:1.7;margin-bottom:16px;">
+            Your account is now protected with two-factor authentication.
+          </div>
+        </div>
+
+        <div style="padding:12px 16px;background:rgba(255,119,0,0.08);
+                    border:1px solid rgba(255,119,0,0.25);border-radius:8px;
+                    font-size:11px;color:#ff9944;line-height:1.6;
+                    font-family:'JetBrains Mono',monospace;margin-bottom:16px;">
+          ⚠ Save these backup codes somewhere safe. They won't be shown again.<br>
+          Each code is single-use if you lose your authenticator app.
+        </div>
+
+        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:16px;">
+          ${codes.map(c => `
+            <div style="padding:8px 12px;background:var(--bg2);border:1px solid var(--border);
+                        border-radius:6px;font-family:'JetBrains Mono',monospace;
+                        font-size:13px;color:var(--accent);text-align:center;letter-spacing:2px;">
+              ${c}
+            </div>`).join("")}
+        </div>
+
+        <button id="copyBackupBtn"
+          style="width:100%;padding:10px;border-radius:8px;background:transparent;
+                color:var(--text2);border:1px solid var(--border);
+                font-family:'JetBrains Mono',monospace;font-size:12px;
+                cursor:pointer;margin-bottom:12px;transition:border-color 0.2s,color 0.2s;">
+          Copy all backup codes
+        </button>
+
+        <button onclick="document.getElementById('mfaModal').remove()"
+          style="width:100%;padding:12px;border-radius:8px;border:none;cursor:pointer;
+                font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;
+                background:var(--accent);color:#000;">
+          Done →
+        </button>`;
+
+      document.getElementById("copyBackupBtn").addEventListener("click", async function () {
+        try {
+          await navigator.clipboard.writeText((data.backupCodes || []).join("\n"));
+          this.textContent = "Copied ✓";
+          setTimeout(() => { this.textContent = "Copy all backup codes"; }, 2000);
+        } catch {
+          alert("Copy failed — please manually copy the codes above.");
+        }
+      });
+
+      toast("MFA enabled successfully", "success");
+
+    } catch (err) {
+      errEl.textContent   = "Network error — " + err.message;
+      errEl.style.display = "block";
+    } finally {
+      // FIX: always re-enable — previously stayed disabled on network error
+      btn.disabled    = false;
+      btn.textContent = "Enable MFA →";
     }
-  });
-}
- 
-// Fetch from DB via API 
-async function fetchAndRenderFromDB() {
-  const params = new URLSearchParams({
-    limit:  AUDIT_PAGE_SIZE,
-    offset: auditPage * AUDIT_PAGE_SIZE,
-    sort:   auditFilters.sort || "date_desc",
-  });
+  }
 
-  if (auditFilters.q)                    params.set("q",          auditFilters.q);
-  if (auditFilters.risk)                 params.set("risk",        auditFilters.risk);
-  if (auditFilters.minScore > 0)         params.set("minScore",    auditFilters.minScore);
-  if (auditFilters.maxScore < 100)       params.set("maxScore",    auditFilters.maxScore);
-  if (auditFilters.proxy      != null)   params.set("proxy",       auditFilters.proxy);
-  if (auditFilters.tor        != null)   params.set("tor",         auditFilters.tor);
-  if (auditFilters.datacenter != null)   params.set("datacenter",  auditFilters.datacenter);
+  // Disable MFA 
+  async function disableMFA() {
+    const code  = document.getElementById("disableMfaCode")?.value.trim();
+    const errEl = document.getElementById("disableMfaError");
+    const btn   = document.getElementById("disableMfaBtn");
 
-  try {
-    const res = await fetch(`/api/v2/audit/search?${params}`, {
-      headers: authHeaders()
-    });
+    errEl.style.display = "none";
 
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({ error: `HTTP ${res.status}` }));
-      throw new Error(err.error || `HTTP ${res.status}`);
+    if (!code || code.length !== 6) {
+      errEl.textContent   = "Enter your 6-digit authenticator code.";
+      errEl.style.display = "block";
+      return;
     }
 
-    const data = await res.json();
-    auditTotal = data.total;
-    renderAuditEntries(data.entries || [], data.total);
+    btn.disabled    = true;
+    btn.textContent = "Disabling…";
 
-  } catch (err) {
-    console.error("[audit/db] error:", err);
-    setBulkStatus(`Audit DB error: ${err.message}`);
-  }
-}
- 
-// Main renderAudit 
-function renderAudit() {
-  if (usingDB) { fetchAndRenderFromDB(); return; }
+    try {
+      const res  = await fetch("/api/v1/mfa/disable", {
+        method:  "POST",
+        headers: { ...authHeaders(), "Content-Type": "application/json" },
+        body:    JSON.stringify({ token: code }),
+      });
+      const data = await res.json();
 
-  const filtered = sortEntries(applyFilters(auditEntries));
-  auditTotal     = filtered.length;
-  const start    = auditPage * AUDIT_PAGE_SIZE;
-  const page     = filtered.slice(start, start + AUDIT_PAGE_SIZE);
-  renderAuditEntries(page, filtered.length);
-}
- 
-function renderAuditEntries(entries, total) {
-  auditCount.textContent = `${total} ${total === 1 ? "entry" : "entries"}`;
+      if (!res.ok) {
+        errEl.textContent   = data.error || "Invalid code";
+        errEl.style.display = "block";
+        return;
+      }
 
-  const status    = document.getElementById("auditFilterStatus");
-  const hasFilter = auditFilters.q || auditFilters.risk ||
-                    auditFilters.minScore > 0 || auditFilters.maxScore < 100 ||
-                    auditFilters.proxy != null || auditFilters.tor != null ||
-                    auditFilters.datacenter != null;
+      document.getElementById("mfaModal")?.remove();
+      toast("MFA disabled", "info");
 
-  if (status) {
-    status.textContent = hasFilter
-      ? `Showing ${Math.min(entries.length, total)} of ${total} matching entries${usingDB ? " (DB)" : " (session)"}`
-      : usingDB ? `Full database history — ${total} total entries` : "";
+    } catch (err) {
+      errEl.textContent   = "Network error — " + err.message;
+      errEl.style.display = "block";
+    } finally {
+      btn.disabled    = false;
+      btn.textContent = "Disable MFA";
+    }
   }
 
-  if (!entries.length) {
-    auditList.innerHTML = `
-      <div style="padding:24px;text-align:center;color:var(--text3);font-size:11px;">
-        ${hasFilter ? "No entries match your filters" : "No queries yet"}
-      </div>`;
-    return;
+  window.showMFAPanel = showMFAPanel;
+  window.disableMFA   = disableMFA;
+
+  // Rate Limit
+  function showAPIStatus(apiStatus) {
+
+    // Remove existing banner if any
+    const existing = document.getElementById("apiStatusBanner");
+    if (existing) existing.remove();
+  
+    if (!apiStatus || apiStatus.abuseIPDB === "ok") return;
+  
+    const banner = document.createElement("div");
+    banner.id = "apiStatusBanner";
+  
+    if (apiStatus.abuseIPDB === "rate_limited") {
+      banner.style.cssText = `
+        position:fixed;bottom:24px;right:24px;z-index:9999;
+        background:#111820;border:1px solid rgba(255,204,0,0.5);border-radius:8px;
+        padding:12px 16px;max-width:320px;box-shadow:0 4px 24px rgba(0,0,0,0.4);`;
+      banner.innerHTML = `
+        <div style="display:flex;align-items:flex-start;gap:10px;">
+          <span style="font-size:18px;">⚠</span>
+          <div>
+            <div style="font-size:12px;font-weight:700;color:#ffcc00;letter-spacing:1px;margin-bottom:4px;">ABUSEIPDB RATE LIMITED</div>
+            <div style="font-size:11px;color:#6a8fa8;line-height:1.5;">
+              Daily quota reached. Abuse scores show 0 until reset.
+              Other intel sources (Shodan, feeds, geo) are unaffected.
+            </div>
+            ${apiStatus.resetAt ? `<div style="font-size:10px;color:#3d5a72;margin-top:6px;">Resets: ${new Date(apiStatus.resetAt).toLocaleString()}</div>` : ""}
+          </div>
+          <button onclick="this.parentElement.parentElement.remove()"
+            style="background:none;border:none;color:#3d5a72;cursor:pointer;font-size:16px;padding:0;flex-shrink:0;">✕</button>
+        </div>`;
+    } else if (apiStatus.abuseIPDB === "key_error") {
+      banner.style.cssText = `
+        position:fixed;bottom:24px;right:24px;z-index:9999;
+        background:#111820;border:1px solid rgba(255,51,85,0.5);border-radius:8px;
+        padding:12px 16px;max-width:320px;box-shadow:0 4px 24px rgba(0,0,0,0.4);`;
+      banner.innerHTML = `
+        <div style="display:flex;align-items:flex-start;gap:10px;">
+          <span style="font-size:18px;">🔑</span>
+          <div>
+            <div style="font-size:12px;font-weight:700;color:#ff3355;letter-spacing:1px;margin-bottom:4px;">ABUSEIPDB KEY ERROR</div>
+            <div style="font-size:11px;color:#6a8fa8;line-height:1.5;">
+              API key is invalid or missing. Check ABUSE_IPDB_KEY in your environment variables.
+            </div>
+          </div>
+          <button onclick="this.parentElement.parentElement.remove()"
+            style="background:none;border:none;color:#3d5a72;cursor:pointer;font-size:16px;padding:0;flex-shrink:0;">✕</button>
+        </div>`;
+    }
+
+    document.body.appendChild(banner);
+  
+    // Auto-dismiss after 10 seconds
+    setTimeout(() => banner.remove(), 10000);
   }
 
-  auditList.innerHTML = entries.map(e => {
-    // Handle both DB (snake_case) and in-memory (camelCase) formats ──
-    const ip        = e.ip;
-    const score     = e.score        ?? 0;
-    const riskLevel = e.riskLevel    || e.risk_level  || "LOW";
-    const scoredAt  = e.meta?.scoredAt || e.scored_at || new Date();
+  // Firewall export 
+  function showFirewallExport() {
 
-    // Threat feed flags — handle both formats
-    const isFeodo    = e.threatFeeds?.feodo            || e.is_feodo    || false;
-    const isSpamhaus = e.threatFeeds?.spamhaus         || e.is_spamhaus || false;
-    const isET       = e.threatFeeds?.emergingThreats  || e.is_et       || false;
-    const otxCount   = e.threatFeeds?.otx?.pulseCount  || e.otx_pulses  || 0;
-
-    const f = [
-      isFeodo    && "F",
-      isSpamhaus && "S",
-      isET       && "E",
-      otxCount > 0 && "O",
-    ].filter(Boolean).join("");
-
-    return `
-      <div class="audit-item" data-ip="${escHtml(ip)}">
-        <span class="audit-ip">${escHtml(ip)}</span>
-        ${f ? `<span style="font-size:9px;color:#ff3355;font-weight:700;">[${f}]</span>` : ""}
-        <span class="audit-badge ${riskLevel}">${riskLevel}</span>
-        <span class="audit-score ${riskLevel}">${score}</span>
-        <span class="audit-ts">${fmtTime(new Date(scoredAt))}</span>
-      </div>`;
-  }).join("");
-
-  // Pagination
-  const totalPages = Math.ceil(total / AUDIT_PAGE_SIZE);
-  if (totalPages > 1) {
-    const nav = document.createElement("div");
-    nav.style.cssText = "display:flex;justify-content:space-between;align-items:center;padding:8px 16px;border-top:1px solid var(--border);font-size:11px;color:var(--text3);";
-    nav.innerHTML = `
-      <button id="auditPrev" class="btn btn-ghost"
-        style="padding:4px 10px;font-size:11px;"
-        ${auditPage === 0 ? "disabled" : ""}>← Prev</button>
-      <span>Page ${auditPage + 1} of ${totalPages} · ${total} total</span>
-      <button id="auditNext" class="btn btn-ghost"
-        style="padding:4px 10px;font-size:11px;"
-        ${auditPage >= totalPages - 1 ? "disabled" : ""}>Next →</button>`;
-    auditList.appendChild(nav);
-
-    document.getElementById("auditPrev")?.addEventListener("click", () => {
-      auditPage--;
-      renderAudit();
+    // Collect CRITICAL and HIGH IPs from session
+    const threats = auditEntries.filter(e => e.riskLevel === "CRITICAL" || e.riskLevel === "HIGH");
+  
+    if (!threats.length) {
+      setBulkStatus; toast("No CRITICAL or HIGH IPs in audit log to export.", "warning");
+      return;
+    }
+  
+    // Deduplicate IPs
+    const uniqueIPs = [...new Map(threats.map(e => [e.ip, e])).values()];
+  
+    // Build modal overlay
+    const overlay = document.createElement("div");
+    overlay.id = "firewallModal";
+    overlay.style.cssText = `
+      position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:10000;
+      display:flex;align-items:center;justify-content:center;padding:24px;`;
+  
+    const modal = document.createElement("div");
+    modal.style.cssText = `
+      background:var(--bg1);border:1px solid var(--border);border-radius:12px;
+      width:100%;max-width:680px;max-height:80vh;display:flex;flex-direction:column;`;
+  
+    // Format selector
+    const formats = [
+      { id:"iptables",  label:"iptables (Linux)" },
+      { id:"ip6tables", label:"ip6tables (IPv6)" },
+      { id:"ufw",       label:"UFW (Ubuntu)" },
+      { id:"cisco",     label:"Cisco ACL" },
+      { id:"pfsense",   label:"pfSense / OPNsense" },
+      { id:"paloalto",  label:"Palo Alto" },
+      { id:"windows",   label:"Windows Firewall" },
+      { id:"nginx",     label:"Nginx deny block" },
+      { id:"apache",    label:"Apache .htaccess" },
+      { id:"json",      label:"JSON (API use)" }
+    ];
+  
+    modal.innerHTML = `
+      <div style="padding:20px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+        <div>
+          <div style="font-size:13px;font-weight:700;color:var(--text);">🛡 Firewall Rule Export</div>
+          <div style="font-size:11px;color:var(--text3);margin-top:2px;">${uniqueIPs.length} CRITICAL/HIGH IP${uniqueIPs.length!==1?"s":""} from audit log</div>
+        </div>
+        <button id="firewallClose" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:20px;padding:4px;">✕</button>
+      </div>
+      <div style="padding:16px 24px;border-bottom:1px solid var(--border);display:flex;gap:8px;flex-wrap:wrap;">
+        ${formats.map(f => `
+          <button class="fw-format-btn" data-format="${f.id}"
+            style="padding:5px 12px;border-radius:6px;border:1px solid ${f.id==="iptables"?"var(--accent)":"var(--border)"};
+                  background:${f.id==="iptables"?"rgba(0,217,255,0.1)":"transparent"};
+                  color:${f.id==="iptables"?"var(--accent)":"var(--text3)"};
+                  font-size:11px;cursor:pointer;font-family:inherit;">${f.label}</button>`).join("")}
+      </div>
+      <div style="padding:12px 24px;border-bottom:1px solid var(--border);display:flex;gap:8px;align-items:center;">
+        <label style="font-size:11px;color:var(--text3);">Action:</label>
+        <select id="fwAction" style="padding:4px 8px;background:var(--bg2);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:11px;font-family:inherit;">
+          <option value="DROP">DROP (silent block)</option>
+          <option value="REJECT">REJECT (send reset)</option>
+        </select>
+        <label style="font-size:11px;color:var(--text3);margin-left:8px;">Risk filter:</label>
+        <select id="fwRisk" style="padding:4px 8px;background:var(--bg2);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:11px;font-family:inherit;">
+          <option value="both">CRITICAL + HIGH</option>
+          <option value="critical">CRITICAL only</option>
+        </select>
+        <button id="fwCopy" class="btn btn-ghost" style="margin-left:auto;padding:5px 14px;font-size:11px;">Copy</button>
+        <button id="fwDownload" class="btn btn-primary" style="padding:5px 14px;font-size:11px;">Download</button>
+      </div>
+      <pre id="fwOutput" style="flex:1;overflow-y:auto;margin:0;padding:16px 24px;font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1.6;color:var(--text);background:var(--bg2);white-space:pre-wrap;word-break:break-all;"></pre>`;
+  
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+  
+    // Close handlers
+    document.getElementById("firewallClose").addEventListener("click", () => overlay.remove());
+    overlay.addEventListener("click", e => { if (e.target === overlay) overlay.remove(); });
+  
+    // Format switching
+    modal.querySelectorAll(".fw-format-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        modal.querySelectorAll(".fw-format-btn").forEach(b => {
+          b.style.borderColor = "var(--border)"; b.style.background = "transparent"; b.style.color = "var(--text3)";
+        });
+        btn.style.borderColor = "var(--accent)"; btn.style.background = "rgba(0,217,255,0.1)"; btn.style.color = "var(--accent)";
+        updateOutput();
+      });
     });
-    document.getElementById("auditNext")?.addEventListener("click", () => {
-      auditPage++;
-      renderAudit();
+  
+    document.getElementById("fwAction").addEventListener("change", updateOutput);
+    document.getElementById("fwRisk").addEventListener("change", updateOutput);
+  
+    document.getElementById("fwCopy").addEventListener("click", () => {
+      const text = document.getElementById("fwOutput").textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        const btn = document.getElementById("fwCopy");
+        btn.textContent = "✓ Copied!";
+        setTimeout(() => { btn.textContent = "Copy"; }, 2000);
+      });
+    });
+  
+    document.getElementById("fwDownload").addEventListener("click", () => {
+      const fmt  = modal.querySelector(".fw-format-btn[style*='var(--accent)']")?.dataset.format || "iptables";
+      const text = document.getElementById("fwOutput").textContent;
+      const ext  = { iptables:"sh", ip6tables:"sh", ufw:"sh", cisco:"txt", pfsense:"txt", paloalto:"txt", windows:"ps1", nginx:"conf", apache:"htaccess", json:"json" }[fmt] || "txt";
+      const blob = new Blob([text], { type: "text/plain" });
+      const url  = URL.createObjectURL(blob);
+      const a    = Object.assign(document.createElement("a"), { href: url, download: `ipshield-firewall-${fmt}-${Date.now()}.${ext}` });
+      a.click(); URL.revokeObjectURL(url);
+      toast(`Firewall rules exported as ${fmt.toUpperCase()} (${ips.length} IPs)`, "success");
+    });
+  
+    // Generate rules
+    function updateOutput() {
+      const fmt    = modal.querySelector(".fw-format-btn[style*='var(--accent)']")?.dataset.format || "iptables";
+      const action = document.getElementById("fwAction").value;
+      const risk   = document.getElementById("fwRisk").value;
+      const ips    = uniqueIPs.filter(e => risk === "critical" ? e.riskLevel === "CRITICAL" : true).map(e => e.ip);
+      document.getElementById("fwOutput").textContent = generateRules(fmt, ips, action);
+    }
+  
+    updateOutput(); // initial render
+
+    // mobile responsive
+    const MODAL_OVERLAY_STYLE = `
+    position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:10000;
+    display:flex;align-items:${window.innerWidth < 640 ? "flex-end" : "center"};
+    justify-content:center;padding:${window.innerWidth < 640 ? "0" : "24px"};`;
+  
+    const MODAL_STYLE = `
+      background:var(--bg1);border:1px solid var(--border);
+      border-radius:${window.innerWidth < 640 ? "12px 12px 0 0" : "12px"};
+      width:100%;max-width:${window.innerWidth < 640 ? "100%" : "700px"};
+      max-height:${window.innerWidth < 640 ? "92vh" : "85vh"};
+      display:flex;flex-direction:column;overflow:hidden;`;
+  }
+  
+  function generateRules(format, ips, action = "DROP") {
+    const ts      = new Date().toISOString();
+    const comment = `# Generated by IPShield — ${ts}\n# ${ips.length} blocked IP(s)\n`;
+    const act     = action.toLowerCase();
+  
+    switch (format) {
+  
+      case "iptables":
+        return `${comment}#!/bin/bash\n\n` +
+          ips.map(ip => `iptables -A INPUT  -s ${ip} -j ${action}\niptables -A OUTPUT -d ${ip} -j ${action}`).join("\n") +
+          `\n\necho "✓ ${ips.length} IPs blocked"`;
+  
+      case "ip6tables":
+        return `${comment}#!/bin/bash\n\n` +
+          ips.map(ip => `ip6tables -A INPUT  -s ${ip} -j ${action}\nip6tables -A OUTPUT -d ${ip} -j ${action}`).join("\n") +
+          `\n\necho "✓ ${ips.length} IPs blocked"`;
+  
+      case "ufw":
+        return `${comment}#!/bin/bash\n\n` +
+          ips.map(ip => `ufw deny from ${ip} to any\nufw deny from any to ${ip}`).join("\n") +
+          `\n\nufw reload\necho "✓ ${ips.length} IPs blocked"`;
+  
+      case "cisco":
+        return `! ${comment.replace(/#/g,"!")}` +
+          `ip access-list extended IPSHIELD_BLOCK\n` +
+          ips.map((ip, i) => ` ${(i+1)*10} deny ip host ${ip} any\n ${(i+1)*10+5} deny ip any host ${ip}`).join("\n") +
+          `\n!\ninterface GigabitEthernet0/0\n ip access-group IPSHIELD_BLOCK in`;
+  
+      case "pfsense":
+        return `# pfSense / OPNsense — import as alias then block\n# ${ts}\n\n` +
+          `# 1. Firewall > Aliases > Add\n#    Name: IPShield_Block\n#    Type: Host(s)\n#    Network(s):\n` +
+          ips.map(ip => `#    ${ip}`).join("\n") +
+          `\n\n# 2. Firewall > Rules > Add rule:\n#    Action: Block, Source: IPShield_Block`;
+  
+      case "paloalto":
+        return `# Palo Alto Networks — Dynamic Address Group\n# ${ts}\n\n` +
+          `set address IPShield_Block_${Date.now()} type ip-netmask\n` +
+          ips.map(ip => `set address "block_${ip.replace(/[.:]/g,"_")}" type ip-netmask ${ip}/32`).join("\n") +
+          `\n\nset address-group IPShield_Block_Group static [ ${ips.map(ip=>`block_${ip.replace(/[.:]/g,"_")}`).join(" ")} ]` +
+          `\nset security policy deny-ipshield from any to any source IPShield_Block_Group action deny`;
+  
+      case "windows":
+        return `# Windows Firewall — PowerShell\n# Run as Administrator\n# ${ts}\n\n` +
+          ips.map((ip, i) =>
+            `New-NetFirewallRule -DisplayName "IPShield_Block_${i+1}" -Direction Inbound  -RemoteAddress ${ip} -Action Block\n` +
+            `New-NetFirewallRule -DisplayName "IPShield_Block_${i+1}_Out" -Direction Outbound -RemoteAddress ${ip} -Action Block`
+          ).join("\n") +
+          `\n\nWrite-Host "✓ ${ips.length} IPs blocked"`;
+  
+      case "nginx":
+        return `# Nginx — add inside http {} or server {} block\n# ${ts}\n\ngeo $blocked_ip {\n    default 0;\n` +
+          ips.map(ip => `    ${ip} 1;`).join("\n") +
+          `\n}\n\n# Then in server block:\n# if ($blocked_ip) { return 403; }`;
+  
+      case "apache":
+        return `# Apache .htaccess\n# ${ts}\n\n<RequireAll>\n    Require all granted\n` +
+          ips.map(ip => `    Require not ip ${ip}`).join("\n") +
+          `\n</RequireAll>`;
+  
+      case "json":
+        return JSON.stringify({
+          generated:  ts,
+          tool:       "IPShield",
+          total:      ips.length,
+          action,
+          blocklist:  ips
+        }, null, 2);
+  
+      default:
+        return ips.join("\n");
+    }
+  }
+  
+  // Sort entries
+    function sortEntries(entries) {
+      const getDate = e => e.meta?.scoredAt || e.scored_at || 0;
+      return [...entries].sort((a, b) => {
+      switch (auditFilters.sort) {
+        case "score_desc": return (b.score ?? 0) - (a.score ?? 0);
+        case "score_asc":  return (a.score ?? 0) - (b.score ?? 0);
+        case "date_asc":   return new Date(getDate(a)) - new Date(getDate(b));
+        default:           return new Date(getDate(b)) - new Date(getDate(a));
+      }
+    });
+  }
+  
+  // Fetch from DB via API 
+  async function fetchAndRenderFromDB() {
+    const params = new URLSearchParams({
+      limit:  AUDIT_PAGE_SIZE,
+      offset: auditPage * AUDIT_PAGE_SIZE,
+      sort:   auditFilters.sort || "date_desc",
+    });
+
+    if (auditFilters.q)                    params.set("q",          auditFilters.q);
+    if (auditFilters.risk)                 params.set("risk",        auditFilters.risk);
+    if (auditFilters.minScore > 0)         params.set("minScore",    auditFilters.minScore);
+    if (auditFilters.maxScore < 100)       params.set("maxScore",    auditFilters.maxScore);
+    if (auditFilters.proxy      != null)   params.set("proxy",       auditFilters.proxy);
+    if (auditFilters.tor        != null)   params.set("tor",         auditFilters.tor);
+    if (auditFilters.datacenter != null)   params.set("datacenter",  auditFilters.datacenter);
+
+    try {
+      const res = await fetch(`/api/v2/audit/search?${params}`, {
+        headers: authHeaders()
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ error: `HTTP ${res.status}` }));
+        throw new Error(err.error || `HTTP ${res.status}`);
+      }
+
+      const data = await res.json();
+      auditTotal = data.total;
+      renderAuditEntries(data.entries || [], data.total);
+
+    } catch (err) {
+      console.error("[audit/db] error:", err);
+      setBulkStatus(`Audit DB error: ${err.message}`);
+    }
+  }
+  
+  // Main renderAudit 
+  function renderAudit() {
+    if (usingDB) { fetchAndRenderFromDB(); return; }
+
+    const filtered = sortEntries(applyFilters(auditEntries));
+    auditTotal     = filtered.length;
+    const start    = auditPage * AUDIT_PAGE_SIZE;
+    const page     = filtered.slice(start, start + AUDIT_PAGE_SIZE);
+    renderAuditEntries(page, filtered.length);
+  }
+  
+  function renderAuditEntries(entries, total) {
+    auditCount.textContent = `${total} ${total === 1 ? "entry" : "entries"}`;
+
+    const status    = document.getElementById("auditFilterStatus");
+    const hasFilter = auditFilters.q || auditFilters.risk ||
+                      auditFilters.minScore > 0 || auditFilters.maxScore < 100 ||
+                      auditFilters.proxy != null || auditFilters.tor != null ||
+                      auditFilters.datacenter != null;
+
+    if (status) {
+      status.textContent = hasFilter
+        ? `Showing ${Math.min(entries.length, total)} of ${total} matching entries${usingDB ? " (DB)" : " (session)"}`
+        : usingDB ? `Full database history — ${total} total entries` : "";
+    }
+
+    if (!entries.length) {
+      auditList.innerHTML = `
+        <div style="padding:24px;text-align:center;color:var(--text3);font-size:11px;">
+          ${hasFilter ? "No entries match your filters" : "No queries yet"}
+        </div>`;
+      return;
+    }
+
+    auditList.innerHTML = entries.map(e => {
+      // Handle both DB (snake_case) and in-memory (camelCase) formats ──
+      const ip        = e.ip;
+      const score     = e.score        ?? 0;
+      const riskLevel = e.riskLevel    || e.risk_level  || "LOW";
+      const scoredAt  = e.meta?.scoredAt || e.scored_at || new Date();
+
+      // Threat feed flags — handle both formats
+      const isFeodo    = e.threatFeeds?.feodo            || e.is_feodo    || false;
+      const isSpamhaus = e.threatFeeds?.spamhaus         || e.is_spamhaus || false;
+      const isET       = e.threatFeeds?.emergingThreats  || e.is_et       || false;
+      const otxCount   = e.threatFeeds?.otx?.pulseCount  || e.otx_pulses  || 0;
+
+      const f = [
+        isFeodo    && "F",
+        isSpamhaus && "S",
+        isET       && "E",
+        otxCount > 0 && "O",
+      ].filter(Boolean).join("");
+
+      return `
+        <div class="audit-item" data-ip="${escHtml(ip)}">
+          <span class="audit-ip">${escHtml(ip)}</span>
+          ${f ? `<span style="font-size:9px;color:#ff3355;font-weight:700;">[${f}]</span>` : ""}
+          <span class="audit-badge ${riskLevel}">${riskLevel}</span>
+          <span class="audit-score ${riskLevel}">${score}</span>
+          <span class="audit-ts">${fmtTime(new Date(scoredAt))}</span>
+        </div>`;
+    }).join("");
+
+    // Pagination
+    const totalPages = Math.ceil(total / AUDIT_PAGE_SIZE);
+    if (totalPages > 1) {
+      const nav = document.createElement("div");
+      nav.style.cssText = "display:flex;justify-content:space-between;align-items:center;padding:8px 16px;border-top:1px solid var(--border);font-size:11px;color:var(--text3);";
+      nav.innerHTML = `
+        <button id="auditPrev" class="btn btn-ghost"
+          style="padding:4px 10px;font-size:11px;"
+          ${auditPage === 0 ? "disabled" : ""}>← Prev</button>
+        <span>Page ${auditPage + 1} of ${totalPages} · ${total} total</span>
+        <button id="auditNext" class="btn btn-ghost"
+          style="padding:4px 10px;font-size:11px;"
+          ${auditPage >= totalPages - 1 ? "disabled" : ""}>Next →</button>`;
+      auditList.appendChild(nav);
+
+      document.getElementById("auditPrev")?.addEventListener("click", () => {
+        auditPage--;
+        renderAudit();
+      });
+      document.getElementById("auditNext")?.addEventListener("click", () => {
+        auditPage++;
+        renderAudit();
+      });
+    }
+
+    // Click to re-score
+    auditList.querySelectorAll(".audit-item").forEach(item => {
+      item.addEventListener("click", () => {
+        ipInput.value = item.dataset.ip;
+        scoreIP();
+      });
     });
   }
 
-  // Click to re-score
-  auditList.querySelectorAll(".audit-item").forEach(item => {
-    item.addEventListener("click", () => {
-      ipInput.value = item.dataset.ip;
-      scoreIP();
+  Map 
+  function initMap() {
+    const container = document.getElementById("mapContainer");
+    if (!container || typeof L === "undefined") return;
+    container.innerHTML = "";
+  
+    // Responsive height
+    const height = window.innerWidth < 480 ? "180px"
+                : window.innerWidth < 640 ? "220px"
+                : "320px";
+    container.style.cssText = `height:${height};`;
+  
+    map = L.map("mapContainer", { zoomControl: window.innerWidth > 640, attributionControl: false });
+    L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
+      maxZoom: 19, subdomains: "abcd"
+    }).addTo(map);
+    map.setView([20, 0], 2);
+  
+    // Update height on resize
+    window.addEventListener("resize", () => {
+      const newHeight = window.innerWidth < 480 ? "180px"
+                      : window.innerWidth < 640 ? "220px"
+                      : "320px";
+      const c = document.getElementById("mapContainer");
+      if (c) { c.style.height = newHeight; map.invalidateSize(); }
     });
-  });
-}
+  }
 
-Map 
- function initMap() {
-  const container = document.getElementById("mapContainer");
-  if (!container || typeof L === "undefined") return;
-  container.innerHTML = "";
- 
-  // Responsive height
-  const height = window.innerWidth < 480 ? "180px"
-               : window.innerWidth < 640 ? "220px"
-               : "320px";
-  container.style.cssText = `height:${height};`;
- 
-  map = L.map("mapContainer", { zoomControl: window.innerWidth > 640, attributionControl: false });
-  L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
-    maxZoom: 19, subdomains: "abcd"
-  }).addTo(map);
-  map.setView([20, 0], 2);
- 
-  // Update height on resize
-  window.addEventListener("resize", () => {
-    const newHeight = window.innerWidth < 480 ? "180px"
-                    : window.innerWidth < 640 ? "220px"
-                    : "320px";
-    const c = document.getElementById("mapContainer");
-    if (c) { c.style.height = newHeight; map.invalidateSize(); }
-  });
-}
-
-function updateMap(geo, ip, riskLevel) {
-    if (!map || geo.lat == null || geo.lon == null) return;
-    const color = { CRITICAL:"#ff3355", HIGH:"#ff7700", MEDIUM:"#ffcc00", LOW:"#00e87c" }[riskLevel] || "#00d9ff";
-    const icon  = L.divIcon({
-      className: "", iconSize: [14,14], iconAnchor: [7,7],
-      html: `<div style="width:14px;height:14px;border-radius:50%;background:${color};border:2px solid #fff;box-shadow:0 0 8px ${color};"></div>`
-    });
-    if (mapMarker) map.removeLayer(mapMarker);
-    mapMarker = L.marker([geo.lat, geo.lon], { icon })
-      .addTo(map)
-      .bindPopup(`<b style="font-family:monospace">${ip}</b><br>${geo.city||""}, ${geo.country||""}<br>Risk: ${riskLevel}`)
-      .openPopup();
-    map.flyTo([geo.lat, geo.lon], 6, { duration: 1.2 });
-    const label = document.getElementById("mapLabel");
-    if (label) label.textContent = `${geo.city||"—"}, ${geo.country||"—"}`;
-}
+  function updateMap(geo, ip, riskLevel) {
+      if (!map || geo.lat == null || geo.lon == null) return;
+      const color = { CRITICAL:"#ff3355", HIGH:"#ff7700", MEDIUM:"#ffcc00", LOW:"#00e87c" }[riskLevel] || "#00d9ff";
+      const icon  = L.divIcon({
+        className: "", iconSize: [14,14], iconAnchor: [7,7],
+        html: `<div style="width:14px;height:14px;border-radius:50%;background:${color};border:2px solid #fff;box-shadow:0 0 8px ${color};"></div>`
+      });
+      if (mapMarker) map.removeLayer(mapMarker);
+      mapMarker = L.marker([geo.lat, geo.lon], { icon })
+        .addTo(map)
+        .bindPopup(`<b style="font-family:monospace">${ip}</b><br>${geo.city||""}, ${geo.country||""}<br>Risk: ${riskLevel}`)
+        .openPopup();
+      map.flyTo([geo.lat, geo.lon], 6, { duration: 1.2 });
+      const label = document.getElementById("mapLabel");
+      if (label) label.textContent = `${geo.city||"—"}, ${geo.country||"—"}`;
+  }
 
   // Events 
   function setupEventListeners() {
@@ -3256,7 +3337,6 @@ function updateMap(geo, ip, riskLevel) {
                 quickBlock(currentIP);
               }
           }
-
 
         // Tab switching
         const tabBtn = e.target.closest(".tab-btn");
@@ -3948,7 +4028,7 @@ function applyTheme(dark) {
 
   setInterval(loadWatchlist, 1000 * 60 * 2);
 
-  // CLUSTER VISUALIZATION MODAL
+  // Cluster visualization modal
   async function showClustersPanel() {
       document.getElementById("clustersModal")?.remove();
 
@@ -4227,7 +4307,7 @@ function applyTheme(dark) {
       loadClusters();
   }
 
-  // SIEM TARGETS CONFIGURATION PANEL
+  // SIEM Targets Configuration Panel
   async function showUnifiedSIEMPanel() {
     document.getElementById("siemUnifiedModal")?.remove();
 
@@ -4703,11 +4783,11 @@ function applyTheme(dark) {
       document.getElementById("addSIEMTargetBtn").addEventListener("click", openAddForm);
       document.getElementById("stSave").addEventListener("click", saveTarget);
       document.getElementById("stCancel").addEventListener("click", () => {
-        document.getElementById("siemTargetForm").style.display = "none";
+      document.getElementById("siemTargetForm").style.display = "none";
       });
     }
 
-  // RATE LIMIT TUNING PANEL
+  // Rate Limit Tuning Panel
   async function showRateLimitPanel() {
       document.getElementById("rateLimitModal")?.remove();
 
@@ -5008,7 +5088,7 @@ function applyTheme(dark) {
     const guard = document.getElementById("authGuard");
     if (guard) guard.remove();
 
-    // KEY MANAGEMENT PANEL 
+    // Key mgt panel
     async function showKeyManagerPanel() {
       document.getElementById("keyMgrModal")?.remove();
       const overlay = document.createElement("div");
@@ -5483,7 +5563,6 @@ function applyTheme(dark) {
         loadKeyStats();
       }
             
-    
       // Usage panel 
       async function showUsagePanel(keyId) {
         const r = await fetch(`${API}/keys/${keyId}/usage?days=30`, { headers: authHeaders() });
