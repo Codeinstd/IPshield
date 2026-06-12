@@ -27,7 +27,7 @@ try {
   console.error("Failed to serialize endpoints:", err);
 }
 
-  return `<!DOCTYPE html>
+return `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -1512,7 +1512,7 @@ try {
 </html>`;
 }
 
-// ── Build flat endpoint list from OpenAPI spec 
+// Build flat endpoint list from OpenAPI spec 
 function buildEndpoints(spec) {
   const endpoints = [];
   const METHOD_ORDER = ["GET","POST","PUT","DELETE","PATCH"];

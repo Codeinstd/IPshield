@@ -455,7 +455,6 @@ token and require a 6-digit TOTP code or an 8-character backup code.
   paths: {
 
     // Auth
-
     "/v1/auth/login": {
       post: {
         tags: ["Auth"], summary: "Login with email + password or API key",
@@ -600,7 +599,6 @@ Passwords must be 8–128 characters.
     },
 
     // MFA 
-
     "/v1/mfa/setup": {
       get: {
         tags: ["MFA"], summary: "Generate TOTP secret and QR code",
@@ -664,7 +662,6 @@ Save them in a password manager immediately.`,
     },
 
     // Keys
-
     "/v1/keys": {
       get: {
         tags: ["Keys"], summary: "List all API keys (admin)",
@@ -928,7 +925,6 @@ Passwords must be 8–128 characters. The invite token is consumed and cannot be
     },
 
     // Health 
-
     "/health": {
       get: {
         tags: ["System"], summary: "Health check", security: [],
@@ -954,7 +950,6 @@ Passwords must be 8–128 characters. The invite token is consumed and cannot be
     },
 
     // Stats 
-
     "/stats": {
       get: {
         tags: ["System"], summary: "Runtime statistics",
@@ -965,7 +960,6 @@ Passwords must be 8–128 characters. The invite token is consumed and cannot be
     },
 
     // Scoring 
-
     "/score/{ip}": {
       get: {
         tags: ["Scoring"], summary: "Score a single IP",
@@ -1010,7 +1004,6 @@ Passwords must be 8–128 characters. The invite token is consumed and cannot be
     },
 
     // Intelligence 
-
     "/whois/{ip}": {
       get: {
         tags: ["Intelligence"], summary: "WHOIS / RDAP deep dive",
@@ -1031,7 +1024,6 @@ Passwords must be 8–128 characters. The invite token is consumed and cannot be
     },
 
     // Blacklist 
-
     "/blacklist": {
       get: {
         tags: ["Blacklist"], summary: "List blacklisted IPs",
@@ -1123,7 +1115,6 @@ Passwords must be 8–128 characters. The invite token is consumed and cannot be
     },
 
     // Cases 
-
     "/cases": {
       get: {
         tags: ["Cases"], summary: "List investigation cases",
@@ -1240,7 +1231,6 @@ Passwords must be 8–128 characters. The invite token is consumed and cannot be
     },
 
     // Watchlist 
-
     "/watchlist": {
       get: {
         tags: ["Watchlist"], summary: "Get all watched IPs",
@@ -1280,7 +1270,6 @@ Passwords must be 8–128 characters. The invite token is consumed and cannot be
     },
 
     // Audit 
-
     "/audit": {
       get: {
         tags: ["Audit"], summary: "Get audit log",
@@ -1322,7 +1311,6 @@ Passwords must be 8–128 characters. The invite token is consumed and cannot be
     },
 
     // SIEM 
-
     "/siem/status": {
       get: { tags: ["System"], summary: "SIEM webhook configuration status", responses: { 200: { description: "SIEM status" } } }
     },

@@ -309,9 +309,30 @@ app.get("/login", (req, res) => {
   res.sendFile(path.join(__dirname, "../public", "login.html"));
 });
 
+// AFTER — only valid mfaSetup tokens get through
 app.get("/mfa-setup", (req, res) => {
-  res.sendFile(path.join(__dirname, "../public", "mfa-setup.html"));
+  const token = req.query.token || 
+    (req.headers.authorization || "").replace("Bearer ", "");
+
+  if (!token) {
+    return res.redirect("/login");
+  }
+
+  try {
+    const jwt     = require("jsonwebtoken");
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    // Must be a setup token, not a full session token
+    if (!decoded.mfaSetup) {
+      return res.redirect("/login");
+    }
+
+    res.sendFile(path.join(__dirname, "../public", "mfa-setup.html"));
+  } catch {
+    return res.redirect("/login");
+  }
 });
+
 
 app.get("/forgot-password", (req, res) => {
   res.sendFile(path.join(__dirname, "../public", "forgot-password.html"));

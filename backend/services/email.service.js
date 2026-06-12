@@ -17,12 +17,12 @@ function getTransporter() {
 
 async function sendEmail({ to, subject, html }) {
    console.log("[EMAIL DEBUG] ENV AT CALL TIME:", {
-    ALERT_FROM: process.env.ALERT_FROM,
-    ALERT_TO:   process.env.ALERT_TO,
+    ALERT_FROM: process.env.ALERT_FROM || "designer.oladipupo@gmail.com",
+    ALERT_TO:   process.env.ALERT_TO || "designer.oladipupo@gmail.com",
     SMTP_USER:  process.env.SMTP_USER,
   });
   const transport  = getTransporter();
-  const fromAddr   = process.env.ALERT_FROM;
+  const fromAddr     = process.env.ALERT_FROM || "designer.oladipupo@gmail.com";
   const recipients = Array.isArray(to)
     ? to.join(",")
     : String(to).split(",").map(e => e.trim()).filter(Boolean).join(",");

@@ -405,8 +405,8 @@
       }
 
       if (data.mfaSetupRequired) {
-      if (data.token) localStorage.setItem("token", data.token);  
-      window.location.href = "/mfa-setup";
+      if (data.token) localStorage.setItem("token", data.token);
+      window.location.href = `/mfa-setup?token=${encodeURIComponent(data.token)}`;
       return;
     }
 
