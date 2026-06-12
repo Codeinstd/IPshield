@@ -65,7 +65,7 @@ router.post("/",
       console.error("[ACCESS EMAIL ERROR]", err);
     }
 
-    // ── Slack alert (reuses your existing webhook setup)
+    // Slack alert (reuses your existing webhook setup)
     if (process.env.SLACK_WEBHOOK_URL) {
       try {
         await fetch(process.env.SLACK_WEBHOOK_URL, {
