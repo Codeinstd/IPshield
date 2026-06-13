@@ -3,14 +3,6 @@ require("dotenv").config({
   override: true
 });
 
-  console.log('ENV FILE VALUES');
-console.log({
-  ALERT_FROM: process.env.ALERT_FROM,
-  ALERT_TO: process.env.ALERT_TO,
-  SMTP_USER: process.env.SMTP_USER,
-  NODE_ENV: process.env.NODE_ENV
-});
-
 require("./utils/validateEnv")();
 const app    = require("./app");
 const logger = require("./utils/logger");

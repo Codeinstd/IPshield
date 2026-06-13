@@ -4,13 +4,19 @@ const nodemailer = require("nodemailer");
 let transporter = null;
 
 function getTransporter() {
+  const port   = parseInt(process.env.SMTP_PORT || "587");
+  const secure = port === 465; 
+
   return nodemailer.createTransport({
     host:   process.env.SMTP_HOST || "smtp.gmail.com",
-    port:   parseInt(process.env.SMTP_PORT || "587"),
-    secure: true,
+    port,
+    secure,
     auth: {
       user: process.env.SMTP_USER,
       pass: process.env.SMTP_PASS,
+    },
+    tls: {
+      rejectUnauthorized: false, 
     },
   });
 }
@@ -88,6 +94,18 @@ async function sendAlertEmail(payload) {
       </div>
     `,
   });
+}
+
+if (process.env.SMTP_USER && process.env.SMTP_PASS) {
+  nodemailer.createTransport({
+    host:   process.env.SMTP_HOST || "smtp.gmail.com",
+    port:   parseInt(process.env.SMTP_PORT || "587"),
+    secure: parseInt(process.env.SMTP_PORT || "587") === 465,
+    auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
+    tls: { rejectUnauthorized: false },
+  }).verify()
+    .then(() => console.log("[EMAIL] SMTP connection verified ✓"))
+    .catch(err => console.error("[EMAIL] SMTP connection FAILED:", err.message));
 }
 
 module.exports = { sendEmail, sendAlertEmail, sendInviteEmail };
