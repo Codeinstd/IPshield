@@ -22,7 +22,46 @@
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&amp;family=Syne:wght@400;600;700;800&amp;display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/leaflet.min.css">
 <style>
-:root{--bg:#080c0f;--bg1:#0d1117;--bg2:#111820;--border:#1e2d3d;--accent:#00d9ff;--text:#c9d8e8;--text2:#6a8fa8;--text3:#3d5a72;--critical:#ff3355;--high:#ff7700;--medium:#ffcc00;--low:#00e87c;}
+:root{
+  --bg:#080c0f;
+  --bg1:#0d1117;
+  --bg2:#111820;
+  --bg3:#1a2430;
+
+  --border:#1e2d3d;
+
+  --accent:#00d9ff;
+
+  --text:#c9d8e8;
+  --text2:#6a8fa8;
+  --text3:#3d5a72;
+
+  --critical:#ff3355;
+  --high:#ff7700;
+  --medium:#ffcc00;
+  --low:#00e87c;
+}
+
+/* Light Theme */
+html[data-theme="light"]{
+  --border:#d7e1eb;
+
+  --accent:#0099cc;
+
+  --text:#12202d;
+  --text2:#52697d;
+  --text3:#7b8fa3;
+
+  --critical:#d7263d;
+  --high:#d97706;
+  --medium:#b58900;
+  --low:#059669;
+
+  --bg:#f7fafc;
+  --bg1:#ffffff;
+  --bg2:#eef3f8;
+  --bg3:#dfe7ef;
+}
 *{box-sizing:border-box;margin:0;padding:0;}
 body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;min-height:100vh;overflow-x:hidden;}
 a{text-decoration:none;}
@@ -353,10 +392,14 @@ footer a:hover{color:var(--accent);}
     <div class="logo-icon">⬡</div>
     <div class="logo-text">IP<span>Shield</span></div>
   </div>
-  <nav class="nav-right">
-    <a href="/api/docs" class="btn btn-ghost">API Docs</a>
-    <a href="/login" class="btn btn-primary">Sign In →</a>
-  </nav>
+ <nav class="nav-right">
+  <button id="themeToggle" class="btn btn-ghost">
+    🌙 Dark
+  </button>
+
+  <a href="/api/docs" class="btn btn-ghost">API Docs</a>
+  <a href="/login" class="btn btn-primary">Sign In →</a>
+</nav>
   <button class="nav-hamburger" id="mainHamburger" aria-label="Open menu" aria-expanded="false">
     <span></span><span></span><span></span>
   </button>
@@ -371,10 +414,19 @@ footer a:hover{color:var(--accent);}
     </div>
     <button class="drawer-close" id="drawerClose">✕</button>
   </div>
-  <div class="drawer-body">
-    <a href="/api/docs">API Docs</a>
-    <a href="/login" class="primary">Sign In →</a>
-  </div>
+ <div class="drawer-body">
+
+  <button
+    id="mobileThemeToggle"
+    class="btn btn-ghost"
+    style="width:100%;justify-content:center;margin-bottom:8px;">
+    🌙 Dark
+  </button>
+
+  <a href="/api/docs">API Docs</a>
+  <a href="/login" class="primary">Sign In →</a>
+
+</div>
 </div>
 
 <section class="hero">
@@ -870,6 +922,25 @@ footer a:hover{color:var(--accent);}
   .btn-primary { animation: none; }
   .hero-badge { animation: none; }
 }
+
+html,
+body,
+header,
+footer,
+.feature-card,
+.platform-mock,
+.mock-stat-card,
+.stat-item,
+.btn,
+.nav-drawer,
+.demo-section,
+.platform-section {
+  transition:
+    background-color .25s ease,
+    color .25s ease,
+    border-color .25s ease,
+    box-shadow .25s ease;
+}
 </style>
 <script>
 async function loadPublicStats() {
@@ -1121,6 +1192,88 @@ loadPublicStats();
 
 })();
 
+
+/* ---------------------------
+   Theme Toggle
+--------------------------- */
+
+(function () {
+
+  const html = document.documentElement;
+
+  const desktopBtn =
+    document.getElementById("themeToggle");
+
+  const mobileBtn =
+    document.getElementById("mobileThemeToggle");
+
+  const savedTheme =
+    localStorage.getItem("theme");
+
+  if (savedTheme) {
+    html.setAttribute("data-theme", savedTheme);
+  } else {
+    const prefersLight =
+      window.matchMedia(
+        "(prefers-color-scheme: light)"
+      ).matches;
+
+    html.setAttribute(
+      "data-theme",
+      prefersLight ? "light" : "dark"
+    );
+  }
+
+  function updateButtons() {
+
+    const light =
+      html.getAttribute("data-theme") === "light";
+
+    const label = light
+      ? "☀️ Light"
+      : "🌙 Dark";
+
+
+    if (desktopBtn)
+      desktopBtn.textContent = label;
+
+    if (mobileBtn)
+      mobileBtn.textContent = label;
+  }
+
+  function toggleTheme() {
+
+    const current =
+      html.getAttribute("data-theme");
+
+    const next =
+      current === "light"
+        ? "dark"
+        : "light";
+
+    html.setAttribute("data-theme", next);
+
+    localStorage.setItem(
+      "theme",
+      next
+    );
+
+    updateButtons();
+  }
+
+  desktopBtn?.addEventListener(
+    "click",
+    toggleTheme
+  );
+
+  mobileBtn?.addEventListener(
+    "click",
+    toggleTheme
+  );
+
+  updateButtons();
+
+})();
 </script>
 </body>
 </html>

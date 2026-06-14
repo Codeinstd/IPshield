@@ -220,7 +220,7 @@
   const toggle = document.createElement("button");
   toggle.className     = "btn btn-ghost";
   toggle.id            = "themeToggle";
-  toggle.textContent   = isDark ? "☀ LIGHT" : "☾ DARK";
+  toggle.textContent   = isDark ? "☀️ LIGHT" : "🌙 DARK";
   toggle.style.cssText = "padding:6px 12px;font-size:11px;";
   toggle.addEventListener("click", toggleTheme);
   headerRight.prepend(toggle);
@@ -3375,14 +3375,13 @@ function applyTheme(dark) {
   const btn  = document.getElementById("themeToggle");
  
   if (dark) {
-    // Remove all overrides — CSS variables revert to dark defaults
     [
       "--bg","--bg1","--bg2","--bg3",
       "--text","--text2","--text3",
       "--border","--border2"
     ].forEach(v => root.style.removeProperty(v));
  
-    if (btn) btn.textContent = "☀ LIGHT";
+    if (btn) btn.textContent = "☀️ LIGHT";
  
     if (map) {
       map.eachLayer(l => { if (l._url) map.removeLayer(l); });
@@ -3401,7 +3400,7 @@ function applyTheme(dark) {
     root.style.setProperty("--border",  "#c8d8e4");
     root.style.setProperty("--border2", "#b0c4d4");
  
-    if (btn) btn.textContent = "☾ DARK";
+    if (btn) btn.textContent = "🌙 DARK";
  
     if (map) {
       map.eachLayer(l => { if (l._url) map.removeLayer(l); });
