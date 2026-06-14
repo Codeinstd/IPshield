@@ -1,67 +1,78 @@
 const crypto = require("crypto");
 const db     = require("./db");
+const logger = require("../utils/logger");
 
-async function appendAuditEntry(entry) {
-  return db.transaction(async (client) => {
+async function appendAuditEntry(result) {
+  try {
+    return await db.transaction(async (client) => {
 
-    // Lock the last row to get its hash — prevents race conditions
-    const lastRow = await client.query(
-      `SELECT row_hash FROM audit_log ORDER BY id DESC LIMIT 1 FOR UPDATE`
-    );
-    const prevHash = lastRow.rows.length
-      ? lastRow.rows[0].row_hash
-      : "GENESIS";
+      // Lock last row to prevent race condition in batch scoring
+      const lastRow = await client.query(
+        `SELECT row_hash FROM audit_log ORDER BY id DESC LIMIT 1 FOR UPDATE`
+      );
+      const prevHash = lastRow.rows.length
+        ? lastRow.rows[0].row_hash
+        : "GENESIS";
 
-    // Build deterministic content string
-    const content = JSON.stringify({
-      ip:         entry.ip,
-      score:      entry.score,
-      risk_level: entry.riskLevel || entry.risk_level,
-      scored_at:  new Date(entry.scoredAt || entry.scored_at || Date.now()).toISOString(),
-      prev_hash:  prevHash,
+      const scoredAt = new Date().toISOString();
+
+      // Deterministic content — same fields always in same order
+      const content = JSON.stringify({
+        ip:         result.ip,
+        score:      result.score,
+        risk_level: result.riskLevel,
+        scored_at:  scoredAt,
+        prev_hash:  prevHash,
+      });
+
+      const rowHash = crypto
+        .createHash("sha256")
+        .update(content)
+        .digest("hex");
+
+      const inserted = await client.query(
+        `INSERT INTO audit_log (
+          ip, score, risk_level, action,
+          is_proxy, is_tor, is_dc,
+          country, city, isp, asn,
+          is_feodo, is_spamhaus, is_et, otx_pulses,
+          cached, processing_ms, api_version,
+          prev_hash, row_hash, scored_at
+        ) VALUES (
+          $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,
+          $12,$13,$14,$15,$16,$17,$18,$19,$20,NOW()
+        ) RETURNING id, row_hash`,
+        [
+          result.ip,
+          result.score,
+          result.riskLevel,
+          result.action                          || null,
+          result.intelligence?.isProxy           || false,
+          result.intelligence?.isTor             || false,
+          result.intelligence?.isDatacenter      || false,
+          result.geo?.country                    || null,
+          result.geo?.city                       || null,
+          result.network?.isp                    || null,
+          result.network?.asn                    || null,
+          result.threatFeeds?.feodo              || false,
+          result.threatFeeds?.spamhaus           || false,
+          result.threatFeeds?.emergingThreats    || false,
+          result.threatFeeds?.otx?.pulseCount    || 0,
+          result.meta?.cached                    || false,
+          result.meta?.processingMs              || null,
+          "v2",
+          prevHash,
+          rowHash,
+        ]
+      );
+
+      logger.info(`[audit] entry #${inserted.rows[0].id} appended — hash: ${rowHash.slice(0, 12)}…`);
+      return inserted.rows[0];
     });
-
-    const rowHash = crypto
-      .createHash("sha256")
-      .update(content)
-      .digest("hex");
-
-    // Insert with hashes
-    const result = await client.query(
-      `INSERT INTO audit_log (
-        ip, score, risk_level, action,
-        country, city, isp, asn,
-        is_proxy, is_tor, is_dc,
-        is_feodo, is_spamhaus, is_et, otx_pulses,
-        scored_at, prev_hash, row_hash
-      ) VALUES (
-        $1,$2,$3,$4,$5,$6,$7,$8,
-        $9,$10,$11,$12,$13,$14,$15,
-        NOW(),$16,$17
-      ) RETURNING id, row_hash`,
-      [
-        entry.ip,
-        entry.score,
-        entry.riskLevel  || entry.risk_level,
-        entry.action,
-        entry.geo?.country     || entry.country    || null,
-        entry.geo?.city        || entry.city       || null,
-        entry.network?.isp     || entry.isp        || null,
-        entry.network?.asn     || entry.asn        || null,
-        entry.intelligence?.isProxy      ?? entry.is_proxy     ?? false,
-        entry.intelligence?.isTor        ?? entry.is_tor       ?? false,
-        entry.intelligence?.isDatacenter ?? entry.is_dc        ?? false,
-        entry.threatFeeds?.feodo         ?? entry.is_feodo     ?? false,
-        entry.threatFeeds?.spamhaus      ?? entry.is_spamhaus  ?? false,
-        entry.threatFeeds?.emergingThreats ?? entry.is_et      ?? false,
-        entry.threatFeeds?.otx?.pulseCount ?? entry.otx_pulses ?? 0,
-        prevHash,
-        rowHash,
-      ]
-    );
-
-    return result.rows[0];
-  });
+  } catch (err) {
+    logger.error("[audit] appendAuditEntry failed:", err.message);
+    throw err;
+  }
 }
 
 module.exports = { appendAuditEntry };

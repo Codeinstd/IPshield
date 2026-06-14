@@ -8,8 +8,55 @@ const { isBlacklisted }         = require("../store/blacklist.store");
 const { checkAndAutoCase }      = require("../services/autoCase.service");
 const { detectClusters }        = require("../services/cluster.service");
 const { sendToAllSIEMTargets }  = require("../services/siemTargets.service");
-const { appendAuditEntry }    =  require("../store/auditLog.store");
+const { appendAuditEntry }      = require("../store/auditLog.store");
 
+// Shared: attach blacklist data to a score result 
+
+async function attachBlacklist(result) {
+  try {
+    const blRes = await db.query(
+      `SELECT * FROM blacklist
+       WHERE ip = $1
+         AND (expires_at IS NULL OR expires_at > NOW())
+       LIMIT 1`,
+      [result.ip]
+    );
+    result.blacklisted = blRes.rows.length ? {
+      id:         blRes.rows[0].id,
+      severity:   blRes.rows[0].severity,
+      category:   blRes.rows[0].category   || null,
+      reason:     blRes.rows[0].reason     || null,
+      added_by:   blRes.rows[0].added_by   || null,
+      added_at:   blRes.rows[0].added_at   || null,
+      expires_at: blRes.rows[0].expires_at || null,
+      tags:       Array.isArray(blRes.rows[0].tags) ? blRes.rows[0].tags : [],
+    } : null;
+  } catch {
+    result.blacklisted = null;
+  }
+}
+
+// Shared: fire-and-forget side effects after scoring 
+
+function fireSideEffects(result) {
+  checkAndAutoCase(result).catch(err =>
+    logger.error("[scoreIP] autoCase error:", err.message)
+  );
+  detectClusters(result).catch(err =>
+    logger.error("[scoreIP] cluster error:", err.message)
+  );
+  sendToAllSIEMTargets(result).catch(err =>
+    logger.error("[scoreIP] SIEM targets error:", err.message)
+  );
+  alertIfCritical(result).catch(err =>
+    logger.error("[scoreIP] alert error:", err.message)
+  );
+  sendToSIEM(result).catch(err =>
+    logger.error("[scoreIP] SIEM error:", err.message)
+  );
+}
+
+// POST /api/score/:ip 
 
 exports.scoreIP = async (req, res, next) => {
   try {
@@ -18,194 +65,74 @@ exports.scoreIP = async (req, res, next) => {
 
     const result = await getFullIntel(ip);
 
-    // Check blacklist via Postgres
-    try {
-      const blRes = await db.query(
-        `SELECT * FROM blacklist
-         WHERE ip = $1
-           AND (expires_at IS NULL OR expires_at > NOW())
-         LIMIT 1`,
-        [ip]
-      );
-      if (blRes.rows.length) {
-        const bl = blRes.rows[0];
-        result.blacklisted = {
-          id:         bl.id,
-          severity:   bl.severity,
-          category:   bl.category   || null,
-          reason:     bl.reason     || null,
-          added_by:   bl.added_by   || null,
-          added_at:   bl.added_at   || null,
-          expires_at: bl.expires_at || null,
-          tags:       Array.isArray(bl.tags) ? bl.tags : [],
-        };
-      } else {
-        result.blacklisted = null;
-      }
-    } catch (_) {
-      result.blacklisted = null;
-    }
+    await attachBlacklist(result);
 
-    // Persist to audit_log
-    // AFTER — matches all table columns:
-    try {
-    async function saveAuditWithHash(db, result) {
-      const crypto = require("crypto");
+    // Append to immutable audit log — hash chain enforced inside transaction
+    await appendAuditEntry(result).catch(err =>
+      logger.error("[scoreIP] audit append error:", err.message)
+    );
 
-      // Get the last row's hash
-      const lastRow = await db.query(
-        `SELECT row_hash FROM audit_log ORDER BY id DESC LIMIT 1`
-      );
-      const prevHash = lastRow.rows[0]?.row_hash || "GENESIS";
-
-      // Build content string
-      const content = JSON.stringify({
-        ip:         result.ip,
-        score:      result.score,
-        risk_level: result.riskLevel,
-        scored_at:  new Date().toISOString(),
-        prev_hash:  prevHash,
-      });
-
-      // Hash it
-      const rowHash = crypto
-        .createHash("sha256")
-        .update(content)
-        .digest("hex");
-
-      await db.query(
-        `INSERT INTO audit_log (
-          ip, score, risk_level, action,
-          is_proxy, is_tor, is_dc,
-          country, city, isp, asn,
-          is_feodo, is_spamhaus, is_et, otx_pulses,
-          cached, processing_ms, api_version,
-          prev_hash, row_hash, scored_at
-        ) VALUES (
-          $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,
-          $12,$13,$14,$15,$16,$17,$18,$19,$20,NOW()
-        )`,
-        [
-          result.ip, result.score, result.riskLevel, result.action || null,
-          result.intelligence?.isProxy      || false,
-          result.intelligence?.isTor        || false,
-          result.intelligence?.isDatacenter || false,
-          result.geo?.country   || null,
-          result.geo?.city      || null,
-          result.network?.isp   || null,
-          result.network?.asn   || null,
-          result.threatFeeds?.feodo            || false,
-          result.threatFeeds?.spamhaus         || false,
-          result.threatFeeds?.emergingThreats  || false,
-          result.threatFeeds?.otx?.pulseCount  || 0,
-          result.meta?.cached      || false,
-          result.meta?.processingMs || null,
-          "v2",
-          prevHash,
-          rowHash,
-        ]
-      );
-    }
-    } catch (dbErr) {
-      logger.error("[audit_log] insert error:", dbErr.message);
-    }
+    // In-memory store for session display
     addAudit(result);
-    checkAndAutoCase(result).catch(() => {});
-    detectClusters(result).catch(() => {});     
-    sendToAllSIEMTargets(result).catch(() => {}); 
-    // Fire-and-forget
-    alertIfCritical(result).catch(() => {});
-    sendToSIEM(result).catch(() => {});
+
+    // Fire-and-forget side effects
+    fireSideEffects(result);
 
     res.json(result);
+
   } catch (err) {
     next(err);
   }
 };
+
+// POST /api/score/batch
+// Batch scores serially for audit log integrity — parallel hashing
+// would cause race conditions in the hash chain even with FOR UPDATE.
 
 exports.scoreBatch = async (req, res, next) => {
   try {
     const { ips } = req.body;
     logger.info(`Batch scoring ${ips.length} IPs`);
 
-    const results = await Promise.allSettled(ips.map(ip => getFullIntel(ip)));
+    // Score all IPs in parallel (intel fetching is safe to parallelise)
+    const intelResults = await Promise.allSettled(
+      ips.map(ip => getFullIntel(ip))
+    );
 
-    const output = await Promise.all(results.map(async (r, i) => {
+    // Attach blacklist data in parallel (read-only, safe)
+    await Promise.allSettled(
+      intelResults.map(r =>
+        r.status === "fulfilled" ? attachBlacklist(r.value) : Promise.resolve()
+      )
+    );
+
+    // Write audit entries SERIALLY — each must read the previous row's hash
+    // before inserting, so parallel writes would corrupt the chain
+    const output = [];
+
+    for (let i = 0; i < intelResults.length; i++) {
+      const r = intelResults[i];
+
       if (r.status === "fulfilled") {
         const result = r.value;
 
-        // Persist to audit_log
-       // Inside scoreBatch — AFTER:
-try {
-async function saveAuditWithHash(db, result) {
-  const crypto = require("crypto");
-
-  // Get the last row's hash
-  const lastRow = await db.query(
-    `SELECT row_hash FROM audit_log ORDER BY id DESC LIMIT 1`
-  );
-  const prevHash = lastRow.rows[0]?.row_hash || "GENESIS";
-
-  // Build content string
-  const content = JSON.stringify({
-    ip:         result.ip,
-    score:      result.score,
-    risk_level: result.riskLevel,
-    scored_at:  new Date().toISOString(),
-    prev_hash:  prevHash,
-  });
-
-  // Hash it
-  const rowHash = crypto
-    .createHash("sha256")
-    .update(content)
-    .digest("hex");
-
-  await db.query(
-    `INSERT INTO audit_log (
-      ip, score, risk_level, action,
-      is_proxy, is_tor, is_dc,
-      country, city, isp, asn,
-      is_feodo, is_spamhaus, is_et, otx_pulses,
-      cached, processing_ms, api_version,
-      prev_hash, row_hash, scored_at
-    ) VALUES (
-      $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,
-      $12,$13,$14,$15,$16,$17,$18,$19,$20,NOW()
-    )`,
-    [
-      result.ip, result.score, result.riskLevel, result.action || null,
-      result.intelligence?.isProxy      || false,
-      result.intelligence?.isTor        || false,
-      result.intelligence?.isDatacenter || false,
-      result.geo?.country   || null,
-      result.geo?.city      || null,
-      result.network?.isp   || null,
-      result.network?.asn   || null,
-      result.threatFeeds?.feodo            || false,
-      result.threatFeeds?.spamhaus         || false,
-      result.threatFeeds?.emergingThreats  || false,
-      result.threatFeeds?.otx?.pulseCount  || 0,
-      result.meta?.cached      || false,
-      result.meta?.processingMs || null,
-      "v2",
-      prevHash,
-      rowHash,
-    ]
-  );
-}
-} catch (_) {}
+        // Serial audit append — preserves hash chain integrity
+        await appendAuditEntry(result).catch(err =>
+          logger.error(`[scoreBatch] audit append error for ${result.ip}:`, err.message)
+        );
 
         addAudit(result);
-        checkAndAutoCase(result).catch(() => {});
-        detectClusters(result).catch(() => {});  
-        sendToAllSIEMTargets(result).catch(() => {}); 
-        alertIfCritical(result).catch(() => {});
-        sendToSIEM(result).catch(() => {});
-        return result;
+        fireSideEffects(result);
+
+        output.push(result);
+      } else {
+        output.push({
+          ip:    ips[i],
+          error: r.reason?.message || "Failed",
+          score: null,
+        });
       }
-      return { ip: ips[i], error: r.reason?.message || "Failed", score: null };
-    }));
+    }
 
     res.json({
       total:   output.length,
@@ -213,6 +140,7 @@ async function saveAuditWithHash(db, result) {
       failed:  output.filter(r => r.error).length,
       results: output,
     });
+
   } catch (err) {
     next(err);
   }

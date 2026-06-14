@@ -1,13 +1,15 @@
 const express         = require("express");
 const router          = express.Router();
+const crypto          = require("crypto");
 const { query, validationResult } = require("express-validator");
 const { getAuditLog } = require("../store/memory.store");
 const db              = require("../store/db");
 const { requireAuth, requireRole } = require("../middleware/auth.js");
 
 // GET /api/audit
-router.get("/", requireAuth, requireRole('readonly'), async (req, res) => { 
-  const limit  = Math.min(parseInt(req.query.limit) || 50, 200);
+
+router.get("/", requireAuth, requireRole("readonly"), async (req, res) => {
+  const limit  = Math.min(parseInt(req.query.limit)  || 50, 200);
   const offset = parseInt(req.query.offset) || 0;
 
   try {
@@ -19,17 +21,31 @@ router.get("/", requireAuth, requireRole('readonly'), async (req, res) => {
       ),
     ]);
     const total = parseInt(totalRes.rows[0].total, 10);
-    res.json({ total, limit, offset, hasMore: offset + limit < total, entries: rowsRes.rows });
+    res.json({
+      total,
+      limit,
+      offset,
+      hasMore:  offset + limit < total,
+      entries:  rowsRes.rows,
+    });
   } catch (err) {
-    console.error("Audit list error:", err.message);
-    // Fallback to memory
+    console.error("[audit] list error:", err.message);
+    // Fallback to in-memory store
     const log = getAuditLog().slice(offset, offset + limit);
-    res.json({ total: getAuditLog().length, limit, offset, hasMore: false, entries: log });
+    res.json({
+      total:   getAuditLog().length,
+      limit,
+      offset,
+      hasMore: false,
+      entries: log,
+    });
   }
 });
 
 // GET /api/audit/search
-router.get("/search", requireAuth, requireRole('readonly'),
+
+router.get("/search",
+  requireAuth, requireRole("readonly"),
   [
     query("q").optional().trim().isLength({ max: 100 }),
     query("risk").optional().isIn(["CRITICAL","HIGH","MEDIUM","LOW"]),
@@ -48,7 +64,9 @@ router.get("/search", requireAuth, requireRole('readonly'),
   ],
   async (req, res) => {
     const errors = validationResult(req);
-    if (!errors.isEmpty()) return res.status(400).json({ error: "Validation failed", errors: errors.array() });
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ error: "Validation failed", errors: errors.array() });
+    }
 
     const {
       q, risk, action, country,
@@ -69,14 +87,14 @@ router.get("/search", requireAuth, requireRole('readonly'),
         params.push(`%${q}%`, `%${q}%`, `%${q}%`);
         i += 3;
       }
-      if (risk)       { conds.push(`risk_level = $${i++}`);  params.push(risk); }
-      if (action)     { conds.push(`action = $${i++}`);       params.push(action); }
-      if (country)    { conds.push(`country ILIKE $${i++}`);  params.push(`%${country}%`); }
+      if (risk)       { conds.push(`risk_level = $${i++}`);     params.push(risk); }
+      if (action)     { conds.push(`action = $${i++}`);          params.push(action); }
+      if (country)    { conds.push(`country ILIKE $${i++}`);     params.push(`%${country}%`); }
       if (minScore != null && minScore !== "") { conds.push(`score >= $${i++}`); params.push(parseInt(minScore)); }
       if (maxScore != null && maxScore !== "") { conds.push(`score <= $${i++}`); params.push(parseInt(maxScore)); }
-      if (proxy != null)      { conds.push(`is_proxy = $${i++}`);      params.push(proxy === "true"); }
-      if (tor != null)        { conds.push(`is_tor = $${i++}`);        params.push(tor === "true"); }
-      if (datacenter != null) { conds.push(`is_dc = $${i++}`); params.push(datacenter === "true"); }
+      if (proxy      != null) { conds.push(`is_proxy = $${i++}`);  params.push(proxy === "true"); }
+      if (tor        != null) { conds.push(`is_tor = $${i++}`);    params.push(tor === "true"); }
+      if (datacenter != null) { conds.push(`is_dc = $${i++}`);     params.push(datacenter === "true"); }
       if (from) { conds.push(`scored_at >= $${i++}`); params.push(new Date(from)); }
       if (to)   { conds.push(`scored_at <= $${i++}`); params.push(new Date(to)); }
 
@@ -108,13 +126,15 @@ router.get("/search", requireAuth, requireRole('readonly'),
         entries: rowsRes.rows,
       });
     } catch (err) {
-      next(err);
+      console.error("[audit/search]", err.message);
+      res.status(500).json({ error: err.message });
     }
   }
 );
 
 // GET /api/audit/threats
-router.get("/threats", requireAuth, requireRole('readonly'), async (req, res) => {
+
+router.get("/threats", requireAuth, requireRole("readonly"), async (req, res) => {
   const limit = Math.min(parseInt(req.query.limit) || 20, 100);
   try {
     const result = await db.query(
@@ -127,12 +147,14 @@ router.get("/threats", requireAuth, requireRole('readonly'), async (req, res) =>
     );
     res.json({ total: result.rows.length, threats: result.rows });
   } catch (err) {
-    next(err);
+    console.error("[audit/threats]", err.message);
+    res.status(500).json({ error: err.message });
   }
 });
 
 // GET /api/audit/breakdown
-router.get("/breakdown", requireAuth, requireRole('readonly'), async (req, res) => {
+
+router.get("/breakdown", requireAuth, requireRole("readonly"), async (req, res) => {
   try {
     const [distRes, totalRes, countriesRes, ispsRes] = await Promise.all([
       db.query("SELECT risk_level, COUNT(*) AS count FROM audit_log GROUP BY risk_level"),
@@ -143,7 +165,9 @@ router.get("/breakdown", requireAuth, requireRole('readonly'), async (req, res) 
 
     const riskDistribution = { CRITICAL: 0, HIGH: 0, MEDIUM: 0, LOW: 0 };
     distRes.rows.forEach(r => {
-      if (r.risk_level in riskDistribution) riskDistribution[r.risk_level] = parseInt(r.count, 10);
+      if (r.risk_level in riskDistribution) {
+        riskDistribution[r.risk_level] = parseInt(r.count, 10);
+      }
     });
 
     res.json({
@@ -153,26 +177,31 @@ router.get("/breakdown", requireAuth, requireRole('readonly'), async (req, res) 
       topISPs:      ispsRes.rows,
     });
   } catch (err) {
-      next(err);
-    }
+    console.error("[audit/breakdown]", err.message);
+    res.status(500).json({ error: err.message });
+  }
 });
 
-// GET /api/v2/audit/verify
+// GET /api/audit/verify 
 router.get("/verify", requireAuth, requireRole("admin"), async (req, res) => {
   try {
-    const crypto = require("crypto");
-    const rows   = await db.query(
+    const rows = await db.query(
       `SELECT id, ip, score, risk_level, scored_at, prev_hash, row_hash
-       FROM audit_log ORDER BY id ASC`
+       FROM audit_log
+       ORDER BY id ASC`
     );
 
-    let prevHash = "GENESIS";
-    let tampered = 0;
-    const broken = [];
+    let prevHash     = "GENESIS";
+    let tampered     = 0;
+    let skipped      = 0;
+    const broken     = [];
 
     for (const row of rows.rows) {
-      // Skip unverifiable legacy rows (no hash yet)
-      if (!row.row_hash || !row.prev_hash) continue;
+      // Skip legacy rows that predate the hash chain
+      if (!row.row_hash || !row.prev_hash) {
+        skipped++;
+        continue;
+      }
 
       const content = JSON.stringify({
         ip:         row.ip,
@@ -187,20 +216,32 @@ router.get("/verify", requireAuth, requireRole("admin"), async (req, res) => {
         .update(content)
         .digest("hex");
 
-      if (expected !== row.row_hash || row.prev_hash !== prevHash) {
+      const hashMismatch = expected !== row.row_hash;
+      const chainBroken  = row.prev_hash !== prevHash;
+
+      if (hashMismatch || chainBroken) {
         tampered++;
-        broken.push({ id: row.id, ip: row.ip });
+        broken.push({
+          id:           row.id,
+          ip:           row.ip,
+          hashMismatch,
+          chainBroken,
+        });
       }
 
       prevHash = row.row_hash;
     }
 
+    const verified = rows.rows.length - skipped;
+
     res.json({
       total:    rows.rows.length,
+      verified,
+      skipped,
       tampered,
-      intact:   rows.rows.length - tampered,
+      intact:   verified - tampered,
       broken,
-      verified: tampered === 0,
+      chainIntact: tampered === 0,
     });
 
   } catch (err) {
