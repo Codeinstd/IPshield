@@ -1,13 +1,8 @@
-
 const db = require("../store/db");
 
 const CLUSTER_WINDOW_MINS = parseInt(process.env.CLUSTER_WINDOW_MINS || "30");
 const CLUSTER_MIN_IPS     = parseInt(process.env.CLUSTER_MIN_IPS     || "3");
-
-/**
- * Called after every score. Updates or creates threat_clusters rows.
- * Returns any newly formed clusters.
- */
+const CLUSTER_SCAN_LIMIT  = parseInt(process.env.CLUSTER_SCAN_LIMIT  || "500");
 async function detectClusters(result) {
   const { ip, score, riskLevel, network } = result;
   if (!ip) return [];
@@ -21,17 +16,19 @@ async function detectClusters(result) {
     if (subnetMatch) {
       const subnet     = `${subnetMatch[1]}.0/24`;
       const clusterKey = `subnet:${subnet}`;
-
-      // Count how many IPs from this /24 scored in the window
       const countRes = await db.query(
         `SELECT COUNT(DISTINCT ip) AS count, MAX(score) AS max_score
-         FROM audit_log
-         WHERE ip LIKE $1
-           AND scored_at > $2`,
-        [`${subnetMatch[1]}.%`, windowStart]
+         FROM (
+           SELECT ip, score FROM audit_log
+           WHERE ip LIKE $1
+             AND scored_at > $2
+           ORDER BY scored_at DESC
+           LIMIT $3
+         ) sub`,
+        [`${subnetMatch[1]}.%`, windowStart, CLUSTER_SCAN_LIMIT]
       );
 
-      const count    = parseInt(countRes.rows[0].count, 10);
+      const count    = parseInt(countRes.rows[0].count,     10);
       const maxScore = parseInt(countRes.rows[0].max_score, 10) || score;
 
       if (count >= CLUSTER_MIN_IPS) {
@@ -51,16 +48,19 @@ async function detectClusters(result) {
     const asn = network?.asn;
     if (asn) {
       const clusterKey = `asn:${asn}`;
-
       const countRes = await db.query(
         `SELECT COUNT(DISTINCT ip) AS count, MAX(score) AS max_score
-         FROM audit_log
-         WHERE asn = $1
-           AND scored_at > $2`,
-        [asn, windowStart]
+         FROM (
+           SELECT ip, score FROM audit_log
+           WHERE asn = $1
+             AND scored_at > $2
+           ORDER BY scored_at DESC
+           LIMIT $3
+         ) sub`,
+        [asn, windowStart, CLUSTER_SCAN_LIMIT]
       );
 
-      const count    = parseInt(countRes.rows[0].count, 10);
+      const count    = parseInt(countRes.rows[0].count,     10);
       const maxScore = parseInt(countRes.rows[0].max_score, 10) || score;
 
       if (count >= CLUSTER_MIN_IPS) {
@@ -80,20 +80,23 @@ async function detectClusters(result) {
     const country = result.geo?.country;
     if (country && (riskLevel === "CRITICAL" || riskLevel === "HIGH")) {
       const clusterKey = `country:${country}`;
-
       const countRes = await db.query(
         `SELECT COUNT(DISTINCT ip) AS count, MAX(score) AS max_score
-         FROM audit_log
-         WHERE country = $1
-           AND risk_level IN ('CRITICAL','HIGH')
-           AND scored_at > $2`,
-        [country, windowStart]
+         FROM (
+           SELECT ip, score FROM audit_log
+           WHERE country = $1
+             AND risk_level IN ('CRITICAL','HIGH')
+             AND scored_at > $2
+           ORDER BY scored_at DESC
+           LIMIT $3
+         ) sub`,
+        [country, windowStart, CLUSTER_SCAN_LIMIT]
       );
 
-      const count    = parseInt(countRes.rows[0].count, 10);
+      const count    = parseInt(countRes.rows[0].count,     10);
       const maxScore = parseInt(countRes.rows[0].max_score, 10) || score;
 
-      const COUNTRY_MIN = CLUSTER_MIN_IPS * 2; // higher threshold for country-level
+      const COUNTRY_MIN = CLUSTER_MIN_IPS * 2;
       if (count >= COUNTRY_MIN) {
         const cluster = await upsertCluster({
           clusterKey,
@@ -106,16 +109,16 @@ async function detectClusters(result) {
         if (cluster.isNew) newClusters.push(cluster);
       }
     }
+
   } catch (err) {
-  next(err);
-}
+    console.error("[cluster] detectClusters error:", err.message);
+  }
 
   return newClusters;
 }
 
 async function upsertCluster({ clusterKey, clusterType, ipCount, maxScore, severity, details }) {
   try {
-    // Check if active cluster already exists
     const existing = await db.query(
       `SELECT id, ip_count FROM threat_clusters
        WHERE cluster_key = $1 AND resolved = FALSE`,
@@ -123,7 +126,6 @@ async function upsertCluster({ clusterKey, clusterType, ipCount, maxScore, sever
     );
 
     if (existing.rows.length) {
-      // Update existing cluster
       await db.query(
         `UPDATE threat_clusters
          SET ip_count = $1, max_score = $2, severity = $3,
@@ -133,7 +135,6 @@ async function upsertCluster({ clusterKey, clusterType, ipCount, maxScore, sever
       );
       return { isNew: false, clusterKey, ipCount };
     } else {
-      // Create new cluster
       const res = await db.query(
         `INSERT INTO threat_clusters
            (cluster_key, cluster_type, ip_count, max_score, severity, details)
@@ -145,13 +146,11 @@ async function upsertCluster({ clusterKey, clusterType, ipCount, maxScore, sever
       return { isNew: true, ...res.rows[0] };
     }
   } catch (err) {
-  next(err);
-}
+    console.error("[cluster] upsertCluster error:", err.message);
+    return { isNew: false, clusterKey, ipCount };
+  }
 }
 
-/**
- * Returns all active (unresolved) clusters, newest first.
- */
 async function getActiveClusters(limit = 20) {
   try {
     const res = await db.query(
@@ -163,13 +162,11 @@ async function getActiveClusters(limit = 20) {
     );
     return res.rows;
   } catch (err) {
-  next(err);
-}
+    console.error("[cluster] getActiveClusters error:", err.message);
+    return [];
+  }
 }
 
-/**
- * Mark a cluster as resolved (analyst dismissed it).
- */
 async function resolveCluster(id) {
   try {
     await db.query(
@@ -178,8 +175,9 @@ async function resolveCluster(id) {
     );
     return true;
   } catch (err) {
-  next(err);
-}
+    console.error("[cluster] resolveCluster error:", err.message);
+    return false;
+  }
 }
 
 module.exports = { detectClusters, getActiveClusters, resolveCluster };

@@ -359,10 +359,6 @@ async function sendAlert(payload) {
     .filter(r => r.status === "rejected")
     .map(r => r.reason?.message);
 
-  console.log(
-    `[ALERT ${alertId}] delivered=${delivered.join(",")}`
-  );
-
   if (errors.length) {
     console.error(
       `[ALERT ${alertId}] errors`,
