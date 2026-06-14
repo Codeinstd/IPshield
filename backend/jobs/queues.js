@@ -2,38 +2,43 @@ const { Queue } = require("bullmq");
 const { getRedis } = require("../store/redis");
 
 const DEFAULT_JOB_OPTIONS = {
-  attempts:    3,
+  attempts: 3,
   backoff: { type: "exponential", delay: 2000 },
   removeOnComplete: { count: 100 },
-  removeOnFail:     { count: 50  },
+  removeOnFail: { count: 50 },
 };
 
-let alertQueue    = null;
-let batchQueue    = null;
-let watchlistQueue = null;
+const PREFIX = process.env.BULLMQ_PREFIX || "ipshield";
 
-function getAlertQueue() {
-  if (alertQueue) return alertQueue;
+const queues = {};
+
+function createQueue(name) {
   const redis = getRedis();
-  if (!redis) return null;
-  alertQueue = new Queue("alerts", { connection: redis, defaultJobOptions: DEFAULT_JOB_OPTIONS });
-  return alertQueue;
+
+  if (!redis) {
+    console.warn(
+      `[queues] Redis unavailable — ${name} queue disabled`
+    );
+    return null;
+  }
+
+  if (queues[name]) return queues[name];
+
+  queues[name] = new Queue(name, {
+    connection: redis,
+    prefix: PREFIX,
+    defaultJobOptions: DEFAULT_JOB_OPTIONS,
+  });
+
+  return queues[name];
 }
 
-function getBatchQueue() {
-  if (batchQueue) return batchQueue;
-  const redis = getRedis();
-  if (!redis) return null;
-  batchQueue = new Queue("batch-score", { connection: redis, defaultJobOptions: DEFAULT_JOB_OPTIONS });
-  return batchQueue;
-}
+const getAlertQueue = () => createQueue("alerts");
+const getBatchQueue = () => createQueue("batch-score");
+const getWatchlistQueue = () => createQueue("watchlist-poll");
 
-function getWatchlistQueue() {
-  if (watchlistQueue) return watchlistQueue;
-  const redis = getRedis();
-  if (!redis) return null;
-  watchlistQueue = new Queue("watchlist-poll", { connection: redis, defaultJobOptions: DEFAULT_JOB_OPTIONS });
-  return watchlistQueue;
-}
-
-module.exports = { getAlertQueue, getBatchQueue, getWatchlistQueue };
+module.exports = {
+  getAlertQueue,
+  getBatchQueue,
+  getWatchlistQueue,
+};

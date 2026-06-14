@@ -1,90 +1,87 @@
 const redis = require("redis");
 
-let client     = null;
-let connected  = false;
-let connecting = false;
+let client = null;
+let connectPromise = null;
+let connected = false;
 
 async function connect() {
   if (!process.env.REDIS_URL) {
-    console.warn("[redis] REDIS_URL not set — Redis disabled, running without cache");
+    console.warn(
+      "[redis] REDIS_URL not set — running without Redis"
+    );
     return null;
   }
 
   if (connected && client) return client;
-  if (connecting)          return null;
 
-  connecting = true;
+  if (connectPromise) return connectPromise;
 
-  try {
-    client = redis.createClient({
-      url: process.env.REDIS_URL,
-      socket: {
-        reconnectStrategy: (retries) => {
-          // Stop retrying after 3 attempts — don't spam logs
-          if (retries >= 3) {
-            console.warn("[redis] giving up reconnection after 3 attempts — running without cache");
-            return false;
-          }
-          return Math.min(retries * 500, 3000);
+  connectPromise = (async () => {
+    try {
+      client = redis.createClient({
+        url: process.env.REDIS_URL,
+        socket: {
+          reconnectStrategy: (retries) => {
+            // keep retrying safely (no permanent disable)
+            return Math.min(retries * 1000, 30000);
+          },
+          connectTimeout: 5000,
         },
-        connectTimeout: 5000, 
-      },
-    });
+      });
 
-    client.on("error", (err) => {
-      // Only log once, not every retry
-      if (connected || connecting) {
+      client.on("error", (err) => {
+        connected = false;
         console.error("[redis] error:", err.message);
-      }
-      connected  = false;
-      connecting = false;
-    });
+      });
 
-    client.on("connect", () => {
-      console.log("[redis] connected successfully");
-      connected  = true;
-      connecting = false;
-    });
+      client.on("ready", () => {
+        connected = true;
+        console.log("[redis] ready");
+      });
 
-    client.on("end", () => {
-      console.warn("[redis] connection closed");
-      connected  = false;
-      connecting = false;
-    });
+      client.on("end", () => {
+        connected = false;
+        console.warn("[redis] disconnected");
+      });
 
-    await client.connect();
-    connected  = true;
-    connecting = false;
-    return client;
+      await client.connect();
 
-  } catch (err) {
-    console.error("[redis] failed to connect:", err.message);
-    console.warn("[redis] app will continue without Redis — caching and queues disabled");
-    client     = null;
-    connected  = false;
-    connecting = false;
-    return null;
-  }
+      connected = true;
+      return client;
+    } catch (err) {
+      connected = false;
+      client = null;
+      console.warn(
+        "[redis] failed — running without Redis:",
+        err.message
+      );
+      return null;
+    }
+  })();
+
+  return connectPromise;
 }
 
-// Synchronous getter — returns null if not connected
+// safe getter
 function getRedis() {
-  if (connected && client) return client;
-  return null;
+  return connected && client ? client : null;
 }
 
-// Check status
 function isRedisConnected() {
   return connected;
 }
 
-// Initialize on startup — never throws
+// safe bootstrap (never crashes app)
 async function initRedis() {
   try {
     await connect();
-  } catch (_) {
-    console.warn("[redis] init failed — continuing without Redis");
+  } catch (err) {
+    console.warn("[redis] init failed:", err.message);
   }
 }
 
-module.exports = { getRedis, isRedisConnected, initRedis };
+module.exports = {
+  getRedis,
+  isRedisConnected,
+  initRedis,
+};

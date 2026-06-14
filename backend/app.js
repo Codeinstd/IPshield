@@ -75,7 +75,6 @@ app.use(helmet({
   hsts: isProd ? { maxAge: 31536000, includeSubDomains: true } : false,
 }));
 
-
 //  CORS
 const allowedOrigins = (process.env.ALLOWED_ORIGIN || "")
   .split(",").map(s => s.trim()).filter(Boolean);
@@ -90,13 +89,13 @@ app.use(cors({
   allowedHeaders: ["Content-Type", "x-api-key", "Authorization"],
 }));
 
-// BODY PARSING & COMPRESSION
+// Body parsing & compression
 app.use(compression());
 app.use(express.json({ limit: "50kb" }));
 app.use(express.urlencoded({ extended: false }));
 
 
-//  HTTP LOGGING
+//  Http Logging
 if (isProd) {
   app.use(morgan("combined", {
     stream: { write: msg => logger.info(msg.trim()) },
@@ -273,10 +272,10 @@ mountShared(SHARED_PREFIXES, "/threat",          threatRoutes);
 mountShared(SHARED_PREFIXES, "/threat/clusters", clusterRoutes);
 
 // v2-only
-mountShared(V2_PREFIXES, "/blacklist",      blacklistRoutes);
-mountShared(V2_PREFIXES, "/blacklist/cidr", cidrRoutes);
-mountShared(V2_PREFIXES, "/cases",          casesRoutes);
-mountShared(V2_PREFIXES, "/cases",          caseAccountsRoutes);
+mountShared(V2_PREFIXES, "/blacklist",           blacklistRoutes);
+mountShared(V2_PREFIXES, "/blacklist/cidr",      cidrRoutes);
+mountShared(V2_PREFIXES, "/cases",               casesRoutes);
+mountShared(V2_PREFIXES, "/cases",               caseAccountsRoutes);
 
 // v1 stubs — explicit 404 for v2-only endpoints
 app.use("/api/v1/blacklist", (req, res) => res.status(404).json({
@@ -289,7 +288,6 @@ app.use("/api/v1/cases", (req, res) => res.status(404).json({
 
 //  SPA Fallback & 404
 app.use(express.static(path.join(__dirname, "../public")));
-
 
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "../public", "index.html"));
@@ -304,7 +302,7 @@ app.get("/dashboard", (req, res) => {
   res.sendFile(path.join(__dirname, "../public", "dashboard.html"));
 });
 
-// 9. HTML PAGE ROUTES (public — no auth)
+// 9. HTML Page routes (public — no auth)
 app.get("/login", (req, res) => {
   res.sendFile(path.join(__dirname, "../public", "login.html"));
 });
@@ -333,7 +331,6 @@ app.get("/mfa-setup", (req, res) => {
   }
 });
 
-
 app.get("/forgot-password", (req, res) => {
   res.sendFile(path.join(__dirname, "../public", "forgot-password.html"));
 });
@@ -352,14 +349,13 @@ app.use((req, res) => res.status(404).json({
   hint:  "See /api/versions for available API versions",
 }));
 
-//  Error Handlers (must be after all routes)
+// Error Handlers (must be after all routes)
 if (process.env.SENTRY_DSN) {
   try { app.use(require("@sentry/node").Handlers.errorHandler()); } catch (_) {}
 }
 app.use(errorMiddleware);
 
-
-//  Background Jobs
+// Background Jobs
 const { startMonitor } = require("./jobs/monitor.job");
 startMonitor();
 

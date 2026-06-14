@@ -98,7 +98,6 @@ router.get("/",
 );
 
 // POST /api/keys/invite 
-
 router.post("/invite",
   requireAuth, requireRole("admin"),
   [
@@ -147,7 +146,6 @@ router.post("/invite",
 );
 
 // GET /api/keys/me 
-
 router.get("/me", requireAuth, async (req, res) => {
   if (!req.auth) return res.status(401).json({ error: "Unauthorized" });
   res.json(req.auth);

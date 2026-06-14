@@ -2,7 +2,6 @@ const { Worker } = require("bullmq");
 const { getRedis } = require("../store/redis");
 
 // Alert worker 
-
 function startAlertWorker() {
   const redis = getRedis();
   if (!redis) return null;
@@ -26,7 +25,6 @@ function startAlertWorker() {
 }
 
 // Batch scoring worker 
-
 function startBatchWorker() {
   const redis = getRedis();
   if (!redis) return null;
@@ -159,7 +157,6 @@ function startBatchWorker() {
 }
 
 // Watchlist polling worker
-
 function startWatchlistWorker() {
   const redis = getRedis();
   if (!redis) return null;
@@ -233,7 +230,6 @@ function startWatchlistWorker() {
 }
 
 // Start all workers 
-
 function startWorkers() {
   const redis = getRedis();
   if (!redis) {

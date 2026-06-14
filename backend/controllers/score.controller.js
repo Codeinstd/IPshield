@@ -8,6 +8,7 @@ const { isBlacklisted }         = require("../store/blacklist.store");
 const { checkAndAutoCase }      = require("../services/autoCase.service");
 const { detectClusters }        = require("../services/cluster.service");
 const { sendToAllSIEMTargets }  = require("../services/siemTargets.service");
+const { appendAuditEntry }    =  require("../store/auditLog.store");
 
 
 exports.scoreIP = async (req, res, next) => {

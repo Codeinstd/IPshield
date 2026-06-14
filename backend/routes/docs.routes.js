@@ -1316,7 +1316,7 @@ return `<!DOCTYPE html>
       let cardsHTML   = "";
 
       Object.entries(byTag).forEach(([tag, eps]) => {
-        const meta    = TAG_META[tag] || { icon: "◆", color: "#6a8fa8", bg: "rgba(106,143,168,0.08)" };
+        const meta    = TAG_META[tag] || { icon: "🔑", color: "#6a8fa8", bg: "rgba(106,143,168,0.08)" };
         const isV2Only = V1_HIDDEN_TAGS.includes(tag);
 
         // Sidebar section
@@ -1542,7 +1542,6 @@ function buildEndpoints(spec) {
       });
     });
   });
-
   return endpoints;
 }
 
