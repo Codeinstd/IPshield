@@ -58,22 +58,83 @@ if (process.env.SENTRY_DSN) {
 }
 
 //  Security Headers
-app.use(helmet({
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc:    ["'self'"],
-      scriptSrc:     ["'self'", "'unsafe-inline'", "https://cdnjs.cloudflare.com", "https://cdn.jsdelivr.net", "https://www.googletagmanager.com", "https://www.google-analytics.com"],
-      scriptSrcAttr: ["'unsafe-inline'"],
-      styleSrc:      ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://cdnjs.cloudflare.com"],
-      fontSrc:       ["'self'", "https://fonts.gstatic.com"],
-      imgSrc:        ["'self'", "data:", "https://www.google-analytics.com", "https://*.basemaps.cartocdn.com", "https://*.cartocdn.com", "https://*.tile.openstreetmap.org", "https://*.openstreetmap.org"],
-      connectSrc:    ["'self'", "https://api.ipify.org", "https://www.google-analytics.com", "https://region1.google-analytics.com"],
-      workerSrc:     ["'self'", "blob:"],
-      objectSrc:     ["'none'"],
+const isProd = process.env.NODE_ENV === "production";
+
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+
+        scriptSrc: [
+          "'self'",
+          "'unsafe-inline'",
+          "https://cdnjs.cloudflare.com",
+          "https://cdn.jsdelivr.net",
+          "https://www.googletagmanager.com",
+          "https://www.google-analytics.com",
+          "https://consent.cookiebot.com",
+          "https://consentcdn.cookiebot.com",
+        ],
+
+        scriptSrcAttr: ["'unsafe-inline'"],
+
+        styleSrc: [
+          "'self'",
+          "'unsafe-inline'",
+          "https://fonts.googleapis.com",
+          "https://cdnjs.cloudflare.com",
+        ],
+
+        fontSrc: [
+          "'self'",
+          "https://fonts.gstatic.com",
+        ],
+
+        imgSrc: [
+          "'self'",
+          "data:",
+          "https://www.google-analytics.com",
+          "https://*.basemaps.cartocdn.com",
+          "https://*.cartocdn.com",
+          "https://*.tile.openstreetmap.org",
+          "https://*.openstreetmap.org",
+          "https://consent.cookiebot.com",
+          "https://consentcdn.cookiebot.com",
+        ],
+
+        connectSrc: [
+          "'self'",
+          "https://api.ipify.org",
+          "https://www.google-analytics.com",
+          "https://region1.google-analytics.com",
+          "https://consent.cookiebot.com",
+          "https://consentcdn.cookiebot.com",
+        ],
+
+        frameSrc: [
+          "'self'",
+          "https://consent.cookiebot.com",
+          "https://consentcdn.cookiebot.com",
+        ],
+
+        workerSrc: [
+          "'self'",
+          "blob:",
+        ],
+
+        objectSrc: ["'none'"],
+      },
     },
-  },
-  hsts: isProd ? { maxAge: 31536000, includeSubDomains: true } : false,
-}));
+
+    hsts: isProd
+      ? {
+          maxAge: 31536000,
+          includeSubDomains: true,
+        }
+      : false,
+  })
+);
 
 //  CORS
 const allowedOrigins = (process.env.ALLOWED_ORIGIN || "")
