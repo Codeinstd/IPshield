@@ -1,408 +1,515 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-W7LXC9M274"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
-
   gtag('config', 'G-W7LXC9M274');
 </script>
 <meta name="google-site-verification" content="WhmK3MH3Co3Wu72eOPEMMp5B8vtkFiVcoCP7Js4HGkA" />
 <title>IPShield</title>
-  <!-- Favicon metadata -->
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon.ico/favicon-32x32.png">
 <link rel="icon" type="image/png" sizes="96x96" href="/favicon.ico/favicon-96x96.png">
 <link rel="icon" type="image/png" sizes="16x16" href="/favicon.ico/favicon-16x16.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&amp;family=Syne:wght@400;600;700;800&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/leaflet.min.css">
 <style>
-:root{
-  --bg:#080c0f;
-  --bg1:#0d1117;
-  --bg2:#111820;
-  --bg3:#1a2430;
-
-  --border:#1e2d3d;
-
-  --accent:#00d9ff;
-
-  --text:#c9d8e8;
-  --text2:#6a8fa8;
-  --text3:#3d5a72;
-
-  --critical:#ff3355;
-  --high:#ff7700;
-  --medium:#ffcc00;
-  --low:#00e87c;
+/* ── Theme tokens */
+:root {
+  --accent:   #00d9ff;
+  --critical: #ff3355;
+  --high:     #ff7700;
+  --medium:   #ffcc00;
+  --low:      #00e87c;
 }
 
-/* Light Theme */
-html[data-theme="light"]{
-  --border:#d7e1eb;
-
-  --accent:#0099cc;
-
-  --text:#12202d;
-  --text2:#52697d;
-  --text3:#7b8fa3;
-
-  --critical:#d7263d;
-  --high:#d97706;
-  --medium:#b58900;
-  --low:#059669;
-
-  --bg:#f7fafc;
-  --bg1:#ffffff;
-  --bg2:#eef3f8;
-  --bg3:#dfe7ef;
-}
-*{box-sizing:border-box;margin:0;padding:0;}
-body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;min-height:100vh;overflow-x:hidden;}
-a{text-decoration:none;}
-
-/* Nav */
-header{display:flex;align-items:center;justify-content:space-between;padding:16px 24px;border-bottom:1px solid var(--border);background:var(--bg1);position:sticky;top:0;z-index:100;gap:12px;}
-.logo{display:flex;align-items:center;gap:10px;flex-shrink:0;}
-.logo-icon{width:32px;height:32px;border:2px solid var(--accent);border-radius:6px;display:flex;align-items:center;justify-content:center;color:var(--accent);font-size:16px;}
-.logo-text{font-family:'Syne',sans-serif;font-weight:800;font-size:20px;white-space:nowrap;}
-.logo-text span{color:var(--accent);}
-.nav-right{display:flex;gap:10px;align-items:center;}
-.btn{padding:9px 20px;border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;letter-spacing:1px;cursor:pointer;border:none;display:inline-flex;align-items:center;transition:all .15s;}
-.btn-primary{background:var(--accent);color:#000;}
-.btn-primary:hover{background:#0099cc;}
-.btn-ghost{background:transparent;color:var(--text2);border:1px solid var(--border);}
-.btn-ghost:hover{border-color:var(--accent);color:var(--accent);}
-
-/* Hamburger */
-.nav-hamburger{display:none;flex-direction:column;justify-content:center;align-items:center;gap:5px;width:36px;height:36px;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:8px;cursor:pointer;padding:8px;transition:border-color .2s;flex-shrink:0;}
-.nav-hamburger:hover{border-color:var(--accent);}
-.nav-hamburger span{display:block;width:100%;height:2px;background:var(--accent);border-radius:2px;transition:transform .25s ease,opacity .2s ease;transform-origin:center;}
-.nav-hamburger[aria-expanded="true"] span:nth-child(1){transform:translateY(7px) rotate(45deg);}
-.nav-hamburger[aria-expanded="true"] span:nth-child(2){opacity:0;transform:scaleX(0);}
-.nav-hamburger[aria-expanded="true"] span:nth-child(3){transform:translateY(-7px) rotate(-45deg);}
-
-/* nav drawer */
-.nav-overlay{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.6);opacity:0;transition:opacity .25s;}
-.nav-overlay.open{display:block;opacity:1;}
-.nav-drawer{position:fixed;top:0;right:0;width:min(280px,82vw);height:100vh;background:var(--bg2);border-left:1px solid var(--border);z-index:201;transform:translateX(100%);transition:transform .3s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;}
-.nav-drawer.open{transform:translateX(0);}
-.drawer-head{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border);}
-.drawer-close{width:30px;height:30px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:6px;color:var(--text2);font-size:14px;cursor:pointer;transition:all .15s;}
-.drawer-close:hover{background:rgba(255,51,85,0.1);border-color:var(--critical);color:var(--critical);}
-.drawer-body{display:flex;flex-direction:column;padding:12px;gap:6px;}
-.drawer-body a{display:block;padding:12px 16px;border-radius:8px;border:1px solid transparent;color:var(--text2);font-size:13px;letter-spacing:0.5px;transition:all .15s;}
-.drawer-body a:hover,.drawer-body a.primary{border-color:rgba(0,217,255,0.25);background:rgba(0,217,255,0.08);color:var(--accent);}
-
-/* hero */
-.hero{text-align:center;padding:64px 24px 72px;max-width:760px;margin:0 auto;}
-.hero-badge{display:inline-flex;align-items:center;gap:8px;padding:6px 16px;border:1px solid rgba(0,217,255,0.3);border-radius:20px;background:rgba(0,217,255,0.06);color:var(--accent);font-size:11px;letter-spacing:2px;margin-bottom:28px;}
-.badge-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);animation:pulse 2s infinite;}
-@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.3;}}
-.hero h1{font-family:'Syne',sans-serif;font-size:clamp(32px,7vw,68px);font-weight:800;line-height:1.1;margin-bottom:20px;}
-.hero h1 span{color:var(--accent);}
-.hero p{font-size:15px;color:var(--text2);line-height:1.8;margin-bottom:36px;max-width:560px;margin-left:auto;margin-right:auto;}
-.hero-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
-.hero-actions .btn{padding:13px 28px;font-size:13px;}
-
-/* Stats */
-.stats-bar{display:flex;justify-content:center;gap:0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:var(--bg1);flex-wrap:wrap;}
-.stat-item{text-align:center;padding:32px 28px;flex:1;min-width:120px;border-right:1px solid var(--border);}
-.stat-item:last-child{border-right:none;}
-.stat-num{font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:var(--accent);}
-.stat-label{font-size:10px;color:var(--text3);letter-spacing:2px;text-transform:uppercase;margin-top:4px;}
-
-/* Features */
-.features{max-width:1060px;margin:0 auto;padding:72px 24px;}
-.section-title{text-align:center;font-family:'Syne',sans-serif;font-size:clamp(22px,4vw,30px);font-weight:800;margin-bottom:40px;}
-.features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px;}
-.feature-card{background:var(--bg1);border:1px solid var(--border);border-radius:12px;padding:26px;transition:border-color .2s;}
-.feature-card:hover{border-color:rgba(0,217,255,0.3);}
-.feature-icon{font-size:26px;margin-bottom:14px;display:block;}
-.feature-title{font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px;letter-spacing:0.5px;}
-.feature-desc{font-size:12px;color:var(--text2);line-height:1.8;}
-
-/* Risk Demo */
-.demo-section{background:var(--bg1);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:72px 24px;}
-.demo-inner{max-width:720px;margin:0 auto;text-align:center;}
-.demo-title{font-family:'Syne',sans-serif;font-size:clamp(20px,4vw,26px);font-weight:800;margin-bottom:10px;}
-.demo-sub{font-size:12px;color:var(--text2);margin-bottom:36px;line-height:1.7;}
-.risk-pills{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:32px;}
-.risk-pill{padding:11px 20px;border-radius:8px;font-size:12px;font-weight:700;letter-spacing:1px;}
-.risk-pill.critical{background:rgba(255,51,85,0.15);color:var(--critical);border:1px solid rgba(255,51,85,0.4);}
-.risk-pill.high{background:rgba(255,119,0,0.15);color:var(--high);border:1px solid rgba(255,119,0,0.4);}
-.risk-pill.medium{background:rgba(255,204,0,0.12);color:var(--medium);border:1px solid rgba(255,204,0,0.4);}
-.risk-pill.low{background:rgba(0,232,124,0.12);color:var(--low);border:1px solid rgba(0,232,124,0.4);}
-
-/* Cta */
-.cta{text-align:center;padding:80px 24px;max-width:580px;margin:0 auto;}
-.cta h2{font-family:'Syne',sans-serif;font-size:clamp(24px,5vw,34px);font-weight:800;margin-bottom:14px;}
-.cta p{font-size:13px;color:var(--text2);line-height:1.8;margin-bottom:28px;}
-.cta-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
-.cta-actions .btn{padding:13px 28px;}
-
-/* Footer */
-footer{border-top:1px solid var(--border);padding:28px 32px;display:flex;align-items:center;justify-content:space-between;font-size:11px;color:var(--text3);flex-wrap:wrap;gap:12px;}
-footer a{color:var(--text3);}
-footer a:hover{color:var(--accent);}
-.footer-links{display:flex;gap:20px;flex-wrap:wrap;}
-
-/* Mobile */
-@media(max-width:768px){
-  .nav-right{display:none;}
-  .nav-hamburger{display:flex;}
-  header{padding:14px 16px;}
-}
-@media(max-width:600px){
-  .hero{padding:48px 20px 56px;}
-  .features{padding:52px 16px;}
-  .features-grid{grid-template-columns:1fr;}
-  .demo-section{padding:52px 20px;}
-  .risk-pills{gap:8px;}
-  .risk-pill{padding:9px 14px;font-size:11px;}
-  .cta{padding:60px 20px;}
-  .stats-bar{gap:0;}
-  .stat-item{padding:24px 16px;min-width:50%;}
-  .stat-item:nth-child(2n){border-right:none;}
-  .stat-item:nth-child(n+3){border-top:1px solid var(--border);}
-  footer{padding:20px 16px;flex-direction:column;align-items:flex-start;}
-  .footer-links{gap:14px;}
-}
-@media(max-width:400px){
-  .logo-text{font-size:17px;}
-  .hero h1{font-size:28px;}
-  .stat-item{min-width:100%;border-right:none;border-top:1px solid var(--border);}
-  .stat-item:first-child{border-top:none;}
-}
-@media (max-width: 600px) {
-    .stbtn {
-        display: flex;
-        flex-direction: column;
-    }
-}
-@media(max-width:768px){
-  .platform-grid {
-    grid-template-columns: 1fr !important;
-  }
-}
-@media(max-width:600px){
-  section [style*="grid-template-columns:1fr 1fr"] {
-    grid-template-columns: 1fr !important;
-  }
+[data-theme="dark"] {
+  --bg:      #080c0f;
+  --bg1:     #0d1117;
+  --bg2:     #111820;
+  --bg3:     #1a2535;
+  --border:  #1e2d3d;
+  --text:    #c9d8e8;
+  --text2:   #6a8fa8;
+  --text3:   #3d5a72;
+  --surface: rgba(255,255,255,0.04);
 }
 
-/* Platform Section */
+[data-theme="light"] {
+  --bg:      #f0f4f8;
+  --bg1:     #ffffff;
+  --bg2:     #f4f7fa;
+  --bg3:     #e8edf3;
+  --border:  #d0dae6;
+  --text:    #0d1822;
+  --text2:   #4a6278;
+  --text3:   #8fa8bc;
+  --surface: rgba(0,0,0,0.04);
+}
+
+/* ── Theme toggle button */
+.theme-toggle {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  transition: border-color .2s, background .2s, transform .15s;
+  flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
+}
+.theme-toggle:hover {
+  border-color: var(--accent);
+  transform: rotate(15deg);
+}
+.theme-toggle .icon-sun,
+.theme-toggle .icon-moon {
+  position: absolute;
+  transition: opacity .25s, transform .25s;
+  line-height: 1;
+}
+[data-theme="dark"]  .icon-sun  { opacity: 1; transform: scale(1); }
+[data-theme="dark"]  .icon-moon { opacity: 0; transform: scale(0.5); }
+[data-theme="light"] .icon-sun  { opacity: 0; transform: scale(0.5); }
+[data-theme="light"] .icon-moon { opacity: 1; transform: scale(1); }
+
+/* ── Base reset */
+*  { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'JetBrains Mono', monospace;
+  min-height: 100vh;
+  overflow-x: hidden;
+  transition: background .3s, color .3s;
+}
+a { text-decoration: none; }
+
+/* ── Nav */
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg1);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  gap: 12px;
+  transition: background .3s, border-color .3s;
+}
+.logo { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+.logo-icon {
+  width: 32px; height: 32px;
+  border: 2px solid var(--accent);
+  border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--accent); font-size: 16px;
+}
+.logo-text { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 20px; white-space: nowrap; color: var(--text); }
+.logo-text span { color: var(--accent); }
+
+.nav-right { display: flex; gap: 10px; align-items: center; }
+.btn {
+  padding: 9px 20px;
+  border-radius: 8px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  cursor: pointer;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  transition: all .15s;
+}
+.btn-primary { background: var(--accent); color: #000; animation: btn-glow 3s ease-in-out infinite; }
+.btn-primary:hover { background: #0099cc; }
+.btn-ghost { background: transparent; color: var(--text2); border: 1px solid var(--border); }
+.btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+
+/* Light mode adjustments for cards/panels */
+[data-theme="light"] .feature-card,
+[data-theme="light"] .platform-mock,
+[data-theme="light"] .mock-stat-card {
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+}
+[data-theme="light"] .hero-badge {
+  background: rgba(0,217,255,0.1);
+}
+[data-theme="light"] .mock-chip {
+  background: #f0f4f8;
+}
+[data-theme="light"] .mock-chip-active {
+  background: rgba(0,217,255,0.12);
+}
+
+/* ── Hamburger */
+.nav-hamburger {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  width: 36px; height: 36px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+  padding: 8px;
+  transition: border-color .2s;
+  flex-shrink: 0;
+}
+.nav-hamburger:hover { border-color: var(--accent); }
+.nav-hamburger span {
+  display: block; width: 100%; height: 2px;
+  background: var(--accent); border-radius: 2px;
+  transition: transform .25s ease, opacity .2s ease;
+  transform-origin: center;
+}
+.nav-hamburger[aria-expanded="true"] span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.nav-hamburger[aria-expanded="true"] span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+.nav-hamburger[aria-expanded="true"] span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+/* ── Nav drawer */
+.nav-overlay {
+  display: none; position: fixed; inset: 0; z-index: 200;
+  background: rgba(0,0,0,0.6); opacity: 0; transition: opacity .25s;
+}
+.nav-overlay.open { display: block; opacity: 1; }
+.nav-drawer {
+  position: fixed; top: 0; right: 0;
+  width: min(280px,82vw); height: 100vh;
+  background: var(--bg2); border-left: 1px solid var(--border);
+  z-index: 201; transform: translateX(100%);
+  transition: transform .3s cubic-bezier(.4,0,.2,1), background .3s;
+  display: flex; flex-direction: column;
+}
+.nav-drawer.open { transform: translateX(0); }
+.drawer-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 20px; border-bottom: 1px solid var(--border);
+}
+.drawer-close {
+  width: 30px; height: 30px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 6px; color: var(--text2); font-size: 14px;
+  cursor: pointer; transition: all .15s;
+}
+.drawer-close:hover { background: rgba(255,51,85,0.1); border-color: var(--critical); color: var(--critical); }
+.drawer-body { display: flex; flex-direction: column; padding: 12px; gap: 6px; }
+.drawer-body a {
+  display: block; padding: 12px 16px; border-radius: 8px;
+  border: 1px solid transparent; color: var(--text2);
+  font-size: 13px; letter-spacing: 0.5px; transition: all .15s;
+}
+.drawer-body a:hover, .drawer-body a.primary {
+  border-color: rgba(0,217,255,0.25);
+  background: rgba(0,217,255,0.08);
+  color: var(--accent);
+}
+.drawer-theme-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 16px;
+  color: var(--text2); font-size: 12px;
+}
+
+/* ── Hero */
+.hero {
+  text-align: center; padding: 64px 24px 72px;
+  max-width: 760px; margin: 0 auto;
+}
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 6px 16px;
+  border: 1px solid rgba(0,217,255,0.3);
+  border-radius: 20px;
+  background: rgba(0,217,255,0.06);
+  color: var(--accent); font-size: 11px; letter-spacing: 2px;
+  margin-bottom: 28px;
+  background-size: 200% auto;
+  animation: badge-sweep 4s linear infinite;
+}
+.badge-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.3; } }
+@keyframes badge-sweep { 0% { background-position:-200% center; } 100% { background-position:200% center; } }
+.hero h1 {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(32px,7vw,68px);
+  font-weight: 800; line-height: 1.1; margin-bottom: 20px;
+  color: var(--text);
+}
+.hero h1 span { color: var(--accent); }
+.hero p { font-size: 15px; color: var(--text2); line-height: 1.8; margin-bottom: 36px; max-width: 560px; margin-left: auto; margin-right: auto; }
+.hero-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+.hero-actions .btn { padding: 13px 28px; font-size: 13px; }
+
+/* ── Stats  */
+.stats-bar {
+  display: flex; justify-content: center;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  background: var(--bg1); flex-wrap: wrap;
+  transition: background .3s;
+}
+.stat-item {
+  text-align: center; padding: 32px 28px;
+  flex: 1; min-width: 120px;
+  border-right: 1px solid var(--border);
+}
+.stat-item:last-child { border-right: none; }
+.stat-num { font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 800; color: var(--accent); }
+.stat-label { font-size: 10px; color: var(--text3); letter-spacing: 2px; text-transform: uppercase; margin-top: 4px; }
+
+/* ── Features ─────────────────────────────────────────────────────────────── */
+.features { max-width: 1060px; margin: 0 auto; padding: 72px 24px; }
+.section-title { text-align: center; font-family: 'Syne', sans-serif; font-size: clamp(22px,4vw,30px); font-weight: 800; margin-bottom: 40px; color: var(--text); }
+.features-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(280px,1fr)); gap: 18px; }
+.feature-card {
+  background: var(--bg1); border: 1px solid var(--border);
+  border-radius: 12px; padding: 26px;
+  transition: border-color .2s, transform .2s, box-shadow .2s, background .3s;
+}
+.feature-card:hover { border-color: rgba(0,217,255,0.3); transform: translateY(-4px); box-shadow: 0 8px 32px rgba(0,217,255,0.08); }
+.feature-icon { font-size: 26px; margin-bottom: 14px; display: block; }
+.feature-title { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 8px; letter-spacing: 0.5px; }
+.feature-desc { font-size: 12px; color: var(--text2); line-height: 1.8; }
+
+/* ── Risk Demo  */
+.demo-section {
+  background: var(--bg1);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  padding: 72px 24px;
+  transition: background .3s;
+}
+.demo-inner { max-width: 720px; margin: 0 auto; text-align: center; }
+.demo-title { font-family: 'Syne', sans-serif; font-size: clamp(20px,4vw,26px); font-weight: 800; margin-bottom: 10px; color: var(--text); }
+.demo-sub { font-size: 12px; color: var(--text2); margin-bottom: 36px; line-height: 1.7; }
+.risk-pills { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-bottom: 32px; }
+.risk-pill { padding: 11px 20px; border-radius: 8px; font-size: 12px; font-weight: 700; letter-spacing: 1px; transition: transform .15s; cursor: default; }
+.risk-pill:hover { transform: translateY(-2px); }
+.risk-pill.critical { background: rgba(255,51,85,0.15);  color: var(--critical); border: 1px solid rgba(255,51,85,0.4); }
+.risk-pill.critical:hover { box-shadow: 0 4px 20px rgba(255,51,85,0.25); }
+.risk-pill.high    { background: rgba(255,119,0,0.15);   color: var(--high);     border: 1px solid rgba(255,119,0,0.4); }
+.risk-pill.high:hover { box-shadow: 0 4px 20px rgba(255,119,0,0.25); }
+.risk-pill.medium  { background: rgba(255,204,0,0.12);   color: var(--medium);   border: 1px solid rgba(255,204,0,0.4); }
+.risk-pill.medium:hover { box-shadow: 0 4px 20px rgba(255,204,0,0.2); }
+.risk-pill.low     { background: rgba(0,232,124,0.12);   color: var(--low);      border: 1px solid rgba(0,232,124,0.4); }
+.risk-pill.low:hover { box-shadow: 0 4px 20px rgba(0,232,124,0.2); }
+
+/* ── CTA */
+.cta { text-align: center; padding: 80px 24px; max-width: 580px; margin: 0 auto; }
+.cta h2 { font-family: 'Syne', sans-serif; font-size: clamp(24px,5vw,34px); font-weight: 800; margin-bottom: 14px; color: var(--text); }
+.cta p { font-size: 13px; color: var(--text2); line-height: 1.8; margin-bottom: 28px; }
+.cta-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+.cta-actions .btn { padding: 13px 28px; }
+
+/* ── Footer */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 28px 32px;
+  display: flex; align-items: center; justify-content: space-between;
+  font-size: 11px; color: var(--text3);
+  flex-wrap: wrap; gap: 12px;
+  transition: border-color .3s;
+}
+footer a { color: var(--text3); }
+footer a:hover { color: var(--accent); }
+.footer-links { display: flex; gap: 20px; flex-wrap: wrap; }
+
+/* ── Platform Section */
 .platform-section {
   background: var(--bg1);
   border-top: 1px solid var(--border);
   border-bottom: 1px solid var(--border);
   padding: 72px 24px;
+  transition: background .3s;
 }
-.platform-inner {
-  max-width: 1060px;
-  margin: 0 auto;
-}
-.platform-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 48px;
-  align-items: center;
-  margin-bottom: 80px;
-}
+.platform-inner { max-width: 1060px; margin: 0 auto; }
+.platform-row { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center; margin-bottom: 80px; }
 .platform-row:last-child { margin-bottom: 0; }
 .platform-row-reverse { direction: rtl; }
 .platform-row-reverse > * { direction: ltr; }
-
-.platform-eyebrow {
-  font-size: 11px;
-  color: var(--accent);
-  letter-spacing: 3px;
-  text-transform: uppercase;
-  margin-bottom: 12px;
-}
-.platform-heading {
-  font-family: 'Syne', sans-serif;
-  font-size: clamp(18px, 3vw, 24px);
-  font-weight: 800;
-  margin-bottom: 14px;
-  line-height: 1.3;
-}
-.platform-body {
-  font-size: 13px;
-  color: var(--text2);
-  line-height: 1.9;
-  margin-bottom: 20px;
-}
+.platform-eyebrow { font-size: 11px; color: var(--accent); letter-spacing: 3px; text-transform: uppercase; margin-bottom: 12px; }
+.platform-heading { font-family: 'Syne', sans-serif; font-size: clamp(18px,3vw,24px); font-weight: 800; margin-bottom: 14px; line-height: 1.3; color: var(--text); }
+.platform-body { font-size: 13px; color: var(--text2); line-height: 1.9; margin-bottom: 20px; }
 .checklist { display: flex; flex-direction: column; gap: 10px; }
-.check-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 12px;
-  color: var(--text2);
-}
+.check-item { display: flex; align-items: center; gap: 10px; font-size: 12px; color: var(--text2); }
 .check-icon { color: var(--low); font-size: 14px; flex-shrink: 0; }
 
-/* Mock UI panels */
+/* ── Mock panels */
 .platform-mock {
-  background: var(--bg2);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 20px;
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 12px; padding: 20px;
+  position: relative; overflow: hidden;
+  transition: background .3s, border-color .3s;
 }
-.mock-label {
-  font-size: 10px;
-  color: var(--text3);
-  letter-spacing: 2px;
-  margin-bottom: 14px;
-  text-transform: uppercase;
+.platform-mock::after {
+  content: ''; position: absolute; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(0,217,255,0.15), transparent);
+  animation: scanline 4s linear infinite; pointer-events: none;
 }
+@keyframes scanline { 0% { top:0%; } 100% { top:100%; } }
+.mock-label { font-size: 10px; color: var(--text3); letter-spacing: 2px; margin-bottom: 14px; text-transform: uppercase; }
 
-/* Watchlist mock */
-.mock-watch-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 10px 0;
-  border-bottom: 1px solid var(--border);
-}
+.mock-watch-row { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border); transition: background .15s; border-radius: 4px; }
+.mock-watch-row:hover { background: rgba(0,217,255,0.04); }
 .mock-watch-info { flex: 1; min-width: 0; }
-.mock-ip {
-  font-size: 12px;
-  font-weight: 600;
-  font-family: monospace;
-  color: var(--text);
-  white-space: nowrap;
-}
-.mock-bar-bg {
-  height: 3px;
-  background: var(--bg3);
-  border-radius: 2px;
-  margin-top: 6px;
-}
-.mock-bar { height: 3px; border-radius: 2px; }
+.mock-ip { font-size: 12px; font-weight: 600; font-family: monospace; color: var(--text); white-space: nowrap; }
+.mock-bar-bg { height: 3px; background: var(--bg3); border-radius: 2px; margin-top: 6px; }
+.mock-bar { height: 3px; border-radius: 2px; width: 0%; transition: width 1s cubic-bezier(.4,0,.2,1); }
+.mock-bar.animated { width: var(--target-width) !important; }
 .mock-watch-score { text-align: right; flex-shrink: 0; }
 .mock-score { font-size: 15px; font-weight: 800; }
 .mock-risk { font-size: 9px; font-weight: 700; letter-spacing: 1px; }
 
-/* Audit mock */
 .mock-chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
-.mock-chip {
-  padding: 3px 10px;
-  border-radius: 12px;
-  font-size: 10px;
-  font-weight: 600;
-  border: 1px solid var(--border);
-  background: transparent;
-  color: var(--text3);
-}
-.mock-chip-active {
-  border-color: var(--accent);
-  background: rgba(0,217,255,0.1);
-  color: var(--accent);
-}
-.mock-audit-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 0;
-  border-bottom: 1px solid var(--border);
-  font-size: 11px;
-}
+.mock-chip { padding: 3px 10px; border-radius: 12px; font-size: 10px; font-weight: 600; border: 1px solid var(--border); background: transparent; color: var(--text3); }
+.mock-chip-active { border-color: var(--accent); background: rgba(0,217,255,0.1); color: var(--accent); }
+.mock-audit-row { display: flex; align-items: center; gap: 8px; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 11px; transition: background .15s; border-radius: 4px; }
+.mock-audit-row:hover { background: rgba(0,217,255,0.04); }
 .mock-flag { font-size: 9px; color: var(--critical); font-weight: 700; flex-shrink: 0; }
-.mock-badge {
-  padding: 2px 6px;
-  border-radius: 3px;
-  font-size: 9px;
-  font-weight: 700;
-  flex-shrink: 0;
-}
-
-/* Telemetry mock */
-.mock-stats-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-  margin-bottom: 16px;
-}
+.mock-badge { padding: 2px 6px; border-radius: 3px; font-size: 9px; font-weight: 700; flex-shrink: 0; }
+.mock-stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
 .mock-stat-card {
-  background: var(--bg1);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 12px;
-  text-align: center;
+  background: var(--bg1); border: 1px solid var(--border);
+  border-radius: 8px; padding: 12px; text-align: center;
+  transition: border-color .2s, transform .2s, background .3s;
 }
-.mock-stat-val {
-  font-size: 18px;
-  font-weight: 800;
-  font-family: 'Syne', sans-serif;
+.mock-stat-card:hover { border-color: rgba(0,217,255,0.3); transform: translateY(-2px); }
+.mock-stat-val { font-size: 18px; font-weight: 800; font-family: 'Syne', sans-serif; }
+.mock-stat-label { font-size: 9px; color: var(--text3); letter-spacing: 1px; text-transform: uppercase; margin-top: 3px; }
+.mock-endpoint-row { display: flex; align-items: center; gap: 8px; padding: 7px 0; border-bottom: 1px solid var(--border); font-size: 10px; font-family: monospace; transition: background .15s; border-radius: 4px; }
+.mock-endpoint-row:hover { background: rgba(0,217,255,0.04); }
+
+/* ── Access Request Modal */
+#accessModalOverlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.75); z-index: 500;
+  align-items: center; justify-content: center; padding: 24px;
 }
-.mock-stat-label {
-  font-size: 9px;
-  color: var(--text3);
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  margin-top: 3px;
+.modal-card {
+  background: var(--bg1); border: 1px solid var(--border);
+  border-radius: 16px; width: 100%; max-width: 480px; padding: 32px;
+  transition: background .3s;
 }
-.mock-endpoint-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 7px 0;
-  border-bottom: 1px solid var(--border);
-  font-size: 10px;
-  font-family: monospace;
+.modal-input {
+  width: 100%; padding: 11px 14px;
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 8px; color: var(--text);
+  font-family: 'JetBrains Mono', monospace; font-size: 13px; outline: none;
+  transition: border-color .2s, background .3s;
+}
+.modal-input:focus { border-color: var(--accent); }
+.modal-label {
+  display: block; font-size: 10px; color: var(--text3);
+  letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px;
 }
 
-/* Platform responsive */
-@media (max-width: 768px) {
-  .platform-section { padding: 52px 20px; }
-  .platform-row {
-    grid-template-columns: 1fr;
-    gap: 28px;
-    margin-bottom: 56px;
-  }
-  /* Reset RTL reverse trick on mobile — stack naturally */
+/* ── Animations */
+.fade-up { opacity: 0; transform: translateY(28px); transition: opacity 0.55s ease, transform 0.55s ease; }
+.fade-up.visible { opacity: 1; transform: translateY(0); }
+.stagger > * { opacity: 0; transform: translateY(20px); transition: opacity 0.4s ease, transform 0.4s ease; }
+.stagger.visible > *:nth-child(1) { transition-delay:0.05s; opacity:1; transform:none; }
+.stagger.visible > *:nth-child(2) { transition-delay:0.12s; opacity:1; transform:none; }
+.stagger.visible > *:nth-child(3) { transition-delay:0.19s; opacity:1; transform:none; }
+.stagger.visible > *:nth-child(4) { transition-delay:0.26s; opacity:1; transform:none; }
+.stagger.visible > *:nth-child(5) { transition-delay:0.33s; opacity:1; transform:none; }
+.stagger.visible > *:nth-child(6) { transition-delay:0.40s; opacity:1; transform:none; }
+.stagger.visible > *:nth-child(7) { transition-delay:0.47s; opacity:1; transform:none; }
+.stagger.visible > *:nth-child(8) { transition-delay:0.54s; opacity:1; transform:none; }
+.stagger.visible > *:nth-child(9) { transition-delay:0.61s; opacity:1; transform:none; }
+
+@keyframes btn-glow {
+  0%,100% { box-shadow: 0 0 12px rgba(0,217,255,0.3); }
+  50%     { box-shadow: 0 0 28px rgba(0,217,255,0.6); }
+}
+
+/* ── Responsive ───────────────────────────────────────────────────────────── */
+@media(max-width:768px) {
+  .nav-right { display: none; }
+  .nav-hamburger { display: flex; }
+  header { padding: 14px 16px; }
+  .platform-row { grid-template-columns: 1fr; gap: 28px; margin-bottom: 56px; }
   .platform-row-reverse { direction: ltr; }
-  .platform-heading { font-size: 20px; }
-  .platform-body { font-size: 12px; }
+  .platform-section { padding: 52px 20px; }
 }
-
-@media (max-width: 480px) {
+@media(max-width:600px) {
+  .hero { padding: 48px 20px 56px; }
+  .features { padding: 52px 16px; }
+  .features-grid { grid-template-columns: 1fr; }
+  .demo-section { padding: 52px 20px; }
+  .risk-pills { gap: 8px; }
+  .risk-pill { padding: 9px 14px; font-size: 11px; }
+  .cta { padding: 60px 20px; }
+  .stat-item { padding: 24px 16px; min-width: 50%; }
+  .stat-item:nth-child(2n) { border-right: none; }
+  .stat-item:nth-child(n+3) { border-top: 1px solid var(--border); }
+  footer { padding: 20px 16px; flex-direction: column; align-items: flex-start; }
+  .footer-links { gap: 14px; }
+  .stbtn { flex-direction: column !important; }
+}
+@media(max-width:400px) {
+  .logo-text { font-size: 17px; }
+  .hero h1 { font-size: 28px; }
+  .stat-item { min-width: 100%; border-right: none; border-top: 1px solid var(--border); }
+  .stat-item:first-child { border-top: none; }
+}
+@media(max-width:480px) {
   .platform-section { padding: 40px 16px; }
   .platform-row { margin-bottom: 40px; gap: 20px; }
   .platform-mock { padding: 14px; }
-  .mock-stats-grid { gap: 8px; }
-  .mock-stat-val { font-size: 16px; }
-  .mock-ip { font-size: 11px; }
-  .platform-heading { font-size: 18px; }
-  .check-item { font-size: 11px; }
 }
-
+@media (prefers-reduced-motion: reduce) {
+  .fade-up, .stagger > * { transition: none; opacity: 1; transform: none; }
+  .mock-bar { transition: none; }
+  .platform-mock::after { animation: none; }
+  .btn-primary { animation: none; }
+  .hero-badge { animation: none; }
+  .theme-toggle { transition: none; }
+}
 </style>
 </head>
 <body>
+
 <header>
   <div class="logo">
     <div class="logo-icon">⬡</div>
     <div class="logo-text">IP<span>Shield</span></div>
   </div>
- <nav class="nav-right">
-  <button id="themeToggle" class="btn btn-ghost">
-    🌙 Dark
-  </button>
+  <nav class="nav-right">
+    <a href="/api/docs" class="btn btn-ghost">API Docs</a>
+    <!-- Theme toggle — desktop -->
+    <button class="theme-toggle" id="themeToggleDesktop" aria-label="Toggle light/dark mode" title="Toggle theme">
+      <span class="icon-sun">☀️</span>
+      <span class="icon-moon">🌙</span>
+    </button>
+    <a href="/login" class="btn btn-primary">Sign In →</a>
+  </nav>
+    <!-- Theme toggle — mobile (shown next to hamburger) -->
+    <button class="theme-toggle" id="themeToggleMobile" aria-label="Toggle light/dark mode" title="Toggle theme" style="display:none;">
+      <span class="icon-sun">☀️</span>
+      <span class="icon-moon">🌙</span>
+    </button>
+    <button class="nav-hamburger" id="mainHamburger" aria-label="Open menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  
 
-  <a href="/api/docs" class="btn btn-ghost">API Docs</a>
-  <a href="/login" class="btn btn-primary">Sign In →</a>
-</nav>
-  <button class="nav-hamburger" id="mainHamburger" aria-label="Open menu" aria-expanded="false">
-    <span></span><span></span><span></span>
-  </button>
 </header>
 
 <div class="nav-overlay" id="navOverlay"></div>
@@ -414,19 +521,10 @@ footer a:hover{color:var(--accent);}
     </div>
     <button class="drawer-close" id="drawerClose">✕</button>
   </div>
- <div class="drawer-body">
-
-  <button
-    id="mobileThemeToggle"
-    class="btn btn-ghost"
-    style="width:100%;justify-content:center;margin-bottom:8px;">
-    🌙 Dark
-  </button>
-
-  <a href="/api/docs">API Docs</a>
-  <a href="/login" class="primary">Sign In →</a>
-
-</div>
+  <div class="drawer-body">
+    <a href="/api/docs">API Docs</a>
+    <a href="/login" class="primary">Sign In →</a>
+  </div>
 </div>
 
 <section class="hero">
@@ -462,74 +560,30 @@ footer a:hover{color:var(--accent);}
 </div>
 
 <section class="features">
-  <div class="section-title">Everything you need to <span style="color:var(--accent)">block threats</span></div>
+  <div class="section-title">Everything you need to block threats</span></div>
   <div class="features-grid">
-    <div class="feature-card">
-      <span class="feature-icon">🎯</span>
-      <div class="feature-title">Real-Time IP Scoring</div>
-      <div class="feature-desc">Score IPv4 or IPv6 address in under 100ms. Combines 10+ intelligence into a single risk score.</div>
-    </div>
-    <div class="feature-card">
-      <span class="feature-icon">🌐</span>
-      <div class="feature-title">Threat Feed Integration</div>
-      <div class="feature-desc">Checks against Feodo Tracker, Spamhaus DROP, Emerging Threats, and OTX pulses in real time.</div>
-    </div>
-    <div class="feature-card">
-      <span class="feature-icon">🗺️</span>
-      <div class="feature-title">Geo & Network Intel</div>
-      <div class="feature-desc">Full geolocation, ASN, ISP classification, datacenter detection with interactive map visualization.</div>
-    </div>
-    <div class="feature-card">
-      <span class="feature-icon">📁</span>
-      <div class="feature-title">Case Management</div>
-      <div class="feature-desc">Group suspicious IPs into investigation cases. Track status, and assign to analysts.</div>
-    </div>
-    <div class="feature-card">
-      <span class="feature-icon">🚫</span>
-      <div class="feature-title">Blacklist & Firewall Export</div>
-      <div class="feature-desc">Maintain IP blacklist, export rules in 10 formats: Cisco ACL, and more.</div>
-    </div>
-    <div class="feature-card">
-      <span class="feature-icon">📡</span>
-      <div class="feature-title">SIEM Integration</div>
-      <div class="feature-desc">Push every score event to Splunk, Microsoft Sentinel, or any generic webhook.</div>
-    </div>
-  <div class="feature-card">
-      <span class="feature-icon">👁️</span>
-      <div class="feature-title">IP Watchlist & Monitoring</div>
-      <div class="feature-desc">Add any IP to your watchlist and get automatic re-scores on a schedule.</div>
-    </div>
-
-    <div class="feature-card">
-      <span class="feature-icon">📋</span>
-      <div class="feature-title">Full Audit History</div>
-      <div class="feature-desc">Scored IPs, logged with risk level, threat feed hits, geo, and ISP.</div>
-    </div>
-
-    <div class="feature-card">
-      <span class="feature-icon">📊</span>
-      <div class="feature-title">Live API Observability</div>
-      <div class="feature-desc">Dashboard shows real-time request volume, error rates & endpoint usage.</div>
-    </div>
+    <div class="feature-card"><span class="feature-icon">🎯</span><div class="feature-title">Real-Time IP Scoring</div><div class="feature-desc">Score IPv4 or IPv6 address in under 100ms. Combines 10+ intelligence sources into a single risk score.</div></div>
+    <div class="feature-card"><span class="feature-icon">🌐</span><div class="feature-title">Threat Feed Integration</div><div class="feature-desc">Checks against Feodo Tracker, Spamhaus DROP, Emerging Threats, and OTX pulses in real time.</div></div>
+    <div class="feature-card"><span class="feature-icon">🗺️</span><div class="feature-title">Geo & Network Intel</div><div class="feature-desc">Full geolocation, ASN, ISP classification, datacenter detection with interactive map visualization.</div></div>
+    <div class="feature-card"><span class="feature-icon">📁</span><div class="feature-title">Case Management</div><div class="feature-desc">Group suspicious IPs into investigation cases. Track status and assign to analysts.</div></div>
+    <div class="feature-card"><span class="feature-icon">🚫</span><div class="feature-title">Blacklist & Firewall Export</div><div class="feature-desc">Maintain IP blacklist, export rules in 10 formats: Cisco ACL, iptables, Nginx, and more.</div></div>
+    <div class="feature-card"><span class="feature-icon">📡</span><div class="feature-title">SIEM Integration</div><div class="feature-desc">Push every score event to Splunk, Microsoft Sentinel, or any generic webhook.</div></div>
+    <div class="feature-card"><span class="feature-icon">👁️</span><div class="feature-title">IP Watchlist & Monitoring</div><div class="feature-desc">Add any IP to your watchlist and get automatic re-scores on a schedule.</div></div>
+    <div class="feature-card"><span class="feature-icon">📋</span><div class="feature-title">Full Audit History</div><div class="feature-desc">Scored IPs logged with risk level, threat feed hits, geo, and ISP — immutable hash chain.</div></div>
+    <div class="feature-card"><span class="feature-icon">📊</span><div class="feature-title">Live API Observability</div><div class="feature-desc">Dashboard shows real-time request volume, error rates and endpoint usage.</div></div>
   </div>
 </section>
 
-<!-- ── Platform Section  -->
 <section class="platform-section">
   <div class="platform-inner">
-
-    <div class="section-title" style="margin-bottom:48px;">
-      Built for <span style="color:var(--accent)">security teams</span>, not just lookups
-    </div>
+    <div class="section-title" style="margin-bottom:48px;">Built for security teams, not just lookups</div>
 
     <!-- Watchlist -->
     <div class="platform-row">
       <div class="platform-text">
         <div class="platform-eyebrow">Continuous Monitoring</div>
         <div class="platform-heading">Watch IPs — get alerted when risk changes</div>
-        <div class="platform-body">
-          Watch any IP. IPShield continuously re-scores it and alerts you when risk crosses your defined threshold, before it turns into an incident.
-        </div>
+        <div class="platform-body">Watch any IP. IPShield continuously re-scores it and alerts you when risk crosses your defined threshold, before it turns into an incident.</div>
         <div class="checklist">
           <div class="check-item"><span class="check-icon">✓</span>Set per-IP alert thresholds (0–100)</div>
           <div class="check-item"><span class="check-icon">✓</span>Automatic re-score polling on a schedule</div>
@@ -539,50 +593,10 @@ footer a:hover{color:var(--accent);}
       </div>
       <div class="platform-mock">
         <div class="mock-label">WATCHLIST</div>
-
-        <div class="mock-watch-row">
-          <div class="mock-watch-info">
-            <div class="mock-ip">185.220.101.1</div>
-            <div class="mock-bar-bg"><div class="mock-bar" style="width:94%;background:var(--critical);"></div></div>
-          </div>
-          <div class="mock-watch-score">
-            <div class="mock-score" style="color:var(--critical);">94</div>
-            <div class="mock-risk" style="color:var(--critical);">CRITICAL</div>
-          </div>
-        </div>
-
-        <div class="mock-watch-row">
-          <div class="mock-watch-info">
-            <div class="mock-ip">45.33.32.156</div>
-            <div class="mock-bar-bg"><div class="mock-bar" style="width:71%;background:var(--high);"></div></div>
-          </div>
-          <div class="mock-watch-score">
-            <div class="mock-score" style="color:var(--high);">71</div>
-            <div class="mock-risk" style="color:var(--high);">HIGH</div>
-          </div>
-        </div>
-
-        <div class="mock-watch-row">
-          <div class="mock-watch-info">
-            <div class="mock-ip">198.20.69.98</div>
-            <div class="mock-bar-bg"><div class="mock-bar" style="width:42%;background:var(--medium);"></div></div>
-          </div>
-          <div class="mock-watch-score">
-            <div class="mock-score" style="color:var(--medium);">42</div>
-            <div class="mock-risk" style="color:var(--medium);">MEDIUM</div>
-          </div>
-        </div>
-
-        <div class="mock-watch-row" style="border-bottom:none;">
-          <div class="mock-watch-info">
-            <div class="mock-ip">8.8.8.8</div>
-            <div class="mock-bar-bg"><div class="mock-bar" style="width:3%;background:var(--low);"></div></div>
-          </div>
-          <div class="mock-watch-score">
-            <div class="mock-score" style="color:var(--low);">3</div>
-            <div class="mock-risk" style="color:var(--low);">LOW</div>
-          </div>
-        </div>
+        <div class="mock-watch-row"><div class="mock-watch-info"><div class="mock-ip">185.220.101.1</div><div class="mock-bar-bg"><div class="mock-bar" data-width="94%" style="background:var(--critical);"></div></div></div><div class="mock-watch-score"><div class="mock-score" style="color:var(--critical);">94</div><div class="mock-risk" style="color:var(--critical);">CRITICAL</div></div></div>
+        <div class="mock-watch-row"><div class="mock-watch-info"><div class="mock-ip">45.33.32.156</div><div class="mock-bar-bg"><div class="mock-bar" data-width="71%" style="background:var(--high);"></div></div></div><div class="mock-watch-score"><div class="mock-score" style="color:var(--high);">71</div><div class="mock-risk" style="color:var(--high);">HIGH</div></div></div>
+        <div class="mock-watch-row"><div class="mock-watch-info"><div class="mock-ip">198.20.69.98</div><div class="mock-bar-bg"><div class="mock-bar" data-width="42%" style="background:var(--medium);"></div></div></div><div class="mock-watch-score"><div class="mock-score" style="color:var(--medium);">42</div><div class="mock-risk" style="color:var(--medium);">MEDIUM</div></div></div>
+        <div class="mock-watch-row" style="border-bottom:none;"><div class="mock-watch-info"><div class="mock-ip">8.8.8.8</div><div class="mock-bar-bg"><div class="mock-bar" data-width="3%" style="background:var(--low);"></div></div></div><div class="mock-watch-score"><div class="mock-score" style="color:var(--low);">3</div><div class="mock-risk" style="color:var(--low);">LOW</div></div></div>
       </div>
     </div>
 
@@ -591,9 +605,7 @@ footer a:hover{color:var(--accent);}
       <div class="platform-text">
         <div class="platform-eyebrow">Complete Audit Trail</div>
         <div class="platform-heading">Every score. Every flag. Every timestamp.</div>
-        <div class="platform-body">
-          IPShield logs every scored IP to a persistent database.
-        </div>
+        <div class="platform-body">IPShield logs every scored IP to a persistent database with an immutable hash chain.</div>
         <div class="checklist">
           <div class="check-item"><span class="check-icon">✓</span>Persistent PostgreSQL-backed audit history</div>
           <div class="check-item"><span class="check-icon">✓</span>Filter by risk, score range, proxy, Tor, datacenter</div>
@@ -601,43 +613,14 @@ footer a:hover{color:var(--accent);}
           <div class="check-item"><span class="check-icon">✓</span>Threat feed indicators (Feodo, Spamhaus, ET, OTX)</div>
         </div>
       </div>
-       <div class="platform-mock">
+      <div class="platform-mock">
         <div class="mock-label">AUDIT LOG</div>
-        <div class="mock-chips">
-          <span class="mock-chip mock-chip-active">ALL</span>
-          <span class="mock-chip">CRITICAL</span>
-          <span class="mock-chip">HIGH</span>
-          <span class="mock-chip">MEDIUM</span>
-          <span class="mock-chip">LOW</span>
-        </div>
-
-        <div class="mock-audit-row">
-          <span class="mock-ip" style="flex:1;">91.108.56.181</span>
-          <span class="mock-flag">[F·S]</span>
-          <span class="mock-badge" style="background:rgba(255,51,85,0.15);color:var(--critical);">CRITICAL</span>
-          <span class="mock-score" style="color:var(--critical);">97</span>
-        </div>
-        <div class="mock-audit-row">
-          <span class="mock-ip" style="flex:1;">185.220.101.34</span>
-          <span class="mock-flag">[F]</span>
-          <span class="mock-badge" style="background:rgba(255,51,85,0.15);color:var(--critical);">CRITICAL</span>
-          <span class="mock-score" style="color:var(--critical);">91</span>
-        </div>
-        <div class="mock-audit-row">
-          <span class="mock-ip" style="flex:1;">45.33.32.156</span>
-          <span class="mock-badge" style="background:rgba(255,119,0,0.15);color:var(--high);">HIGH</span>
-          <span class="mock-score" style="color:var(--high);">71</span>
-        </div>
-        <div class="mock-audit-row">
-          <span class="mock-ip" style="flex:1;">198.20.69.98</span>
-          <span class="mock-badge" style="background:rgba(255,204,0,0.12);color:var(--medium);">MEDIUM</span>
-          <span class="mock-score" style="color:var(--medium);">42</span>
-        </div>
-        <div class="mock-audit-row" style="border-bottom:none;">
-          <span class="mock-ip" style="flex:1;">1.1.1.1</span>
-          <span class="mock-badge" style="background:rgba(0,232,124,0.12);color:var(--low);">LOW</span>
-          <span class="mock-score" style="color:var(--low);">2</span>
-        </div>
+        <div class="mock-chips"><span class="mock-chip mock-chip-active">ALL</span><span class="mock-chip">CRITICAL</span><span class="mock-chip">HIGH</span><span class="mock-chip">MEDIUM</span><span class="mock-chip">LOW</span></div>
+        <div class="mock-audit-row"><span class="mock-ip" style="flex:1;">91.108.56.181</span><span class="mock-flag">[F·S]</span><span class="mock-badge" style="background:rgba(255,51,85,0.15);color:var(--critical);">CRITICAL</span><span class="mock-score" style="color:var(--critical);">97</span></div>
+        <div class="mock-audit-row"><span class="mock-ip" style="flex:1;">185.220.101.34</span><span class="mock-flag">[F]</span><span class="mock-badge" style="background:rgba(255,51,85,0.15);color:var(--critical);">CRITICAL</span><span class="mock-score" style="color:var(--critical);">91</span></div>
+        <div class="mock-audit-row"><span class="mock-ip" style="flex:1;">45.33.32.156</span><span class="mock-badge" style="background:rgba(255,119,0,0.15);color:var(--high);">HIGH</span><span class="mock-score" style="color:var(--high);">71</span></div>
+        <div class="mock-audit-row"><span class="mock-ip" style="flex:1;">198.20.69.98</span><span class="mock-badge" style="background:rgba(255,204,0,0.12);color:var(--medium);">MEDIUM</span><span class="mock-score" style="color:var(--medium);">42</span></div>
+        <div class="mock-audit-row" style="border-bottom:none;"><span class="mock-ip" style="flex:1;">1.1.1.1</span><span class="mock-badge" style="background:rgba(0,232,124,0.12);color:var(--low);">LOW</span><span class="mock-score" style="color:var(--low);">2</span></div>
       </div>
     </div>
 
@@ -646,9 +629,7 @@ footer a:hover{color:var(--accent);}
       <div class="platform-text">
         <div class="platform-eyebrow">API Observability</div>
         <div class="platform-heading">Live telemetry. Zero extra tooling.</div>
-        <div class="platform-body">
-          A built-in observability dashboard shows request volume, error rates, top endpoints etc, all in real time, directly inside the platform.
-        </div>
+        <div class="platform-body">A built-in observability dashboard shows request volume, error rates, top endpoints, all in real time.</div>
         <div class="checklist">
           <div class="check-item"><span class="check-icon">✓</span>Real-time request and error rate counters</div>
           <div class="check-item"><span class="check-icon">✓</span>P50 / P95 / P99 latency per endpoint</div>
@@ -660,68 +641,32 @@ footer a:hover{color:var(--accent);}
       <div class="platform-mock">
         <div class="mock-label">LIVE TELEMETRY</div>
         <div class="mock-stats-grid">
-          <div class="mock-stat-card">
-            <div class="mock-stat-val" style="color:var(--accent);">12.4k</div>
-            <div class="mock-stat-label">Requests</div>
-          </div>
-          <div class="mock-stat-card">
-            <div class="mock-stat-val" style="color:var(--low);">0.3%</div>
-            <div class="mock-stat-label">Error Rate</div>
-          </div>
-          <div class="mock-stat-card">
-            <div class="mock-stat-val" style="color:var(--medium);">84ms</div>
-            <div class="mock-stat-label">Avg Latency</div>
-          </div>
-          <div class="mock-stat-card">
-            <div class="mock-stat-val" style="color:var(--low);">99.9%</div>
-            <div class="mock-stat-label">Uptime</div>
-          </div>
+          <div class="mock-stat-card"><div class="mock-stat-val" style="color:var(--accent);" data-countup="12.4" data-suffix="k" data-decimals="1">12.4k</div><div class="mock-stat-label">Requests</div></div>
+          <div class="mock-stat-card"><div class="mock-stat-val" style="color:var(--low);" data-countup="0.3" data-suffix="%" data-decimals="1">0.3%</div><div class="mock-stat-label">Error Rate</div></div>
+          <div class="mock-stat-card"><div class="mock-stat-val" style="color:var(--medium);" data-countup="84" data-suffix="ms" data-decimals="0">84ms</div><div class="mock-stat-label">Avg Latency</div></div>
+          <div class="mock-stat-card"><div class="mock-stat-val" style="color:var(--low);" data-countup="99.9" data-suffix="%" data-decimals="1">99.9%</div><div class="mock-stat-label">Uptime</div></div>
         </div>
         <div class="mock-label" style="margin-bottom:8px;">TOP ENDPOINTS</div>
-        <div class="mock-endpoint-row">
-          <span class="mock-ip" style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--accent);">GET /api/score/:ip</span>
-          <span style="color:var(--text2);font-size:10px;">8,241</span>
-          <span style="color:var(--text3);font-size:10px;">112ms</span>
-        </div>
-        <div class="mock-endpoint-row">
-          <span class="mock-ip" style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--accent);">POST /api/score/batch</span>
-          <span style="color:var(--text2);font-size:10px;">1,833</span>
-          <span style="color:var(--text3);font-size:10px;">340ms</span>
-        </div>
-        <div class="mock-endpoint-row" style="border-bottom:none;">
-          <span class="mock-ip" style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--accent);">GET /api/whois/:ip</span>
-          <span style="color:var(--text2);font-size:10px;">982</span>
-          <span style="color:var(--text3);font-size:10px;">201ms</span>
-        </div>
+        <div class="mock-endpoint-row"><span class="mock-ip" style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--accent);">GET /api/score/:ip</span><span style="color:var(--text2);font-size:10px;">8,241</span><span style="color:var(--text3);font-size:10px;">112ms</span></div>
+        <div class="mock-endpoint-row"><span class="mock-ip" style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--accent);">POST /api/score/batch</span><span style="color:var(--text2);font-size:10px;">1,833</span><span style="color:var(--text3);font-size:10px;">340ms</span></div>
+        <div class="mock-endpoint-row" style="border-bottom:none;"><span class="mock-ip" style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--accent);">GET /api/whois/:ip</span><span style="color:var(--text2);font-size:10px;">982</span><span style="color:var(--text3);font-size:10px;">201ms</span></div>
       </div>
     </div>
-
   </div>
 </section>
 
 <!-- Access Request Modal -->
-<div id="accessModalOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:500;display:none;align-items:center;justify-content:center;padding:24px;">
-  <div style="background:var(--bg1);border:1px solid var(--border);border-radius:16px;width:100%;max-width:480px;padding:32px;">
+<div id="accessModalOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:500;align-items:center;justify-content:center;padding:24px;">
+  <div class="modal-card">
     <div id="accessFormView">
-      <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:800;margin-bottom:6px;">Request Access</div>
+      <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:800;margin-bottom:6px;color:var(--text);">Request Access</div>
       <div style="font-size:12px;color:var(--text2);line-height:1.7;margin-bottom:24px;">Tell us about yourself and we'll get you set up shortly.</div>
-
       <div id="accessErr" style="display:none;padding:10px 14px;background:rgba(255,51,85,0.1);border:1px solid rgba(255,51,85,0.3);border-radius:8px;font-size:12px;color:var(--critical);margin-bottom:16px;"></div>
-
-      <div style="margin-bottom:16px;">
-        <label style="display:block;font-size:10px;color:var(--text3);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;">Full Name</label>
-        <input type="text" id="reqName" placeholder="Dave Instd" maxlength="32"
-          style="width:100%;padding:11px 14px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:13px;outline:none;">
-      </div>
-      <div style="margin-bottom:16px;">
-        <label style="display:block;font-size:10px;color:var(--text3);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;">Work Email</label>
-        <input type="email" id="reqEmail" placeholder="dave@company.com" maxlength="32"
-          style="width:100%;padding:11px 14px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:13px;outline:none;">
-      </div>
+      <div style="margin-bottom:16px;"><label class="modal-label">Full Name</label><input type="text" id="reqName" placeholder="Dave Instd" maxlength="32" class="modal-input"></div>
+      <div style="margin-bottom:16px;"><label class="modal-label">Work Email</label><input type="email" id="reqEmail" placeholder="dave@company.com" maxlength="32" class="modal-input"></div>
       <div style="margin-bottom:24px;">
-        <label style="display:block;font-size:10px;color:var(--text3);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;">Organisation Type</label>
-        <select id="reqCompany"
-          style="width:100%;padding:11px 14px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:13px;outline:none;appearance:none;">
+        <label class="modal-label">Organisation Type</label>
+        <select id="reqCompany" class="modal-input" style="appearance:none;cursor:pointer;">
           <option value="">Select type…</option>
           <option>Bank / Financial Services</option>
           <option>Education / University</option>
@@ -734,28 +679,16 @@ footer a:hover{color:var(--accent);}
           <option>Other</option>
         </select>
       </div>
-      <div class= "stbtn" style="display:flex; gap:16px">
-        <button id="accessSubmitBtn" onclick="submitAccessRequest()"
-        style="width:100%;padding:13px;border-radius:8px;border:none;cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;letter-spacing:1px;text-transform:uppercase;background:var(--accent);color:#000;">
-        Submit Request →
-      </button>
-      <button onclick="hideAccessModal()"
-        style="width:100%;padding:13px;border-radius:8px;background:transparent;color:var(--text2);border:1px solid var(--border);font-family:'JetBrains Mono',monospace;font-size:12px;cursor:pointer;">
-        Cancel
-      </button>
+      <div class="stbtn" style="display:flex;gap:12px;">
+        <button id="accessSubmitBtn" onclick="submitAccessRequest()" style="flex:1;padding:13px;border-radius:8px;border:none;cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;letter-spacing:1px;text-transform:uppercase;background:var(--accent);color:#000;">Submit Request →</button>
+        <button onclick="hideAccessModal()" style="flex:1;padding:13px;border-radius:8px;background:transparent;color:var(--text2);border:1px solid var(--border);font-family:'JetBrains Mono',monospace;font-size:12px;cursor:pointer;">Cancel</button>
       </div>
     </div>
     <div id="accessSuccessView" style="display:none;text-align:center;padding:8px 0;">
       <div style="font-size:44px;margin-bottom:14px;">✓</div>
       <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:var(--low);margin-bottom:8px;">Request received!</div>
-      <div style="font-size:12px;color:var(--text2);line-height:1.7;margin-bottom:24px;">
-        Thanks, <strong id="accessSuccessName" style="color:var(--text);">—</strong>.
-        We'll review your request and be in touch shortly.
-      </div>
-      <button onclick="hideAccessModal()"
-        style="width:100%;padding:13px;border-radius:8px;border:none;cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;background:var(--accent);color:#000;">
-        Back to Home →
-      </button>
+      <div style="font-size:12px;color:var(--text2);line-height:1.7;margin-bottom:24px;">Thanks, <strong id="accessSuccessName" style="color:var(--text);">—</strong>. We'll review your request and be in touch shortly.</div>
+      <button onclick="hideAccessModal()" style="width:100%;padding:13px;border-radius:8px;border:none;cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;background:var(--accent);color:#000;">Back to Home →</button>
     </div>
   </div>
 </div>
@@ -791,158 +724,49 @@ footer a:hover{color:var(--accent);}
     <a href="/login">Sign In</a>
   </div>
 </footer>
-<style>
-  /* ── Animation base */
-.fade-up {
-  opacity: 0;
-  transform: translateY(28px);
-  transition: opacity 0.55s ease, transform 0.55s ease;
-}
-.fade-up.visible {
-  opacity: 1;
-  transform: translateY(0);
-}
 
-/* Stagger children */
-.stagger > * {
-  opacity: 0;
-  transform: translateY(20px);
-  transition: opacity 0.4s ease, transform 0.4s ease;
-}
-.stagger.visible > *:nth-child(1) { transition-delay: 0.05s; opacity:1; transform:translateY(0); }
-.stagger.visible > *:nth-child(2) { transition-delay: 0.12s; opacity:1; transform:translateY(0); }
-.stagger.visible > *:nth-child(3) { transition-delay: 0.19s; opacity:1; transform:translateY(0); }
-.stagger.visible > *:nth-child(4) { transition-delay: 0.26s; opacity:1; transform:translateY(0); }
-.stagger.visible > *:nth-child(5) { transition-delay: 0.33s; opacity:1; transform:translateY(0); }
-.stagger.visible > *:nth-child(6) { transition-delay: 0.40s; opacity:1; transform:translateY(0); }
-.stagger.visible > *:nth-child(7) { transition-delay: 0.47s; opacity:1; transform:translateY(0); }
-.stagger.visible > *:nth-child(8) { transition-delay: 0.54s; opacity:1; transform:translateY(0); }
-.stagger.visible > *:nth-child(9) { transition-delay: 0.61s; opacity:1; transform:translateY(0); }
-
-/* Feature card hover lift */
-.feature-card {
-  transition: border-color .2s, transform .2s, box-shadow .2s;
-}
-.feature-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 32px rgba(0,217,255,0.08);
-}
-
-/* Risk pill hover */
-.risk-pill {
-  transition: transform .15s, box-shadow .15s;
-  cursor: default;
-}
-.risk-pill:hover { transform: translateY(-2px); }
-.risk-pill.critical:hover { box-shadow: 0 4px 20px rgba(255,51,85,0.25); }
-.risk-pill.high:hover     { box-shadow: 0 4px 20px rgba(255,119,0,0.25); }
-.risk-pill.medium:hover   { box-shadow: 0 4px 20px rgba(255,204,0,0.2);  }
-.risk-pill.low:hover      { box-shadow: 0 4px 20px rgba(0,232,124,0.2);  }
-
-/* Mock audit row hover */
-.mock-audit-row {
-  transition: background .15s;
-  border-radius: 4px;
-}
-.mock-audit-row:hover { background: rgba(0,217,255,0.04); }
-
-/* Mock watch row hover */
-.mock-watch-row {
-  transition: background .15s;
-  border-radius: 4px;
-}
-.mock-watch-row:hover { background: rgba(0,217,255,0.04); }
-
-/* Mock endpoint row hover */
-.mock-endpoint-row {
-  transition: background .15s;
-  border-radius: 4px;
-}
-.mock-endpoint-row:hover { background: rgba(0,217,255,0.04); }
-
-/* Stat card hover */
-.mock-stat-card {
-  transition: border-color .2s, transform .2s;
-}
-.mock-stat-card:hover {
-  border-color: rgba(0,217,255,0.3);
-  transform: translateY(-2px);
-}
-
-/* Hero badge glow sweep */
-@keyframes badge-sweep {
-  0%   { background-position: -200% center; }
-  100% { background-position: 200% center; }
-}
-.hero-badge {
-  background-size: 200% auto;
-  animation: badge-sweep 4s linear infinite;
-}
-
-/* Progress bar fill animation */
-.mock-bar {
-  width: 0% !important;
-  transition: width 1s cubic-bezier(.4,0,.2,1);
-}
-.mock-bar.animated { width: var(--target-width) !important; }
-
-/* Scan line on mock panels */
-@keyframes scanline {
-  0%   { top: 0%; }
-  100% { top: 100%; }
-}
-.platform-mock {
-  position: relative;
-  overflow: hidden;
-}
-.platform-mock::after {
-  content: '';
-  position: absolute;
-  left: 0; right: 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(0,217,255,0.15), transparent);
-  animation: scanline 4s linear infinite;
-  pointer-events: none;
-}
-
-/* CTA button pulse */
-@keyframes btn-glow {
-  0%,100% { box-shadow: 0 0 12px rgba(0,217,255,0.3); }
-  50%     { box-shadow: 0 0 28px rgba(0,217,255,0.6); }
-}
-.btn-primary {
-  animation: btn-glow 3s ease-in-out infinite;
-}
-
-/* reduced motion */
-@media (prefers-reduced-motion: reduce) {
-  .fade-up, .stagger > * { transition: none; opacity: 1; transform: none; }
-  .mock-bar { transition: none; }
-  .platform-mock::after { animation: none; }
-  .btn-primary { animation: none; }
-  .hero-badge { animation: none; }
-}
-
-html,
-body,
-header,
-footer,
-.feature-card,
-.platform-mock,
-.mock-stat-card,
-.stat-item,
-.btn,
-.nav-drawer,
-.demo-section,
-.platform-section {
-  transition:
-    background-color .25s ease,
-    color .25s ease,
-    border-color .25s ease,
-    box-shadow .25s ease;
-}
-</style>
 <script>
+// Theme toggle 
+(function () {
+  const html    = document.documentElement;
+  const KEY     = "ipshield_theme";
+  const saved   = localStorage.getItem(KEY);
+
+  // Apply saved preference immediately (before paint)
+  if (saved) html.setAttribute("data-theme", saved);
+
+  function getTheme()    { return html.getAttribute("data-theme") || "dark"; }
+  function toggleTheme() {
+    const next = getTheme() === "dark" ? "light" : "dark";
+    html.setAttribute("data-theme", next);
+    localStorage.setItem(KEY, next);
+  }
+
+  // Wire both toggle buttons (desktop + mobile)
+  document.getElementById("themeToggleDesktop").addEventListener("click", toggleTheme);
+  document.getElementById("themeToggleMobile").addEventListener("click", toggleTheme);
+
+  // Show mobile toggle only when hamburger is visible
+  const mq = window.matchMedia("(max-width: 768px)");
+  function syncMobileToggle(e) {
+    document.getElementById("themeToggleMobile").style.display = e.matches ? "flex" : "none";
+  }
+  mq.addEventListener("change", syncMobileToggle);
+  syncMobileToggle(mq);
+})();
+
+// Auth redirect 
+const existingToken = localStorage.getItem("token");
+if (existingToken) {
+  fetch("/api/v1/keys/me", { headers: { Authorization: `Bearer ${existingToken}` } })
+    .then(r => {
+      if (r.ok) window.location.replace("/dashboard");
+      else { localStorage.removeItem("token"); localStorage.removeItem("user"); }
+    })
+    .catch(() => {});
+}
+
+// Public stats 
 async function loadPublicStats() {
   try {
     const res = await fetch("/api/health");
@@ -956,323 +780,142 @@ async function loadPublicStats() {
 }
 loadPublicStats();
 
-  const existingToken = localStorage.getItem("token");
-  if (existingToken) {
-    fetch("/api/v1/keys/me", { headers: { Authorization: `Bearer ${existingToken}` } })
-      .then(r => { if (r.ok) window.location.replace("/dashboard"); else { localStorage.removeItem("token"); localStorage.removeItem("user"); } })
-      .catch(() => {});
-  }
+// Nav drawer 
+const hamburger = document.getElementById("mainHamburger");
+const drawer    = document.getElementById("navDrawer");
+const overlay   = document.getElementById("navOverlay");
+const closeBtn  = document.getElementById("drawerClose");
 
-  const hamburger = document.getElementById("mainHamburger");
-  const drawer    = document.getElementById("navDrawer");
-  const overlay   = document.getElementById("navOverlay");
-  const closeBtn  = document.getElementById("drawerClose");
-
-  function openDrawer() {
+function openDrawer() {
   hamburger.setAttribute("aria-expanded","true");
   drawer.classList.add("open");
   drawer.removeAttribute("aria-hidden");
   overlay.classList.add("open");
   document.body.style.overflow = "hidden";
 }
-  function closeDrawer() {
-    hamburger.setAttribute("aria-expanded","false");
-    drawer.classList.remove("open");
-    drawer.setAttribute("aria-hidden","true");
-    overlay.classList.remove("open");
-    document.body.style.overflow = "";
-    hamburger.focus();
-  }
+function closeDrawer() {
+  hamburger.setAttribute("aria-expanded","false");
+  drawer.classList.remove("open");
+  drawer.setAttribute("aria-hidden","true");
+  overlay.classList.remove("open");
+  document.body.style.overflow = "";
+  hamburger.focus();
+}
+hamburger.addEventListener("click", e => { e.stopPropagation(); drawer.classList.contains("open") ? closeDrawer() : openDrawer(); });
+closeBtn.addEventListener("click", closeDrawer);
+overlay.addEventListener("click", closeDrawer);
+document.addEventListener("keydown", e => { if (e.key === "Escape") { closeDrawer(); hideAccessModal(); } });
+window.matchMedia("(min-width:769px)").addEventListener("change", e => { if (e.matches) closeDrawer(); });
 
-  hamburger.addEventListener("click", e => { e.stopPropagation(); drawer.classList.contains("open") ? closeDrawer() : openDrawer(); });
-  closeBtn.addEventListener("click", closeDrawer);
-  overlay.addEventListener("click", closeDrawer);
-  document.addEventListener("keydown", e => { if (e.key === "Escape") closeDrawer(); });
-  window.matchMedia("(min-width:769px)").addEventListener("change", e => { if (e.matches) closeDrawer(); });
+// Access modal 
+function showAccessModal() {
+  const ov = document.getElementById("accessModalOverlay");
+  ov.style.display = "flex";
+  document.body.style.overflow = "hidden";
+  document.getElementById("reqName").focus();
+}
+function hideAccessModal() {
+  document.getElementById("accessModalOverlay").style.display = "none";
+  document.body.style.overflow = "";
+  document.getElementById("accessFormView").style.display    = "block";
+  document.getElementById("accessSuccessView").style.display = "none";
+  document.getElementById("accessErr").style.display         = "none";
+  document.getElementById("reqName").value    = "";
+  document.getElementById("reqEmail").value   = "";
+  document.getElementById("reqCompany").value = "";
+}
+document.getElementById("accessModalOverlay").addEventListener("click", function(e) {
+  if (e.target === this) hideAccessModal();
+});
 
+async function submitAccessRequest() {
+  const errEl   = document.getElementById("accessErr");
+  const btn     = document.getElementById("accessSubmitBtn");
+  const name    = document.getElementById("reqName").value.trim();
+  const email   = document.getElementById("reqEmail").value.trim();
+  const company = document.getElementById("reqCompany").value;
 
-  function showAccessModal() {
-    const ov = document.getElementById("accessModalOverlay");
-    ov.style.display = "flex";
-    document.body.style.overflow = "hidden";
-    document.getElementById("reqName").focus();
-  }
-  function hideAccessModal() {
-    document.getElementById("accessModalOverlay").style.display = "none";
-    document.body.style.overflow = "";
-    document.getElementById("accessFormView").style.display    = "block";
-    document.getElementById("accessSuccessView").style.display = "none";
-    document.getElementById("accessErr").style.display         = "none";
-    document.getElementById("reqName").value    = "";
-    document.getElementById("reqEmail").value   = "";
-    document.getElementById("reqCompany").value = "";
-  }
-  document.getElementById("accessModalOverlay").addEventListener("click", function(e) {
-    if (e.target === this) hideAccessModal();
-  });
-  document.addEventListener("keydown", e => {
-    if (e.key === "Escape") hideAccessModal();
-  });
+  errEl.style.display = "none";
+  if (!name)                         { errEl.textContent = "Full name is required.";            errEl.style.display = "block"; return; }
+  if (!email || !email.includes("@")){ errEl.textContent = "Enter a valid work email.";         errEl.style.display = "block"; return; }
+  if (!company)                      { errEl.textContent = "Please select an organisation type."; errEl.style.display = "block"; return; }
 
-  async function submitAccessRequest() {
-    const errEl  = document.getElementById("accessErr");
-    const btn    = document.getElementById("accessSubmitBtn");
-    const name   = document.getElementById("reqName").value.trim();
-    const email  = document.getElementById("reqEmail").value.trim();
-    const company = document.getElementById("reqCompany").value;
-
-    errEl.style.display = "none";
-    if (!name)                        { errEl.textContent = "Full name is required.";           errEl.style.display = "block"; return; }
-    if (!email || !email.includes("@")){ errEl.textContent = "Enter a valid work email.";       errEl.style.display = "block"; return; }
-    if (!company)                     { errEl.textContent = "Please select an organisation type."; errEl.style.display = "block"; return; }
-
-    btn.disabled    = true;
-    btn.textContent = "Sending…";
-
-    try {
-      const res  = await fetch("/api/access-request", {
-        method:  "POST",
-        headers: { "Content-Type": "application/json" },
-        body:    JSON.stringify({ name, email, company }),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        errEl.textContent  = data.error || "Submission failed. Please try again.";
-        errEl.style.display = "block";
-        btn.disabled    = false;
-        btn.textContent = "Submit Request →";
-        return;
-      }
-      document.getElementById("accessSuccessName").textContent  = name;
-      document.getElementById("accessFormView").style.display    = "none";
-      document.getElementById("accessSuccessView").style.display = "block";
-    } catch(err) {
-      errEl.textContent  = "Network error. Please try again.";
+  btn.disabled = true; btn.textContent = "Sending…";
+  try {
+    const res  = await fetch("/api/access-request", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, email, company }),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      errEl.textContent = data.error || "Submission failed. Please try again.";
       errEl.style.display = "block";
-      btn.disabled    = false;
-      btn.textContent = "Submit Request →";
+      btn.disabled = false; btn.textContent = "Submit Request →";
+      return;
     }
+    document.getElementById("accessSuccessName").textContent  = name;
+    document.getElementById("accessFormView").style.display    = "none";
+    document.getElementById("accessSuccessView").style.display = "block";
+  } catch {
+    errEl.textContent = "Network error. Please try again.";
+    errEl.style.display = "block";
+    btn.disabled = false; btn.textContent = "Submit Request →";
   }
+}
 
-  // landing page animation
-  (function () {
-
-  // Scroll observer — fade-up and stagger 
+// Scroll animations 
+(function () {
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add("visible");
+      if (!entry.isIntersecting) return;
+      entry.target.classList.add("visible");
 
-        // Trigger progress bars inside this element
-        entry.target.querySelectorAll(".mock-bar[data-width]").forEach(bar => {
-          requestAnimationFrame(() => {
-            bar.style.setProperty("--target-width", bar.dataset.width);
-            bar.classList.add("animated");
-          });
+      entry.target.querySelectorAll(".mock-bar[data-width]").forEach(bar => {
+        requestAnimationFrame(() => {
+          bar.style.setProperty("--target-width", bar.dataset.width);
+          bar.classList.add("animated");
         });
+      });
 
-        // Trigger count-up spans inside this element
-        entry.target.querySelectorAll("[data-countup]").forEach(el => {
-          countUp(el);
-        });
-
-        observer.unobserve(entry.target);
-      }
+      entry.target.querySelectorAll("[data-countup]").forEach(el => countUp(el));
+      observer.unobserve(entry.target);
     });
   }, { threshold: 0.15 });
 
-  // Apply fade-up to top-level sections 
-  document.querySelectorAll(
-    ".hero, .stats-bar, .features, .platform-section, .demo-section, .cta"
-  ).forEach(el => {
+  document.querySelectorAll(".hero, .stats-bar, .features, .platform-section, .demo-section, .cta").forEach(el => {
     el.classList.add("fade-up");
     observer.observe(el);
   });
 
-  // Apply stagger to feature cards grid 
   const grid = document.querySelector(".features-grid");
-  if (grid) {
-    grid.classList.add("stagger");
-    observer.observe(grid);
-  }
+  if (grid) { grid.classList.add("stagger"); observer.observe(grid); }
 
-  // Apply stagger to platform rows individually 
   document.querySelectorAll(".platform-row").forEach(row => {
     row.classList.add("fade-up");
     observer.observe(row);
   });
 
-  // Convert mock bars to use data-width 
-  //    (so CSS animation can control them)
-  document.querySelectorAll(".mock-bar").forEach(bar => {
-    // Extract current inline width e.g. "width:94%"
-    const match = bar.style.width ? bar.style.width.match(/(\d+)%/) : null;
-    if (match) {
-      bar.dataset.width = match[1] + "%";
-      // Reset to 0 so animation plays when observed
-      bar.style.removeProperty("width");
-    }
-  });
-
-  // Count-up utility 
   function countUp(el) {
     const target   = parseFloat(el.dataset.countup);
-    const suffix   = el.dataset.suffix || "";
-    const prefix   = el.dataset.prefix || "";
+    const suffix   = el.dataset.suffix   || "";
     const decimals = el.dataset.decimals ? parseInt(el.dataset.decimals) : 0;
     const duration = 1200;
     const start    = performance.now();
-
     function step(now) {
       const progress = Math.min((now - start) / duration, 1);
-      // Ease out cubic
-      const eased = 1 - Math.pow(1 - progress, 3);
-      const val   = (target * eased).toFixed(decimals);
-      el.textContent = prefix + val + suffix;
+      const eased    = 1 - Math.pow(1 - progress, 3);
+      el.textContent = (target * eased).toFixed(decimals) + suffix;
       if (progress < 1) requestAnimationFrame(step);
     }
     requestAnimationFrame(step);
   }
 
-  // Wire count-up to stats bar numbers 
-  //    Only for numbers we know — skip "4" and "<200ms"
-  const statNums = document.querySelectorAll(".stat-num");
-  statNums.forEach(el => {
-    const text = el.textContent.trim();
-    // 450k → countup to 450 with suffix k
-    if (/^\d+(\.\d+)?k$/.test(text)) {
-      const num = parseFloat(text);
-      el.dataset.countup  = num;
-      el.dataset.suffix   = "k";
-      el.dataset.decimals = "1";
-      el.textContent      = "0k";
-      observer.observe(el.closest(".stats-bar") || el);
-    }
-    // 30k
-    else if (/^\d+k$/.test(text)) {
-      const num = parseInt(text);
-      el.dataset.countup = num;
-      el.dataset.suffix  = "k";
-      el.textContent     = "0k";
-    }
-  });
-
-  // Wire count-up to telemetry mock stats 
-  const telemetryMap = [
-    { selector: null, text: "12.4k", target: 12.4, suffix: "k", decimals: 1 },
-    { selector: null, text: "0.3%",  target: 0.3,  suffix: "%", decimals: 1 },
-    { selector: null, text: "84ms",  target: 84,   suffix: "ms", decimals: 0 },
-    { selector: null, text: "99.9%", target: 99.9, suffix: "%", decimals: 1 },
-  ];
-
-  document.querySelectorAll(".mock-stat-val").forEach((el, i) => {
-    const map = telemetryMap[i];
-    if (!map) return;
-    el.dataset.countup  = map.target;
-    el.dataset.suffix   = map.suffix;
-    el.dataset.decimals = map.decimals;
-    el.textContent      = "0" + map.suffix;
-  });
-
-  // Observe telemetry section for count-up trigger 
-  const telSection = document.querySelector(".platform-section");
-  if (telSection) observer.observe(telSection);
-
-  // Hero fade in immediately on load 
   window.addEventListener("load", () => {
     const hero = document.querySelector(".hero");
-    if (hero) {
-      setTimeout(() => hero.classList.add("visible"), 80);
-    }
+    if (hero) setTimeout(() => hero.classList.add("visible"), 80);
     const statsBar = document.querySelector(".stats-bar");
-    if (statsBar) {
-      setTimeout(() => statsBar.classList.add("visible"), 200);
-    }
+    if (statsBar) setTimeout(() => statsBar.classList.add("visible"), 200);
   });
-
-})();
-
-
-/* ---------------------------
-   Theme Toggle
---------------------------- */
-
-(function () {
-
-  const html = document.documentElement;
-
-  const desktopBtn =
-    document.getElementById("themeToggle");
-
-  const mobileBtn =
-    document.getElementById("mobileThemeToggle");
-
-  const savedTheme =
-    localStorage.getItem("theme");
-
-  if (savedTheme) {
-    html.setAttribute("data-theme", savedTheme);
-  } else {
-    const prefersLight =
-      window.matchMedia(
-        "(prefers-color-scheme: light)"
-      ).matches;
-
-    html.setAttribute(
-      "data-theme",
-      prefersLight ? "light" : "dark"
-    );
-  }
-
-  function updateButtons() {
-
-    const light =
-      html.getAttribute("data-theme") === "light";
-
-    const label = light
-      ? "☀️ Light"
-      : "🌙 Dark";
-
-
-    if (desktopBtn)
-      desktopBtn.textContent = label;
-
-    if (mobileBtn)
-      mobileBtn.textContent = label;
-  }
-
-  function toggleTheme() {
-
-    const current =
-      html.getAttribute("data-theme");
-
-    const next =
-      current === "light"
-        ? "dark"
-        : "light";
-
-    html.setAttribute("data-theme", next);
-
-    localStorage.setItem(
-      "theme",
-      next
-    );
-
-    updateButtons();
-  }
-
-  desktopBtn?.addEventListener(
-    "click",
-    toggleTheme
-  );
-
-  mobileBtn?.addEventListener(
-    "click",
-    toggleTheme
-  );
-
-  updateButtons();
-
 })();
 </script>
 </body>
