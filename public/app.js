@@ -298,6 +298,14 @@
   mfaBtn.textContent = "🔐 MFA";
   mfaBtn.style.cssText = "padding:6px 12px;font-size:11px;";
   headerRight.prepend(mfaBtn);
+
+  // After the MFA button creation:
+  const scanBtn       = document.createElement("button");
+  scanBtn.className   = "btn btn-ghost";
+  scanBtn.id          = "scanBtn";
+  scanBtn.textContent = "🔍 Scan";
+  scanBtn.style.cssText = "padding:6px 12px;font-size:11px;";
+  headerRight.prepend(scanBtn);
  
   buildHamburgerMenu();
 
@@ -312,68 +320,711 @@
   });
 }
 
-  // Quick Tests Btn - Bulk Section
-  const searchSection = document.querySelector(".search-section");
-  if (searchSection) {
-      const bulk = document.createElement("div");
-      bulk.id = "bulkSection";
-      bulk.style.cssText = "margin-top:8px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;";
-      bulk.innerHTML = `
+    // Quick Tests Btn - Bulk Section
+    const searchSection = document.querySelector(".search-section");
+    if (searchSection) {
+        const bulk = document.createElement("div");
+        bulk.id = "bulkSection";
+        bulk.style.cssText = "margin-top:8px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;";
+        bulk.innerHTML = `
 
-      <label style="font-size:10px;color:var(--text3);letter-spacing:2px;text-transform:uppercase;">Bulk:</label>
-      <input type="file" id="csvUpload" accept=".csv,.txt" style="display:none">
-      <button class="btn btn-ghost" id="csvBtn"      style="padding:8px 14px;font-size:11px;">↑ UPLOAD CSV</button>
-      <button class="btn btn-ghost" id="exportBtn"   style="padding:8px 14px;font-size:11px;">↓ EXPORT LOG</button>
-      <button class="btn btn-ghost" id="firewallBtn" style="padding:8px 14px;font-size:11px;">🛡 FIREWALL</button>
-      <span id="bulkStatus" style="font-size:11px;color:var(--text2);"></span>`;
-      searchSection.appendChild(bulk);
-    }
+        <label style="font-size:10px;color:var(--text3);letter-spacing:2px;text-transform:uppercase;">Bulk:</label>
+        <input type="file" id="csvUpload" accept=".csv,.txt" style="display:none">
+        <button class="btn btn-ghost" id="csvBtn"      style="padding:8px 14px;font-size:11px;">↑ UPLOAD CSV</button>
+        <button class="btn btn-ghost" id="exportBtn"   style="padding:8px 14px;font-size:11px;">↓ EXPORT LOG</button>
+        <button class="btn btn-ghost" id="firewallBtn" style="padding:8px 14px;font-size:11px;">🛡 FIREWALL</button>
+        <span id="bulkStatus" style="font-size:11px;color:var(--text2);"></span>`;
+        searchSection.appendChild(bulk);
+      }
 
-  // Map panels
-  const mainGrid = document.querySelector(".main-grid");
-  if (mainGrid) {
-      const row = document.createElement("div");
-      row.id            = "mapWatchRow";
-      row.style.cssText = "display:grid;grid-template-columns:1fr 1fr;gap:24px;";
+    // Map panels
+    const mainGrid = document.querySelector(".main-grid");
+    if (mainGrid) {
+        const row = document.createElement("div");
+        row.id            = "mapWatchRow";
+        row.style.cssText = "display:grid;grid-template-columns:1fr 1fr;gap:24px;";
 
-      // Score IP panels
-      const mapWrap = document.createElement("div");
-      mapWrap.id = "mapSection";
-      mapWrap.style.cssText = "background:var(--bg1);border:1px solid var(--border);border-radius:12px;overflow:hidden;";
-      mapWrap.innerHTML = `
-        <div class="panel-header">
-          <div class="panel-title" style="font-size:11px;font-weight:700;">Geo Map</div>
-          <div id="mapLabel" style="font-size:11px;color:var(--text3);">Score an IP to see location</div>
-        </div>
-        <div id="mapContainer" style="height:320px;background:var(--bg2);display:flex;align-items:center;justify-content:center;color:var(--text3);font-size:12px;">Loading map…</div>`;
-
-      
-      // Watchlist Panel
-      const watchWrap = document.createElement("div");
-      watchWrap.id = "watchlistSection";
-      watchWrap.style.cssText = "background:var(--bg1);border:1px solid var(--border);border-radius:12px;overflow:hidden;display:flex;flex-direction:column;";
-      watchWrap.innerHTML = `
-        <div class="panel-header" style="justify-content:space-between;">
-          <div class="panel-title" style="font-size:11px;font-weight:700;">Watchlist</div>
-          <div style="display:flex;gap:8px;align-items:center;">
-            <span id="watchlistCount" style="font-size:11px;color:var(--text3);">0 IPs</span>
-            <button id="addWatchBtn" class="btn btn-ghost" style="padding:4px 10px;font-size:11px;">+ WATCH</button>
-            <button id="pollBtn"     class="btn btn-ghost" style="padding:4px 10px;font-size:11px;">↻ POLL</button>
+        // Score IP panels
+        const mapWrap = document.createElement("div");
+        mapWrap.id = "mapSection";
+        mapWrap.style.cssText = "background:var(--bg1);border:1px solid var(--border);border-radius:12px;overflow:hidden;";
+        mapWrap.innerHTML = `
+          <div class="panel-header">
+            <div class="panel-title" style="font-size:11px;font-weight:700;">Geo Map</div>
+            <div id="mapLabel" style="font-size:11px;color:var(--text3);">Score an IP to see location</div>
           </div>
-        </div>
-        <div id="watchlistBody" style="flex:1;overflow-y:auto;">
-          <div style="padding:24px;text-align:center;color:var(--text3);font-size:11px;">No IPs being watched</div>
-        </div>
-        <div id="monitorStatus" style="padding:8px 16px;font-size:10px;color:var(--text3);border-top:1px solid var(--border);"></div>`;
+          <div id="mapContainer" style="height:320px;background:var(--bg2);display:flex;align-items:center;justify-content:center;color:var(--text3);font-size:12px;">Loading map…</div>`;
 
-      row.appendChild(mapWrap);
-      row.appendChild(watchWrap);
-      mainGrid.after(row);
+        
+        // Watchlist Panel
+        const watchWrap = document.createElement("div");
+        watchWrap.id = "watchlistSection";
+        watchWrap.style.cssText = "background:var(--bg1);border:1px solid var(--border);border-radius:12px;overflow:hidden;display:flex;flex-direction:column;";
+        watchWrap.innerHTML = `
+          <div class="panel-header" style="justify-content:space-between;">
+            <div class="panel-title" style="font-size:11px;font-weight:700;">Watchlist</div>
+            <div style="display:flex;gap:8px;align-items:center;">
+              <span id="watchlistCount" style="font-size:11px;color:var(--text3);">0 IPs</span>
+              <button id="addWatchBtn" class="btn btn-ghost" style="padding:4px 10px;font-size:11px;">+ WATCH</button>
+              <button id="pollBtn"     class="btn btn-ghost" style="padding:4px 10px;font-size:11px;">↻ POLL</button>
+            </div>
+          </div>
+          <div id="watchlistBody" style="flex:1;overflow-y:auto;">
+            <div style="padding:24px;text-align:center;color:var(--text3);font-size:11px;">No IPs being watched</div>
+          </div>
+          <div id="monitorStatus" style="padding:8px 16px;font-size:10px;color:var(--text3);border-top:1px solid var(--border);"></div>`;
 
-      const style = document.createElement("style");
-      style.textContent = "@media(max-width:768px){#mapWatchRow{grid-template-columns:1fr!important}}";
-      document.head.appendChild(style);
+        row.appendChild(mapWrap);
+        row.appendChild(watchWrap);
+        mainGrid.after(row);
+
+        const style = document.createElement("style");
+        style.textContent = "@media(max-width:768px){#mapWatchRow{grid-template-columns:1fr!important}}";
+        document.head.appendChild(style);
+      }
+
+    // scan function panel 
+    function scanSevColor(sev) {
+      return (
+        { CRITICAL: "var(--critical)", HIGH: "var(--high)", MEDIUM: "var(--medium)",
+          LOW: "var(--low)", INFO: "var(--accent)", NONE: "var(--text3)" }[
+          (sev ?? "NONE").toUpperCase()
+        ] ?? "var(--text3)"
+      );
     }
+    
+    // Main entry point 
+    async function showScanPanel(ip) {
+      if (!ip || !isValidIP(ip)) {
+        toast("Score an IP first, then click 🔍 Scan", "warning");
+        return;
+      }
+    
+      document.getElementById("scanModal")?.remove();
+    
+      // Step 1: show consent gate before anything else
+      showScanConsent(ip);
+    }
+    
+    // Consent modal 
+    function showScanConsent(ip) {
+      const overlay = document.createElement("div");
+      overlay.id = "scanModal";
+      overlay.style.cssText =
+        "position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:10000;" +
+        "display:flex;align-items:center;justify-content:center;padding:24px;";
+    
+      overlay.innerHTML = `
+        <div style="background:var(--bg1);border:1px solid var(--border);border-radius:12px;
+                    width:100%;max-width:520px;overflow:hidden;">
+    
+          <!-- Header -->
+          <div style="padding:20px 24px;border-bottom:1px solid var(--border);
+                      display:flex;align-items:center;gap:12px;">
+            <span style="font-size:28px;">🔍</span>
+            <div>
+              <div style="font-size:14px;font-weight:700;color:var(--text);">Active Scan</div>
+              <div style="font-size:11px;color:var(--text3);margin-top:2px;font-family:monospace;">${escHtml(ip)}</div>
+            </div>
+          </div>
+    
+          <!-- Warning -->
+          <div style="padding:20px 24px;">
+            <div style="padding:14px 16px;background:rgba(255,204,0,0.08);
+                        border:1px solid rgba(255,204,0,0.35);border-radius:8px;margin-bottom:18px;">
+              <div style="font-size:11px;font-weight:700;color:var(--medium);
+                          letter-spacing:1px;margin-bottom:8px;">⚠ LEGAL NOTICE — READ BEFORE PROCEEDING</div>
+              <div style="font-size:11px;color:var(--text2);line-height:1.7;">
+                This action will send active network probes to <strong style="color:var(--text);
+                font-family:monospace;">${escHtml(ip)}</strong> using <strong>nmap</strong>
+                (port scan + service detection) and <strong>nuclei</strong> (vulnerability templates).<br><br>
+                <strong style="color:var(--medium);">You must only scan systems you own or have explicit
+                written authorisation to test.</strong> Unauthorised scanning may be illegal under the
+                Computer Fraud and Abuse Act (CFAA), Computer Misuse Act, and equivalent laws in
+                your jurisdiction.<br><br>
+                By proceeding you confirm that you are authorised to scan this IP address.
+              </div>
+            </div>
+    
+            <!-- What will run -->
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;">
+              <div style="padding:12px 14px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;">
+                <div style="font-size:11px;font-weight:700;color:var(--accent);margin-bottom:6px;">nmap</div>
+                <div style="font-size:10px;color:var(--text3);line-height:1.6;">
+                  Port scan (1–10 000)<br>
+                  Service &amp; version detection<br>
+                  Default safe scripts<br>
+                  CVE lookup (vulners NSE)
+                </div>
+              </div>
+              <div style="padding:12px 14px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;">
+                <div style="font-size:11px;font-weight:700;color:var(--accent);margin-bottom:6px;">nuclei</div>
+                <div style="font-size:10px;color:var(--text3);line-height:1.6;">
+                  Network templates<br>
+                  SSL/TLS checks<br>
+                  Misconfiguration detection<br>
+                  Exposure &amp; default-login checks
+                </div>
+              </div>
+            </div>
+    
+            <!-- Estimated time -->
+            <div style="font-size:11px;color:var(--text3);margin-bottom:18px;
+                        padding:8px 12px;background:var(--bg);border-radius:6px;border:1px solid var(--border);">
+              ⏱ Estimated time: <strong style="color:var(--text);">2–5 minutes</strong>
+              depending on open ports and network latency.
+              Results will appear automatically when ready.
+            </div>
+    
+            <!-- Consent checkbox -->
+            <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;margin-bottom:20px;">
+              <input type="checkbox" id="scanConsentCheck"
+                style="margin-top:2px;cursor:pointer;width:14px;height:14px;flex-shrink:0;">
+              <span style="font-size:11px;color:var(--text2);line-height:1.6;">
+                I confirm I am authorised to scan <strong style="color:var(--text);
+                font-family:monospace;">${escHtml(ip)}</strong> and accept full legal responsibility
+                for this action.
+              </span>
+            </label>
+    
+            <!-- Action buttons -->
+            <div style="display:flex;gap:10px;justify-content:flex-end;">
+              <button id="scanCancelBtn" class="btn btn-ghost" style="padding:9px 20px;font-size:12px;">
+                Cancel
+              </button>
+              <button id="scanStartBtn" class="btn btn-primary"
+                style="padding:9px 24px;font-size:12px;opacity:0.4;cursor:not-allowed;"
+                disabled>
+                Start Scan →
+              </button>
+            </div>
+          </div>
+        </div>`;
+    
+      document.body.appendChild(overlay);
+    
+      // Enable start button only when checkbox ticked
+      const check    = document.getElementById("scanConsentCheck");
+      const startBtn = document.getElementById("scanStartBtn");
+      const cancelBtn = document.getElementById("scanCancelBtn");
+    
+      check.addEventListener("change", () => {
+        startBtn.disabled    = !check.checked;
+        startBtn.style.opacity    = check.checked ? "1"         : "0.4";
+        startBtn.style.cursor     = check.checked ? "pointer"   : "not-allowed";
+      });
+    
+      cancelBtn.addEventListener("click", () => overlay.remove());
+      overlay.addEventListener("click",   (e) => { if (e.target === overlay) overlay.remove(); });
+    
+      startBtn.addEventListener("click", async () => {
+        overlay.remove();
+        await startScan(ip);
+      });
+    }
+    
+    // Start scan + show live progress UI 
+    async function startScan(ip) {
+      // Show progress modal immediately
+      const overlay = document.createElement("div");
+      overlay.id = "scanModal";
+      overlay.style.cssText =
+        "position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:10000;" +
+        "display:flex;align-items:center;justify-content:center;padding:24px;";
+    
+      overlay.innerHTML = `
+        <div style="background:var(--bg1);border:1px solid var(--border);border-radius:12px;
+                    width:100%;max-width:760px;max-height:92vh;display:flex;flex-direction:column;overflow:hidden;">
+    
+          <!-- Header -->
+          <div style="padding:18px 24px;border-bottom:1px solid var(--border);
+                      display:flex;align-items:center;justify-content:space-between;">
+            <div style="display:flex;align-items:center;gap:12px;">
+              <span style="font-size:22px;">🔍</span>
+              <div>
+                <div style="font-size:13px;font-weight:700;color:var(--text);">Active Scan</div>
+                <div style="font-size:11px;color:var(--text3);font-family:monospace;margin-top:1px;">
+                  ${escHtml(ip)}
+                </div>
+              </div>
+            </div>
+            <button id="scanCloseBtn"
+              style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:20px;padding:4px;">
+              ✕
+            </button>
+          </div>
+    
+          <!-- Body -->
+          <div style="flex:1;overflow-y:auto;padding:24px;" id="scanBody">
+    
+            <!-- Scanner status cards -->
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;">
+              ${["nmap", "nuclei"].map((s) => `
+                <div id="scan-card-${s}"
+                  style="padding:14px 16px;background:var(--bg2);border:1px solid var(--border);
+                        border-radius:8px;transition:border-color 0.3s;">
+                  <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+                    <span style="font-size:14px;">${s === "nmap" ? "🗺" : "⚡"}</span>
+                    <span style="font-size:12px;font-weight:700;color:var(--text);text-transform:uppercase;">
+                      ${s}
+                    </span>
+                    <span id="scan-status-${s}"
+                      style="font-size:10px;padding:2px 8px;border-radius:3px;
+                            background:rgba(255,204,0,0.1);color:var(--medium);font-weight:700;margin-left:auto;">
+                      WAITING
+                    </span>
+                  </div>
+                  <div id="scan-detail-${s}" style="font-size:10px;color:var(--text3);line-height:1.6;">
+                    ${s === "nmap"
+                      ? "Port scan · Service detection · CVE lookup"
+                      : "Vuln templates · Misconfig · SSL/TLS · Exposure"}
+                  </div>
+                </div>`).join("")}
+            </div>
+    
+            <!-- Progress bar -->
+            <div style="margin-bottom:8px;display:flex;justify-content:space-between;font-size:10px;color:var(--text3);">
+              <span id="scanProgressLabel">Queuing scan…</span>
+              <span id="scanProgressPct">0%</span>
+            </div>
+            <div style="height:4px;background:var(--bg3);border-radius:2px;margin-bottom:24px;overflow:hidden;">
+              <div id="scanProgressBar"
+                style="height:4px;width:0%;background:var(--accent);border-radius:2px;transition:width 0.4s;">
+              </div>
+            </div>
+    
+            <!-- Results area — populated when done -->
+            <div id="scanResults"></div>
+          </div>
+        </div>`;
+    
+      document.body.appendChild(overlay);
+    
+      document.getElementById("scanCloseBtn").addEventListener("click",  () => overlay.remove());
+      overlay.addEventListener("click", (e) => { if (e.target === overlay) overlay.remove(); });
+    
+      // Enqueue scan
+      let jobId;
+      try {
+        const res  = await fetch(`/api/v2/scan/${encodeURIComponent(ip)}`, {
+          method:  "POST",
+          headers: { ...authHeaders(), "Content-Type": "application/json" },
+          body:    JSON.stringify({ consent: true }),
+        });
+        const data = await res.json();
+    
+        if (res.status === 409) {
+          // Already running — poll the existing job
+          jobId = data.jobId;
+          toast("Scan already in progress — showing live results", "info");
+        } else if (!res.ok) {
+          throw new Error(data.error || `HTTP ${res.status}`);
+        } else {
+          jobId = data.jobId;
+        }
+      } catch (err) {
+        document.getElementById("scanProgressLabel").textContent = `⚠ ${err.message}`;
+        document.getElementById("scanProgressLabel").style.color = "var(--critical)";
+        return;
+      }
+    
+      // Poll for results
+      pollScanJob(jobId, ip);
+    }
+ 
+    // Poll loop 
+    function pollScanJob(jobId, ip) {
+      const INTERVAL    = 4000; // poll every 4 s
+      const MAX_POLLS   = 120;  // 8 min max
+      let   polls       = 0;
+      let   lastStatus  = "";
+    
+      const timer = setInterval(async () => {
+        polls++;
+        if (polls > MAX_POLLS) {
+          clearInterval(timer);
+          setScanLabel("⚠ Timed out waiting for results. Check back later.", "var(--medium)");
+          return;
+        }
+    
+        // Modal might have been closed
+        if (!document.getElementById("scanModal")) {
+          clearInterval(timer);
+          return;
+        }
+    
+        try {
+          const res  = await fetch(`/api/v2/scan/job/${jobId}`, { headers: authHeaders() });
+          const data = await res.json();
+    
+          if (!res.ok) throw new Error(data.error ?? `HTTP ${res.status}`);
+    
+          updateScanProgress(data);
+    
+          if (data.status === "done" || data.status === "failed") {
+            clearInterval(timer);
+            renderScanResults(data);
+          }
+        } catch (err) {
+          // Network blip — keep polling
+          console.warn("[scan poll] error:", err.message);
+        }
+      }, INTERVAL);
+    }
+    
+    // Progress UI updates 
+    function updateScanProgress(job) {
+      const bar   = document.getElementById("scanProgressBar");
+      const pct   = document.getElementById("scanProgressPct");
+      const label = document.getElementById("scanProgressLabel");
+    
+      const progress = job.progress ?? 0;
+      if (bar)   bar.style.width   = `${progress}%`;
+      if (pct)   pct.textContent   = `${progress}%`;
+    
+      const statusLabel = {
+        queued:  "Waiting in queue…",
+        running: "Scanning — nmap + nuclei running in parallel…",
+        done:    "Scan complete ✓",
+        failed:  "⚠ Scan failed",
+      }[job.status] ?? "Processing…";
+    
+      if (label) label.textContent = statusLabel;
+      if (label && job.status === "failed") label.style.color = "var(--critical)";
+      if (label && job.status === "done")   label.style.color = "var(--low)";
+    
+      // Update individual scanner cards based on available results
+      const scanners = (job.results ?? []).map((r) => r.scanner);
+      ["nmap", "nuclei"].forEach((s) => {
+        const statusEl = document.getElementById(`scan-status-${s}`);
+        const card     = document.getElementById(`scan-card-${s}`);
+        if (!statusEl) return;
+    
+        if (scanners.includes(s)) {
+          const result = (job.results ?? []).find((r) => r.scanner === s);
+          const sev    = result?.severity ?? "NONE";
+          statusEl.textContent    = "DONE";
+          statusEl.style.background  = "rgba(0,232,124,0.1)";
+          statusEl.style.color       = "var(--low)";
+          if (card) card.style.borderColor = "var(--low)";
+    
+          // Update detail with quick stats
+          const detailEl = document.getElementById(`scan-detail-${s}`);
+          if (detailEl && result?.summary) {
+            const sum = result.summary;
+            if (s === "nmap") {
+              detailEl.innerHTML =
+                `<span style="color:var(--accent);">${(sum.openPorts ?? []).length} open ports</span>` +
+                ` · ${sum.totalVulns ?? 0} CVEs` +
+                ` · Severity: <span style="color:${scanSevColor(sev)};font-weight:700;">${sev}</span>`;
+            } else {
+              detailEl.innerHTML =
+                `<span style="color:var(--accent);">${sum.total ?? 0} findings</span>` +
+                ` · ${(sum.cves ?? []).length} CVEs` +
+                ` · Severity: <span style="color:${scanSevColor(sev)};font-weight:700;">${sev}</span>`;
+            }
+          }
+        } else if (job.status === "running") {
+          statusEl.textContent    = "RUNNING";
+          statusEl.style.background  = "rgba(0,217,255,0.1)";
+          statusEl.style.color       = "var(--accent)";
+          if (card) card.style.borderColor = "var(--accent)";
+        }
+      });
+    }
+    
+    function setScanLabel(msg, color) {
+      const el = document.getElementById("scanProgressLabel");
+      if (el) { el.textContent = msg; el.style.color = color ?? ""; }
+    }
+    
+    // Full results rendering
+    function renderScanResults(job) {
+      const el = document.getElementById("scanResults");
+      if (!el) return;
+    
+      if (job.status === "failed") {
+        el.innerHTML = `
+          <div style="padding:16px;background:rgba(255,51,85,0.08);border:1px solid rgba(255,51,85,0.3);
+                      border-radius:8px;color:var(--critical);font-size:12px;">
+            ⚠ Scan failed: ${escHtml(job.error ?? "Unknown error")}
+          </div>`;
+        return;
+      }
+    
+      const results = job.results ?? [];
+      const nmap    = results.find((r) => r.scanner === "nmap");
+      const nuclei  = results.find((r) => r.scanner === "nuclei");
+    
+      // Overall severity — highest of both
+      const sevRank  = { CRITICAL: 0, HIGH: 1, MEDIUM: 2, LOW: 3, INFO: 4, NONE: 5 };
+      const overallSev = [nmap?.severity, nuclei?.severity]
+        .filter(Boolean)
+        .sort((a, b) => (sevRank[a] ?? 5) - (sevRank[b] ?? 5))[0] ?? "NONE";
+    
+      const overallColor = scanSevColor(overallSev);
+      const elapsed = job.completedAt && job.createdAt
+        ? Math.round((new Date(job.completedAt) - new Date(job.createdAt)) / 1000)
+        : null;
+    
+      el.innerHTML = `
+        <!-- Overall summary banner -->
+        <div style="padding:14px 18px;background:${overallColor}11;border:1px solid ${overallColor}44;
+                    border-radius:8px;display:flex;align-items:center;gap:12px;margin-bottom:20px;">
+          <div style="flex:1;">
+            <div style="font-size:12px;font-weight:700;color:${overallColor};letter-spacing:1px;">
+              Overall Severity: ${overallSev}
+            </div>
+            <div style="font-size:11px;color:var(--text3);margin-top:3px;">
+              Scan completed${elapsed ? ` in ${elapsed}s` : ""} · Job ${escHtml(job.jobId)}
+            </div>
+          </div>
+          <button id="scanRawNmapBtn" class="btn btn-ghost"
+            style="padding:5px 12px;font-size:10px;">nmap raw</button>
+          <button id="scanRawNucleiBtn" class="btn btn-ghost"
+            style="padding:5px 12px;font-size:10px;">nuclei raw</button>
+        </div>
+    
+        ${renderNmapSection(nmap, job.jobId)}
+        ${renderNucleiSection(nuclei, job.jobId)}`;
+    
+      // Raw detail buttons
+      document.getElementById("scanRawNmapBtn")?.addEventListener("click", () =>
+        openRawPanel(job.jobId, "nmap"));
+      document.getElementById("scanRawNucleiBtn")?.addEventListener("click", () =>
+        openRawPanel(job.jobId, "nuclei"));
+    
+      // Port click → score
+      el.querySelectorAll(".port-rescore").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          document.getElementById("scanModal")?.remove();
+          // ports can't be scored — IP is already in ipInput from caller
+        });
+      });
+    }
+    
+    function renderNmapSection(result, jobId) {
+      if (!result) {
+        return `<div style="padding:12px 16px;background:var(--bg2);border:1px solid var(--border);
+                  border-radius:8px;font-size:11px;color:var(--text3);margin-bottom:16px;">
+                  🗺 nmap — no result (may have failed or timed out)
+                </div>`;
+      }
+    
+      const sum       = result.summary ?? {};
+      const ports     = sum.openPorts  ?? [];
+      const topVulns  = sum.topVulns   ?? [];
+      const sevColor  = scanSevColor(result.severity);
+    
+      return `
+        <div style="margin-bottom:20px;">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+            <span style="font-size:16px;">🗺</span>
+            <span style="font-size:12px;font-weight:700;color:var(--text);">nmap</span>
+            <span style="font-size:10px;font-weight:700;color:${sevColor};padding:2px 8px;
+                        border-radius:3px;background:${sevColor}22;">${result.severity}</span>
+            <span style="font-size:10px;color:var(--text3);margin-left:auto;">
+              ${ports.length} open ports · ${sum.totalVulns ?? 0} CVEs
+            </span>
+          </div>
+    
+          <!-- Open ports -->
+          ${ports.length ? `
+            <div style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;
+                        padding:12px 14px;margin-bottom:12px;">
+              <div style="font-size:10px;color:var(--text3);letter-spacing:2px;margin-bottom:8px;">OPEN PORTS</div>
+              <div style="display:flex;flex-wrap:wrap;gap:6px;">
+                ${ports.slice(0, 40).map((p) => `
+                  <span style="font-size:11px;padding:3px 10px;border-radius:4px;
+                              background:rgba(0,217,255,0.08);color:var(--accent);
+                              border:1px solid rgba(0,217,255,0.2);font-family:monospace;">
+                    ${p}
+                  </span>`).join("")}
+                ${ports.length > 40 ? `<span style="font-size:11px;color:var(--text3);">+${ports.length - 40} more</span>` : ""}
+              </div>
+            </div>` : `
+            <div style="padding:10px 14px;background:var(--bg2);border:1px solid var(--border);
+                        border-radius:8px;font-size:11px;color:var(--low);margin-bottom:12px;">
+              ✓ No open ports detected in range 1–10 000
+            </div>`}
+    
+          ${sum.os ? `
+            <div style="padding:10px 14px;background:var(--bg2);border:1px solid var(--border);
+                        border-radius:8px;font-size:11px;color:var(--text2);margin-bottom:12px;">
+              🖥 OS: <strong style="color:var(--text);">${escHtml(sum.os.name)}</strong>
+              (${sum.os.accuracy}% confidence${sum.os.family ? ` · ${sum.os.family}` : ""})
+            </div>` : ""}
+    
+          <!-- Top CVEs from vulners NSE -->
+          ${topVulns.length ? `
+            <div style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;overflow:hidden;">
+              <div style="padding:10px 14px;border-bottom:1px solid var(--border);
+                          font-size:10px;color:var(--text3);letter-spacing:2px;">TOP CVEs (via vulners NSE)</div>
+              ${topVulns.slice(0, 8).map((v) => {
+                const vc = scanSevColor(v.severity);
+                return `
+                  <div style="display:flex;align-items:center;gap:10px;padding:8px 14px;
+                              border-bottom:1px solid var(--border);">
+                    <span style="font-size:10px;font-weight:700;color:${vc};width:64px;
+                                flex-shrink:0;">${v.severity}</span>
+                    <span style="font-size:11px;font-family:monospace;color:var(--accent);flex:1;">
+                      ${escHtml(v.id)}
+                    </span>
+                    <span style="font-size:11px;font-weight:700;color:${vc};">${v.cvss}</span>
+                    ${v.url ? `<a href="${escHtml(v.url)}" target="_blank" rel="noopener"
+                      style="font-size:10px;color:var(--text3);text-decoration:none;">↗</a>` : ""}
+                  </div>`;
+              }).join("")}
+              ${topVulns.length > 8 ? `
+                <div style="padding:8px 14px;font-size:10px;color:var(--text3);">
+                  +${topVulns.length - 8} more CVEs — click "nmap raw" for full list
+                </div>` : ""}
+            </div>` : ""}
+        </div>`;
+    }
+    
+    function renderNucleiSection(result, jobId) {
+      if (!result) {
+        return `<div style="padding:12px 16px;background:var(--bg2);border:1px solid var(--border);
+                  border-radius:8px;font-size:11px;color:var(--text3);">
+                  ⚡ nuclei — no result (may have failed or timed out)
+                </div>`;
+      }
+    
+      const sum       = result.summary ?? {};
+      const findings  = sum.topFindings ?? [];
+      const bySev     = sum.bySeverity  ?? {};
+      const sevColor  = scanSevColor(result.severity);
+    
+      return `
+        <div>
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+            <span style="font-size:16px;">⚡</span>
+            <span style="font-size:12px;font-weight:700;color:var(--text);">nuclei</span>
+            <span style="font-size:10px;font-weight:700;color:${sevColor};padding:2px 8px;
+                        border-radius:3px;background:${sevColor}22;">${result.severity}</span>
+            <span style="font-size:10px;color:var(--text3);margin-left:auto;">
+              ${sum.total ?? 0} findings · ${(sum.cves ?? []).length} CVEs
+            </span>
+          </div>
+    
+          <!-- Severity breakdown -->
+          <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:14px;">
+            ${["CRITICAL","HIGH","MEDIUM","LOW","INFO"].map((s) => {
+              const c = scanSevColor(s);
+              return `
+                <div style="padding:10px 8px;background:${c}11;border:1px solid ${c}33;
+                            border-radius:6px;text-align:center;">
+                  <div style="font-size:16px;font-weight:800;color:${c};">${bySev[s] ?? 0}</div>
+                  <div style="font-size:9px;color:var(--text3);letter-spacing:1px;margin-top:2px;">${s}</div>
+                </div>`;
+            }).join("")}
+          </div>
+    
+          <!-- CVE tags if any -->
+          ${sum.cves?.length ? `
+            <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;">
+              <span style="font-size:10px;color:var(--text3);letter-spacing:1px;align-self:center;">CVEs:</span>
+              ${sum.cves.slice(0, 8).map((c) => `
+                <a href="https://nvd.nist.gov/vuln/detail/${encodeURIComponent(c)}" target="_blank" rel="noopener"
+                  style="font-size:10px;padding:2px 8px;border-radius:3px;
+                        background:rgba(255,51,85,0.1);color:var(--critical);
+                        border:1px solid rgba(255,51,85,0.3);text-decoration:none;font-family:monospace;">
+                  ${escHtml(c)}
+                </a>`).join("")}
+              ${sum.cves.length > 8 ? `<span style="font-size:10px;color:var(--text3);">+${sum.cves.length - 8} more</span>` : ""}
+            </div>` : ""}
+    
+          <!-- Findings table -->
+          ${findings.length ? `
+            <div style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;overflow:hidden;">
+              <div style="padding:10px 14px;border-bottom:1px solid var(--border);
+                          font-size:10px;color:var(--text3);letter-spacing:2px;">FINDINGS</div>
+              ${findings.map((f) => {
+                const fc = scanSevColor(f.severity);
+                return `
+                  <div style="padding:10px 14px;border-bottom:1px solid var(--border);">
+                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+                      <span style="font-size:10px;font-weight:700;color:${fc};width:64px;
+                                  flex-shrink:0;">${f.severity}</span>
+                      <span style="font-size:11px;font-weight:600;color:var(--text);">
+                        ${escHtml(f.templateName)}
+                      </span>
+                      ${f.cve ? `<span style="font-size:9px;padding:1px 6px;border-radius:3px;
+                                              background:rgba(255,51,85,0.1);color:var(--critical);
+                                              font-family:monospace;flex-shrink:0;">${escHtml(f.cve)}</span>` : ""}
+                    </div>
+                    ${f.matched ? `
+                      <div style="font-size:10px;color:var(--accent);font-family:monospace;
+                                  margin-bottom:3px;overflow:hidden;text-overflow:ellipsis;
+                                  white-space:nowrap;">${escHtml(f.matched)}</div>` : ""}
+                    ${f.description ? `
+                      <div style="font-size:10px;color:var(--text3);line-height:1.5;">
+                        ${escHtml(f.description.slice(0, 200))}${f.description.length > 200 ? "…" : ""}
+                      </div>` : ""}
+                  </div>`;
+              }).join("")}
+              ${sum.total > findings.length ? `
+                <div style="padding:10px 14px;font-size:10px;color:var(--text3);">
+                  Showing ${findings.length} of ${sum.total} findings — click "nuclei raw" for full report
+                </div>` : ""}
+            </div>` : `
+            <div style="padding:14px 16px;background:var(--bg2);border:1px solid var(--border);
+                        border-radius:8px;font-size:11px;color:var(--low);">
+              ✓ No nuclei findings — no known vulnerabilities or misconfigurations detected
+            </div>`}
+        </div>`;
+    }
+    
+    // Raw output panel 
+    async function openRawPanel(jobId, scanner) {
+      const rawOverlay = document.createElement("div");
+      rawOverlay.style.cssText =
+        "position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:10001;" +
+        "display:flex;align-items:center;justify-content:center;padding:24px;";
+    
+      rawOverlay.innerHTML = `
+        <div style="background:var(--bg1);border:1px solid var(--border);border-radius:10px;
+                    width:100%;max-width:860px;max-height:90vh;display:flex;flex-direction:column;overflow:hidden;">
+          <div style="padding:14px 20px;border-bottom:1px solid var(--border);
+                      display:flex;align-items:center;justify-content:space-between;">
+            <div style="font-size:13px;font-weight:700;color:var(--text);">
+              ${scanner === "nmap" ? "🗺" : "⚡"} ${scanner} — Raw Output
+            </div>
+            <div style="display:flex;gap:8px;">
+              <button id="rawCopyBtn" class="btn btn-ghost" style="padding:4px 12px;font-size:11px;">Copy JSON</button>
+              <button onclick="this.closest('[style*=fixed]').remove()"
+                style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:18px;">✕</button>
+            </div>
+          </div>
+          <pre id="rawPre" style="flex:1;overflow-y:auto;margin:0;padding:16px 20px;
+                                  font-size:10px;line-height:1.6;color:var(--text2);
+                                  background:var(--bg2);white-space:pre-wrap;word-break:break-all;">
+            Loading…
+          </pre>
+        </div>`;
+    
+      document.body.appendChild(rawOverlay);
+      rawOverlay.addEventListener("click", (e) => { if (e.target === rawOverlay) rawOverlay.remove(); });
+    
+      try {
+        const res  = await fetch(`/api/v2/scan/job/${jobId}/raw/${scanner}`, { headers: authHeaders() });
+        const data = await res.json();
+        const text = JSON.stringify(data.raw, null, 2);
+        document.getElementById("rawPre").textContent = text;
+    
+        document.getElementById("rawCopyBtn").addEventListener("click", async () => {
+          await navigator.clipboard.writeText(text);
+          toast("Copied to clipboard", "success");
+        });
+      } catch (err) {
+        document.getElementById("rawPre").textContent = `Error: ${err.message}`;
+      }
+    }
+ 
+  // Expose globally so event delegation in setupEventListeners() can call it
+  window.showScanPanel = showScanPanel;
+ 
 
   // Responsive label switching
   const mq = window.matchMedia("(max-width: 480px)");
@@ -3303,6 +3954,11 @@
         if (e.target.id === "logoutBtn")    logout();
 
         if (e.target.id === "mfaBtn") showMFAPanel();
+
+        if (e.target.id === "scanBtn" || e.target.id === "scanCurrentBtn") {
+        if ((window._userRank ?? 0) >= 1) showScanPanel(currentIP);
+        else toast("Analyst access required", "warning");
+      }
       });
 
       document.addEventListener("change", e => {
@@ -3319,6 +3975,7 @@
 
       // Single unified click handler on resultBody — no inline onclick needed
       resultBody.addEventListener("click", e => {
+        
         if (e.target.id === "watchCurrentBtn") {
           addCurrentToWatchlist();
           return;
@@ -3376,6 +4033,8 @@
                 quickBlock(currentIP);
               }
           }
+      //ScanIP
+       if (e.target.id === "scanCurrentBtn") showScanPanel(currentIP);
 
         // Tab switching
         const tabBtn = e.target.closest(".tab-btn");
@@ -3750,6 +4409,7 @@ function applyTheme(dark) {
         <button id="downloadPdfBtn"  class="btn btn-ghost" style="padding:5px 12px;font-size:11px;">↓ PDF Report</button>
         <button id="viewReportBtn" class="btn btn-ghost" style="padding:5px 12px;font-size:11px;">📄 View Report</button>
         <button id="timelineBtn"     class="btn btn-ghost" style="padding:5px 12px;font-size:11px;">↑ History</button> 
+        <button id="scanCurrentBtn"  class="btn btn-ghost" style="padding:5px 12px;font-size:11px; ${(window._userRank ?? 0) < 1 ? 'display:none;' : ''}"> 🔍 Scan</button>
         <button id="blockCurrentBtn" class="btn btn-ghost v2-only"
           style="padding:5px 12px;font-size:11px;
             ${apiVersion === "v1" || (window._userRank ?? 0) < 1 ? "display:none;" : ""}
@@ -5089,6 +5749,7 @@ function applyTheme(dark) {
       rateLimitBtn:   "admin",      // admin only
       keyMgrBtn:      "admin", 
       mfaBtn:         "readonly",   // admin only
+      scanBtn:        "analyst",    // analyst + admin
     };
 
     const rankOf = { readonly: 0, analyst: 1, admin: 2 };

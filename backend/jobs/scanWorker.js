@@ -1,75 +1,108 @@
-const { Worker } = require("bullmq");
+const { Worker, Queue } = require("bullmq");
 const { getRedis } = require("../store/redis");
-const { spawn } = require("child_process");
+const scanStore = require("../store/scan.store.js");
+const { processNmap } = require("./nmapProcessor");
+const { processNuclei } = require("./nucleiProcessor");
+const logger = require("../utils/logger");
 
-function runCommand(cmd, args) {
-  return new Promise((resolve, reject) => {
-    let stdout = "";
-    let stderr = "";
+const QUEUE_NAME = "active-scans";
 
-    const child = spawn(cmd, args);
+let scanQueue;
 
-    child.stdout.on("data", d => {
-      stdout += d.toString();
+// Queue
+function getScanQueue() {
+  if (!scanQueue) {
+    const redis = getRedis();
+
+    scanQueue = new Queue(QUEUE_NAME, {
+      connection: redis,
+      defaultJobOptions: {
+        attempts: 2,
+        backoff: { type: "exponential", delay: 5000 },
+        removeOnComplete: { count: 200 },
+        removeOnFail: { count: 100 },
+      },
     });
-
-    child.stderr.on("data", d => {
-      stderr += d.toString();
-    });
-
-    child.on("close", code => {
-      if (code !== 0) {
-        return reject(new Error(stderr));
-      }
-
-      resolve(stdout);
-    });
-  });
+  }
+  return scanQueue;
 }
 
+async function enqueueScan({ jobId, ip, requestedBy }) {
+  const q = getScanQueue();
+
+  await q.add(
+    "scan",
+    { jobId, ip, requestedBy },
+    { jobId }
+  );
+
+  logger.info(`[scanWorker] enqueued scan ${jobId} for ${ip}`);
+}
+
+// Worker
 function startScanWorker() {
-  return new Worker(
-    "scan-jobs",
+  const worker = new Worker(
+    QUEUE_NAME,
     async (job) => {
-      const { target } = job.data;
+      const { jobId, ip } = job.data;
 
-      // Validate target before scanning
-      // Reject localhost/private ranges/etc.
+      logger.info(`[scanWorker] processing job ${jobId} for ${ip}`);
 
-      const nmapOutput = await runCommand(
-        "nmap",
-        [
-          "-sV",
-          "-oX",
-          "-",
-          target
-        ]
-      );
+      await scanStore.setJobRunning(jobId);
 
-      await job.updateProgress(50);
+      const [nmapResult, nucleiResult] = await Promise.allSettled([
+        processNmap(job),
+        processNuclei(job),
+      ]);
 
-      const nucleiOutput = await runCommand(
-        "nuclei",
-        [
-          "-u",
-          target,
-          "-json"
-        ]
-      );
+      if (
+        nmapResult.status === "rejected" &&
+        nucleiResult.status === "rejected"
+      ) {
+        await scanStore.setJobFailed(jobId, "both scanners failed");
+        throw new Error("both scanners failed");
+      }
 
-      await job.updateProgress(100);
+      await scanStore.setJobDone(jobId);
 
       return {
-        target,
-        nmap: nmapOutput,
-        nuclei: nucleiOutput
+        nmap:
+          nmapResult.status === "fulfilled"
+            ? nmapResult.value
+            : { error: nmapResult.reason?.message },
+
+        nuclei:
+          nucleiResult.status === "fulfilled"
+            ? nucleiResult.value
+            : { error: nucleiResult.reason?.message },
       };
     },
     {
       connection: getRedis(),
-      concurrency: 2
+      concurrency: 2,
+      lockDuration: 360000,
     }
   );
+
+  worker.on("completed", (job, result) => {
+    logger.info(`[scanWorker] job ${job.id} completed`, result);
+  });
+
+  worker.on("failed", (job, err) => {
+    logger.error(`[scanWorker] job ${job?.id} failed: ${err.message}`);
+
+    if (job?.data?.jobId) {
+      scanStore.setJobFailed(job.data.jobId, err.message).catch(() => {});
+    }
+  });
+
+  logger.info("[scanWorker] started — queue: " + QUEUE_NAME);
+
+  return worker;
 }
 
-module.exports = { startScanWorker };
+module.exports = {
+  startScanWorker,
+  enqueueScan,
+  getScanQueue,
+};
