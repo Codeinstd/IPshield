@@ -33,6 +33,7 @@ const authRoutes            = require("./routes/auth.routes");
 const accessRequestRoutes   = require("./routes/accessRequest.routes");
 const gdprRoutes            = require("./routes/gdpr.routes");
 const mfaRoutes             = require("./routes/mfa.routes");
+const scansRoutes           = require("./routes/scans.routes");
 
 // v2-only route imports 
 const blacklistRoutes = require("./routes/blacklist.routes");
@@ -259,11 +260,17 @@ app.use("/api/v1/auth", authRoutes);
 app.use("/api/v2/auth", authRoutes);
 app.use("/api/auth",    authRoutes);
 
+// AccessRequest
 app.use("/api/access-request", accessRequestRoutes);
 
+//ViewReport
+app.use("/api/v2/report", reportRoutes);
 
 // GDPR Tooling
 app.use("/api/v2/gdpr", gdprRoutes);
+
+// scan 
+app.use("/api/scans", scansRoutes);
 
 
 // Version info

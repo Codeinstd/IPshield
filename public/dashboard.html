@@ -567,11 +567,6 @@
   // Run on page load
   loadDashboardStats();
 
-  const dashboardData = JSON.parse(
-  localStorage.getItem("dashboardData") || "{}"
-  );
-
-
 </script>
 </body>
 <script src="/leaflet.min.js"></script>
@@ -966,8 +961,11 @@
 .nav-drawer-body .btn-danger:hover { background: rgba(255,51,85,0.08) !important; border-color: rgba(255,51,85,0.2) !important; }
 
 @media (max-width: 1309px) {
-  /* #threatBtn, */
-  /* #casesBtn, */
+  
+  /* #casesBtn,, */
+  #threatBtn,
+  #mfaBtn,
+  #keyMgrBtn,
   #rateLimitBtn,
   #blacklistBtn,
   #siemBtn

@@ -11,6 +11,7 @@ const DEFAULT_JOB_OPTIONS = {
 const PREFIX = process.env.BULLMQ_PREFIX || "ipshield";
 
 const queues = {};
+let scanQueue = null;
 
 function createQueue(name) {
   const redis = getRedis();
@@ -33,6 +34,17 @@ function createQueue(name) {
   return queues[name];
 }
 
+function getScanQueue() {
+  if (!scanQueue && getRedis()) {
+    scanQueue = new Queue("scan-jobs", {
+      connection: getRedis()
+    });
+  }
+
+  return scanQueue;
+}
+
+
 const getAlertQueue = () => createQueue("alerts");
 const getBatchQueue = () => createQueue("batch-score");
 const getWatchlistQueue = () => createQueue("watchlist-poll");
@@ -41,4 +53,5 @@ module.exports = {
   getAlertQueue,
   getBatchQueue,
   getWatchlistQueue,
+  getScanQueue
 };

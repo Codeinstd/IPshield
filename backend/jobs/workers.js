@@ -1,7 +1,9 @@
 const { Worker } = require("bullmq");
 const { getRedis } = require("../store/redis");
+const {startScanWorker} = require("../jobs/scanWorker")
 
-// Alert worker 
+
+// Alert worker s
 function startAlertWorker() {
   const redis = getRedis();
   if (!redis) return null;
@@ -244,4 +246,10 @@ function startWorkers() {
   };
 }
 
-module.exports = { startWorkers, startAlertWorker, startBatchWorker, startWatchlistWorker };
+module.exports = { 
+  startWorkers, 
+  startAlertWorker, 
+  startBatchWorker, 
+  startWatchlistWorker,
+  startScanWorker
+};

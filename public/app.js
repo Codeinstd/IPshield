@@ -546,6 +546,42 @@
     });
   }
 
+  // 
+   const dashboardData = JSON.parse(
+  localStorage.getItem("dashboardData") || "{}"
+  );
+
+  async function pollScan(jobId) {
+
+  const interval = setInterval(async () => {
+
+    const res =
+      await fetch(`/api/scans/${jobId}`);
+
+    const data =
+      await res.json();
+
+    scanStatus.innerHTML =
+      `Progress: ${data.progress || 0}%`;
+
+    if (data.state === "completed") {
+
+      clearInterval(interval);
+
+      scanStatus.innerHTML =
+        "Completed";
+
+      scanResults.textContent =
+        JSON.stringify(
+          data.result,
+          null,
+          2
+        );
+    }
+
+  }, 3000);
+}
+
   // Apply Filter
     function applyFilters(entries) {
     return entries.filter(e => {
@@ -2532,7 +2568,6 @@
   }
 
   // Setup: load QR then render form 
-
   async function _loadMFASetup() {
     try {
       const res  = await fetch("/api/v1/mfa/setup", { headers: authHeaders() });
@@ -2614,7 +2649,6 @@
   }
 
   // Verify setup TOTP 
-
   async function _verifyMFASetup() {
     const code  = document.getElementById("setupMfaCode")?.value.trim();
     const errEl = document.getElementById("setupMfaError");
@@ -3274,6 +3308,7 @@
       document.addEventListener("change", e => {
         if (e.target.id === "csvUpload") handleCSVUpload(e.target.files[0]);
       });
+      
 
       // Find the right button id from your earlier dump — e.g. apiBadge or add a new one
       document.getElementById("YOUR-LOGOUT-BTN-ID")?.addEventListener("click", () => {
@@ -3291,38 +3326,42 @@
 
       // Download pdfbtn
         if (e.target.id === "downloadPdfBtn") {
-            const ip  = currentIP || ipInput.value.trim();
-            if (!ip) return;
-            const url = `${API}/report/${encodeURIComponent(ip)}?cached=true`;
+        const ip = currentIP || ipInput.value.trim();
+        if (!ip) return;
 
-          // Open in new tab — browser handles the PDF download
-          const a = Object.assign(document.createElement("a"), {
-            href:     url,
-            download: `ipshield-${ip}-report.pdf`
+        e.target.textContent = "Generating…";
+        e.target.disabled    = true;
+
+        fetch(`/api/v2/report/${encodeURIComponent(ip)}/pdf`, {
+          headers: authHeaders(),
+        })
+          .then(r => {
+            if (!r.ok) throw new Error("Report generation failed");
+            return r.blob();
+          })
+          .then(blob => {
+            const url      = URL.createObjectURL(blob);
+            const filename = `ipshield-report-${ip.replace(/[:.]/g, "-")}.pdf`;
+            const a        = Object.assign(document.createElement("a"), { href: url, download: filename });
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            toast(`PDF report downloaded for ${ip}`, "success");
+          })
+          .catch(err => toast(`PDF error: ${err.message}`, "error"))
+          .finally(() => {
+            e.target.textContent = "↓ PDF Report";
+            e.target.disabled    = false;
           });
-          // Must add auth header — use fetch + blob instead of direct link
-          e.target.textContent = "Generating…";
-          e.target.disabled    = true;
-          fetch(url, { headers: { "x-api-key": API_KEY } })
-            .then(r => {
-              if (!r.ok) throw new Error("Report generation failed");
-              return r.blob();
-            })
-            .then(blob => {
-              const blobUrl = URL.createObjectURL(blob);
-              Object.assign(a, { href: blobUrl });
-              document.body.appendChild(a);
-              a.click();
-              toast(`PDF report downloaded for ${ip}`, "success");
-              document.body.removeChild(a);
-              URL.revokeObjectURL(blobUrl);
-            })
-            .catch(err => toast(`PDF error: ${err.message}`, "error"))
-            .finally(() => {
-              e.target.textContent = "↓ PDF Report";
-              e.target.disabled    = false;
-            });
-        }
+      }
+
+      // viewPdfBtn block:
+      if (e.target.id === "viewReportBtn") {
+        const ip = currentIP || ipInput.value.trim();
+        if (!ip) return;
+        window.open(`/api/v2/report/${encodeURIComponent(ip)}`, "_blank", "noopener");
+      }
 
       // Timelinebtn
         if (e.target.id === "timelineBtn") {
@@ -3709,6 +3748,7 @@ function applyTheme(dark) {
         <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
         <button id="watchCurrentBtn" class="btn btn-ghost" style="padding:5px 12px;font-size:11px;">+ Watch</button>
         <button id="downloadPdfBtn"  class="btn btn-ghost" style="padding:5px 12px;font-size:11px;">↓ PDF Report</button>
+        <button id="viewReportBtn" class="btn btn-ghost" style="padding:5px 12px;font-size:11px;">📄 View Report</button>
         <button id="timelineBtn"     class="btn btn-ghost" style="padding:5px 12px;font-size:11px;">↑ History</button> 
         <button id="blockCurrentBtn" class="btn btn-ghost v2-only"
           style="padding:5px 12px;font-size:11px;
