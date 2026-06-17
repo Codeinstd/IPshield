@@ -64,7 +64,6 @@ function runNuclei(ip) {
 }
 
 // Parse JSONL → structured findings 
-
 function parseFindings(jsonLines) {
   const findings = [];
 

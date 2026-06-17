@@ -397,6 +397,18 @@ footer a:hover { color: var(--accent); }
 .mock-endpoint-row { display: flex; align-items: center; gap: 8px; padding: 7px 0; border-bottom: 1px solid var(--border); font-size: 10px; font-family: monospace; transition: background .15s; border-radius: 4px; }
 .mock-endpoint-row:hover { background: rgba(0,217,255,0.04); }
 
+/* ── Scan mock specific  */
+.mock-scan-port { padding: 2px 8px; border-radius: 4px; font-size: 10px; font-family: monospace; background: rgba(0,217,255,0.08); color: var(--accent); border: 1px solid rgba(0,217,255,0.2); }
+.mock-scan-finding { display: flex; align-items: center; gap: 8px; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 11px; transition: background .15s; border-radius: 4px; }
+.mock-scan-finding:hover { background: rgba(0,217,255,0.04); }
+.mock-scan-sev { font-size: 9px; font-weight: 700; width: 56px; flex-shrink: 0; letter-spacing: 0.5px; }
+.mock-consent-tag {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 4px 10px; border-radius: 6px; font-size: 9px; font-weight: 700;
+  letter-spacing: 1px; background: rgba(255,204,0,0.1); color: var(--medium);
+  border: 1px solid rgba(255,204,0,0.3); margin-bottom: 14px;
+}
+
 /* ── Access Request Modal */
 #accessModalOverlay {
   display: none; position: fixed; inset: 0;
@@ -434,6 +446,7 @@ footer a:hover { color: var(--accent); }
 .stagger.visible > *:nth-child(7) { transition-delay:0.47s; opacity:1; transform:none; }
 .stagger.visible > *:nth-child(8) { transition-delay:0.54s; opacity:1; transform:none; }
 .stagger.visible > *:nth-child(9) { transition-delay:0.61s; opacity:1; transform:none; }
+.stagger.visible > *:nth-child(10) { transition-delay:0.68s; opacity:1; transform:none; }
 
 @keyframes btn-glow {
   0%,100% { box-shadow: 0 0 12px rgba(0,217,255,0.3); }
@@ -536,7 +549,7 @@ footer a:hover { color: var(--accent); }
     REAL-TIME THREAT INTELLIGENCE
   </div>
   <h1>Know the risk behind<br>every <span>IP address</span></h1>
-  <p>IPShield scores any IP in milliseconds — combining geo intelligence, threat feeds, WHOIS signals, Shodan data, and behavioral analysis into a single actionable risk score.</p>
+  <p>IPShield scores any IP in milliseconds, combining geo intelligence, threat feeds, WHOIS signals, Shodan data, and behavioral analysis into a single actionable risk score.</p>
   <div class="hero-actions">
     <button onclick="showAccessModal()" class="btn btn-primary">Request Access →</button>
     <a href="/api/docs" class="btn btn-ghost">View API Docs</a>
@@ -557,13 +570,13 @@ footer a:hover { color: var(--accent); }
     <div class="stat-label">Threat Feeds</div>
   </div>
   <div class="stat-item">
-    <div class="stat-num">&lt;100ms</div>
+    <div class="stat-num">&lt;80ms</div>
     <div class="stat-label">Avg Response</div>
   </div>
 </div>
 
 <section class="features">
-  <div class="section-title">Everything you need to block threats</span></div>
+  <div class="section-title">Everything you need to block threats</div>
   <div class="features-grid">
     <div class="feature-card"><span class="feature-icon">🎯</span><div class="feature-title">Real-Time IP Scoring</div><div class="feature-desc">Score IPv4 or IPv6 address in under 100ms. Combines 10+ intelligence sources into a single risk score.</div></div>
     <div class="feature-card"><span class="feature-icon">🌐</span><div class="feature-title">Threat Feed Integration</div><div class="feature-desc">Checks against Feodo Tracker, Spamhaus DROP, Emerging Threats, and OTX pulses in real time.</div></div>
@@ -572,8 +585,9 @@ footer a:hover { color: var(--accent); }
     <div class="feature-card"><span class="feature-icon">🚫</span><div class="feature-title">Blacklist & Firewall Export</div><div class="feature-desc">Maintain IP blacklist, export rules in 10 formats: Cisco ACL, iptables, Nginx, and more.</div></div>
     <div class="feature-card"><span class="feature-icon">📡</span><div class="feature-title">SIEM Integration</div><div class="feature-desc">Push every score event to Splunk, Microsoft Sentinel, or any generic webhook.</div></div>
     <div class="feature-card"><span class="feature-icon">👁️</span><div class="feature-title">IP Watchlist & Monitoring</div><div class="feature-desc">Add any IP to your watchlist and get automatic re-scores on a schedule.</div></div>
-    <div class="feature-card"><span class="feature-icon">📋</span><div class="feature-title">Full Audit History</div><div class="feature-desc">Scored IPs logged with risk level, threat feed hits, geo, and ISP — immutable hash chain.</div></div>
+    <!-- <div class="feature-card"><span class="feature-icon">📋</span><div class="feature-title">Full Audit History</div><div class="feature-desc">Scored IPs logged with risk level, threat feed hits, geo, and ISP — immutable hash chain.</div></div> -->
     <div class="feature-card"><span class="feature-icon">📊</span><div class="feature-title">Live API Observability</div><div class="feature-desc">Dashboard shows real-time request volume, error rates and endpoint usage.</div></div>
+    <div class="feature-card"><span class="feature-icon">🔍</span><div class="feature-title">Active Vulnerability Scanning</div><div class="feature-desc">Run nmap port scans and nuclei vulnerability templates on demand, with CVE matching and consent-gated execution.</div></div>
   </div>
 </section>
 
@@ -585,7 +599,7 @@ footer a:hover { color: var(--accent); }
     <div class="platform-row">
       <div class="platform-text">
         <div class="platform-eyebrow">Continuous Monitoring</div>
-        <div class="platform-heading">Watch IPs — get alerted when risk changes</div>
+        <div class="platform-heading">Watch IPs & get alerted when risk changes</div>
         <div class="platform-body">Watch any IP. IPShield continuously re-scores it and alerts you when risk crosses your defined threshold, before it turns into an incident.</div>
         <div class="checklist">
           <div class="check-item"><span class="check-icon">✓</span>Set per-IP alert thresholds (0–100)</div>
@@ -627,8 +641,37 @@ footer a:hover { color: var(--accent); }
       </div>
     </div>
 
-    <!-- Telemetry -->
+    <!-- Active Scanning -->
     <div class="platform-row">
+      <div class="platform-text">
+        <div class="platform-eyebrow">Active Reconnaissance</div>
+        <div class="platform-heading">Go beyond passive intel scan on demand</div>
+        <div class="platform-body">When passive scoring isn't enough, launch an active scan directly from any result. IPShield runs nmap and nuclei in parallel, fingerprinting open services and matching them against known CVEs.</div>
+        <div class="checklist">
+          <div class="check-item"><span class="check-icon">✓</span>nmap port scan with service &amp; version detection</div>
+          <div class="check-item"><span class="check-icon">✓</span>Automatic CVE matching via vulners NSE</div>
+          <div class="check-item"><span class="check-icon">✓</span>nuclei templates for misconfig, SSL/TLS, exposures</div>
+          <!-- <div class="check-item"><span class="check-icon">✓</span>Consent-gated — private IP ranges blocked by default</div> -->
+        </div>
+      </div>
+      <div class="platform-mock">
+        <div class="mock-label">ACTIVE SCAN — 45.33.32.156</div>
+        <span class="mock-consent-tag">⚠ CONSENT REQUIRED</span>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;">
+          <span class="mock-scan-port">22 ssh</span>
+          <span class="mock-scan-port">80 http</span>
+          <span class="mock-scan-port">443 https</span>
+          <span class="mock-scan-port">3306 mysql</span>
+        </div>
+        <div class="mock-scan-finding"><span class="mock-scan-sev" style="color:var(--critical);">CRITICAL</span><span style="flex:1;font-family:monospace;color:var(--accent);">CVE-2024-3094</span><span style="color:var(--text2);">9.8</span></div>
+        <div class="mock-scan-finding"><span class="mock-scan-sev" style="color:var(--high);">HIGH</span><span style="flex:1;color:var(--text);">Outdated TLS 1.0 enabled</span></div>
+        <div class="mock-scan-finding"><span class="mock-scan-sev" style="color:var(--medium);">MEDIUM</span><span style="flex:1;color:var(--text);">Default MySQL credentials exposed</span></div>
+        <div class="mock-scan-finding" style="border-bottom:none;"><span class="mock-scan-sev" style="color:var(--low);">INFO</span><span style="flex:1;color:var(--text);">nginx/1.18.0 banner disclosed</span></div>
+      </div>
+    </div>
+
+    <!-- Telemetry -->
+    <div class="platform-row platform-row-reverse">
       <div class="platform-text">
         <div class="platform-eyebrow">API Observability</div>
         <div class="platform-heading">Live telemetry. Zero extra tooling.</div>

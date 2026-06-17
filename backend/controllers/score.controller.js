@@ -11,7 +11,6 @@ const { sendToAllSIEMTargets }  = require("../services/siemTargets.service");
 const { appendAuditEntry }      = require("../store/auditLog.store");
 
 // Shared: attach blacklist data to a score result 
-
 async function attachBlacklist(result) {
   try {
     const blRes = await db.query(
@@ -37,7 +36,6 @@ async function attachBlacklist(result) {
 }
 
 // Shared: fire-and-forget side effects after scoring 
-
 function fireSideEffects(result) {
   checkAndAutoCase(result).catch(err =>
     logger.error("[scoreIP] autoCase error:", err.message)
@@ -57,7 +55,6 @@ function fireSideEffects(result) {
 }
 
 // POST /api/score/:ip 
-
 exports.scoreIP = async (req, res, next) => {
   try {
     const { ip } = req.params;
@@ -86,9 +83,6 @@ exports.scoreIP = async (req, res, next) => {
 };
 
 // POST /api/score/batch
-// Batch scores serially for audit log integrity — parallel hashing
-// would cause race conditions in the hash chain even with FOR UPDATE.
-
 exports.scoreBatch = async (req, res, next) => {
   try {
     const { ips } = req.body;

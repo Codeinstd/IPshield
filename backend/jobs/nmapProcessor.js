@@ -155,7 +155,6 @@ function buildSummary(ports, os) {
 }
 
 // Main processor function (called by BullMQ worker) 
-
 async function processNmap(job) {
   const { jobId, ip } = job.data;
 

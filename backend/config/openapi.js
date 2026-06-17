@@ -13,6 +13,7 @@ IPShield provides real-time IP risk scoring combining multiple threat intelligen
 - **Reverse DNS** — PTR records with FCrDNS verification and pattern detection
 - **Blacklist** — internal IP blocklist with severity, categories, tags and expiry
 - **Case Management** — investigation cases with IP attachments and analyst notes
+- **Active Scanning** — on-demand nmap port scans and nuclei vulnerability templates
 
 ## Authentication
 All endpoints except \`/api/health\` and \`/api/docs\` require the \`x-api-key\` header.
@@ -30,6 +31,7 @@ Dashboard login uses JWT via \`Authorization: Bearer <token>\`.
 | /score | 30 requests | 1 minute |
 | /whois | 20 requests | 1 minute |
 | /report | 10 requests | 1 minute |
+| /scan | 5 requests | 10 minutes |
 | /auth/login | 10 attempts | 15 minutes |
 | /auth/login/mfa | 10 attempts | 5 minutes |
 | /auth/forgot-password | 5 attempts | 15 minutes |
@@ -40,6 +42,16 @@ All dashboard accounts require two-factor authentication (TOTP). On first login 
 users are redirected to \`/mfa-setup\` to enrol. Subsequent logins issue a short-lived challenge
 token and require a 6-digit TOTP code or an 8-character backup code.
 
+## Active Scanning
+Unlike passive intelligence endpoints, \`/scan\` performs **active reconnaissance** against the
+target IP using nmap and nuclei. This requires:
+- **Analyst role or higher** (readonly keys are rejected with 403)
+- **Explicit consent** — \`consent: true\` must be set in the request body
+- **A public, non-reserved IP** — RFC-1918, loopback and link-local ranges are rejected with 400
+
+Scans run asynchronously via a job queue. Poll \`GET /scan/job/{jobId}\` until \`status\` is
+\`done\` or \`failed\`. Typical scans complete in 2–5 minutes.
+
 ## Account Pages
 | Page | Description |
 |------|-------------|
@@ -49,7 +61,7 @@ token and require a 6-digit TOTP code or an 8-character backup code.
 | \`/forgot-password\` | Request a password reset link |
 | \`/reset-password?token=\` | Set a new password via reset link |
     `,
-    version: "2.2.0",
+    version: "2.3.0",
     contact: { name: "IPShield", url: "https://ipshield.live/" }
   },
 
@@ -433,6 +445,151 @@ token and require a 6-digit TOTP code or an 8-character backup code.
           added_at:        { type: "integer" },
           alert_on_change: { type: "integer", enum: [0,1] }
         }
+      },
+
+      // Scanning
+      ScanStartRequest: {
+        type: "object",
+        required: ["consent"],
+        properties: {
+          consent: {
+            type: "boolean",
+            description: "Must be explicitly true. Confirms the caller is authorised to scan this IP.",
+            example: true
+          }
+        }
+      },
+
+      ScanStartResponse: {
+        type: "object",
+        properties: {
+          jobId:   { type: "string", format: "uuid", example: "f47ac10b-58cc-4372-a567-0e02b2c3d479" },
+          ip:      { type: "string", example: "45.33.32.156" },
+          status:  { type: "string", enum: ["queued"], example: "queued" },
+          message: { type: "string" },
+          pollUrl: { type: "string", example: "/api/v2/scan/job/f47ac10b-58cc-4372-a567-0e02b2c3d479" }
+        }
+      },
+
+      ScanResultSummary: {
+        type: "object",
+        properties: {
+          scanner:  { type: "string", enum: ["nmap","nuclei"] },
+          severity: { type: "string", enum: ["CRITICAL","HIGH","MEDIUM","LOW","INFO","NONE"] },
+          summary: {
+            type: "object",
+            description: "Distilled findings. Shape differs by scanner — see NmapSummary / NucleiSummary.",
+            oneOf: [
+              { "$ref": "#/components/schemas/NmapSummary" },
+              { "$ref": "#/components/schemas/NucleiSummary" }
+            ]
+          }
+        }
+      },
+
+      NmapSummary: {
+        type: "object",
+        properties: {
+          openPorts:     { type: "array", items: { type: "integer" }, example: [22,80,443,3306] },
+          services:      { type: "array", items: { type: "string" }, example: ["ssh","http","https","mysql"] },
+          os: {
+            type: "object", nullable: true,
+            properties: {
+              name:     { type: "string", example: "Linux 5.x" },
+              accuracy: { type: "integer", example: 92 },
+              family:   { type: "string", nullable: true, example: "Linux" }
+            }
+          },
+          totalVulns:    { type: "integer", example: 3 },
+          criticalVulns: { type: "integer", example: 1 },
+          highVulns:     { type: "integer", example: 1 },
+          topVulns: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                id:       { type: "string", example: "CVE-2024-3094" },
+                cvss:     { type: "number", example: 9.8 },
+                url:      { type: "string" },
+                severity: { type: "string", enum: ["CRITICAL","HIGH","MEDIUM","LOW","INFO"] }
+              }
+            }
+          }
+        }
+      },
+
+      NucleiSummary: {
+        type: "object",
+        properties: {
+          total: { type: "integer", example: 4 },
+          bySeverity: {
+            type: "object",
+            properties: {
+              CRITICAL: { type: "integer" },
+              HIGH:     { type: "integer" },
+              MEDIUM:   { type: "integer" },
+              LOW:      { type: "integer" },
+              INFO:     { type: "integer" }
+            }
+          },
+          cves:            { type: "array", items: { type: "string" }, example: ["CVE-2024-3094"] },
+          uniqueTemplates: { type: "integer" },
+          topFindings: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                templateId:   { type: "string", example: "tls-version" },
+                templateName: { type: "string", example: "Outdated TLS Version" },
+                severity:     { type: "string", enum: ["CRITICAL","HIGH","MEDIUM","LOW","INFO"] },
+                matched:      { type: "string", example: "https://45.33.32.156:443" },
+                cve:          { type: "string", nullable: true },
+                cvss:         { type: "number", nullable: true },
+                description:  { type: "string" },
+                tags:         { type: "array", items: { type: "string" } }
+              }
+            }
+          }
+        }
+      },
+
+      ScanJob: {
+        type: "object",
+        properties: {
+          jobId:       { type: "string", format: "uuid" },
+          ip:          { type: "string", example: "45.33.32.156" },
+          status:      { type: "string", enum: ["queued","running","done","failed"] },
+          progress:    { type: "integer", minimum: 0, maximum: 100, example: 100 },
+          createdAt:   { type: "string", format: "date-time" },
+          startedAt:   { type: "string", format: "date-time", nullable: true },
+          completedAt: { type: "string", format: "date-time", nullable: true },
+          error:       { type: "string", nullable: true },
+          results:     { type: "array", items: { "$ref": "#/components/schemas/ScanResultSummary" } }
+        }
+      },
+
+      ScanHistoryEntry: {
+        type: "object",
+        properties: {
+          jobId:       { type: "string", format: "uuid" },
+          status:      { type: "string", enum: ["queued","running","done","failed"] },
+          createdAt:   { type: "string", format: "date-time" },
+          completedAt: { type: "string", format: "date-time", nullable: true },
+          results:     { type: "array", items: { "$ref": "#/components/schemas/ScanResultSummary" } }
+        }
+      },
+
+      ScanRawResponse: {
+        type: "object",
+        properties: {
+          jobId:    { type: "string", format: "uuid" },
+          scanner:  { type: "string", enum: ["nmap","nuclei"] },
+          severity: { type: "string", enum: ["CRITICAL","HIGH","MEDIUM","LOW","INFO","NONE"] },
+          raw: {
+            type: "object",
+            description: "Full unfiltered scanner output — large payload, fetch on demand only."
+          }
+        }
       }
     }
   },
@@ -449,6 +606,7 @@ token and require a 6-digit TOTP code or an 8-character backup code.
     { name: "Cases",      description: "Investigation case management" },
     { name: "Watchlist",  description: "IP monitoring and alerting" },
     { name: "Audit",      description: "Scoring history and search" },
+    { name: "Scanning",   description: "Active reconnaissance — nmap port scans and nuclei vulnerability templates (v2 only, analyst role required)" },
     { name: "System",     description: "Health, stats and documentation" }
   ],
 
@@ -936,7 +1094,7 @@ Passwords must be 8–128 characters. The invite token is consumed and cannot be
               type: "object",
               properties: {
                 status:      { type: "string", example: "ok" },
-                version:     { type: "string", example: "2.2.0" },
+                version:     { type: "string", example: "2.3.0" },
                 environment: { type: "string" },
                 uptime:      { type: "integer" },
                 db:          { type: "string" },
@@ -1307,6 +1465,108 @@ Passwords must be 8–128 characters. The invite token is consumed and cannot be
         tags: ["Audit"], summary: "Top CRITICAL/HIGH IPs",
         parameters: [{ name: "limit", in: "query", schema: { type: "integer", default: 20, maximum: 100 } }],
         responses: { 200: { description: "Top threats" } }
+      }
+    },
+
+    // Scanning (v2 only)
+    "/v2/scan/{ip}": {
+      post: {
+        tags: ["Scanning"], summary: "Launch an active scan (nmap + nuclei)",
+        description: `Enqueues an active reconnaissance scan against the target IP. **This is not a
+passive lookup** — it sends real packets and HTTP/TLS probes to the target.
+
+Runs two scanners in parallel as a background job:
+- **nmap** — port scan (1–10000), service/version detection, default safe scripts, CVE matching via vulners NSE
+- **nuclei** — network, SSL/TLS and HTTP templates tagged \`network,ssl,tls,misconfig,exposure,default-login,takeover,tech\`. Destructive tags (\`fuzzing\`,\`dos\`,\`code\`,\`intrusive\`) are always excluded.
+
+**Requirements:**
+- Caller's API key role must be \`analyst\` or \`admin\` — \`readonly\` keys get 403
+- \`consent: true\` must be present in the request body
+- Target IP must be public — RFC-1918, loopback and link-local ranges are rejected
+
+If a scan is already queued or running for this IP, returns 409 with the existing \`jobId\`
+instead of starting a duplicate.
+
+**Rate limit:** 5 requests / 10 minutes per key.`,
+        security: [{ ApiKeyAuth: [] }],
+        parameters: [
+          { name: "ip", in: "path", required: true, schema: { type: "string" }, example: "45.33.32.156" }
+        ],
+        requestBody: {
+          required: true,
+          content: { "application/json": { schema: { "$ref": "#/components/schemas/ScanStartRequest" } } }
+        },
+        responses: {
+          202: { description: "Scan enqueued", content: { "application/json": { schema: { "$ref": "#/components/schemas/ScanStartResponse" } } } },
+          400: { description: "Invalid IP, private/reserved IP range, or missing consent" },
+          403: { description: "Analyst role or higher required" },
+          409: { description: "A scan is already in progress for this IP", content: { "application/json": { schema: {
+            type: "object",
+            properties: {
+              error:  { type: "string", example: "A scan is already in progress for this IP" },
+              jobId:  { type: "string", format: "uuid" },
+              status: { type: "string", enum: ["queued","running"] }
+            }
+          }}}},
+          429: { description: "Rate limit exceeded" }
+        }
+      }
+    },
+
+    "/v2/scan/job/{jobId}": {
+      get: {
+        tags: ["Scanning"], summary: "Poll scan job status and summarised results",
+        description: `Poll this endpoint every few seconds until \`status\` is \`done\` or \`failed\`.
+Returns summarised findings only — call \`GET /v2/scan/job/{jobId}/raw/{scanner}\` for the full
+unfiltered output of either scanner.`,
+        security: [{ ApiKeyAuth: [] }],
+        parameters: [
+          { name: "jobId", in: "path", required: true, schema: { type: "string", format: "uuid" } }
+        ],
+        responses: {
+          200: { description: "Job status and summarised results", content: { "application/json": { schema: { "$ref": "#/components/schemas/ScanJob" } } } },
+          404: { description: "Job not found" }
+        }
+      }
+    },
+
+    "/v2/scan/job/{jobId}/raw/{scanner}": {
+      get: {
+        tags: ["Scanning"], summary: "Get full raw output for a scanner (analyst only)",
+        description: `Returns the complete unfiltered output for either scanner — full nmap port/CVE
+data or the complete nuclei findings list. This payload can be large; only fetch it when you need
+to inspect a specific finding in depth.`,
+        security: [{ ApiKeyAuth: [] }],
+        parameters: [
+          { name: "jobId",   in: "path", required: true, schema: { type: "string", format: "uuid" } },
+          { name: "scanner", in: "path", required: true, schema: { type: "string", enum: ["nmap","nuclei"] } }
+        ],
+        responses: {
+          200: { description: "Full raw scanner output", content: { "application/json": { schema: { "$ref": "#/components/schemas/ScanRawResponse" } } } },
+          400: { description: "scanner must be nmap or nuclei" },
+          403: { description: "Analyst role or higher required" },
+          404: { description: "Job not found or scanner has no result yet" }
+        }
+      }
+    },
+
+    "/v2/scan/history/{ip}": {
+      get: {
+        tags: ["Scanning"], summary: "Get the 5 most recent scans for an IP",
+        security: [{ ApiKeyAuth: [] }],
+        parameters: [
+          { name: "ip", in: "path", required: true, schema: { type: "string" }, example: "45.33.32.156" }
+        ],
+        responses: {
+          200: { description: "Recent scan history", content: { "application/json": { schema: {
+            type: "object",
+            properties: {
+              ip:    { type: "string" },
+              scans: { type: "array", items: { "$ref": "#/components/schemas/ScanHistoryEntry" } }
+            }
+          }}}},
+          400: { description: "Invalid IP" }
+        }
       }
     },
 

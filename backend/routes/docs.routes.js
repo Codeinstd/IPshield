@@ -1,4 +1,3 @@
-
 const express = require("express");
 const router  = express.Router();
 const spec    = require("../config/openapi");
@@ -520,8 +519,10 @@ return `<!DOCTYPE html>
     }
     .rc-200 { color: var(--low); }
     .rc-201 { color: var(--low); }
+    .rc-202 { color: var(--low); }
     .rc-400 { color: var(--high); }
     .rc-401 { color: var(--medium); }
+    .rc-403 { color: var(--high); }
     .rc-404 { color: var(--medium); }
     .rc-409 { color: var(--high); }
     .rc-429 { color: var(--critical); }
@@ -844,6 +845,23 @@ return `<!DOCTYPE html>
         .hero-stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
         .overview-cards { grid-template-columns: repeat(2, 1fr); }
       }
+
+      /* ── Scanning-specific badges ── */
+      .consent-required-badge {
+        display: inline-flex; align-items: center; gap: 6px;
+        font-size: 10px; font-weight: 700; letter-spacing: 0.5px;
+        padding: 3px 10px; border-radius: 6px;
+        background: rgba(255,204,0,0.1); color: var(--medium);
+        border: 1px solid rgba(255,204,0,0.3);
+        margin-bottom: 12px;
+      }
+      .role-badge {
+        font-size: 9px; font-weight: 700; letter-spacing: 0.5px;
+        padding: 2px 8px; border-radius: 4px;
+        background: rgba(255,119,0,0.1); color: var(--high);
+        border: 1px solid rgba(255,119,0,0.25);
+        margin-left: 8px;
+      }
         </style>
 </head>
     <!-- Header -->
@@ -893,7 +911,7 @@ return `<!DOCTYPE html>
     <button class="ver-btn" id="vBtn1" onclick="setVersion('v1')">v1 Stable</button>
     <button class="ver-btn active" id="vBtn2" onclick="setVersion('v2')">v2 Latest</button>
     <span style="margin-left:8px;color:#4a6278;">|</span>
-    <span style="margin-left:8px;" id="versionDesc">Full platform — Scoring, WHOIS, Watchlist, Audit, SIEM, Blacklist, Cases</span>
+    <span style="margin-left:8px;" id="versionDesc">Full platform — Scoring, WHOIS, Watchlist, Audit, SIEM, Blacklist, Cases, Active Scanning</span>
     <span class="version-bar-links" style="margin-left:auto;">
       <a href="/api/v1/docs" style="color:var(--text3);font-size:11px;text-decoration:none;margin-right:12px;">v1 Swagger ↗</a>
       <a href="/api/v2/docs" style="color:var(--accent);font-size:11px;text-decoration:none;">v2 Swagger ↗</a>
@@ -933,12 +951,12 @@ return `<!DOCTYPE html>
       <!-- Hero -->
       <section id="overview">
         <div class="hero">
-          <div class="hero-badge">v2.2.0 · Live</div>
+          <div class="hero-badge">v2.3.0 · Live</div>
           <h1>IP<span>Shield</span> API</h1>
-          <p>Real-time IP risk intelligence combining AbuseIPDB, Shodan, VirusTotal, threat feeds, WHOIS/RDAP, reverse DNS, blacklist management and incident case tracking.</p>
+          <p>Real-time IP risk intelligence combining AbuseIPDB, Shodan, VirusTotal, threat feeds, WHOIS/RDAP, reverse DNS, blacklist management, incident case tracking, and on-demand active vulnerability scanning.</p>
           <div class="hero-stats">
             <div class="hero-stat"><div class="num">7</div><div class="lbl">Data Sources</div></div>
-            <div class="hero-stat"><div class="num">20+</div><div class="lbl">Endpoints</div></div>
+            <div class="hero-stat"><div class="num">23+</div><div class="lbl">Endpoints</div></div>
             <div class="hero-stat"><div class="num">v1/v2</div><div class="lbl">Versioned</div></div>
             <div class="hero-stat"><div class="num">30/min</div><div class="lbl">Rate Limit</div></div>
           </div>
@@ -959,6 +977,11 @@ return `<!DOCTYPE html>
               except <code style="background:var(--bg3);padding:1px 6px;border-radius:3px;font-family:'JetBrains Mono',monospace;font-size:11px;">/health</code> and
               <code style="background:var(--bg3);padding:1px 6px;border-radius:3px;font-family:'JetBrains Mono',monospace;font-size:11px;">/docs</code>.
               Set your key once using the Authorize button or paste it into any Try It request.
+              <br><br>
+              <strong style="color:var(--high);">Note:</strong> Active Scanning endpoints additionally require a key with the
+              <code style="background:var(--bg3);padding:1px 6px;border-radius:3px;color:var(--high);font-family:'JetBrains Mono',monospace;font-size:11px;">analyst</code> or
+              <code style="background:var(--bg3);padding:1px 6px;border-radius:3px;color:var(--high);font-family:'JetBrains Mono',monospace;font-size:11px;">admin</code> role —
+              <code style="background:var(--bg3);padding:1px 6px;border-radius:3px;font-family:'JetBrains Mono',monospace;font-size:11px;">readonly</code> keys receive 403.
             </div>
             <div class="auth-key" onclick="copyApiKey()" title="Click to copy">
               x-api-key: ••••••••••••••••••••••••
@@ -978,6 +1001,7 @@ return `<!DOCTYPE html>
               <tr><td>/api/score/*</td><td>30 requests</td><td>1 minute</td></tr>
               <tr><td>/api/whois/*</td><td>20 requests</td><td>1 minute</td></tr>
               <tr><td>/api/report/*</td><td>10 requests</td><td>1 minute</td></tr>
+              <tr><td>/api/v2/scan/*</td><td>5 requests</td><td>10 minutes</td></tr>
             </tbody>
           </table>
         </div>
@@ -1005,10 +1029,11 @@ return `<!DOCTYPE html>
       Cases:        { icon: "📁", color: "#ff7700", bg: "rgba(255,119,0,0.08)"  },
       Watchlist:    { icon: "👁", color: "#ffcc00", bg: "rgba(255,204,0,0.08)"  },
       Audit:        { icon: "📋", color: "#9966ff", bg: "rgba(153,102,255,0.08)"},
+      Scanning:     { icon: "🛰", color: "#ff7700", bg: "rgba(255,119,0,0.08)"  },
       System:       { icon: "⚙️", color: "#6a8fa8", bg: "rgba(106,143,168,0.08)"}
     };
 
-    const V1_HIDDEN_TAGS = ["Blacklist", "Cases"];
+    const V1_HIDDEN_TAGS = ["Blacklist", "Cases", "Scanning"];
 
     const endpoints = ${endpointsJSON};
 
@@ -1019,7 +1044,7 @@ return `<!DOCTYPE html>
       document.getElementById("vBtn2").classList.toggle("active", v === "v2");
       document.getElementById("versionDesc").textContent = v === "v1"
         ? "Core platform — Scoring, WHOIS, Watchlist, Audit, SIEM, Reports"
-        : "Full platform — Scoring, WHOIS, Watchlist, Audit, SIEM, Blacklist, Cases";
+        : "Full platform — Scoring, WHOIS, Watchlist, Audit, SIEM, Blacklist, Cases, Active Scanning";
 
       // Hide/show v2-only sections
       document.querySelectorAll(".tag-group").forEach(el => {
@@ -1151,6 +1176,7 @@ return `<!DOCTYPE html>
 
           <div class="section-label">Try It</div>
           <div style="background:var(--bg1);border:1px solid var(--border);border-radius:8px;padding:16px;">
+            \${ep.tags?.includes("Scanning") ? '<div class="consent-required-badge">⚠ This sends real network probes to the target IP — only test against IPs you own or are authorised to scan</div>' : ""}
             <div class="try-form">\${inputsHTML}</div>
             <div style="margin-top:12px;display:flex;gap:10px;align-items:center;">
               <button class="try-btn" onclick="runRequest(\${idx})">▶ Execute</button>
@@ -1346,7 +1372,7 @@ return `<!DOCTYPE html>
             <div class="tag-header">
               <div class="tag-icon" style="background:\${meta.bg};">\${meta.icon}</div>
               <div>
-                <div class="tag-title">\${tag}\${isV2Only ? ' <span style="font-size:12px;color:var(--accent);font-weight:600;">— v2 only</span>' : ""}</div>
+                <div class="tag-title">\${tag}\${isV2Only ? ' <span style="font-size:12px;color:var(--accent);font-weight:600;">— v2 only</span>' : ""}\${tag === "Scanning" ? '<span class="role-badge">ANALYST+</span>' : ""}</div>
                 <div class="tag-desc">\${eps.length} endpoint\${eps.length !== 1 ? "s" : ""}</div>
               </div>
             </div>

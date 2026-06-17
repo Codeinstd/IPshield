@@ -6,7 +6,6 @@ const db                  = require("../store/db");
 const logger              = require("../utils/logger");
 
 // constants 
-
 const DEFAULT_SEVERITY_MAP = {
   CRITICAL: 90,
   HIGH:     75,
@@ -107,7 +106,6 @@ async function insertBlacklist({ ip, severity, reason, added_by, tags, expires_a
 }
 
 // controller 
-
 exports.scoreBatchAndBlock = async (req, res, next) => {
   try {
     const {
