@@ -2426,7 +2426,6 @@
             <button id="vulnReportBtn" class="btn btn-ghost" style="padding:5px 12px;font-size:11px;" title="Generate vulnerability assessment report from scanned IPs in this case">📄 Vuln Report</button>
             <button id="caseEditBtn"   class="btn btn-ghost" style="padding:5px 12px;font-size:11px;">Edit</button>
             <button id="caseDeleteBtn" class="btn btn-ghost" style="padding:5px 12px;font-size:11px;color:var(--critical);border-color:var(--critical);">Delete</button>
-            <button id="vulnReportBtn" class="btn btn-ghost"  style="padding:5px 12px;font-size:11px;">📄 Vuln Report</button>
           </div>
         </div>
  
