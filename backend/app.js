@@ -36,6 +36,8 @@ const mfaRoutes             = require("./routes/mfa.routes");
 const scanRoutes            = require("./routes/scan.routes");
 const {requireAuth}         = require("./middleware/auth");
 const scan                  = require("./store/scan.store");
+const vulnreportRoutes      = require("./routes/vulnreport.routes");
+
 
 // v2-only route imports 
 const blacklistRoutes = require("./routes/blacklist.routes");
@@ -273,6 +275,9 @@ app.use("/api/v2/gdpr", gdprRoutes);
 
 // scan 
 app.use("/api/v2/scan", requireAuth, scanRoutes);
+
+// vulnerability scan 
+app.use("/api/v2/cases", vulnreportRoutes);
 
 
 // Version info

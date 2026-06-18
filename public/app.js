@@ -2423,8 +2423,10 @@
             <select id="caseStatusChange" style="padding:5px 8px;background:var(--bg1);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:inherit;font-size:11px;">
               ${["Open","Investigating","Contained","Resolved","Closed"].map(s=>`<option value="${s}"${s===c.status?" selected":""}>${s}</option>`).join("")}
             </select>
+            <button id="vulnReportBtn" class="btn btn-ghost" style="padding:5px 12px;font-size:11px;" title="Generate vulnerability assessment report from scanned IPs in this case">📄 Vuln Report</button>
             <button id="caseEditBtn"   class="btn btn-ghost" style="padding:5px 12px;font-size:11px;">Edit</button>
             <button id="caseDeleteBtn" class="btn btn-ghost" style="padding:5px 12px;font-size:11px;color:var(--critical);border-color:var(--critical);">Delete</button>
+            <button id="vulnReportBtn" class="btn btn-ghost"  style="padding:5px 12px;font-size:11px;">📄 Vuln Report</button>
           </div>
         </div>
  
@@ -2486,6 +2488,11 @@
     document.getElementById("caseStatusChange")?.addEventListener("change", async e => {
       const r = await apiPut(`/cases/${caseId}`, { status: e.target.value });
       if (r.ok) { toast(`Status → ${e.target.value}`, "success"); loadAndRenderCase(caseId); refreshList(); refreshStats(); }
+    });
+
+    // Generate vulnerability assessment report — opens a small format picker
+    document.getElementById("vulnReportBtn")?.addEventListener("click", () => {
+      showVulnReportMenu(caseId, c.title);
     });
  
     document.getElementById("caseEditBtn")?.addEventListener("click", async () => {
@@ -2620,6 +2627,102 @@
     document.getElementById("caseNoteSubmit")?.addEventListener("click", submitNote);
     document.getElementById("caseNoteInput")?.addEventListener("keydown", e => {
       if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) submitNote();
+    });
+  }
+
+  // Vulnerability Assessment Report — format picker 
+
+  function showVulnReportMenu(caseId, caseTitle) {
+    document.getElementById("vulnReportMenu")?.remove();
+
+    const btn = document.getElementById("vulnReportBtn");
+    const rect = btn?.getBoundingClientRect();
+
+    const menu = document.createElement("div");
+    menu.id = "vulnReportMenu";
+    menu.style.cssText = `
+      position:fixed;
+      top:${rect ? rect.bottom + 6 : 100}px;
+      left:${rect ? Math.max(8, rect.right - 240) : 100}px;
+      width:240px;
+      background:var(--bg1);border:1px solid var(--border);border-radius:8px;
+      box-shadow:0 8px 24px rgba(0,0,0,0.4);
+      z-index:10010;
+      overflow:hidden;
+    `;
+
+    menu.innerHTML = `
+      <div style="padding:10px 14px;border-bottom:1px solid var(--border);font-size:10px;color:var(--text3);letter-spacing:1px;">
+        VULNERABILITY ASSESSMENT
+      </div>
+      <button id="vulnReportPreviewBtn" style="width:100%;text-align:left;padding:10px 14px;background:none;border:none;
+        color:var(--text2);font-size:12px;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:8px;">
+        <span>👁</span> Preview in browser
+      </button>
+      <button id="vulnReportDownloadBtn" style="width:100%;text-align:left;padding:10px 14px;background:none;border:none;
+        color:var(--text2);font-size:12px;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:8px;
+        border-top:1px solid var(--border);">
+        <span>↓</span> Download PDF
+      </button>
+      <div style="padding:8px 14px;font-size:9px;color:var(--text3);border-top:1px solid var(--border);line-height:1.5;">
+        Aggregates scan results from all IPs attached to this case. IPs without a completed scan are listed using passive risk data only.
+      </div>
+    `;
+
+    document.body.appendChild(menu);
+
+    function closeMenu(e) {
+      if (e && (menu.contains(e.target) || e.target === btn)) return;
+      menu.remove();
+      document.removeEventListener("click", closeMenu);
+    }
+    // Defer listener attach so the opening click doesn't immediately close it
+    setTimeout(() => document.addEventListener("click", closeMenu), 0);
+
+    document.getElementById("vulnReportPreviewBtn").addEventListener("click", () => {
+      menu.remove();
+      window.open(`${API}/cases/${caseId}/vuln-report`, "_blank", "noopener");
+    });
+
+    document.getElementById("vulnReportDownloadBtn").addEventListener("click", async () => {
+      const dlBtn = document.getElementById("vulnReportDownloadBtn");
+      dlBtn.innerHTML = `<span>⏳</span> Generating…`;
+      dlBtn.disabled = true;
+
+      try {
+        const res = await fetch(`${API}/cases/${caseId}/vuln-report/pdf`, {
+          headers: { "x-api-key": API_KEY }
+        });
+
+        if (res.status === 403) {
+          toast("Analyst role required to download vulnerability reports", "warning");
+          menu.remove();
+          return;
+        }
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error(err.error || `HTTP ${res.status}`);
+        }
+
+        const blob = await res.blob();
+        const url  = URL.createObjectURL(blob);
+        const safe = (caseTitle || `case-${caseId}`).toLowerCase().replace(/[^a-z0-9]+/g, "-").slice(0, 40);
+        const a    = Object.assign(document.createElement("a"), {
+          href: url,
+          download: `ipshield-vuln-assessment-${safe}-${Date.now()}.pdf`
+        });
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        toast("Vulnerability assessment report downloaded", "success");
+        menu.remove();
+      } catch (err) {
+        toast(`Report generation failed: ${err.message}`, "error");
+        dlBtn.innerHTML = `<span>↓</span> Download PDF`;
+        dlBtn.disabled = false;
+      }
     });
   }
  
@@ -4068,46 +4171,46 @@
     localStorage.setItem("ipshield_theme", isDark ? "dark" : "light");
   }
  
-function applyTheme(dark) {
-  const root = document.documentElement;
-  const btn  = document.getElementById("themeToggle");
- 
-  if (dark) {
-    [
-      "--bg","--bg1","--bg2","--bg3",
-      "--text","--text2","--text3",
-      "--border","--border2"
-    ].forEach(v => root.style.removeProperty(v));
- 
-    if (btn) btn.textContent = "☀️ LIGHT";
- 
-    if (map) {
-      map.eachLayer(l => { if (l._url) map.removeLayer(l); });
-      L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
-        maxZoom: 19, subdomains: "abcd"
-      }).addTo(map);
-    }
-  } else {
-    root.style.setProperty("--bg",      "#f0f4f8");
-    root.style.setProperty("--bg1",     "#ffffff");
-    root.style.setProperty("--bg2",     "#e8edf2");
-    root.style.setProperty("--bg3",     "#dce3ea");
-    root.style.setProperty("--text",    "#1a2332");
-    root.style.setProperty("--text2",   "#4a6278");
-    root.style.setProperty("--text3",   "#7a95a8");
-    root.style.setProperty("--border",  "#c8d8e4");
-    root.style.setProperty("--border2", "#b0c4d4");
- 
-    if (btn) btn.textContent = "🌙 DARK";
- 
-    if (map) {
-      map.eachLayer(l => { if (l._url) map.removeLayer(l); });
-      L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
-        maxZoom: 19, subdomains: "abcd"
-      }).addTo(map);
+  function applyTheme(dark) {
+    const root = document.documentElement;
+    const btn  = document.getElementById("themeToggle");
+  
+    if (dark) {
+      [
+        "--bg","--bg1","--bg2","--bg3",
+        "--text","--text2","--text3",
+        "--border","--border2"
+      ].forEach(v => root.style.removeProperty(v));
+  
+      if (btn) btn.textContent = "☀️ LIGHT";
+  
+      if (map) {
+        map.eachLayer(l => { if (l._url) map.removeLayer(l); });
+        L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
+          maxZoom: 19, subdomains: "abcd"
+        }).addTo(map);
+      }
+    } else {
+      root.style.setProperty("--bg",      "#f0f4f8");
+      root.style.setProperty("--bg1",     "#ffffff");
+      root.style.setProperty("--bg2",     "#e8edf2");
+      root.style.setProperty("--bg3",     "#dce3ea");
+      root.style.setProperty("--text",    "#1a2332");
+      root.style.setProperty("--text2",   "#4a6278");
+      root.style.setProperty("--text3",   "#7a95a8");
+      root.style.setProperty("--border",  "#c8d8e4");
+      root.style.setProperty("--border2", "#b0c4d4");
+  
+      if (btn) btn.textContent = "🌙 DARK";
+  
+      if (map) {
+        map.eachLayer(l => { if (l._url) map.removeLayer(l); });
+        L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
+          maxZoom: 19, subdomains: "abcd"
+        }).addTo(map);
+      }
     }
   }
-}
   // Score 
   async function scoreIP() {
     const token = localStorage.getItem("token");

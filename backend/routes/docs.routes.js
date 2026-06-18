@@ -205,7 +205,7 @@ return `<!DOCTYPE html>
     }
 
     .header-right .btn-primary {
-    color: #b9beca;
+    color: var(--text2);
     font-size: 12px;
     text-decoration: none;
     border: 1px solid var(--border); background: transparent;
@@ -1029,7 +1029,7 @@ return `<!DOCTYPE html>
       Cases:        { icon: "📁", color: "#ff7700", bg: "rgba(255,119,0,0.08)"  },
       Watchlist:    { icon: "👁", color: "#ffcc00", bg: "rgba(255,204,0,0.08)"  },
       Audit:        { icon: "📋", color: "#9966ff", bg: "rgba(153,102,255,0.08)"},
-      Scanning:     { icon: "🛰", color: "#ff7700", bg: "rgba(255,119,0,0.08)"  },
+      Scanning:     { icon: "🔍", color: "#ff7700", bg: "rgba(255,119,0,0.08)"  },
       System:       { icon: "⚙️", color: "#6a8fa8", bg: "rgba(106,143,168,0.08)"}
     };
 

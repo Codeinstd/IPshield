@@ -1,6 +1,6 @@
 
 const express = require("express");
-const router  = express.Router({ mergeParams: true }); // mergeParams gets :id from parent
+const router  = express.Router({ mergeParams: true });
 const { body, param, validationResult } = require("express-validator");
 const { requireAuth, requireRole }      = require("../middleware/auth.js");
 const db = require("../store/db");
