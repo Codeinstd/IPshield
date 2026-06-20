@@ -6,10 +6,17 @@ const { validateIPParam, validateBatchBody } = require("../middleware/validateIP
 const { validateBatchAndBlockBody }        = require("../middleware/validateBatchAndBlockBody.middleware");
 const { requireAuth, requireRole }         = require("../middleware/auth.js");
 
+router.get(
+  "/public/:ip",
+  validateIPParam,
+  scoreIP
+);
+
 
 // Existing routes (unchanged)
 router.get("/:ip",    requireAuth, requireRole("readonly"), validateIPParam,    scoreIP);
 router.post("/batch", requireAuth, requireRole("readonly"), validateBatchBody,  scoreBatch);
+
 
 //
 async function saveAuditLog(db, result) {

@@ -20,7 +20,7 @@
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/leaflet.min.css">
 <style>
-/* ── Theme tokens */
+/* Theme tokens */
 :root {
   --accent:   #00d9ff;
   --critical: #ff3355;
@@ -53,7 +53,7 @@
   --surface: rgba(0,0,0,0.04);
 }
 
-/* ── Theme toggle button */
+/* Theme toggle button */
 .theme-toggle {
   width: 36px;
   height: 36px;
@@ -85,7 +85,7 @@
 [data-theme="light"] .icon-sun  { opacity: 0; transform: scale(0.5); }
 [data-theme="light"] .icon-moon { opacity: 1; transform: scale(1); }
 
-/* ── Base reset */
+/*  Base reset */
 *  { box-sizing: border-box; margin: 0; padding: 0; }
 body {
   background: var(--bg);
@@ -97,7 +97,7 @@ body {
 }
 a { text-decoration: none; }
 
-/* ── Nav */
+/* Nav */
 header {
   display: flex;
   align-items: center;
@@ -157,7 +157,7 @@ header {
   background: rgba(0,217,255,0.12);
 }
 
-/* ── Hamburger */
+/* Hamburger */
 .nav-hamburger {
   display: none;
   flex-direction: column;
@@ -184,7 +184,7 @@ header {
 .nav-hamburger[aria-expanded="true"] span:nth-child(2) { opacity: 0; transform: scaleX(0); }
 .nav-hamburger[aria-expanded="true"] span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
 
-/* ── Nav drawer */
+/* Nav drawer */
 .nav-overlay {
   display: none; position: fixed; inset: 0; z-index: 200;
   background: rgba(0,0,0,0.6); opacity: 0; transition: opacity .25s;
@@ -228,11 +228,19 @@ header {
   color: var(--text2); font-size: 12px;
 }
 
-/* ── Hero */
+/* Hero */
 .hero {
-  text-align: center; padding: 64px 24px 72px;
-  max-width: 760px; margin: 0 auto;
+  padding: 64px 24px 72px;
+  max-width: 1180px; margin: 0 auto;
 }
+.hero-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 56px;
+  align-items: center;
+}
+.hero-copy { text-align: left; }
+.hero-demo { display: flex; justify-content: center; }
 .hero-badge {
   display: inline-flex; align-items: center; gap: 8px;
   padding: 6px 16px;
@@ -249,16 +257,24 @@ header {
 @keyframes badge-sweep { 0% { background-position:-200% center; } 100% { background-position:200% center; } }
 .hero h1 {
   font-family: 'Syne', sans-serif;
-  font-size: clamp(32px,7vw,68px);
+  font-size: clamp(30px,5vw,52px);
   font-weight: 800; line-height: 1.1; margin-bottom: 20px;
   color: var(--text);
 }
 .hero h1 span { color: var(--accent); }
-.hero p { font-size: 15px; color: var(--text2); line-height: 1.8; margin-bottom: 36px; max-width: 560px; margin-left: auto; margin-right: auto; }
-.hero-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+.hero p { font-size: 15px; color: var(--text2); line-height: 1.8; margin-bottom: 36px; max-width: 480px; }
+.hero-actions { display: flex; gap: 12px; flex-wrap: wrap; }
 .hero-actions .btn { padding: 13px 28px; font-size: 13px; }
 
-/* ── Stats  */
+@media (max-width: 900px) {
+  .hero-grid { grid-template-columns: 1fr; gap: 36px; }
+  .hero-copy { text-align: center; }
+  .hero-copy p { margin-left: auto; margin-right: auto; }
+  .hero-actions { justify-content: center; }
+  .hero-demo { width: 100%; }
+}
+
+/* Stats  */
 .stats-bar {
   display: flex; justify-content: center;
   border-top: 1px solid var(--border);
@@ -275,7 +291,7 @@ header {
 .stat-num { font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 800; color: var(--accent); }
 .stat-label { font-size: 10px; color: var(--text3); letter-spacing: 2px; text-transform: uppercase; margin-top: 4px; }
 
-/* ── Features ─────────────────────────────────────────────────────────────── */
+/* Features  */
 .features { max-width: 1060px; margin: 0 auto; padding: 72px 24px; }
 .section-title { text-align: center; font-family: 'Syne', sans-serif; font-size: clamp(22px,4vw,30px); font-weight: 800; margin-bottom: 40px; color: var(--text); }
 .features-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(280px,1fr)); gap: 18px; }
@@ -289,7 +305,7 @@ header {
 .feature-title { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 8px; letter-spacing: 0.5px; }
 .feature-desc { font-size: 12px; color: var(--text2); line-height: 1.8; }
 
-/* ── Risk Demo  */
+/* Risk Demo  */
 .demo-section {
   background: var(--bg1);
   border-top: 1px solid var(--border);
@@ -312,14 +328,14 @@ header {
 .risk-pill.low     { background: rgba(0,232,124,0.12);   color: var(--low);      border: 1px solid rgba(0,232,124,0.4); }
 .risk-pill.low:hover { box-shadow: 0 4px 20px rgba(0,232,124,0.2); }
 
-/* ── CTA */
+/* CTA */
 .cta { text-align: center; padding: 80px 24px; max-width: 580px; margin: 0 auto; }
 .cta h2 { font-family: 'Syne', sans-serif; font-size: clamp(24px,5vw,34px); font-weight: 800; margin-bottom: 14px; color: var(--text); }
 .cta p { font-size: 13px; color: var(--text2); line-height: 1.8; margin-bottom: 28px; }
 .cta-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
 .cta-actions .btn { padding: 13px 28px; }
 
-/* ── Footer */
+/* Footer */
 footer {
   border-top: 1px solid var(--border);
   padding: 28px 32px;
@@ -352,7 +368,7 @@ footer a:hover { color: var(--accent); }
 .check-item { display: flex; align-items: center; gap: 10px; font-size: 12px; color: var(--text2); }
 .check-icon { color: var(--low); font-size: 14px; flex-shrink: 0; }
 
-/* ── Mock panels */
+/* Mock panels */
 .platform-mock {
   background: var(--bg2); border: 1px solid var(--border);
   border-radius: 12px; padding: 20px;
@@ -397,7 +413,7 @@ footer a:hover { color: var(--accent); }
 .mock-endpoint-row { display: flex; align-items: center; gap: 8px; padding: 7px 0; border-bottom: 1px solid var(--border); font-size: 10px; font-family: monospace; transition: background .15s; border-radius: 4px; }
 .mock-endpoint-row:hover { background: rgba(0,217,255,0.04); }
 
-/* ── Scan mock specific  */
+/* Scan mock specific  */
 .mock-scan-port { padding: 2px 8px; border-radius: 4px; font-size: 10px; font-family: monospace; background: rgba(0,217,255,0.08); color: var(--accent); border: 1px solid rgba(0,217,255,0.2); }
 .mock-scan-finding { display: flex; align-items: center; gap: 8px; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 11px; transition: background .15s; border-radius: 4px; }
 .mock-scan-finding:hover { background: rgba(0,217,255,0.04); }
@@ -409,7 +425,7 @@ footer a:hover { color: var(--accent); }
   border: 1px solid rgba(255,204,0,0.3); margin-bottom: 14px;
 }
 
-/* ── Access Request Modal */
+/* Access Request Modal */
 #accessModalOverlay {
   display: none; position: fixed; inset: 0;
   background: rgba(0,0,0,0.75); z-index: 500;
@@ -433,7 +449,109 @@ footer a:hover { color: var(--accent); }
   letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px;
 }
 
-/* ── Animations */
+/* Live IP Demo Card (hero, right column) */
+.demo-live-card {
+  background: var(--bg1); border: 1px solid var(--border);
+  border-radius: 14px; overflow: hidden; text-align: left;
+  width: 100%; max-width: 420px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.35), 0 0 0 1px rgba(0,217,255,0.04);
+  transition: background .3s, border-color .3s;
+}
+.demo-live-card-header {
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 8px;
+  padding: 13px 18px;
+  border-bottom: 1px solid var(--border);
+  background: linear-gradient(180deg, rgba(0,217,255,0.04), transparent);
+}
+.demo-live-label {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 10px; color: var(--text2); letter-spacing: 1.5px;
+}
+.demo-live-livedot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--low); box-shadow: 0 0 6px var(--low);
+  animation: pulse 2s infinite;
+}
+.demo-live-tag {
+  font-size: 9px; font-weight: 700; letter-spacing: 0.5px;
+  padding: 4px 10px; border-radius: 5px;
+  background: rgba(255,204,0,0.1); color: var(--medium);
+  border: 1px solid rgba(255,204,0,0.3);
+  white-space: nowrap;
+}
+.demo-live-body { padding: 22px; min-height: 110px; }
+
+.demo-live-loading {
+  display: flex; align-items: center; gap: 12px; justify-content: center;
+  color: var(--text2); font-size: 12px; padding: 30px 0;
+}
+.demo-live-spinner {
+  width: 18px; height: 18px; border: 2px solid var(--border);
+  border-top-color: var(--accent); border-radius: 50%;
+  animation: spin-live 0.7s linear infinite;
+}
+@keyframes spin-live { to { transform: rotate(360deg); } }
+
+/* Score header row — ring + IP/risk meta, mirrors the real dashboard result panel */
+.demo-live-scorerow {
+  display: flex; align-items: center; gap: 18px;
+  padding-bottom: 16px; margin-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+.demo-live-ring-wrap { position: relative; width: 76px; height: 76px; flex-shrink: 0; }
+.demo-live-ring-wrap svg { transform: rotate(-90deg); width: 76px; height: 76px; }
+.demo-live-ring-bg { fill: none; stroke: var(--bg3); stroke-width: 6; }
+.demo-live-ring-fill {
+  fill: none; stroke-width: 6; stroke-linecap: round;
+  transition: stroke-dashoffset 0.9s cubic-bezier(.4,0,.2,1);
+}
+.demo-live-ring-center {
+  position: absolute; inset: 0; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+}
+.demo-live-ring-num { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; line-height: 1; }
+.demo-live-ring-max { font-size: 8px; color: var(--text3); margin-top: 1px; }
+
+.demo-live-idmeta { flex: 1; min-width: 0; }
+.demo-live-ip {
+  font-family: 'JetBrains Mono', monospace; font-size: 15px; font-weight: 700;
+  color: var(--text); margin-bottom: 6px; overflow: hidden; text-overflow: ellipsis;
+}
+.demo-live-pill {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 3px 10px; border-radius: 5px; font-size: 10px; font-weight: 700;
+  letter-spacing: 1px;
+}
+
+/* Signal list — mirrors .signal-item from the real result panel */
+.demo-live-signals { display: flex; flex-direction: column; gap: 7px; }
+.demo-live-signal-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 10px;
+  background: var(--bg2); border: 1px solid var(--border); border-radius: 6px;
+  font-size: 11px;
+}
+.demo-live-signal-icon { font-size: 12px; flex-shrink: 0; width: 14px; text-align: center; }
+.demo-live-signal-label { color: var(--text2); flex: 1; }
+.demo-live-signal-val { font-weight: 700; flex-shrink: 0; }
+.demo-live-sample-tag {
+  font-size: 8px; font-weight: 700; letter-spacing: 0.5px;
+  color: var(--text3); background: var(--bg3);
+  padding: 1px 6px; border-radius: 3px; flex-shrink: 0;
+}
+
+.demo-live-error { font-size: 12px; color: var(--text3); text-align: center; padding: 26px 0; line-height: 1.7; }
+
+.demo-live-footnote {
+
+  padding: 11px 18px; border-top: 1px solid var(--border);
+  background: var(--bg2); font-size: 10px; color: var(--text3); line-height: 1.6;
+}
+.demo-live-footnote a { color: var(--accent); }
+
+
+/* Animations */
 .fade-up { opacity: 0; transform: translateY(28px); transition: opacity 0.55s ease, transform 0.55s ease; }
 .fade-up.visible { opacity: 1; transform: translateY(0); }
 .stagger > * { opacity: 0; transform: translateY(20px); transition: opacity 0.4s ease, transform 0.4s ease; }
@@ -453,7 +571,7 @@ footer a:hover { color: var(--accent); }
   50%     { box-shadow: 0 0 28px rgba(0,217,255,0.6); }
 }
 
-/* ── Responsive ───────────────────────────────────────────────────────────── */
+/* Responsive */
 @media(max-width:768px) {
   .nav-right { display: none; }
   .nav-hamburger { display: flex; }
@@ -544,15 +662,39 @@ footer a:hover { color: var(--accent); }
 </div>
 
 <section class="hero">
-  <div class="hero-badge">
-    <div class="badge-dot"></div>
-    REAL-TIME THREAT INTELLIGENCE
-  </div>
-  <h1>Know the risk behind<br>every <span>IP address</span></h1>
-  <p>IPShield scores any IP in milliseconds, combining geo intelligence, threat feeds, WHOIS signals, Shodan data, and behavioral analysis into a single actionable risk score.</p>
-  <div class="hero-actions">
-    <button onclick="showAccessModal()" class="btn btn-primary">Request Access →</button>
-    <a href="/api/docs" class="btn btn-ghost">View API Docs</a>
+  <div class="hero-grid">
+    <div class="hero-copy">
+      <div class="hero-badge">
+        <div class="badge-dot"></div>
+        REAL-TIME THREAT INTELLIGENCE
+      </div>
+      <h1>Know the risk behind<br>every <span>IP address</span></h1>
+      <p>IPShield scores any IP in milliseconds, combining geo intelligence, threat feeds, WHOIS signals, Shodan data, and behavioral analysis into a single actionable risk score.</p>
+      <div class="hero-actions">
+        <button onclick="showAccessModal()" class="btn btn-primary">Request Access →</button>
+        <a href="/api/docs" class="btn btn-ghost">View API Docs</a>
+      </div>
+    </div>
+
+    <div class="hero-demo">
+      <div class="demo-live-card">
+        <div class="demo-live-card-header">
+          <div class="demo-live-label"><span class="demo-live-livedot"></span>LIVE — YOUR DETECTED IP</div>
+          <span class="demo-live-tag">⚠ DEMO ONLY</span>
+        </div>
+
+        <div class="demo-live-body" id="liveDemoBody">
+          <div class="demo-live-loading">
+            <div class="demo-live-spinner"></div>
+            <span>Detecting your IP address…</span>
+          </div>
+        </div>
+
+        <div class="demo-live-footnote">
+          Score and rows marked <strong>SAMPLE</strong> are illustrative only — your IP is real, but the network type, ASN and score shown are not from a real lookup. <a href="/api/docs">See the real API →</a>
+        </div>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -570,7 +712,7 @@ footer a:hover { color: var(--accent); }
     <div class="stat-label">Threat Feeds</div>
   </div>
   <div class="stat-item">
-    <div class="stat-num">&lt;80ms</div>
+    <div class="stat-num">&lt;100ms</div>
     <div class="stat-label">Avg Response</div>
   </div>
 </div>
@@ -600,7 +742,7 @@ footer a:hover { color: var(--accent); }
       <div class="platform-text">
         <div class="platform-eyebrow">Continuous Monitoring</div>
         <div class="platform-heading">Watch IPs & get alerted when risk changes</div>
-        <div class="platform-body">Watch any IP. IPShield continuously re-scores it and alerts you when risk crosses your defined threshold, before it turns into an incident.</div>
+        <div class="platform-body">Watch any IP.IPShield continuously re-scores it and alerts you when risk crosses your defined threshold, before it turns into an incident.</div>
         <div class="checklist">
           <div class="check-item"><span class="check-icon">✓</span>Set per-IP alert thresholds (0–100)</div>
           <div class="check-item"><span class="check-icon">✓</span>Automatic re-score polling on a schedule</div>
@@ -645,13 +787,13 @@ footer a:hover { color: var(--accent); }
     <div class="platform-row">
       <div class="platform-text">
         <div class="platform-eyebrow">Active Reconnaissance</div>
-        <div class="platform-heading">Go beyond passive intel scan on demand</div>
+        <div class="platform-heading">Go beyond passive intel, scan on demand</div>
         <div class="platform-body">When passive scoring isn't enough, launch an active scan directly from any result. IPShield runs nmap and nuclei in parallel, fingerprinting open services and matching them against known CVEs.</div>
         <div class="checklist">
           <div class="check-item"><span class="check-icon">✓</span>nmap port scan with service &amp; version detection</div>
           <div class="check-item"><span class="check-icon">✓</span>Automatic CVE matching via vulners NSE</div>
           <div class="check-item"><span class="check-icon">✓</span>nuclei templates for misconfig, SSL/TLS, exposures</div>
-          <!-- <div class="check-item"><span class="check-icon">✓</span>Consent-gated — private IP ranges blocked by default</div> -->
+          <div class="check-item"><span class="check-icon">✓</span>Consent-gated private IP ranges, blocked by default</div>
         </div>
       </div>
       <div class="platform-mock">
@@ -772,6 +914,116 @@ footer a:hover { color: var(--accent); }
 </footer>
 
 <script>
+// Live IP demo widget 
+(function () {
+  const body = document.getElementById("liveDemoBody");
+  if (!body) return;
+
+  // Deterministic hash so the same visitor sees a stable result on reload,
+  function hashString(str) {
+    let h = 0;
+    for (let i = 0; i < str.length; i++) {
+      h = (h << 5) - h + str.charCodeAt(i);
+      h |= 0;
+    }
+    return Math.abs(h);
+  }
+
+  function illustrativeProfile(ip) {
+    const h     = hashString(ip);
+    const score = h % 100;
+    let risk, color;
+    if (score > 80)      { risk = "CRITICAL"; color = "var(--critical)"; }
+    else if (score > 60) { risk = "HIGH";     color = "var(--high)"; }
+    else if (score > 30) { risk = "MEDIUM";   color = "var(--medium)"; }
+    else                  { risk = "LOW";      color = "var(--low)"; }
+
+    // FAKE sample values — these are NOT derived from the real IP in any way
+    // (no WHOIS, no ASN registry, no geo lookup). They're picked from a fixed
+    // list using a hash of the IP string purely so a given visitor sees the
+    // same fake values on reload. Never wire this to anything real without
+    // renaming — the UI explicitly labels these rows "SAMPLE" because of that.
+    const FAKE_NETWORK_TYPES = ["Residential ISP", "Datacenter / Cloud", "Business broadband", "Mobile carrier"];
+    const FAKE_ASN_SAMPLES   = ["AS7922 Comcast", "AS16509 Amazon", "AS6128 Cablevision", "AS8075 Microsoft", "AS3320 Deutsche Telekom"];
+    const feedHits           = h % 7 === 0 ? 1 : 0; // mostly clean, occasionally "flagged" for variety
+
+    return {
+      score, risk, color,
+      networkType: FAKE_NETWORK_TYPES[h % FAKE_NETWORK_TYPES.length],
+      asn:          FAKE_ASN_SAMPLES[(h >> 3) % FAKE_ASN_SAMPLES.length],
+      feedHits,
+    };
+  }
+
+  function renderResult(ip) {
+    const p     = illustrativeProfile(ip);
+    const r     = 32;
+    const circ  = 2 * Math.PI * r;
+    const offset = circ - (p.score / 100) * circ;
+
+    body.innerHTML = `
+      <div class="demo-live-scorerow">
+        <div class="demo-live-ring-wrap">
+          <svg viewBox="0 0 76 76">
+            <circle class="demo-live-ring-bg" cx="38" cy="38" r="${r}"/>
+            <circle class="demo-live-ring-fill" cx="38" cy="38" r="${r}"
+              stroke="${p.color}" stroke-dasharray="${circ}" stroke-dashoffset="${circ}"/>
+          </svg>
+          <div class="demo-live-ring-center">
+            <div class="demo-live-ring-num" style="color:${p.color};">${p.score}</div>
+            <div class="demo-live-ring-max">/100</div>
+          </div>
+        </div>
+        <div class="demo-live-idmeta">
+          <div class="demo-live-ip">${ip}</div>
+          <div class="demo-live-pill" style="background:${p.color}22;color:${p.color};border:1px solid ${p.color}66;">${p.risk}</div>
+        </div>
+      </div>
+
+      <div class="demo-live-signals">
+        <div class="demo-live-signal-row">
+          <span class="demo-live-signal-icon">🌐</span>
+          <span class="demo-live-signal-label">Network type</span>
+          <span class="demo-live-signal-val" style="color:var(--text);">${p.networkType}</span>
+          <span class="demo-live-sample-tag">SAMPLE</span>
+        </div>
+        <div class="demo-live-signal-row">
+          <span class="demo-live-signal-icon">🏢</span>
+          <span class="demo-live-signal-label">ASN</span>
+          <span class="demo-live-signal-val" style="color:var(--text);">${p.asn}</span>
+          <span class="demo-live-sample-tag">SAMPLE</span>
+        </div>
+        <div class="demo-live-signal-row">
+          <span class="demo-live-signal-icon">${p.feedHits ? "⚠" : "✓"}</span>
+          <span class="demo-live-signal-label">Threat feed check</span>
+          <span class="demo-live-signal-val" style="color:${p.feedHits ? "var(--high)" : "var(--low)"};">${p.feedHits ? "1 flag" : "Clean"}</span>
+        </div>
+      </div>`;
+
+    // Animate the ring fill in on next frame, same as the real dashboard panel
+    requestAnimationFrame(() => {
+      const fill = body.querySelector(".demo-live-ring-fill");
+      if (fill) fill.style.strokeDashoffset = offset;
+    });
+  }
+
+  function renderError() {
+    body.innerHTML = `
+      <div class="demo-live-error">
+        Couldn't auto-detect your IP from this browser — that's fine, it happens behind some
+        networks/VPNs. <a href="/api/docs" style="color:var(--accent);">Try the real API</a> with any IP instead.
+      </div>`;
+  }
+
+  fetch("https://api.ipify.org?format=json")
+    .then((res) => res.json())
+    .then((data) => {
+      if (data && data.ip) renderResult(data.ip);
+      else renderError();
+    })
+    .catch(renderError);
+})();
+
 // Theme toggle 
 (function () {
   const html    = document.documentElement;

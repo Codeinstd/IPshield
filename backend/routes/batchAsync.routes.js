@@ -75,7 +75,6 @@ router.post("/batch-async",
 );
 
 // GET /score/batch-async/:jobId 
-
 router.get("/batch-async/:jobId",
   requireAuth,
   requireRole("readonly"),
