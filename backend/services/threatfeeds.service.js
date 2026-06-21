@@ -146,7 +146,19 @@ async function checkThreatFeeds(ip) {
     emergingThreats:feedCache.emergingThreats.ips.has(ip),
     otx,
     signals:        [],
-    scoreBoost:     0  // additional score to add to abuse score
+    scoreBoost:     0,  // additional score to add to abuse score
+
+    // Feed availability — distinct from the per-IP hit/miss fields above.
+    // A feed that never loaded (ts === 0) and a feed that loaded but found
+    // nothing both produce `false` for feodo/spamhaus/emergingThreats, which
+    // is correct for scoring but loses information for confidence reporting.
+    // This block exposes which feeds actually had data to check against.
+    feedsLoaded: {
+      feodo:           feedCache.feodo.ts > 0,
+      spamhaus:        feedCache.spamhaus.ts > 0,
+      emergingThreats: feedCache.emergingThreats.ts > 0,
+      otxChecked:      otx !== null, // null = key missing or lookup failed, not "no pulses found"
+    }
   };
 
   // Build signals from feed hits

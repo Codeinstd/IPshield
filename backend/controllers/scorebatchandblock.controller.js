@@ -37,8 +37,8 @@ async function persistAudit(result) {
     await db.query(
       `INSERT INTO audit_log
          (ip, score, risk_level, action, is_proxy, is_tor, is_datacenter,
-          country, isp, asn, cached, scored_at)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,NOW())`,
+          country, isp, asn, cached, confidence, confidence_reasons, scored_at)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,NOW())`,
       [
         result.ip,
         result.score,
@@ -51,6 +51,8 @@ async function persistAudit(result) {
         result.network?.isp                || null,
         result.network?.asn                || null,
         result.meta?.cached                || false,
+        result.confidence                  || null,
+        JSON.stringify(result.confidenceReasons || []),
       ]
     );
   } catch (err) {
