@@ -1,11 +1,10 @@
 const { execFile }  = require("child_process");
 const { promisify } = require("util");
 const xml2js        = require("xml2js");   
-const scan          = require("../store/scan.store.js");
+const scanStore      = require("../store/scan.store.js");
 const logger        = require("../utils/logger");
 
 const execFileAsync = promisify(execFile);
-const parseXml      = promisify(new xml2js.Parser({ explicitArray: false }).parseString);
 
 // Severity thresholds by CVSS (from vulners NSE output)
 function cvssSeverity(score) {

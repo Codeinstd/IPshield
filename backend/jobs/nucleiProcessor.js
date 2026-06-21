@@ -1,5 +1,5 @@
 const { spawn }     = require("child_process");
-const scan          = require("../store/scan.store.js");
+const scanStore     = require("../store/scan.store.js");
 const logger        = require("../utils/logger");
 
 const SEV_ORDER = ["critical", "high", "medium", "low", "info", "unknown"];

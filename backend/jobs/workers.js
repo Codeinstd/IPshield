@@ -243,6 +243,7 @@ function startWorkers() {
     alertWorker:     startAlertWorker(),
     batchWorker:     startBatchWorker(),
     watchlistWorker: startWatchlistWorker(),
+    scanWorker:      startScanWorker(),
   };
 }
 
