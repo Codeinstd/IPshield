@@ -130,10 +130,10 @@ exports.scoreBatchAndBlock = async (req, res, next) => {
       `batch-and-block: ${uniqueIPs.length} IPs, threshold=${auto_block_threshold}, dry_run=${dry_run}`
     );
 
-    // 1. Score all IPs in parallel
+    // Score all IPs in parallel
     const settled = await Promise.allSettled(uniqueIPs.map(ip => getFullIntel(ip)));
 
-    // 2. Process results 
+    // Process results 
     const blocked = [];
     const allowed = [];
     const failed  = [];
@@ -215,7 +215,7 @@ exports.scoreBatchAndBlock = async (req, res, next) => {
       })
     );
 
-    // 3. Respond 207 
+    // Respond 207 
     return res.status(207).json({
       summary: {
         total:         uniqueIPs.length,

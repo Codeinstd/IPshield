@@ -14,12 +14,7 @@ const prevHash = lastRow.rows.length
 const scoredAt = new Date().toISOString();
 // Deterministic content — same fields always in same order.
 // NOTE: confidence/confidence_reasons are intentionally NOT part of this
-// hashed content. They're descriptive metadata about how much data backed
-// the score, not part of the score's immutable record — including them
-// here would mean any future change to the confidence calculation alters
-// what a hash "means" for historical rows, breaking /verify chain-walks
-// across the boundary where the logic changed. ip/score/risk_level remain
-// the only fields the chain actually attests to.
+
 const content = JSON.stringify({
 ip:         result.ip,
 score:      result.score,

@@ -124,12 +124,7 @@ function computeConfidence({ geo, whoisData, feeds, rdns }) {
     reasons.push("Geolocation lookup failed — country/region/ISP unavailable");
   }
 
-  // WHOIS — getRDAPData returns null only when ARIN, RIPE, and APNIC all
-  // fail. A non-null result with no org name / no registration date is a
-  // real registry response that happened to be sparse — the realistic
-  // signature of under-resourced registries (some AFRINIC/APNIC-allocated
-  // ranges), not a request failure. Both cases lower confidence, but total
-  // failure is treated as worse than a sparse-but-real answer.
+  // WHOIS — getRDAPData returns null only when ARIN, RIPE, and APNIC all fail.
   const whois = whoisData?.whois ?? null;
   if (!whois) {
     downgrade("LOW");
