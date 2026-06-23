@@ -3,7 +3,6 @@ const validator = require("validator");
 
 let transporter = null;
 
-/* Escape HTML to prevent injection in email templates */
 function escapeHtml(str = "") {
   return String(str)
     .replace(/&/g, "&amp;")
@@ -11,6 +10,36 @@ function escapeHtml(str = "") {
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#039;");
+}
+
+function buildBrandedEmailHTML({ heading, accentColor = "#00d9ff", rows = [], bodyHtml = "", footerHtml = "" }) {
+  const rowsHtml = rows
+    .filter(([, v]) => v !== undefined && v !== null && v !== "")
+    .map(
+      ([k, v]) => `
+              <tr>
+                <td style="padding:8px 12px;color:#4a6278;border-bottom:1px solid #1e2d3d;width:140px;vertical-align:top;">
+                  ${escapeHtml(k)}
+                </td>
+                <td style="padding:8px 12px;color:#c9d8e8;border-bottom:1px solid #1e2d3d;">
+                  ${v}
+                </td>
+              </tr>`
+    )
+    .join("");
+
+  return `
+    <div style="background:#0d1117;padding:32px;font-family:monospace;max-width:520px;margin:0 auto;">
+      <h2 style="color:#c9d8e8;margin-bottom:20px;">
+        IP<span style="color:#00d9ff;">Shield</span> — <span style="color:${accentColor};">${escapeHtml(heading)}</span>
+      </h2>
+      ${bodyHtml}
+      ${rows.length ? `
+      <table style="width:100%;border-collapse:collapse;font-size:13px;">
+        ${rowsHtml}
+      </table>` : ""}
+      ${footerHtml}
+    </div>`;
 }
 
 /* Create or reuse transporter */
@@ -140,6 +169,27 @@ async function sendInviteEmail(invite) {
   const role = escapeHtml(invite.role || "Member");
   const activateUrl = escapeHtml(invite.activateUrl || "");
 
+  const bodyHtml = `
+    <p style="color:#c9d8e8;font-size:13px;line-height:1.7;margin-bottom:16px;">
+      Hi ${name}, you've been granted <strong style="color:#00d9ff;">${role}</strong> access
+      to IPShield Risk Intelligence.
+    </p>
+    <p style="color:#6a8fa8;font-size:12px;margin-bottom:20px;">
+      Click below to activate your account and set your password.
+    </p>
+    <p style="margin:24px 0;">
+      <a href="${activateUrl}" style="background:#00d9ff;color:#000;padding:12px 24px;border-radius:6px;text-decoration:none;font-weight:bold;font-family:monospace;font-size:13px;letter-spacing:1px;">
+        ACTIVATE ACCOUNT →
+      </a>
+    </p>
+    <p style="font-size:11px;color:#4a6278;margin-bottom:4px;">Or copy this link:</p>
+    <code style="color:#00d9ff;font-size:11px;word-break:break-all;">${activateUrl}</code>`;
+
+  const footerHtml = `
+    <p style="font-size:11px;color:#3d5a72;margin-top:24px;border-top:1px solid #1e2d3d;padding-top:16px;">
+      This link expires in 7 days. If you weren't expecting this email, you can safely ignore it.
+    </p>`;
+
   return sendEmail({
     to: invite.email,
 
@@ -157,54 +207,11 @@ ${invite.activateUrl}
 This link expires in 7 days.
 `.trim(),
 
-    html: `
-      <div style="font-family:Arial,sans-serif;max-width:600px;margin:auto;">
-        <h2 style="color:#02bfe0;">
-          You're invited to IPShield
-        </h2>
-
-        <p>Hi ${name},</p>
-
-        <p>
-          You've been granted
-          <strong>${role}</strong>
-          access to IPShield Risk Intelligence.
-        </p>
-
-        <p>
-          Click the link below to activate your account
-          and set your password:
-        </p>
-
-        <p style="margin:24px 0;">
-          <a
-            href="${activateUrl}"
-            style="
-              background:#02bfe0;
-              color:#000;
-              padding:12px 24px;
-              border-radius:6px;
-              text-decoration:none;
-              font-weight:bold;
-            "
-          >
-            Activate Account →
-          </a>
-        </p>
-
-        <p style="font-size:12px;color:#666;">
-          Or copy this link:
-        </p>
-
-        <code>${activateUrl}</code>
-
-        <p style="font-size:11px;color:#999;margin-top:20px;">
-          This link expires in 7 days.
-          If you weren't expecting this email,
-          you can safely ignore it.
-        </p>
-      </div>
-    `,
+    html: buildBrandedEmailHTML({
+      heading: "You're Invited",
+      bodyHtml,
+      footerHtml,
+    }),
   });
 }
 
@@ -245,7 +252,6 @@ Type: ${type}
   });
 }
 
-/* Verify SMTP at startup */
 verifySMTP();
 
 module.exports = {

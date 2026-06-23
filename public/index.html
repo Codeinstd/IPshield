@@ -28,7 +28,7 @@
   --medium:   #ffcc00;
   --low:      #00e87c;
 }
-
+ 
 [data-theme="dark"] {
   --bg:      #080c0f;
   --bg1:     #0d1117;
@@ -40,7 +40,7 @@
   --text3:   #3d5a72;
   --surface: rgba(255,255,255,0.04);
 }
-
+ 
 [data-theme="light"] {
   --bg:      #f0f4f8;
   --bg1:     #ffffff;
@@ -52,7 +52,7 @@
   --text3:   #8fa8bc;
   --surface: rgba(0,0,0,0.04);
 }
-
+ 
 /* Theme toggle button */
 .theme-toggle {
   width: 36px;
@@ -84,7 +84,7 @@
 [data-theme="dark"]  .icon-moon { opacity: 0; transform: scale(0.5); }
 [data-theme="light"] .icon-sun  { opacity: 0; transform: scale(0.5); }
 [data-theme="light"] .icon-moon { opacity: 1; transform: scale(1); }
-
+ 
 /*  Base reset */
 *  { box-sizing: border-box; margin: 0; padding: 0; }
 body {
@@ -96,7 +96,7 @@ body {
   transition: background .3s, color .3s;
 }
 a { text-decoration: none; }
-
+ 
 /* Nav */
 header {
   display: flex;
@@ -121,7 +121,7 @@ header {
 }
 .logo-text { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 20px; white-space: nowrap; color: var(--text); }
 .logo-text span { color: var(--accent); }
-
+ 
 .nav-right { display: flex; gap: 10px; align-items: center; }
 .btn {
   padding: 9px 20px;
@@ -140,7 +140,7 @@ header {
 .btn-primary:hover { background: #0099cc; }
 .btn-ghost { background: transparent; color: var(--text2); border: 1px solid var(--border); }
 .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
-
+ 
 /* Light mode adjustments for cards/panels */
 [data-theme="light"] .feature-card,
 [data-theme="light"] .platform-mock,
@@ -156,7 +156,7 @@ header {
 [data-theme="light"] .mock-chip-active {
   background: rgba(0,217,255,0.12);
 }
-
+ 
 /* Hamburger */
 .nav-hamburger {
   display: none;
@@ -183,7 +183,7 @@ header {
 .nav-hamburger[aria-expanded="true"] span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
 .nav-hamburger[aria-expanded="true"] span:nth-child(2) { opacity: 0; transform: scaleX(0); }
 .nav-hamburger[aria-expanded="true"] span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
-
+ 
 /* Nav drawer */
 .nav-overlay {
   display: none; position: fixed; inset: 0; z-index: 200;
@@ -227,7 +227,7 @@ header {
   padding: 12px 16px;
   color: var(--text2); font-size: 12px;
 }
-
+ 
 /* Hero */
 .hero {
   padding: 64px 24px 72px;
@@ -265,14 +265,14 @@ header {
 .hero p { font-size: 15px; color: var(--text2); line-height: 1.8; margin-bottom: 36px; max-width: 480px; }
 .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; }
 .hero-actions .btn { padding: 13px 28px; font-size: 13px; }
-
+ 
 /* Cost-of-a-miss callout, hero */
 .hero-cost {
   display: flex; gap: 12px; align-items: flex-start;
-  margin-top: 24px;
-  margin-bottom: 24px;
+  margin-top: 28px;
   padding: 14px 16px;
-  border: 1.5px solid rgba(255,51,85,0.25);
+  border: 1px solid rgba(255,51,85,0.25);
+  border-left: 3px solid var(--critical);
   border-radius: 8px;
   background: rgba(255,51,85,0.05);
   max-width: 480px;
@@ -281,11 +281,11 @@ header {
 .hero-cost-text { font-size: 12px; color: var(--text2); line-height: 1.7; }
 .hero-cost-text strong { color: var(--text); font-weight: 700; }
 .hero-cost-text .hero-cost-num { color: var(--critical); font-weight: 700; }
-
+ 
 @media (max-width: 900px) {
   .hero-cost { margin-left: auto; margin-right: auto; }
 }
-
+ 
 @media (max-width: 900px) {
   .hero-grid { grid-template-columns: 1fr; gap: 36px; }
   .hero-copy { text-align: center; }
@@ -293,7 +293,7 @@ header {
   .hero-actions { justify-content: center; }
   .hero-demo { width: 100%; }
 }
-
+ 
 /* Stats  */
 .stats-bar {
   display: flex; justify-content: center;
@@ -310,7 +310,7 @@ header {
 .stat-item:last-child { border-right: none; }
 .stat-num { font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 800; color: var(--accent); }
 .stat-label { font-size: 10px; color: var(--text3); letter-spacing: 2px; text-transform: uppercase; margin-top: 4px; }
-
+ 
 /* Features  */
 .features { max-width: 1060px; margin: 0 auto; padding: 72px 24px; }
 .section-title { text-align: center; font-family: 'Syne', sans-serif; font-size: clamp(22px,4vw,30px); font-weight: 800; margin-bottom: 40px; color: var(--text); }
@@ -324,7 +324,7 @@ header {
 .feature-icon { font-size: 26px; margin-bottom: 14px; display: block; }
 .feature-title { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 8px; letter-spacing: 0.5px; }
 .feature-desc { font-size: 12px; color: var(--text2); line-height: 1.8; }
-
+ 
 /* Risk Demo  */
 .demo-section {
   background: var(--bg1);
@@ -347,14 +347,14 @@ header {
 .risk-pill.medium:hover { box-shadow: 0 4px 20px rgba(255,204,0,0.2); }
 .risk-pill.low     { background: rgba(0,232,124,0.12);   color: var(--low);      border: 1px solid rgba(0,232,124,0.4); }
 .risk-pill.low:hover { box-shadow: 0 4px 20px rgba(0,232,124,0.2); }
-
+ 
 /* CTA */
 .cta { text-align: center; padding: 80px 24px; max-width: 580px; margin: 0 auto; }
 .cta h2 { font-family: 'Syne', sans-serif; font-size: clamp(24px,5vw,34px); font-weight: 800; margin-bottom: 14px; color: var(--text); }
 .cta p { font-size: 13px; color: var(--text2); line-height: 1.8; margin-bottom: 28px; }
 .cta-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
 .cta-actions .btn { padding: 13px 28px; }
-
+ 
 /* Footer */
 footer {
   border-top: 1px solid var(--border);
@@ -367,8 +367,8 @@ footer {
 footer a { color: var(--text3); }
 footer a:hover { color: var(--accent); }
 .footer-links { display: flex; gap: 20px; flex-wrap: wrap; }
-
-/* Platform Section */
+ 
+/* ── Platform Section */
 .platform-section {
   background: var(--bg1);
   border-top: 1px solid var(--border);
@@ -387,7 +387,7 @@ footer a:hover { color: var(--accent); }
 .checklist { display: flex; flex-direction: column; gap: 10px; }
 .check-item { display: flex; align-items: center; gap: 10px; font-size: 12px; color: var(--text2); }
 .check-icon { color: var(--low); font-size: 14px; flex-shrink: 0; }
-
+ 
 /* Mock panels */
 .platform-mock {
   background: var(--bg2); border: 1px solid var(--border);
@@ -402,7 +402,7 @@ footer a:hover { color: var(--accent); }
 }
 @keyframes scanline { 0% { top:0%; } 100% { top:100%; } }
 .mock-label { font-size: 10px; color: var(--text3); letter-spacing: 2px; margin-bottom: 14px; text-transform: uppercase; }
-
+ 
 .mock-watch-row { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border); transition: background .15s; border-radius: 4px; }
 .mock-watch-row:hover { background: rgba(0,217,255,0.04); }
 .mock-watch-info { flex: 1; min-width: 0; }
@@ -413,7 +413,7 @@ footer a:hover { color: var(--accent); }
 .mock-watch-score { text-align: right; flex-shrink: 0; }
 .mock-score { font-size: 15px; font-weight: 800; }
 .mock-risk { font-size: 9px; font-weight: 700; letter-spacing: 1px; }
-
+ 
 .mock-chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
 .mock-chip { padding: 3px 10px; border-radius: 12px; font-size: 10px; font-weight: 600; border: 1px solid var(--border); background: transparent; color: var(--text3); }
 .mock-chip-active { border-color: var(--accent); background: rgba(0,217,255,0.1); color: var(--accent); }
@@ -432,7 +432,7 @@ footer a:hover { color: var(--accent); }
 .mock-stat-label { font-size: 9px; color: var(--text3); letter-spacing: 1px; text-transform: uppercase; margin-top: 3px; }
 .mock-endpoint-row { display: flex; align-items: center; gap: 8px; padding: 7px 0; border-bottom: 1px solid var(--border); font-size: 10px; font-family: monospace; transition: background .15s; border-radius: 4px; }
 .mock-endpoint-row:hover { background: rgba(0,217,255,0.04); }
-
+ 
 /* Scan mock specific  */
 .mock-scan-port { padding: 2px 8px; border-radius: 4px; font-size: 10px; font-family: monospace; background: rgba(0,217,255,0.08); color: var(--accent); border: 1px solid rgba(0,217,255,0.2); }
 .mock-scan-finding { display: flex; align-items: center; gap: 8px; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 11px; transition: background .15s; border-radius: 4px; }
@@ -444,7 +444,7 @@ footer a:hover { color: var(--accent); }
   letter-spacing: 1px; background: rgba(255,204,0,0.1); color: var(--medium);
   border: 1px solid rgba(255,204,0,0.3); margin-bottom: 14px;
 }
-
+ 
 /* Trust / methodology section */
 .trust-section {
   padding: 72px 24px;
@@ -479,7 +479,7 @@ footer a:hover { color: var(--accent); }
   text-transform: uppercase; margin-top: 8px; margin-bottom: 12px;
 }
 .trust-card-detail { font-size: 12px; color: var(--text2); line-height: 1.7; }
-
+ 
 .trust-methods {
   display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 16px;
@@ -492,11 +492,54 @@ footer a:hover { color: var(--accent); }
 .trust-method-icon { font-size: 16px; color: var(--accent); flex-shrink: 0; }
 .trust-method-title { font-size: 12px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
 .trust-method-desc { font-size: 11px; color: var(--text2); line-height: 1.6; }
-
+ 
 @media (max-width: 768px) {
   .trust-grid { grid-template-columns: 1fr; }
 }
-
+ 
+/* Pilot section */
+.pilot-section {
+  background: var(--bg1);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  padding: 72px 24px;
+  transition: background .3s;
+}
+.pilot-inner {
+  max-width: 880px; margin: 0 auto; text-align: center;
+}
+.pilot-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 6px 16px; border-radius: 20px;
+  border: 1px solid rgba(0,232,124,0.3);
+  background: rgba(0,232,124,0.06);
+  color: var(--low); font-size: 11px; letter-spacing: 2px;
+  margin-bottom: 20px;
+}
+.pilot-title {
+  font-family: 'Syne', sans-serif; font-size: clamp(22px,4vw,30px);
+  font-weight: 800; margin-bottom: 14px; color: var(--text);
+}
+.pilot-sub {
+  font-size: 13px; color: var(--text2); line-height: 1.8;
+  max-width: 560px; margin: 0 auto 36px;
+}
+.pilot-points {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 14px; margin-bottom: 36px; text-align: left;
+}
+.pilot-point {
+  padding: 16px; background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 8px;
+}
+.pilot-point-num { font-size: 10px; color: var(--low); letter-spacing: 1px; margin-bottom: 6px; }
+.pilot-point-text { font-size: 12px; color: var(--text2); line-height: 1.6; }
+.pilot-point-text strong { color: var(--text); }
+ 
+@media (max-width: 768px) {
+  .pilot-points { grid-template-columns: 1fr; text-align: center; }
+}
+ 
 /* Access Request Modal */
 #accessModalOverlay {
   display: none; position: fixed; inset: 0;
@@ -520,7 +563,7 @@ footer a:hover { color: var(--accent); }
   display: block; font-size: 10px; color: var(--text3);
   letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px;
 }
-
+ 
 /* Live IP Demo Card (hero, right column) */
 .demo-live-card {
   background: var(--bg1); border: 1px solid var(--border);
@@ -553,7 +596,7 @@ footer a:hover { color: var(--accent); }
   white-space: nowrap;
 }
 .demo-live-body { padding: 22px; min-height: 110px; }
-
+ 
 .demo-live-loading {
   display: flex; align-items: center; gap: 12px; justify-content: center;
   color: var(--text2); font-size: 12px; padding: 30px 0;
@@ -564,7 +607,7 @@ footer a:hover { color: var(--accent); }
   animation: spin-live 0.7s linear infinite;
 }
 @keyframes spin-live { to { transform: rotate(360deg); } }
-
+ 
 /* Score header row — ring + IP/risk meta, mirrors the real dashboard result panel */
 .demo-live-scorerow {
   display: flex; align-items: center; gap: 18px;
@@ -584,7 +627,7 @@ footer a:hover { color: var(--accent); }
 }
 .demo-live-ring-num { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; line-height: 1; }
 .demo-live-ring-max { font-size: 8px; color: var(--text3); margin-top: 1px; }
-
+ 
 .demo-live-idmeta { flex: 1; min-width: 0; }
 .demo-live-ip {
   font-family: 'JetBrains Mono', monospace; font-size: 15px; font-weight: 700;
@@ -595,9 +638,9 @@ footer a:hover { color: var(--accent); }
   padding: 3px 10px; border-radius: 5px; font-size: 10px; font-weight: 700;
   letter-spacing: 1px;
 }
-
+ 
 /* Signal list — mirrors .signal-item from the real result panel */
-.demo-live-signals { display: flex; flex-direction: column; gap: 14px; }
+.demo-live-signals { display: flex; flex-direction: column; gap: 7px; }
 .demo-live-signal-row {
   display: flex; align-items: center; gap: 10px;
   padding: 8px 10px;
@@ -612,17 +655,17 @@ footer a:hover { color: var(--accent); }
   color: var(--text3); background: var(--bg3);
   padding: 1px 6px; border-radius: 3px; flex-shrink: 0;
 }
-
+ 
 .demo-live-error { font-size: 12px; color: var(--text3); text-align: center; padding: 26px 0; line-height: 1.7; }
-
+ 
 .demo-live-footnote {
-
+ 
   padding: 11px 18px; border-top: 1px solid var(--border);
   background: var(--bg2); font-size: 10px; color: var(--text3); line-height: 1.6;
 }
 .demo-live-footnote a { color: var(--accent); }
-
-
+ 
+ 
 /* Animations */
 .fade-up { opacity: 0; transform: translateY(28px); transition: opacity 0.55s ease, transform 0.55s ease; }
 .fade-up.visible { opacity: 1; transform: translateY(0); }
@@ -637,12 +680,12 @@ footer a:hover { color: var(--accent); }
 .stagger.visible > *:nth-child(8) { transition-delay:0.54s; opacity:1; transform:none; }
 .stagger.visible > *:nth-child(9) { transition-delay:0.61s; opacity:1; transform:none; }
 .stagger.visible > *:nth-child(10) { transition-delay:0.68s; opacity:1; transform:none; }
-
+ 
 @keyframes btn-glow {
   0%,100% { box-shadow: 0 0 12px rgba(0,217,255,0.3); }
   50%     { box-shadow: 0 0 28px rgba(0,217,255,0.6); }
 }
-
+ 
 /* Responsive */
 @media(max-width:768px) {
   .nav-right { display: none; }
@@ -967,12 +1010,12 @@ footer a:hover { color: var(--accent); }
 <div id="accessModalOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:500;align-items:center;justify-content:center;padding:24px;">
   <div class="modal-card">
     <div id="accessFormView">
-      <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:800;margin-bottom:6px;color:var(--text);">Request Access</div>
-      <div style="font-size:12px;color:var(--text2);line-height:1.7;margin-bottom:24px;">Tell us about yourself and we'll get you set up shortly.</div>
+      <div id="accessModalTitle" style="font-family:'Syne',sans-serif;font-size:20px;font-weight:800;margin-bottom:6px;color:var(--text);">Request Access</div>
+      <div id="accessModalSub" style="font-size:12px;color:var(--text2);line-height:1.7;margin-bottom:24px;">Tell us about yourself and we'll get you set up shortly.</div>
       <div id="accessErr" style="display:none;padding:10px 14px;background:rgba(255,51,85,0.1);border:1px solid rgba(255,51,85,0.3);border-radius:8px;font-size:12px;color:var(--critical);margin-bottom:16px;"></div>
-      <div style="margin-bottom:16px;"><label class="modal-label">Full Name</label><input type="text" id="reqName" placeholder="Dave Instd" maxlength="32" class="modal-input"></div>
-      <div style="margin-bottom:16px;"><label class="modal-label">Work Email</label><input type="email" id="reqEmail" placeholder="dave@company.com" maxlength="32" class="modal-input"></div>
-      <div style="margin-bottom:24px;">
+      <div style="margin-bottom:16px;"><label class="modal-label">Full Name</label><input type="text" id="reqName" placeholder="Full Name" maxlength="32" class="modal-input"></div>
+      <div style="margin-bottom:16px;"><label class="modal-label">Work Email</label><input type="email" id="reqEmail" placeholder="workemail@company.com" maxlength="32" class="modal-input"></div>
+      <div style="margin-bottom:16px;">
         <label class="modal-label">Organisation Type</label>
         <select id="reqCompany" class="modal-input" style="appearance:none;cursor:pointer;">
           <option value="">Select type…</option>
@@ -987,6 +1030,16 @@ footer a:hover { color: var(--accent); }
           <option>Other</option>
         </select>
       </div>
+      <div id="reqTeamSizeField" style="display:none;margin-bottom:24px;">
+        <label class="modal-label">SOC / Security Team Size</label>
+        <select id="reqTeamSize" class="modal-input" style="appearance:none;cursor:pointer;">
+          <option value="">Select size…</option>
+          <option>Just me</option>
+          <option>2–5 analysts</option>
+          <option>6–20 analysts</option>
+          <option>20+ analysts</option>
+        </select>
+      </div>
       <div class="stbtn" style="display:flex;gap:12px;">
         <button id="accessSubmitBtn" onclick="submitAccessRequest()" style="flex:1;padding:13px;border-radius:8px;border:none;cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;letter-spacing:1px;text-transform:uppercase;background:var(--accent);color:#000;">Submit Request →</button>
         <button onclick="hideAccessModal()" style="flex:1;padding:13px;border-radius:8px;background:transparent;color:var(--text2);border:1px solid var(--border);font-family:'JetBrains Mono',monospace;font-size:12px;cursor:pointer;">Cancel</button>
@@ -994,8 +1047,8 @@ footer a:hover { color: var(--accent); }
     </div>
     <div id="accessSuccessView" style="display:none;text-align:center;padding:8px 0;">
       <div style="font-size:44px;margin-bottom:14px;">✓</div>
-      <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:var(--low);margin-bottom:8px;">Request received!</div>
-      <div style="font-size:12px;color:var(--text2);line-height:1.7;margin-bottom:24px;">Thanks, <strong id="accessSuccessName" style="color:var(--text);">—</strong>. We'll review your request and be in touch shortly.</div>
+      <div id="accessSuccessTitle" style="font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:var(--low);margin-bottom:8px;">Request received!</div>
+      <div id="accessSuccessBody" style="font-size:12px;color:var(--text2);line-height:1.7;margin-bottom:24px;"></div>
       <button onclick="hideAccessModal()" style="width:100%;padding:13px;border-radius:8px;border:none;cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;background:var(--accent);color:#000;">Back to Home →</button>
     </div>
   </div>
@@ -1012,6 +1065,32 @@ footer a:hover { color: var(--accent); }
       <div class="risk-pill low">● LOW — ALLOW</div>
     </div>
     <a href="/login" class="btn btn-primary" style="padding:13px 36px;font-size:13px;">Start Analyzing IPs →</a>
+  </div>
+</section>
+
+<!-- Pilot Modal -->
+<section class="pilot-section">
+  <div class="pilot-inner">
+    <div class="pilot-badge">◆ FOR SOC &amp; SECURITY TEAMS</div>
+    <div class="pilot-title">Not ready to commit? Start a pilot.</div>
+    <div class="pilot-sub">No contracts. No migration. Compare your traffic against IPShield alongside your existing tools and discover what others might miss.</div>
+ 
+    <div class="pilot-points">
+      <div class="pilot-point">
+        <div class="pilot-point-num">SCOPE</div>
+        <div class="pilot-point-text">A pilot built around your traffic and threat profile, not a generic trial account.</div>
+      </div>
+      <div class="pilot-point">
+        <div class="pilot-point-num">DATA</div>
+        <div class="pilot-point-text">Run it against real IPs your team already sees, not a sanitized demo dataset.</div>
+      </div>
+      <div class="pilot-point">
+        <div class="pilot-point-num">COMMITMENT</div>
+        <div class="pilot-point-text">No procurement cycle to start. A real person scopes it with you first.</div>
+      </div>
+    </div>
+ 
+    <button onclick="showAccessModal('pilot')" class="btn btn-primary" style="padding:13px 32px;font-size:13px;">Start a Pilot →</button>
   </div>
 </section>
 
@@ -1038,7 +1117,7 @@ footer a:hover { color: var(--accent); }
 (function () {
   const body = document.getElementById("liveDemoBody");
   if (!body) return;
-
+ 
   // Deterministic hash so the same visitor sees a stable result on reload,
   function hashString(str) {
     let h = 0;
@@ -1048,7 +1127,7 @@ footer a:hover { color: var(--accent); }
     }
     return Math.abs(h);
   }
-
+ 
   function illustrativeProfile(ip) {
     const h     = hashString(ip);
     const score = h % 100;
@@ -1057,14 +1136,13 @@ footer a:hover { color: var(--accent); }
     else if (score > 60) { risk = "HIGH";     color = "var(--high)"; }
     else if (score > 30) { risk = "MEDIUM";   color = "var(--medium)"; }
     else                  { risk = "LOW";      color = "var(--low)"; }
-
+ 
     // FAKE sample values — these are NOT derived from the real IP in any way
     // (no WHOIS, no ASN registry, no geo lookup). They're picked from a fixed
-    // list using a hash of the IP string purely so a given visitor sees the
     const FAKE_NETWORK_TYPES = ["Residential ISP", "Datacenter / Cloud", "Business broadband", "Mobile carrier"];
     const FAKE_ASN_SAMPLES   = ["AS7922 Comcast", "AS16509 Amazon", "AS6128 Cablevision", "AS8075 Microsoft", "AS3320 Deutsche Telekom"];
     const feedHits           = h % 7 === 0 ? 1 : 0; // mostly clean, occasionally "flagged" for variety
-
+ 
     return {
       score, risk, color,
       networkType: FAKE_NETWORK_TYPES[h % FAKE_NETWORK_TYPES.length],
@@ -1072,13 +1150,13 @@ footer a:hover { color: var(--accent); }
       feedHits,
     };
   }
-
+ 
   function renderResult(ip) {
     const p     = illustrativeProfile(ip);
     const r     = 32;
     const circ  = 2 * Math.PI * r;
     const offset = circ - (p.score / 100) * circ;
-
+ 
     body.innerHTML = `
       <div class="demo-live-scorerow">
         <div class="demo-live-ring-wrap">
@@ -1097,7 +1175,7 @@ footer a:hover { color: var(--accent); }
           <div class="demo-live-pill" style="background:${p.color}22;color:${p.color};border:1px solid ${p.color}66;">${p.risk}</div>
         </div>
       </div>
-
+ 
         <div class="demo-live-signals">
         <div class="demo-live-signal-row">
           <span class="demo-live-signal-icon">🎯</span>
@@ -1122,14 +1200,14 @@ footer a:hover { color: var(--accent); }
           <span class="demo-live-signal-val" style="color:${p.feedHits ? "var(--high)" : "var(--low)"};">${p.feedHits ? "1 flag" : "Clean"}</span>
         </div>
       </div>`;
-
+ 
     // Animate the ring fill in on next frame, same as the real dashboard panel
     requestAnimationFrame(() => {
       const fill = body.querySelector(".demo-live-ring-fill");
       if (fill) fill.style.strokeDashoffset = offset;
     });
   }
-
+ 
   function renderError() {
     body.innerHTML = `
       <div class="demo-live-error">
@@ -1137,7 +1215,7 @@ footer a:hover { color: var(--accent); }
         networks/VPNs. <a href="/api/docs" style="color:var(--accent);">Try the real API</a> with any IP instead.
       </div>`;
   }
-
+ 
   fetch("https://api.ipify.org?format=json")
     .then((res) => res.json())
     .then((data) => {
@@ -1146,27 +1224,27 @@ footer a:hover { color: var(--accent); }
     })
     .catch(renderError);
 })();
-
+ 
 // Theme toggle 
 (function () {
   const html    = document.documentElement;
   const KEY     = "ipshield_theme";
   const saved   = localStorage.getItem(KEY);
-
+ 
   // Apply saved preference immediately (before paint)
   if (saved) html.setAttribute("data-theme", saved);
-
+ 
   function getTheme()    { return html.getAttribute("data-theme") || "dark"; }
   function toggleTheme() {
     const next = getTheme() === "dark" ? "light" : "dark";
     html.setAttribute("data-theme", next);
     localStorage.setItem(KEY, next);
   }
-
+ 
   // Wire both toggle buttons (desktop + mobile)
   document.getElementById("themeToggleDesktop").addEventListener("click", toggleTheme);
   document.getElementById("themeToggleMobile").addEventListener("click", toggleTheme);
-
+ 
   // Show mobile toggle only when hamburger is visible
   const mq = window.matchMedia("(max-width: 768px)");
   function syncMobileToggle(e) {
@@ -1175,7 +1253,7 @@ footer a:hover { color: var(--accent); }
   mq.addEventListener("change", syncMobileToggle);
   syncMobileToggle(mq);
 })();
-
+ 
 // Auth redirect 
 const existingToken = localStorage.getItem("token");
 if (existingToken) {
@@ -1186,7 +1264,7 @@ if (existingToken) {
     })
     .catch(() => {});
 }
-
+ 
 // Public stats 
 async function loadPublicStats() {
   try {
@@ -1200,13 +1278,13 @@ async function loadPublicStats() {
   } catch(_) {}
 }
 loadPublicStats();
-
+ 
 // Nav drawer 
 const hamburger = document.getElementById("mainHamburger");
 const drawer    = document.getElementById("navDrawer");
 const overlay   = document.getElementById("navOverlay");
 const closeBtn  = document.getElementById("drawerClose");
-
+ 
 function openDrawer() {
   hamburger.setAttribute("aria-expanded","true");
   drawer.classList.add("open");
@@ -1227,9 +1305,38 @@ closeBtn.addEventListener("click", closeDrawer);
 overlay.addEventListener("click", closeDrawer);
 document.addEventListener("keydown", e => { if (e.key === "Escape") { closeDrawer(); hideAccessModal(); } });
 window.matchMedia("(min-width:769px)").addEventListener("change", e => { if (e.matches) closeDrawer(); });
-
-// Access modal 
-function showAccessModal() {
+ 
+// Access modal — mode-aware: "access" (default) or "pilot" 
+let accessModalMode = "access";
+ 
+const ACCESS_MODAL_COPY = {
+  access: {
+    title:        "Request Access",
+    sub:          "Tell us about yourself and we'll get you set up shortly.",
+    showTeamSize: false,
+    submitLabel:  "Submit Request →",
+    successTitle: "Request received!",
+    successBody:  (name) => `Thanks, <strong style="color:var(--text);">${name}</strong>. We'll review your request and be in touch shortly.`,
+  },
+  pilot: {
+    title:        "Start a Pilot",
+    sub:          "Tell us about your team and we'll scope a pilot — real IPs, real scoring, no commitment.",
+    showTeamSize: true,
+    submitLabel:  "Request Pilot →",
+    successTitle: "Pilot request received!",
+    successBody:  (name) => `Thanks, <strong style="color:var(--text);">${name}</strong>. A real person will reach out to scope your pilot — not a generic onboarding email.`,
+  },
+};
+ 
+function showAccessModal(mode = "access") {
+  accessModalMode = ACCESS_MODAL_COPY[mode] ? mode : "access";
+  const copy = ACCESS_MODAL_COPY[accessModalMode];
+ 
+  document.getElementById("accessModalTitle").textContent = copy.title;
+  document.getElementById("accessModalSub").textContent    = copy.sub;
+  document.getElementById("reqTeamSizeField").style.display = copy.showTeamSize ? "block" : "none";
+  document.getElementById("accessSubmitBtn").textContent   = copy.submitLabel;
+ 
   const ov = document.getElementById("accessModalOverlay");
   ov.style.display = "flex";
   document.body.style.overflow = "hidden";
@@ -1241,81 +1348,89 @@ function hideAccessModal() {
   document.getElementById("accessFormView").style.display    = "block";
   document.getElementById("accessSuccessView").style.display = "none";
   document.getElementById("accessErr").style.display         = "none";
-  document.getElementById("reqName").value    = "";
-  document.getElementById("reqEmail").value   = "";
-  document.getElementById("reqCompany").value = "";
+  document.getElementById("reqName").value     = "";
+  document.getElementById("reqEmail").value    = "";
+  document.getElementById("reqCompany").value  = "";
+  document.getElementById("reqTeamSize").value = "";
 }
 document.getElementById("accessModalOverlay").addEventListener("click", function(e) {
   if (e.target === this) hideAccessModal();
 });
-
+ 
 async function submitAccessRequest() {
   const errEl   = document.getElementById("accessErr");
   const btn     = document.getElementById("accessSubmitBtn");
+  const copy    = ACCESS_MODAL_COPY[accessModalMode];
   const name    = document.getElementById("reqName").value.trim();
   const email   = document.getElementById("reqEmail").value.trim();
   const company = document.getElementById("reqCompany").value;
-
+  const teamSize = document.getElementById("reqTeamSize").value;
+ 
   errEl.style.display = "none";
   if (!name)                         { errEl.textContent = "Full name is required.";            errEl.style.display = "block"; return; }
   if (!email || !email.includes("@")){ errEl.textContent = "Enter a valid work email.";         errEl.style.display = "block"; return; }
   if (!company)                      { errEl.textContent = "Please select an organisation type."; errEl.style.display = "block"; return; }
-
+  if (copy.showTeamSize && !teamSize) { errEl.textContent = "Please select your team size.";    errEl.style.display = "block"; return; }
+ 
   btn.disabled = true; btn.textContent = "Sending…";
   try {
+    const body = { name, email, company, request_type: accessModalMode };
+    if (copy.showTeamSize) body.team_size = teamSize;
+ 
     const res  = await fetch("/api/access-request", {
       method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, email, company }),
+      body: JSON.stringify(body),
     });
     const data = await res.json();
     if (!res.ok) {
       errEl.textContent = data.error || "Submission failed. Please try again.";
       errEl.style.display = "block";
-      btn.disabled = false; btn.textContent = "Submit Request →";
+      btn.disabled = false; btn.textContent = copy.submitLabel;
       return;
     }
-    document.getElementById("accessSuccessName").textContent  = name;
+    document.getElementById("accessSuccessTitle").textContent  = copy.successTitle;
+    document.getElementById("accessSuccessBody").innerHTML     = copy.successBody(name);
     document.getElementById("accessFormView").style.display    = "none";
     document.getElementById("accessSuccessView").style.display = "block";
   } catch {
     errEl.textContent = "Network error. Please try again.";
     errEl.style.display = "block";
-    btn.disabled = false; btn.textContent = "Submit Request →";
+    btn.disabled = false; btn.textContent = copy.submitLabel;
   }
 }
-
+ 
 // Scroll animations 
 (function () {
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
       if (!entry.isIntersecting) return;
       entry.target.classList.add("visible");
-
+ 
       entry.target.querySelectorAll(".mock-bar[data-width]").forEach(bar => {
         requestAnimationFrame(() => {
           bar.style.setProperty("--target-width", bar.dataset.width);
           bar.classList.add("animated");
         });
       });
-
+ 
       entry.target.querySelectorAll("[data-countup]").forEach(el => countUp(el));
       observer.unobserve(entry.target);
     });
   }, { threshold: 0.15 });
-
-  document.querySelectorAll(".hero, .stats-bar, .features, .platform-section, .trust-section, .demo-section, .cta").forEach(el => {
+ 
+  document.querySelectorAll(".hero, .stats-bar, .features, .platform-section, .trust-section, .pilot-section, .demo-section, .cta").forEach(el => {
     el.classList.add("fade-up");
     observer.observe(el);
   });
-
+ 
   const grid = document.querySelector(".features-grid");
   if (grid) { grid.classList.add("stagger"); observer.observe(grid); }
-
+ 
   document.querySelectorAll(".platform-row").forEach(row => {
     row.classList.add("fade-up");
     observer.observe(row);
   });
-
+ 
   function countUp(el) {
     const target   = parseFloat(el.dataset.countup);
     const suffix   = el.dataset.suffix   || "";
@@ -1330,7 +1445,7 @@ async function submitAccessRequest() {
     }
     requestAnimationFrame(step);
   }
-
+ 
   window.addEventListener("load", () => {
     const hero = document.querySelector(".hero");
     if (hero) setTimeout(() => hero.classList.add("visible"), 80);
