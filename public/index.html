@@ -262,7 +262,7 @@ header {
   color: var(--text);
 }
 .hero h1 span { color: var(--accent); }
-.hero p { font-size: 15px; color: var(--text2); line-height: 1.8; margin-bottom: 36px; max-width: 480px; }
+.hero p { font-size: 15px; color: var(--text2); line-height: 1.8; margin-bottom: 36px; max-width: 420px; }
 .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; }
 .hero-actions .btn { padding: 13px 28px; font-size: 13px; }
  
@@ -275,7 +275,7 @@ header {
   border: 1.5px solid rgba(255,51,85,0.25);
   border-radius: 8px;
   background: rgba(255,51,85,0.05);
-  max-width: 480px;
+  max-width: 418px;
 }
 .hero-cost-icon { font-size: 16px; color: var(--critical); flex-shrink: 0; line-height: 1.4; }
 .hero-cost-text { font-size: 12px; color: var(--text2); line-height: 1.7; }
@@ -450,7 +450,20 @@ footer a:hover { color: var(--accent); }
   padding: 72px 24px;
   border-bottom: 1px solid var(--border);
 }
-.trust-inner { max-width: 1060px; margin: 0 auto; }
+
+
+.trust-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 6px 16px; border-radius: 20px;
+  border: 1px solid rgba(0, 232, 124, 0.3);
+  background:  rgba(0, 232, 124, 0.06);
+  color: var(--low); font-size: 11px; letter-spacing: 2px;
+  margin-bottom: 20px;
+}
+
+.trust-inner { max-width: 880px;
+    margin: 0 auto;
+    text-align: center; }
 .trust-eyebrow {
   text-align: center; font-size: 11px; color: var(--accent);
   letter-spacing: 3px; text-transform: uppercase; margin-bottom: 12px;
@@ -461,7 +474,7 @@ footer a:hover { color: var(--accent); }
 }
 .trust-grid {
   display: grid; grid-template-columns: repeat(3, 1fr);
-  gap: 18px; margin-bottom: 40px;
+  gap: 18px; margin-bottom: 40px; text-align: left;
 }
 .trust-card {
   background: var(--bg1); border: 1px solid var(--border);
@@ -516,6 +529,7 @@ footer a:hover { color: var(--accent); }
   color: var(--low); font-size: 11px; letter-spacing: 2px;
   margin-bottom: 20px;
 }
+
 .pilot-title {
   font-family: 'Syne', sans-serif; font-size: clamp(22px,4vw,30px);
   font-weight: 800; margin-bottom: 14px; color: var(--text);
@@ -640,7 +654,7 @@ footer a:hover { color: var(--accent); }
 }
  
 /* Signal list — mirrors .signal-item from the real result panel */
-.demo-live-signals { display: flex; flex-direction: column; gap: 7px; }
+.demo-live-signals { display: flex; flex-direction: column; gap: 12px; }
 .demo-live-signal-row {
   display: flex; align-items: center; gap: 10px;
   padding: 8px 10px;
@@ -748,7 +762,7 @@ footer a:hover { color: var(--accent); }
       <span class="icon-moon">🌙</span>
     </button>
     <a href="/api/docs" class="btn btn-ghost">API Docs</a>
-    <button onclick="showAccessModal('pilot')" class="btn btn-ghost">Request Pilot</button>
+    <button onclick="showAccessModal('pilot')" class="btn btn-ghost">Request Access</button>
     <a href="/login" class="btn btn-primary">Sign In →</a>
   </nav>
     <!-- Theme toggle — mobile (shown next to hamburger) -->
@@ -774,7 +788,7 @@ footer a:hover { color: var(--accent); }
   </div>
   <div class="drawer-body">
     <a href="/api/docs">API Docs</a>
-    <a onclick="showAccessModal('pilot')" >Request Pilot</button>
+    <a onclick="showAccessModal('pilot')" >Request Access</button>
     <a href="/login" class="primary">Sign In →</a>
   </div>
 </div>
@@ -787,24 +801,26 @@ footer a:hover { color: var(--accent); }
         REAL-TIME THREAT INTELLIGENCE
       </div>
       <h1>Know the risk behind<br>every <span>IP address</span></h1>
-      <p>Score suspicious IPs in milliseconds, then give your SOC a clear block, monitor, or review decision they can defend.</p>
-
+      <p>Score suspicious IPs in milliseconds. Give your SOC a clear, defensible decision: block, monitor, or review.</p>
+      
+       <!-- demo IP  -->
       <div class="hero-cost">
         <span class="hero-cost-icon">🚩</span>
         <div class="hero-cost-text">
-          One IP that looks clean but isn't for fraud, or a breach to slip through.
-          Of the <span class="hero-cost-num"> 500K+ IPs</span> scored by IPshield.<span class="hero-cost-num"> Over 32,000</span> were
-          flagged as CRITICAL. Many likely to have pass a manual review.
+          The most dangerous IPs don't look dangerous.
+          Of <span class="hero-cost-num"> 500K+ IPs</span> scored by IPshield,<span class="hero-cost-num"> 32,000+</span> were
+          flagged as CRITICAL. Many appeared legitimate enough to pass a manual review.
         </div>
       </div>
-
       <div class="hero-actions">
-        <button onclick="showAccessModal()" class="btn btn-primary">Request Access →</button>
+        <button onclick="showAccessModal('pilot')" class="btn btn-primary">Request Access →</button>
         <a href="/api/docs" class="btn btn-ghost">View API Docs</a>
       </div>
     </div>
 
     <div class="hero-demo">
+      
+       <!-- demo card  -->
       <div class="demo-live-card">
         <div class="demo-live-card-header">
           <div class="demo-live-label"><span class="demo-live-livedot"></span>LIVE — YOUR DETECTED IP</div>
@@ -817,11 +833,12 @@ footer a:hover { color: var(--accent); }
             <span>Detecting your IP address…</span>
           </div>
         </div>
-
         <div class="demo-live-footnote">
           Score and rows marked <strong>SAMPLE</strong> are illustrative only. Your IP is real, but the network type, ASN and score shown are not from a real lookup. <a href="/api/docs">See the real API →</a>
         </div>
       </div>
+      
+      
     </div>
   </div>
 </section>
@@ -958,7 +975,7 @@ footer a:hover { color: var(--accent); }
 <!-- Trust / Methodology -->
 <section class="trust-section">
   <div class="trust-inner">
-    <div class="trust-eyebrow">Methodology, Not Marketing</div>
+    <div class="trust-badge">◆ Methodology, Not Marketing</div>
     <div class="section-title" style="margin-bottom:6px;">Numbers you can check.</div>
     <div class="trust-sub">No certification claims yet. No black-box scoring. IPShield evaluates measurable security signals and shows exactly how every score is determined.</div>
 
@@ -1090,15 +1107,15 @@ footer a:hover { color: var(--accent); }
       </div>
     </div>
  
-    <button onclick="showAccessModal('pilot')" class="btn btn-primary" style="padding:13px 32px;font-size:13px;">Request Pilot →</button>
+    <button onclick="showAccessModal('pilot')" class="btn btn-primary" style="padding:13px 32px;font-size:13px;">Request Access →</button>
   </div>
 </section>
 
 <section class="cta">
   <h2>Ready to secure your <span style="color:var(--accent)">infrastructure?</span></h2>
-  <p>Request access to the IPShield platform or integrate directly via the REST API. Full Swagger documentation included.</p>
+  <p>Request pilot to the IPShield platform or integrate directly via the REST API. Full Swagger documentation included.</p>
   <div class="cta-actions">
-    <button onclick="showAccessModal()" class="btn btn-primary">Request Access →</button>
+    <button onclick="showAccessModal('pilot')" class="btn btn-primary">Request Access →</button>
     <a href="/api/docs" class="btn btn-ghost">API Documentation</a>
   </div>
 </section>
@@ -1319,12 +1336,12 @@ const ACCESS_MODAL_COPY = {
     successBody:  (name) => `Thanks, <strong style="color:var(--text);">${name}</strong>. We'll review your request and be in touch shortly.`,
   },
   pilot: {
-    title:        "Request Pilot",
-    sub:          "Tell us about your team and we'll scope a pilot — real IPs, real scoring, no commitment.",
+    title:        "Request Access",
+    sub:          "Tell us about your team and we'll get you set up shortly.",
     showTeamSize: true,
-    submitLabel:  "Request Pilot →",
-    successTitle: "Pilot request received!",
-    successBody:  (name) => `Thanks, <strong style="color:var(--text);">${name}</strong>. A real person will reach out to scope your pilot — not a generic onboarding email.`,
+    submitLabel:  "Submit Request →",
+    successTitle: "Request received!",
+    successBody:  (name) => `Thanks, <strong style="color:var(--text);">${name}</strong>. We'll review your request and be in touch shortly to scope your pilot.`,
   },
 };
  
