@@ -262,7 +262,7 @@ header {
   color: var(--text);
 }
 .hero h1 span { color: var(--accent); }
-.hero p { font-size: 15px; color: var(--text2); line-height: 1.8; max-width: 420px; }
+.hero p { font-size: 15px; color: var(--text2); line-height: 1.8; max-width: 420px; margin-bottom: 24px; }
 .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; }
 .hero-actions .btn { padding: 13px 28px; font-size: 13px; }
  
@@ -289,7 +289,7 @@ header {
 @media (max-width: 900px) {
   .hero-grid { grid-template-columns: 1fr; gap: 36px; }
   .hero-copy { text-align: center; }
-  .hero-copy p { margin-left: auto; margin-right: auto; }
+  .hero-copy p { margin-left: auto; margin-right: auto; margin-bottom: 24px;}
   .hero-actions { justify-content: center; }
   .hero-demo { width: 100%; }
 }
@@ -800,18 +800,18 @@ footer a:hover { color: var(--accent); }
         <div class="badge-dot"></div>
         REAL-TIME THREAT INTELLIGENCE
       </div>
-      <h1>Know the risk behind<br>every <span>IP address</span></h1>
-      <p>Score suspicious IPs in milliseconds. Give your SOC a clear, defensible decision: block, monitor, or review.</p>
+      <h1>Make faster,<br>confident<span><br>IP threat decisions</span> </h1>
+      <p>Score suspicious IPs in milliseconds. Reduce analyst guesswork with transparent risk assessments and clear actions: block, monitor, or review.</p>
       
        <!-- demo IP  -->
-      <div class="hero-cost">
+      <!-- <div class="hero-cost">
         <span class="hero-cost-icon">🚩</span>
         <div class="hero-cost-text">
           The most dangerous IPs don't look dangerous.
           Of <span class="hero-cost-num"> 500K+ IPs</span> scored by IPshield,<span class="hero-cost-num"> 32,000+</span> were
           flagged as CRITICAL. Many appeared legitimate enough to pass a manual review.
         </div>
-      </div>
+      </div> -->
       <div class="hero-actions">
         <button onclick="showAccessModal('pilot')" class="btn btn-primary">Request Access →</button>
         <a href="/api/docs" class="btn btn-ghost">View API Docs</a>

@@ -3,6 +3,7 @@ const validator = require("validator");
 
 let transporter = null;
 
+/* Escape HTML to prevent injection in email templates */
 function escapeHtml(str = "") {
   return String(str)
     .replace(/&/g, "&amp;")
@@ -215,6 +216,13 @@ This link expires in 7 days.
   });
 }
 
+const ALERT_RISK_COLORS = {
+  CRITICAL: "#FF3355",
+  HIGH:     "#FF7700",
+  MEDIUM:   "#FFCC00",
+  LOW:      "#00E87C",
+};
+
 /* Security / threat alert email */
 async function sendAlertEmail(payload) {
   if (!process.env.ALERT_TO) {
@@ -222,10 +230,16 @@ async function sendAlertEmail(payload) {
   }
 
   const riskLevel = escapeHtml(payload.riskLevel || "ALERT");
-  const title = escapeHtml(payload.title || payload.ip || "Threat Detected");
-  const ip = escapeHtml(payload.ip || "Unknown");
-  const score = escapeHtml(payload.score || "N/A");
-  const type = escapeHtml(payload.type || "Unknown");
+  const title     = escapeHtml(payload.title || payload.ip || "Threat Detected");
+  const ip        = escapeHtml(payload.ip || "Unknown");
+  const score     = escapeHtml(String(payload.score ?? "N/A"));
+  const type      = escapeHtml(payload.type || "Unknown");
+  const action    = escapeHtml(payload.action || "");
+  const location  = escapeHtml(payload.location || "");
+  const isp       = escapeHtml(payload.isp || "");
+  const flags     = escapeHtml(payload.flags || "");
+
+  const accentColor = ALERT_RISK_COLORS[payload.riskLevel] || "#00d9ff";
 
   return sendEmail({
     to: process.env.ALERT_TO,
@@ -236,22 +250,28 @@ async function sendAlertEmail(payload) {
 ${riskLevel} Alert
 
 IP: ${ip}
-Score: ${score}
+Score: ${score}/100
 Type: ${type}
-`.trim(),
+${action ? `Action: ${action}\n` : ""}${location ? `Location: ${location}\n` : ""}${isp ? `ISP: ${isp}\n` : ""}${flags ? `Flags: ${flags}\n` : ""}`.trim(),
 
-    html: `
-      <div style="font-family:Arial,sans-serif;">
-        <h2>${riskLevel} Alert</h2>
-
-        <p><strong>IP:</strong> ${ip}</p>
-        <p><strong>Score:</strong> ${score}</p>
-        <p><strong>Type:</strong> ${type}</p>
-      </div>
-    `,
+    html: buildBrandedEmailHTML({
+      heading: `${payload.riskLevel || "ALERT"} Alert`,
+      accentColor,
+      rows: [
+        ["IP",       `<span style="font-weight:700;">${ip}</span>`],
+        ["Score",    `<span style="color:${accentColor};font-weight:700;">${score}/100</span>`],
+        ["Risk Level", `<span style="color:${accentColor};font-weight:700;">${riskLevel}</span>`],
+        ["Type",     type],
+        ["Action",   action],
+        ["Location", location],
+        ["ISP",      isp],
+        ["Flags",    flags],
+      ],
+    }),
   });
 }
 
+/* Verify SMTP at startup */
 verifySMTP();
 
 module.exports = {
