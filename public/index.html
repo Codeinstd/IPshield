@@ -270,9 +270,9 @@ header {
 .hero-cost {
   display: flex; gap: 12px; align-items: flex-start;
   margin-top: 28px;
+  margin-bottom: 24px;
   padding: 14px 16px;
-  border: 1px solid rgba(255,51,85,0.25);
-  border-left: 3px solid var(--critical);
+  border: 1.5px solid rgba(255,51,85,0.25);
   border-radius: 8px;
   background: rgba(255,51,85,0.05);
   max-width: 480px;
@@ -748,7 +748,7 @@ footer a:hover { color: var(--accent); }
       <span class="icon-moon">🌙</span>
     </button>
     <a href="/api/docs" class="btn btn-ghost">API Docs</a>
-    <button onclick="showAccessModal()" class="btn btn-ghost">Request Access</button>
+    <button onclick="showAccessModal('pilot')" class="btn btn-ghost">Request Pilot</button>
     <a href="/login" class="btn btn-primary">Sign In →</a>
   </nav>
     <!-- Theme toggle — mobile (shown next to hamburger) -->
@@ -774,7 +774,7 @@ footer a:hover { color: var(--accent); }
   </div>
   <div class="drawer-body">
     <a href="/api/docs">API Docs</a>
-    <a onclick="showAccessModal()">Request Access</button>
+    <a onclick="showAccessModal('pilot')" >Request Pilot</button>
     <a href="/login" class="primary">Sign In →</a>
   </div>
 </div>
@@ -792,8 +792,8 @@ footer a:hover { color: var(--accent); }
       <div class="hero-cost">
         <span class="hero-cost-icon">🚩</span>
         <div class="hero-cost-text">
-          One IP <strong>that looks clean </strong>but isn't for fraud, or a breach to slip through.
-          <strong>Of the 500K+ IPs</strong> scored by IPshield.<span class="hero-cost-num"> Over 32,000</span> were
+          One IP that looks clean but isn't for fraud, or a breach to slip through.
+          Of the <span class="hero-cost-num"> 500K+ IPs</span> scored by IPshield.<span class="hero-cost-num"> Over 32,000</span> were
           flagged as CRITICAL. Many likely to have pass a manual review.
         </div>
       </div>
@@ -1090,7 +1090,7 @@ footer a:hover { color: var(--accent); }
       </div>
     </div>
  
-    <button onclick="showAccessModal('pilot')" class="btn btn-primary" style="padding:13px 32px;font-size:13px;">Start a Pilot →</button>
+    <button onclick="showAccessModal('pilot')" class="btn btn-primary" style="padding:13px 32px;font-size:13px;">Request Pilot →</button>
   </div>
 </section>
 
@@ -1319,7 +1319,7 @@ const ACCESS_MODAL_COPY = {
     successBody:  (name) => `Thanks, <strong style="color:var(--text);">${name}</strong>. We'll review your request and be in touch shortly.`,
   },
   pilot: {
-    title:        "Start a Pilot",
+    title:        "Request Pilot",
     sub:          "Tell us about your team and we'll scope a pilot — real IPs, real scoring, no commitment.",
     showTeamSize: true,
     submitLabel:  "Request Pilot →",
