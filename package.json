@@ -16,6 +16,7 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "@upstash/redis": "^1.38.0",
     "axios": "^1.15.1",
     "bcryptjs": "^3.0.3",
     "body-parser": "^2.2.2",
@@ -35,7 +36,7 @@
     "morgan": "^1.10.1",
     "node-cache": "^5.1.2",
     "node-cron": "^4.2.1",
-    "nodemailer": "^8.0.10",
+    "nodemailer": "^9.0.1",
     "otplib": "^12.0.1",
     "pdf-lib": "^1.17.1",
     "pdfkit": "^0.18.0",
