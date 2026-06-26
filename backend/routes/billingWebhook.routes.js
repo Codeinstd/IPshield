@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 const router  = express.Router();
 const Stripe  = require("stripe");
@@ -5,6 +6,7 @@ const db      = require("../store/db");
 const { planForPriceId } = require("../config/plans");
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+
 
 router.post("/", async (req, res) => {
   const sig = req.headers["stripe-signature"];
