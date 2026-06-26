@@ -3,6 +3,7 @@
   let apiVersion = localStorage.getItem("ipshield_api_version") || "v2";  
   let API = `/api/${apiVersion}`;
   const API_KEY  = localStorage.getItem("ipshield_api_key") || "";
+  const PLANS_TEAM_PRICE = 70;
 
   const ipInput    = document.getElementById("ipInput");
   const scoreBtn   = document.getElementById("scoreBtn");
@@ -224,6 +225,19 @@
   toggle.style.cssText = "padding:6px 12px;font-size:11px;";
   toggle.addEventListener("click", toggleTheme);
   headerRight.prepend(toggle);
+
+  // Plan / billing badge
+   const planBtn = document.createElement("button");
+  planBtn.id          = "planBtn";
+  planBtn.textContent = "PLAN";
+  planBtn.title       = "Click to view billing & plan";
+  planBtn.style.cssText = `
+    padding:4px 10px; margin-left:8px; font-size:10px;font-weight:700;font-family:inherit;
+    border-radius:4px;cursor:pointer;letter-spacing:1px;
+    color:var(--low);border:1px solid var(--low);
+    background:rgba(0,232,124,0.1);`;
+  planBtn.addEventListener("click", showPlanPanel);
+  headerRight.prepend(planBtn);
  
   // API version badge
   const badge = document.createElement("button");
@@ -2828,6 +2842,210 @@
   await refreshList();
   }
 
+  // plan / billing function
+   let _billingCache = null;
+ 
+  async function loadBillingInfo() {
+    try {
+      const res = await fetch("/api/v2/billing/me", { headers: authHeaders() });
+      if (!res.ok) return; // not a logged-in "user" type (e.g. API-key-only context) — leave badge as-is
+      const data = await res.json();
+      _billingCache = data;
+ 
+      const btn = document.getElementById("planBtn");
+      if (!btn) return;
+ 
+      const planName = data.planDetails?.name || data.plan || "Free";
+      const isTeam   = data.plan === "team";
+      const canceling = !!data.cancel_at_period_end;
+ 
+      btn.textContent = planName.toUpperCase() + (canceling ? " ⚠" : "");
+ 
+      const color = canceling ? "var(--medium)" : isTeam ? "var(--accent)" : "var(--low)";
+      btn.style.color       = color;
+      btn.style.borderColor  = color;
+      btn.style.background   = canceling ? "rgba(255,204,0,0.1)" : isTeam ? "rgba(0,217,255,0.1)" : "rgba(0,232,124,0.1)";
+ 
+    } catch (_) {
+  
+    }
+  }
+
+  // plan / billing panel
+  async function showPlanPanel() {
+    document.getElementById("planModal")?.remove();
+ 
+    const overlay = document.createElement("div");
+    overlay.id = "planModal";
+    overlay.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:10000;display:flex;align-items:center;justify-content:center;padding:24px;";
+ 
+    const modal = document.createElement("div");
+    modal.style.cssText = "background:var(--bg1);border:1px solid var(--border);border-radius:12px;width:100%;max-width:480px;overflow:hidden;";
+ 
+    modal.innerHTML = `
+      <div style="padding:20px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+        <div style="font-size:14px;font-weight:700;color:var(--text);">💳 Plan &amp; Billing</div>
+        <button id="planModalClose" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:20px;padding:4px;">✕</button>
+      </div>
+      <div id="planModalBody" style="padding:24px;">
+        <div style="text-align:center;padding:20px 0;">
+          <div class="spinner" style="margin:0 auto 12px;"></div>
+          <div style="font-size:12px;color:var(--text2);">Loading billing info…</div>
+        </div>
+      </div>`;
+ 
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+    document.getElementById("planModalClose").addEventListener("click", () => overlay.remove());
+    overlay.addEventListener("click", e => { if (e.target === overlay) overlay.remove(); });
+ 
+    await _renderPlanModalBody();
+  }
+
+  // plan / render modal body 
+    async function _renderPlanModalBody() {
+    const body = document.getElementById("planModalBody");
+    if (!body) return;
+ 
+    try {
+      const res  = await fetch("/api/v2/billing/me", { headers: authHeaders() });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to load billing info");
+      _billingCache = data;
+ 
+      const plan      = data.plan || "free";
+      const isTeam    = plan === "team";
+      const canceling = !!data.cancel_at_period_end;
+      const periodEnd = data.current_period_end
+        ? new Date(data.current_period_end).toLocaleDateString(undefined, { year:"numeric", month:"long", day:"numeric" })
+        : null;
+ 
+      const usage = data.usageToday || [];
+      const usageRows = ["score","batch","active_scan","watchlist","siem_targets"].map(feature => {
+        const row   = usage.find(u => u.feature === feature);
+        const used  = row?.count ?? 0;
+        const limit = data.planDetails?.featureLimits?.[feature];
+        const limitLabel = limit === null ? "Unlimited" : limit === false ? "Not available" : limit;
+        return `<div class="kv"><span class="kv-key" style="text-transform:capitalize;">${feature.replace("_"," ")}</span>
+          <span class="kv-val">${used} / ${limitLabel}</span></div>`;
+      }).join("");
+ 
+      let actionsHtml;
+      if (!isTeam) {
+        actionsHtml = `
+          <button id="planUpgradeBtn" style="width:100%;padding:12px;border-radius:8px;border:none;cursor:pointer;
+            font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;letter-spacing:1px;
+            background:var(--accent);color:#000;">
+            Upgrade to Team — $${PLANS_TEAM_PRICE} →
+          </button>`;
+      } else if (canceling) {
+        actionsHtml = `
+          <div style="padding:12px 14px;background:rgba(255,204,0,0.08);border:1px solid rgba(255,204,0,0.3);
+            border-radius:8px;font-size:11px;color:var(--medium);line-height:1.6;margin-bottom:14px;">
+            ⚠ Your subscription is set to cancel${periodEnd ? ` on <strong>${periodEnd}</strong>` : ""}.
+            You'll keep full Team access until then.
+          </div>
+          <button id="planResumeBtn" style="width:100%;padding:12px;border-radius:8px;border:1px solid var(--accent);cursor:pointer;
+            font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;letter-spacing:1px;
+            background:rgba(0,217,255,0.1);color:var(--accent);">
+            Resume subscription
+          </button>`;
+      } else {
+        actionsHtml = `
+          <div style="font-size:11px;color:var(--text3);margin-bottom:14px;">
+            ${periodEnd ? `Renews automatically on <strong style="color:var(--text2);">${periodEnd}</strong>.` : ""}
+          </div>
+          <button id="planCancelBtn" style="width:100%;padding:11px;border-radius:8px;border:1px solid var(--border);cursor:pointer;
+            font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;
+            background:transparent;color:var(--text2);">
+            Cancel subscription
+          </button>`;
+      }
+ 
+      body.innerHTML = `
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:18px;">
+          <div style="flex:1;">
+            <div style="font-size:10px;color:var(--text3);letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;">Current Plan</div>
+            <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:${isTeam ? "var(--accent)" : "var(--low)"};">
+              ${data.planDetails?.name || "Free"}
+            </div>
+          </div>
+        </div>
+ 
+        <div class="detail-card" style="margin-bottom:18px;">
+          <div class="detail-card-title">Usage Today</div>
+          ${usageRows}
+        </div>
+ 
+        <div id="planActionError" style="display:none;font-size:11px;color:var(--critical);margin-bottom:10px;"></div>
+        <div id="planActions">${actionsHtml}</div>`;
+ 
+      document.getElementById("planUpgradeBtn")?.addEventListener("click", _handlePlanUpgrade);
+      document.getElementById("planCancelBtn")?.addEventListener("click", _handlePlanCancel);
+      document.getElementById("planResumeBtn")?.addEventListener("click", _handlePlanResume);
+ 
+    } catch (err) {
+      body.innerHTML = `<div style="color:var(--critical);font-size:12px;text-align:center;padding:20px 0;">⚠ ${escHtml(err.message)}</div>`;
+    }
+  }
+ 
+  async function _handlePlanUpgrade() {
+    const btn = document.getElementById("planUpgradeBtn");
+    btn.disabled = true; btn.textContent = "Redirecting to checkout…";
+    try {
+      const res  = await fetch("/api/v2/billing/checkout", {
+        method:  "POST",
+        headers: { ...authHeaders() },
+        body:    JSON.stringify({ plan: "team" }),
+      });
+      const data = await res.json();
+      if (data.checkoutUrl) { window.location.href = data.checkoutUrl; return; }
+      throw new Error(data.message || "Could not start checkout");
+    } catch (err) {
+      const errEl = document.getElementById("planActionError");
+      errEl.textContent = err.message; errEl.style.display = "block";
+      btn.disabled = false; btn.textContent = `Upgrade to Team — $${PLANS_TEAM_PRICE}/mo →`;
+    }
+  }
+ 
+  async function _handlePlanCancel() {
+    if (!confirm("Cancel your Team subscription? You'll keep access until the end of the current billing period, then drop to Free.")) return;
+    const btn = document.getElementById("planCancelBtn");
+    btn.disabled = true; btn.textContent = "Cancelling…";
+    try {
+      const res  = await fetch("/api/v2/billing/cancel", { method: "POST", headers: authHeaders() });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || data.error || "Cancel failed");
+      toast(data.message, "info");
+      await _renderPlanModalBody();
+      await loadBillingInfo();
+    } catch (err) {
+      const errEl = document.getElementById("planActionError");
+      errEl.textContent = err.message; errEl.style.display = "block";
+      btn.disabled = false; btn.textContent = "Cancel subscription";
+    }
+  }
+ 
+  async function _handlePlanResume() {
+    const btn = document.getElementById("planResumeBtn");
+    btn.disabled = true; btn.textContent = "Resuming…";
+    try {
+      const res  = await fetch("/api/v2/billing/resume", { method: "POST", headers: authHeaders() });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || data.error || "Resume failed");
+      toast(data.message, "success");
+      await _renderPlanModalBody();
+      await loadBillingInfo();
+    } catch (err) {
+      const errEl = document.getElementById("planActionError");
+      errEl.textContent = err.message; errEl.style.display = "block";
+      btn.disabled = false; btn.textContent = "Resume subscription";
+    }
+  }
+ 
+  window.showPlanPanel = showPlanPanel;
+
+
     // Add current IP to an existing or new case 
     async function addIPToCase(ip, result) {
   if (!ip || !isValidIP(ip)) { toast("Score an IP first", "warning"); return; }
@@ -4212,6 +4430,7 @@
   }
   // Score 
   async function scoreIP() {
+    console.log
     const token = localStorage.getItem("token");
     const ip = ipInput.value.trim();
     if (!ip) return;
@@ -5875,6 +6094,7 @@
 
     // drawer reflects correct buttons 
     buildHamburgerMenu();
+    loadBillingInfo();
 
     // Remove auth guard — show dashboard 
     const guard = document.getElementById("authGuard");

@@ -16,16 +16,6 @@ const server = app.listen(PORT, "0.0.0.0", () => {
   logger.info(`IPShield running on port ${PORT} [${process.env.NODE_ENV || "development"}]`);
 });
 
-app.post("/login", (req, res) => {
-    res.json({
-        success: true,
-        token: "demo-token-123",
-        user: {
-            email: req.body.email
-        }
-    });
-});
-
 // Graceful shutdown
 function shutdown(signal) {
   logger.info(`${signal} received — shutting down gracefully`);

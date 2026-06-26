@@ -6,6 +6,7 @@ const { requireAuth, requireRole }      = require("../middleware/auth.js");
 const { getBatchQueue }                 = require("../jobs/queues");
 const { Queue }                         = require("bullmq");
 const { getRedis }                      = require("../store/redis");
+const { requireQuota }                  = require("../middleware/quota");
 
 function validate(req, res, next) {
   const errors = validationResult(req);

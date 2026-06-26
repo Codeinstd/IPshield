@@ -37,6 +37,9 @@ const scanRoutes            = require("./routes/scan.routes");
 const {requireAuth}         = require("./middleware/auth");
 const scan                  = require("./store/scan.store");
 const vulnreportRoutes      = require("./routes/vulnreport.routes");
+const billingRoutes         = require("./routes/billing.routes");
+const billingWebhookRoutes  = require("./routes/billingWebhook.routes");
+const { requireQuota }      = require("./middleware/quota");
 
 
 // v2-only route imports 
@@ -155,6 +158,21 @@ app.use(cors({
 
 // Body parsing & compression
 app.use(compression());
+
+app.use(
+  "/api/v2/billing/webhook",
+  express.raw({ type: "application/json" }),
+  billingWebhookRoutes
+);
+
+app.get("/api/_debug_stripe_price", (req, res) => {
+  res.json({
+    raw: process.env.STRIPE_PRICE_TEAM || "(unset)",
+    length: (process.env.STRIPE_PRICE_TEAM || "").length,
+  });
+});
+
+
 app.use(express.json({ limit: "50kb" }));
 app.use(express.urlencoded({ extended: false }));
 
@@ -274,7 +292,7 @@ app.use("/api/v2/report", reportRoutes);
 app.use("/api/v2/gdpr", gdprRoutes);
 
 // scan 
-app.use("/api/v2/scan", requireAuth, scanRoutes);
+app.use("/api/v2/scan", requireAuth, requireQuota("active_scan"), scanRoutes);
 
 // vulnerability scan 
 app.use("/api/v2/cases", vulnreportRoutes);
@@ -318,6 +336,10 @@ app.use("/api/v2/audit", auditRoutes);
 // Stats routes
 app.use("/api/v1/stats", statsRoutes);
 app.use("/api/v2/stats", statsRoutes);
+
+ 
+app.use("/api/v2/billing", billingRoutes);
+app.use("/api/billing",    billingRoutes); // default alias, matches your /api -> v2 convention
 
 
 //  ProtectedD API Routes
@@ -375,9 +397,13 @@ app.get("/dashboard", (req, res) => {
   res.sendFile(path.join(__dirname, "../public", "dashboard.html"));
 });
 
-// 9. HTML Page routes (public — no auth)
+// HTML Page routes (public — no auth)
 app.get("/login", (req, res) => {
   res.sendFile(path.join(__dirname, "../public", "login.html"));
+});
+
+app.get("/pricing", (req, res) => {
+  res.sendFile(path.join(__dirname, "../public", "pricing.html"));
 });
 
 // AFTER — only valid mfaSetup tokens get through

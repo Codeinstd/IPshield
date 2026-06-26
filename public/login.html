@@ -363,6 +363,11 @@
     document.getElementById("mfaError").style.display  = "none";
   }
 
+  function resolvePostLoginDestination() {
+  const intent = sessionStorage.getItem("ipshield_post_login_intent");
+  return intent ? "/pricing?continue=1" : "/dashboard";
+}
+
   // Login (step 1) 
   async function handleLogin(e) {
     e?.preventDefault();
@@ -423,7 +428,7 @@
       // Full login success
       if (data.token) localStorage.setItem("token", data.token);
       if (data.user)  localStorage.setItem("user",  JSON.stringify(data.user));
-      window.location.href = "/dashboard";
+      window.location.href = resolvePostLoginDestination();
 
     } catch {
       errEl.textContent   = "Network error. Please try again.";
@@ -483,10 +488,10 @@
         return;
       }
 
-      sessionStorage.removeItem("mfa_challenge");
-      if (data.token) localStorage.setItem("token", data.token);
-      if (data.user)  localStorage.setItem("user",  JSON.stringify(data.user));
-      window.location.href = "/dashboard";
+        sessionStorage.removeItem("mfa_challenge");
+        if (data.token) localStorage.setItem("token", data.token);
+        if (data.user)  localStorage.setItem("user",  JSON.stringify(data.user));
+        window.location.href = resolvePostLoginDestination();
 
     } catch {
       errEl.textContent   = "Network error. Please try again.";

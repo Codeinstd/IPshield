@@ -73,15 +73,15 @@ router.post("/login", loginLimiter, async (req, res) => {
       });
     }
 
-    // ── Email + password login ─────────────────────────────────────────────────
+    // Email + password login 
     if (email && password) {
-      const result = await db.query(
-        `SELECT id, name, email, role, status, password_hash, mfa_enabled, mfa_secret
-         FROM api_keys
-         WHERE LOWER(email) = LOWER($1)
-           AND status = 'active'`,
-        [email.trim()]
-      );
+          const result = await db.query(
+          `SELECT id, email, role, password_hash, mfa_enabled, mfa_secret
+          FROM users
+          WHERE LOWER(email) = LOWER($1)`,
+          [email.trim()]
+        );
+    
 
       if (!result.rows.length) {
         return res.status(401).json({ error: "Invalid email or password" });
@@ -103,7 +103,7 @@ router.post("/login", loginLimiter, async (req, res) => {
       // Force MFA enrolment for accounts that haven't set it up
       if (!user.mfa_enabled) {
         const setupToken = jwt.sign(
-          { id: user.id, email: user.email, name: user.name, role: user.role, mfaSetup: true },
+          { id: user.id, email: user.email, role: user.role, mfaSetup: true },
           process.env.JWT_SECRET,
           { expiresIn: "15m" }
         );
@@ -111,7 +111,7 @@ router.post("/login", loginLimiter, async (req, res) => {
         return res.status(200).json({
           mfaSetupRequired: true,
           token: setupToken,
-          user: { id: user.id, email: user.email, name: user.name, role: user.role },
+          user: { id: user.id, email: user.email, role: user.role },
         });
       }
 
@@ -155,9 +155,9 @@ router.post("/login/mfa", mfaLimiter, async (req, res) => {
     }
 
     const result = await db.query(
-      `SELECT id, name, email, role, status, mfa_secret, mfa_backup_codes
-       FROM api_keys
-       WHERE id = $1 AND status = 'active'`,
+      `SELECT id, email, role, mfa_secret, mfa_backup_codes
+       FROM users
+       WHERE id = $1`,
       [decoded.id]
     );
 
@@ -170,10 +170,10 @@ router.post("/login/mfa", mfaLimiter, async (req, res) => {
 
     const rawInput = String(totpToken).trim().toUpperCase();
 
-    // ── 1. Try TOTP ───────────────────────────────────────────────────────────
+    // 1. Try TOTP 
     let valid = verifyToken(rawInput, user.mfa_secret);
 
-    // ── 2. Try backup codes ───────────────────────────────────────────────────
+    // 2. Try backup codes 
     if (!valid && Array.isArray(user.mfa_backup_codes) && user.mfa_backup_codes.length) {
       for (let i = 0; i < user.mfa_backup_codes.length; i++) {
         const match = await bcrypt.compare(rawInput, user.mfa_backup_codes[i]);
@@ -182,7 +182,7 @@ router.post("/login/mfa", mfaLimiter, async (req, res) => {
           // Consume — remove used code from array
           const remaining = user.mfa_backup_codes.filter((_, idx) => idx !== i);
           await db.query(
-            `UPDATE api_keys SET mfa_backup_codes = $1 WHERE id = $2`,
+            `UPDATE users SET mfa_backup_codes = $1 WHERE id = $2`,
             [remaining, user.id]
           );
           valid = true;
@@ -196,14 +196,14 @@ router.post("/login/mfa", mfaLimiter, async (req, res) => {
     }
 
     const token = jwt.sign(
-      { id: user.id, name: user.name, email: user.email, role: user.role },
+      { id: user.id, email: user.email, role: user.role },
       process.env.JWT_SECRET,
       { expiresIn: "7d" }
     );
 
     res.json({
       token,
-      user: { id: user.id, name: user.name, email: user.email, role: user.role },
+      user: { id: user.id, email: user.email, role: user.role },
     });
 
   } catch (err) {
@@ -240,8 +240,8 @@ router.post("/forgot-password", resetLimiter, async (req, res) => {
     }
 
     const result = await db.query(
-      `SELECT id, name, email, status FROM api_keys
-       WHERE LOWER(email) = LOWER($1) AND status = 'active'`,
+      `SELECT id, email FROM api_keys
+        WHERE LOWER(email) = LOWER($1)`,
       [email.trim()]
     );
 
@@ -258,7 +258,7 @@ router.post("/forgot-password", resetLimiter, async (req, res) => {
     const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
 
     await db.query(
-      `UPDATE api_keys
+      `UPDATE users
        SET reset_token = $1, reset_token_expires = $2
        WHERE id = $3`,
       [tokenHash, expires, user.id]
@@ -278,7 +278,7 @@ router.post("/forgot-password", resetLimiter, async (req, res) => {
             IP<span style="color:#00d9ff;">Shield</span> — Password Reset
           </h2>
           <p style="color:#6a8fa8;font-size:13px;margin-bottom:24px;">
-            Hi ${user.name}, we received a request to reset your password.
+            Hi ${user.email}, we received a request to reset your password.
           </p>
           <p style="margin-bottom:24px;">
             <a href="${resetUrl}"
@@ -327,10 +327,9 @@ router.post("/reset-password", resetLimiter, async (req, res) => {
     const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
 
     const result = await db.query(
-      `SELECT id, name, email FROM api_keys
+      `SELECT id, email FROM users
        WHERE reset_token = $1
-         AND reset_token_expires > NOW()
-         AND status = 'active'`,
+         AND reset_token_expires > NOW()`,
       [tokenHash]
     );
 
@@ -345,7 +344,7 @@ router.post("/reset-password", resetLimiter, async (req, res) => {
 
     // Update password and clear the reset token atomically
     await db.query(
-      `UPDATE api_keys
+      `UPDATE users
        SET password_hash        = $1,
            reset_token          = NULL,
            reset_token_expires  = NULL

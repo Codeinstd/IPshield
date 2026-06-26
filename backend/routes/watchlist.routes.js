@@ -2,6 +2,7 @@ const express = require("express");
 const router  = express.Router();
 const { requireAuth, requireRole } = require("../middleware/auth.js");
 const { body, param, validationResult } = require("express-validator");
+const { requireQuota } = require("../middleware/quota");
 const {
   addToWatchlist,
   removeFromWatchlist,

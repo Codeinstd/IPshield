@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pricing — IPShield</title>
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon.ico/favicon-32x32.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --accent:   #00d9ff;
+  --critical: #ff3355;
+  --high:     #ff7700;
+  --medium:   #ffcc00;
+  --low:      #00e87c;
+}
+[data-theme="dark"] {
+  --bg: #080c0f; --bg1: #0d1117; --bg2: #111820; --bg3: #1a2535;
+  --border: #1e2d3d; --text: #c9d8e8; --text2: #6a8fa8; --text3: #3d5a72;
+  --surface: rgba(255,255,255,0.04);
+}
+[data-theme="light"] {
+  --bg: #f0f4f8; --bg1: #ffffff; --bg2: #f4f7fa; --bg3: #e8edf3;
+  --border: #d0dae6; --text: #0d1822; --text2: #4a6278; --text3: #8fa8bc;
+  --surface: rgba(0,0,0,0.04);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--bg); color: var(--text); font-family: 'JetBrains Mono', monospace;
+  min-height: 100vh; transition: background .3s, color .3s;
+}
+a { text-decoration: none; }
+
+header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 24px; border-bottom: 1px solid var(--border);
+  background: var(--bg1); position: sticky; top: 0; z-index: 100; gap: 12px;
+}
+.logo { display: flex; align-items: center; gap: 10px; }
+.logo-icon {
+  width: 32px; height: 32px; border: 2px solid var(--accent); border-radius: 6px;
+  display: flex; align-items: center; justify-content: center; color: var(--accent); font-size: 16px;
+}
+.logo-text { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 20px; color: var(--text); }
+.logo-text span { color: var(--accent); }
+.nav-right { display: flex; gap: 10px; align-items: center; }
+.btn {
+  padding: 9px 20px; border-radius: 8px; font-family: 'JetBrains Mono', monospace;
+  font-size: 12px; font-weight: 600; letter-spacing: 1px; cursor: pointer; border: none;
+  display: inline-flex; align-items: center; transition: all .15s;
+}
+.btn-primary { background: var(--accent); color: #000; }
+.btn-primary:hover { background: #0099cc; }
+.btn-ghost { background: transparent; color: var(--text2); border: 1px solid var(--border); }
+.btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+.theme-toggle {
+  width: 36px; height: 36px; border-radius: 8px; border: 1px solid var(--border);
+  background: var(--surface); cursor: pointer; display: flex; align-items: center;
+  justify-content: center; font-size: 16px; position: relative; overflow: hidden;
+}
+.theme-toggle .icon-sun, .theme-toggle .icon-moon { position: absolute; transition: opacity .25s, transform .25s; }
+[data-theme="dark"] .icon-sun { opacity: 1; } [data-theme="dark"] .icon-moon { opacity: 0; transform: scale(0.5); }
+[data-theme="light"] .icon-sun { opacity: 0; transform: scale(0.5); } [data-theme="light"] .icon-moon { opacity: 1; }
+
+.page-head { max-width: 720px; margin: 0 auto; padding: 64px 24px 40px; text-align: center; }
+.page-head h1 { font-family: 'Syne', sans-serif; font-weight: 800; font-size: clamp(28px,5vw,42px); margin-bottom: 14px; }
+.page-head h1 span { color: var(--accent); }
+.page-head p { font-size: 13px; color: var(--text2); line-height: 1.8; }
+
+.billing-toggle {
+  display: flex; justify-content: center; align-items: center; gap: 14px;
+  margin: 28px 0 8px; font-size: 12px; color: var(--text2);
+}
+.toggle-switch {
+  width: 44px; height: 24px; border-radius: 14px; background: var(--bg3);
+  border: 1px solid var(--border); position: relative; cursor: pointer; flex-shrink: 0;
+}
+.toggle-knob {
+  width: 18px; height: 18px; border-radius: 50%; background: var(--accent);
+  position: absolute; top: 2px; left: 2px; transition: left .2s;
+}
+.toggle-switch.on .toggle-knob { left: 23px; }
+.save-pill {
+  font-size: 10px; font-weight: 700; color: var(--low); background: rgba(0,232,124,0.1);
+  border: 1px solid rgba(0,232,124,0.3); padding: 2px 8px; border-radius: 10px;
+}
+
+.plans-wrap { max-width: 1180px; margin: 0 auto; padding: 24px 24px 80px; }
+.plans-grid {
+  display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; align-items: stretch;
+  max-width: 760px; margin: 0 auto;
+}
+.plan-card {
+  background: var(--bg1); border: 1px solid var(--border); border-radius: 14px;
+  padding: 28px 24px; display: flex; flex-direction: column; position: relative;
+  transition: border-color .2s, transform .2s;
+}
+.plan-card:hover { transform: translateY(-3px); }
+.plan-card.featured { border-color: rgba(0,217,255,0.4); background: linear-gradient(180deg, rgba(0,217,255,0.05), var(--bg1) 60%); }
+.plan-badge {
+  position: absolute; top: -11px; left: 24px; background: var(--accent); color: #000;
+  font-size: 9px; font-weight: 700; letter-spacing: 1px; padding: 4px 10px; border-radius: 6px;
+}
+.plan-name { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 18px; margin-bottom: 6px; }
+.plan-desc { font-size: 11px; color: var(--text2); line-height: 1.6; margin-bottom: 20px; min-height: 36px; }
+.plan-price { display: flex; align-items: baseline; gap: 4px; margin-bottom: 4px; }
+.plan-price .num { font-family: 'Syne', sans-serif; font-size: 36px; font-weight: 800; }
+.plan-price .period { font-size: 11px; color: var(--text3); }
+.plan-price .contact { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; }
+.plan-cta {
+  margin: 20px 0 22px; width: 100%; padding: 11px; border-radius: 8px; text-align: center;
+  font-size: 12px; font-weight: 700; letter-spacing: 0.5px; cursor: pointer; border: none;
+  font-family: 'JetBrains Mono', monospace;
+}
+.plan-cta.primary { background: var(--accent); color: #000; }
+.plan-cta.primary:hover { background: #0099cc; }
+.plan-cta.ghost { background: transparent; color: var(--text); border: 1px solid var(--border); }
+.plan-cta.ghost:hover { border-color: var(--accent); color: var(--accent); }
+.plan-cta:disabled { opacity: 0.55; cursor: default; }
+.plan-features { display: flex; flex-direction: column; gap: 11px; font-size: 12px; flex: 1; }
+.plan-feature { display: flex; align-items: flex-start; gap: 9px; color: var(--text2); line-height: 1.5; }
+.plan-feature .check { color: var(--low); flex-shrink: 0; }
+.plan-feature .cross { color: var(--text3); flex-shrink: 0; }
+.plan-feature .dim { color: var(--text3); }
+.plan-feature strong { color: var(--text); font-weight: 700; }
+
+.plan-current-tag {
+  font-size: 9px; font-weight: 700; letter-spacing: 1px; color: var(--low);
+  background: rgba(0,232,124,0.1); border: 1px solid rgba(0,232,124,0.3);
+  padding: 3px 9px; border-radius: 6px; display: inline-flex; margin-bottom: 10px; width: fit-content;
+}
+
+.compare-note {
+  text-align: center; font-size: 11px; color: var(--text3); margin-top: 28px; line-height: 1.7;
+}
+.compare-note a { color: var(--accent); }
+
+/* Access Request Modal */
+#accessModalOverlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.75); z-index: 500;
+  align-items: center; justify-content: center; padding: 24px;
+}
+.modal-card {
+  background: var(--bg1); border: 1px solid var(--border);
+  border-radius: 16px; width: 100%; max-width: 480px; padding: 32px;
+  transition: background .3s;
+}
+.modal-input {
+  width: 100%; padding: 11px 14px;
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 8px; color: var(--text);
+  font-family: 'JetBrains Mono', monospace; font-size: 13px; outline: none;
+  transition: border-color .2s, background .3s;
+}
+.modal-input:focus { border-color: var(--accent); }
+.modal-label {
+  display: block; font-size: 10px; color: var(--text3);
+  letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px;
+}
+
+footer {
+  border-top: 1px solid var(--border); padding: 28px 32px; display: flex;
+  align-items: center; justify-content: space-between; font-size: 11px; color: var(--text3); flex-wrap: wrap; gap: 12px; margin-top: 200px;
+}
+footer a { color: var(--text3); }
+footer a:hover { color: var(--accent); }
+.footer-links { display: flex; gap: 20px; flex-wrap: wrap; }
+
+@media (max-width: 640px) { .plans-grid { grid-template-columns: 1fr; } }
+@media (max-width: 600px) {
+  .nav-right .btn-ghost { display: none; }
+  .page-head { padding: 44px 20px 32px; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <a href="/">
+    <div class="logo">
+      <div class="logo-icon">⬡</div>
+      <div class="logo-text">IP<span>Shield</span></div>
+    </div>
+  </a>
+  <nav class="nav-right">
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+      <span class="icon-sun">☀️</span><span class="icon-moon">🌙</span>
+    </button>
+    <a href="/api/docs" class="btn btn-ghost">API Docs</a>
+    <a href="/login" class="btn btn-primary">Sign In →</a>
+  </nav>
+</header>
+
+<section class="page-head">
+  <h1>Find issues for free.<span> Prevent them at scale.</span></h1>
+  <p>Run real traffic lookups for free. Upgrade to Team for continuous scanning, higher limits, and proactive monitoring at scale. Cancel anytime.</p>
+</section>
+
+<!-- Access Request Modal -->
+<div id="accessModalOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:500;align-items:center;justify-content:center;padding:24px;">
+  <div class="modal-card">
+    <div id="accessFormView">
+      <div id="accessModalTitle" style="font-family:'Syne',sans-serif;font-size:20px;font-weight:800;margin-bottom:6px;color:var(--text);">Request Access</div>
+      <div id="accessModalSub" style="font-size:12px;color:var(--text2);line-height:1.7;margin-bottom:24px;">Tell us about yourself and we'll get you set up shortly.</div>
+      <div id="accessErr" style="display:none;padding:10px 14px;background:rgba(255,51,85,0.1);border:1px solid rgba(255,51,85,0.3);border-radius:8px;font-size:12px;color:var(--critical);margin-bottom:16px;"></div>
+      <div style="margin-bottom:16px;"><label class="modal-label">Full Name</label><input type="text" id="reqName" placeholder="Full Name" maxlength="32" class="modal-input"></div>
+      <div style="margin-bottom:16px;"><label class="modal-label">Work Email</label><input type="email" id="reqEmail" placeholder="workemail@company.com" maxlength="32" class="modal-input"></div>
+      <div style="margin-bottom:16px;">
+        <label class="modal-label">Organisation Type</label>
+        <select id="reqCompany" class="modal-input" style="appearance:none;cursor:pointer;">
+          <option value="">Select type…</option>
+          <option>Bank / Financial Services</option>
+          <option>Education / University</option>
+          <option>Healthcare</option>
+          <option>Government / Public Sector</option>
+          <option>Technology / SaaS</option>
+          <option>E-commerce / Retail</option>
+          <option>Telecommunications</option>
+          <option>Consulting / MSSP</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div id="reqTeamSizeField" style="display:none;margin-bottom:24px;">
+        <label class="modal-label">SOC / Security Team Size</label>
+        <select id="reqTeamSize" class="modal-input" style="appearance:none;cursor:pointer;">
+          <option value="">Select size…</option>
+          <option>Just me</option>
+          <option>2–5 analysts</option>
+          <option>6–20 analysts</option>
+          <option>20+ analysts</option>
+        </select>
+      </div>
+      <div class="stbtn" style="display:flex;gap:12px;">
+        <button id="accessSubmitBtn" onclick="submitAccessRequest()" style="flex:1;padding:13px;border-radius:8px;border:none;cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;letter-spacing:1px;text-transform:uppercase;background:var(--accent);color:#000;">Submit Request →</button>
+        <button onclick="hideAccessModal()" style="flex:1;padding:13px;border-radius:8px;background:transparent;color:var(--text2);border:1px solid var(--border);font-family:'JetBrains Mono',monospace;font-size:12px;cursor:pointer;">Cancel</button>
+      </div>
+    </div>
+    <div id="accessSuccessView" style="display:none;text-align:center;padding:8px 0;">
+      <div style="font-size:44px;margin-bottom:14px;">✓</div>
+      <div id="accessSuccessTitle" style="font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:var(--low);margin-bottom:8px;">Request received!</div>
+      <div id="accessSuccessBody" style="font-size:12px;color:var(--text2);line-height:1.7;margin-bottom:24px;"></div>
+      <button onclick="hideAccessModal()" style="width:100%;padding:13px;border-radius:8px;border:none;cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;background:var(--accent);color:#000;">Back to Home →</button>
+    </div>
+  </div>
+</div>
+
+<div class="plans-wrap">
+  <div class="plans-grid" id="plansGrid">
+    <!-- Rendered by JS from /api/v2/billing/plans, with a static fallback below -->
+  </div>
+  <div class="compare-note" id="currentPlanNote"></div>
+</div>
+
+<footer>
+  <div>© 2026 IPShield · Real-Time Threat Intelligence</div>
+  <div class="footer-links">
+    <a href="/api/docs">API Docs</a>
+    <a href="/api/health">Status</a>
+    <a href="/login">Sign In</a>
+  </div>
+</footer>
+
+<script>
+
+// Theme toggle — same pattern as the landing page
+(function () {
+  const html = document.documentElement;
+  const KEY = "ipshield_theme";
+  const saved = localStorage.getItem(KEY);
+  if (saved) html.setAttribute("data-theme", saved);
+  document.getElementById("themeToggle").addEventListener("click", () => {
+    const next = html.getAttribute("data-theme") === "dark" ? "light" : "dark";
+    html.setAttribute("data-theme", next);
+    localStorage.setItem(KEY, next);
+  });
+})();
+
+// Feature label/order config — keys must match config/plans.js featureLimits exactly
+const FEATURE_LABELS = [
+  { key: "score",        label: n => n === null ? "Unlimited IP score lookups" : n === false ? "IP score lookups" : `${n.toLocaleString()} IP score lookups / day` },
+  { key: "batch",        label: n => n === false ? "Batch scoring" : n === null ? "Unlimited batch scoring" : `Batch scoring — ${n.toLocaleString()}/day` },
+  { key: "active_scan",  label: n => n === false ? "Active scanning (nmap/nuclei)" : n === null ? "Unlimited active scans" : `Active scanning — ${n}/day` },
+  { key: "watchlist",    label: n => n === false ? "Watchlist monitoring" : n === null ? "Unlimited watched IPs" : `Watch up to ${n} IP${n === 1 ? "" : "s"}` },
+  { key: "siem_targets", label: n => n === false ? "SIEM fan-out" : n === null ? "Unlimited SIEM targets" : `${n} SIEM target${n === 1 ? "" : "s"}` },
+];
+
+function featureRow(value, label) {
+  const available = value !== false;
+  return `<div class="plan-feature">
+    <span class="${available ? "check" : "cross"}">${available ? "✓" : "✕"}</span>
+    <span class="${available ? "" : "dim"}">${label}</span>
+  </div>`;
+}
+
+function renderPlans(plans, currentPlanId) {
+  const grid = document.getElementById("plansGrid");
+  grid.innerHTML = plans.map(p => {
+    const featured = p.id === "team";
+    const isCurrent = currentPlanId === p.id;
+    const priceHtml =
+  p.priceYearly === 0
+    ? `
+      <div class="plan-price">
+        <span class="num">$0</span>
+      </div>
+    `
+    : `
+      <div class="plan-price">
+        <span class="num">$${p.priceYearly}</span>
+        <span class="period">/ year</span>
+      </div>
+    `;
+
+    let ctaHtml;
+    if (isCurrent) {
+      ctaHtml = `<button class="plan-cta ghost" disabled>Current plan</button>`;
+    } else if (p.id === "free") {
+      ctaHtml = `<a onclick="showAccessModal('pilot')" class="plan-cta ghost" style="display:block;text-decoration:none;text-align:center;">Request Free Access</a>`;
+    } else {
+      ctaHtml = `<button class="plan-cta primary" onclick="startCheckout('${p.id}')">Upgrade to ${p.name} →</button>`;
+    }
+
+    const features = FEATURE_LABELS.map(f => featureRow(p.featureLimits[f.key], f.label(p.featureLimits[f.key]))).join("");
+
+    return `<div class="plan-card ${featured ? "featured" : ""}">
+      ${featured ? '<div class="plan-badge">UNLOCK EVERYTHING</div>' : ""}
+      ${isCurrent ? '<div class="plan-current-tag">YOUR PLAN</div>' : ""}
+      <div class="plan-name">${p.name}</div>
+      <div class="plan-desc">${p.description}</div>
+      ${priceHtml}
+      ${ctaHtml}
+      <div class="plan-features">${features}</div>
+    </div>`;
+  }).join("");
+}
+
+// Static fallback so the page renders correctly even if the API call fails —
+// keep this in sync with config/plans.js by hand if limits change.
+const FALLBACK_PLANS = [
+  { id: "free", name: "Free", priceYearly: 0, description: "Evaluate IPShield against a handful of real lookups. Request an invite code to begin.",
+    featureLimits: { score: 5, batch: false, active_scan: false, watchlist: 1, siem_targets: 0 } },
+  { id: "team", name: "Team", priceYearly: 70, description: "For analysts and SOC teams running IPShield day to day — full limits, no seat minimum.",
+    featureLimits: { score: 500000, batch: 100000, active_scan: 10000, watchlist: 10000, siem_targets: 5000 } },
+];
+
+const POST_LOGIN_INTENT_KEY = "ipshield_post_login_intent";
+
+async function startCheckout(planId) {
+  const token = localStorage.getItem("token");
+  if (!token) {
+    // Remember what they were trying to do, then send them to log in.
+    // login.html checks this key after a successful sign-in and routes back
+    // here with ?continue=1 instead of going straight to /dashboard.
+    sessionStorage.setItem(POST_LOGIN_INTENT_KEY, JSON.stringify({ action: "checkout", plan: planId }));
+    window.location.href = "/login?next=/pricing";
+    return;
+  }
+  await runCheckout(planId);
+}
+
+async function runCheckout(planId) {
+  try {
+    const token = localStorage.getItem("token");
+    const res = await fetch("/api/v2/billing/checkout", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ plan: planId }),
+    });
+    const data = await res.json();
+    if (data.checkoutUrl) window.location.href = data.checkoutUrl;
+    else alert(data.message || "Couldn't start checkout — please try again.");
+  } catch {
+    alert("Network error starting checkout.");
+  }
+}
+
+async function init() {
+  
+  let plans = FALLBACK_PLANS;
+  try {
+    const res = await fetch("/api/v2/billing/plans");
+    if (res.ok) {
+      const data = await res.json();
+      if (data.plans?.length) plans = data.plans;
+    }
+  } catch (_) {}
+
+  let currentPlanId = null;
+  const token = localStorage.getItem("token");
+  if (token) {
+    try {
+      const res = await fetch("/api/v2/billing/me", { headers: { Authorization: `Bearer ${token}` } });
+      if (res.ok) {
+        const data = await res.json();
+        currentPlanId = data.plan;
+        document.getElementById("currentPlanNote").innerHTML =
+          `Signed in on the <strong style="color:var(--text);">${data.planDetails?.name || data.plan}</strong> plan. <a href="/dashboard">Manage billing →</a>`;
+      }
+    } catch (_) {}
+  }
+
+  renderPlans(plans, currentPlanId);
+  const params = new URLSearchParams(window.location.search);
+  if (params.get("continue") === "1" && token) {
+    const raw = sessionStorage.getItem(POST_LOGIN_INTENT_KEY);
+    sessionStorage.removeItem(POST_LOGIN_INTENT_KEY); // one-shot, never replays on refresh/back-button
+    if (raw) {
+      try {
+        const intent = JSON.parse(raw);
+        if (intent.action === "checkout" && intent.plan && intent.plan !== currentPlanId) {
+          document.getElementById("currentPlanNote").innerHTML =
+            `<span style="color:var(--text2);">Signed in — resuming your upgrade…</span>`;
+          await runCheckout(intent.plan);
+        }
+      } catch (_) {}
+    }
+  }
+  
+}
+
+
+// Access modal — mode-aware: "access" (default) or "pilot" 
+let accessModalMode = "access";
+ 
+const ACCESS_MODAL_COPY = {
+  access: {
+    title:        "Request Access",
+    sub:          "Tell us about yourself and we'll get you set up shortly.",
+    showTeamSize: false,
+    submitLabel:  "Submit Request →",
+    successTitle: "Request received!",
+    successBody:  (name) => `Thanks, <strong style="color:var(--text);">${name}</strong>. We'll review your request and be in touch shortly.`,
+  },
+  pilot: {
+    title:        "Request Access",
+    sub:          "Tell us about your team and we'll get you set up shortly.",
+    showTeamSize: true,
+    submitLabel:  "Submit Request →",
+    successTitle: "Request received!",
+    successBody:  (name) => `Thanks, <strong style="color:var(--text);">${name}</strong>. We'll review your request and be in touch shortly to scope your pilot.`,
+  },
+};
+// request access function
+
+function showAccessModal(mode = "access") {
+  accessModalMode = ACCESS_MODAL_COPY?.[mode] ? mode : "access";
+  const copy = ACCESS_MODAL_COPY[accessModalMode];
+ 
+  document.getElementById("accessModalTitle").textContent = copy.title;
+  document.getElementById("accessModalSub").textContent    = copy.sub;
+  document.getElementById("reqTeamSizeField").style.display = copy.showTeamSize ? "block" : "none";
+  document.getElementById("accessSubmitBtn").textContent   = copy.submitLabel;
+ 
+  const ov = document.getElementById("accessModalOverlay");
+  ov.style.display = "flex";
+  document.body.style.overflow = "hidden";
+  document.getElementById("reqName").focus();
+}
+function hideAccessModal() {
+  document.getElementById("accessModalOverlay").style.display = "none";
+  document.body.style.overflow = "";
+  document.getElementById("accessFormView").style.display    = "block";
+  document.getElementById("accessSuccessView").style.display = "none";
+  document.getElementById("accessErr").style.display         = "none";
+  document.getElementById("reqName").value     = "";
+  document.getElementById("reqEmail").value    = "";
+  document.getElementById("reqCompany").value  = "";
+  document.getElementById("reqTeamSize").value = "";
+}
+const overlay = document.getElementById("accessModalOverlay");
+if (overlay) {
+  overlay.addEventListener("click", (e) => {
+    if (e.target === overlay) hideAccessModal();
+  });
+}
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") hideAccessModal();
+});
+ 
+async function submitAccessRequest() {
+  const errEl   = document.getElementById("accessErr");
+  const btn     = document.getElementById("accessSubmitBtn");
+  const copy    = ACCESS_MODAL_COPY[accessModalMode];
+  const name    = document.getElementById("reqName").value.trim();
+  const email   = document.getElementById("reqEmail").value.trim();
+  const company = document.getElementById("reqCompany").value;
+  const teamSize = document.getElementById("reqTeamSize").value;
+ 
+  errEl.style.display = "none";
+  if (!name)                         { errEl.textContent = "Full name is required.";            errEl.style.display = "block"; return; }
+  if (!email || !email.includes("@")){ errEl.textContent = "Enter a valid work email.";         errEl.style.display = "block"; return; }
+  if (!company)                      { errEl.textContent = "Please select an organisation type."; errEl.style.display = "block"; return; }
+  if (copy.showTeamSize && !teamSize) { errEl.textContent = "Please select your team size.";    errEl.style.display = "block"; return; }
+ 
+  btn.disabled = true; btn.textContent = "Sending…";
+  try {
+    const body = { name, email, company, request_type: accessModalMode };
+    if (copy.showTeamSize) body.team_size = teamSize;
+ 
+    const res  = await fetch("/api/access-request", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      errEl.textContent = data.error || "Submission failed. Please try again.";
+      errEl.style.display = "block";
+      btn.disabled = false; btn.textContent = copy.submitLabel;
+      return;
+    }
+    document.getElementById("accessSuccessTitle").textContent  = copy.successTitle;
+    document.getElementById("accessSuccessBody").innerHTML     = copy.successBody(name);
+    document.getElementById("accessFormView").style.display    = "none";
+    document.getElementById("accessSuccessView").style.display = "block";
+  } catch {
+    errEl.textContent = "Network error. Please try again.";
+    errEl.style.display = "block";
+    btn.disabled = false; btn.textContent = copy.submitLabel;
+  }
+}
+ 
+
+
+init();
+</script>
+</body>
+</html>

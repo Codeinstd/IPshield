@@ -1,5 +1,7 @@
 const express  = require("express");
 const router   = express.Router();
+const crypto = require("crypto");
+const { hashKey } = require("../utils/keyHash");
 const { body, param, query, validationResult } = require("express-validator");
 const { requireAuth, requireRole } = require("../middleware/auth.js");
 const km = require("../services/keyManager.service");
@@ -450,5 +452,67 @@ router.get("/:id/usage",
     }
   }
 );
+
+// POST /api/keys/me  — create a new API key owned by the logged-in user
+router.post("/me",
+  requireAuth,
+  [
+    body("name").trim().notEmpty().isLength({ max: 100 }),
+  ],
+  validate,
+  async (req, res) => {
+    if (req.auth.type !== "user") {
+      return res.status(403).json({
+        error: "user_login_required",
+        message: "API keys must be created from a logged-in dashboard account, not another API key.",
+      });
+    }
+ 
+    try {
+      const rawKey   = "ipsk_" + crypto.randomBytes(24).toString("hex");
+      const keyHash  = hashKey(rawKey);
+      const preview  = rawKey.slice(0, 12) + "…";
+ 
+      // New self-serve keys inherit the readonly/analyst default — admins can
+      // still elevate role via PUT /:id same as any other key.
+      const result = await db.query(
+        `INSERT INTO api_keys (name, role, status, key_hash, key_preview, user_id, activated_at)
+         VALUES ($1, 'analyst', 'active', $2, $3, $4, NOW())
+         RETURNING id, name, role, status, created_at`,
+        [req.body.name, keyHash, preview, req.auth.id]
+      );
+ 
+      res.status(201).json({
+        message: "API key created. Save it now — it will not be shown again.",
+        key:     rawKey,
+        id:      result.rows[0].id,
+        name:    result.rows[0].name,
+        role:    result.rows[0].role,
+      });
+    } catch (err) {
+      console.error("[keys/self-create]", err.message);
+      res.status(500).json({ error: err.message });
+    }
+  }
+);
+ 
+// GET /api/keys/me/list — list keys owned by the logged-in user (not admin-only)
+router.get("/me/list", requireAuth, async (req, res) => {
+  if (req.auth.type !== "user") {
+    return res.status(403).json({ error: "user_login_required" });
+  }
+  try {
+    const result = await db.query(
+      `SELECT id, name, role, status, key_preview, created_at, last_used, daily_limit, daily_used
+       FROM api_keys WHERE user_id = $1 ORDER BY created_at DESC`,
+      [req.auth.id]
+    );
+    res.json({ keys: result.rows });
+  } catch (err) {
+    console.error("[keys/me/list]", err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+ 
 
 module.exports = router;

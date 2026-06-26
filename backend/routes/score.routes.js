@@ -5,17 +5,19 @@ const { scoreIP, scoreBatch }              = require("../controllers/score.contr
 const { validateIPParam, validateBatchBody } = require("../middleware/validateIP.middleware");
 const { validateBatchAndBlockBody }        = require("../middleware/validateBatchAndBlockBody.middleware");
 const { requireAuth, requireRole }         = require("../middleware/auth.js");
+const { requireQuota }                      = require("../middleware/quota");
 
 router.get(
   "/public/:ip",
   validateIPParam,
-  scoreIP
+  requireQuota("score"),
+    scoreIP,
 );
 
 
 // Existing routes (unchanged)
-router.get("/:ip",    requireAuth, requireRole("readonly"), validateIPParam,    scoreIP);
-router.post("/batch", requireAuth, requireRole("readonly"), validateBatchBody,  scoreBatch);
+router.get("/:ip",    requireAuth, requireRole("readonly"), validateIPParam, requireQuota("score"),   scoreIP);
+router.post("/batch", requireAuth, requireRole("readonly"), validateBatchBody, requireQuota("batch"), scoreBatch);
 
 
 //
@@ -68,7 +70,8 @@ router.post(
   requireAuth,
   requireRole("readonly"),
   validateBatchAndBlockBody,
-  scoreBatchAndBlock
+  requireQuota("batch"),
+  scoreBatchAndBlock,
 );
 
 module.exports = router;
