@@ -272,6 +272,7 @@ function buildSwaggerHTML(spec, version, accentColor) {
     background: radial-gradient(circle at top left, rgba(0, 217, 255, .08), transparent 25%), 
     radial-gradient(circle at bottom right, rgba(0, 232, 124, .05), transparent 25%), #050816;
     font-family: 'JetBrains Mono', monospace;
+    body: #121212;
 }
     
 .docs-header {
@@ -360,7 +361,7 @@ function buildSwaggerHTML(spec, version, accentColor) {
 
       
     .swagger-ui .info li, .swagger-ui .info p, .swagger-ui .info table {
-    color: #c9d8e8;
+    color: #aeb4b8;
     font-family: 'JetBrains Mono', monospace;
     font-size: 14px;
     }
