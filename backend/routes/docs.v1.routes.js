@@ -368,7 +368,7 @@ function buildSwaggerHTML(spec, version, accentColor) {
 
 
     .swagger-ui .info p {
-    color: #c0ccd4;
+    color: #aeb4b8;
     font-family:'JetBrains Mono', monospace ;
     }
 
@@ -395,7 +395,7 @@ function buildSwaggerHTML(spec, version, accentColor) {
     }
 
     .swagger-ui .info li, .swagger-ui .info p, .swagger-ui .info table {
-    color: #b9beca;
+    color: #aeb4b8;
     font-family: 'JetBrains Mono', monospace;
     font-size: 14px;
     }
@@ -433,14 +433,14 @@ function buildSwaggerHTML(spec, version, accentColor) {
 }
 
     .swagger-ui .opblock .opblock-summary-description {
-    color: #868da0;
+    color: #aeb4b8;
     font-family:'JetBrains Mono', monospace ;
     font-size: 13px;
     word-break: break-word;
     }
 
     .swagger-ui .info li, .swagger-ui .info p, .swagger-ui .info table {
-    color: #838fb0;
+    color: #aeb4b8;
     font-family: 'JetBrains Mono', monospace;
     font-size: 14px;
 }
@@ -501,7 +501,7 @@ function buildSwaggerHTML(spec, version, accentColor) {
     .hero-content p {
     max-width: 760px;
     margin: auto;
-    color: #6a8fa8;
+    color: #aeb4b8;
     font-size: 18px;
     line-height: 1.8;
     }
@@ -852,7 +852,7 @@ function buildSwaggerHTML(spec, version, accentColor) {
         }
     }
 
-    .swagger-ui .info p { color:#6a8fa8; }
+    .swagger-ui .info p { color:#aeb4b8; }
     .swagger-ui .opblock-tag { color:#c9d8e8; border-bottom:1px solid #1e2d3d; }
     .swagger-ui .opblock { background:#0d1117; border:1px solid #1e2d3d; border-radius:8px; margin-bottom:8px; }
     .swagger-ui .opblock-summary-method { border-radius:4px; font-family:inherit; font-size:12px; font-weight:700; min-width:60px; text-align:center; }
@@ -860,9 +860,9 @@ function buildSwaggerHTML(spec, version, accentColor) {
     .swagger-ui .opblock.opblock-post   { border-color:rgba(255,204,0,0.3); }
     .swagger-ui .opblock.opblock-put    { border-color:rgba(0,140,255,0.3); }
     .swagger-ui .opblock.opblock-delete { border-color:rgba(255,51,85,0.3); }
-    .swagger-ui .opblock.opblock-get    .opblock-summary-method { background:#171717; color:#000; }
-    .swagger-ui .opblock.opblock-post   .opblock-summary-method { background:#171717; color:#000; }
-    .swagger-ui .opblock.opblock-put    .opblock-summary-method { background:#171717; color:#fff; }
+    .swagger-ui .opblock.opblock-get    .opblock-summary-method { background:#00e87c; color:#000; }
+    .swagger-ui .opblock.opblock-post   .opblock-summary-method { background:#ffcc00; color:#000; }
+    .swagger-ui .opblock.opblock-put    .opblock-summary-method { background:#008cff; color:#fff; }
     .swagger-ui .opblock.opblock-delete .opblock-summary-method { background:#ff3355; color:#fff; }
     .swagger-ui .scheme-container { background:#171717; box-shadow:none; border-bottom:1px solid #1e2d3d; }
     .swagger-ui input[type=text], .swagger-ui textarea { background:#111820; border:1px solid #1e2d3d; color:#c9d8e8; border-radius:4px; }
