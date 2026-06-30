@@ -272,7 +272,7 @@ function buildSwaggerHTML(spec, version, accentColor) {
     background: radial-gradient(circle at top left, rgba(0, 217, 255, .08), transparent 25%), 
     radial-gradient(circle at bottom right, rgba(0, 232, 124, .05), transparent 25%), #050816;
     font-family: 'JetBrains Mono', monospace;
-    body: #121212;
+    background: #121212;
 }
     
 .docs-header {
