@@ -221,7 +221,7 @@
   const toggle = document.createElement("button");
   toggle.className     = "btn btn-ghost";
   toggle.id            = "themeToggle";
-  toggle.textContent   = isDark ? "☀️ LIGHT" : "🌙 DARK";
+  toggle.textContent   = isDark ? "☀️" : "🌙";
   toggle.style.cssText = "padding:6px 12px;font-size:11px;";
   toggle.addEventListener("click", toggleTheme);
   headerRight.prepend(toggle);
@@ -386,7 +386,7 @@
           <div id="watchlistBody" style="flex:1;overflow-y:auto;">
             <div style="padding:24px;text-align:center;color:var(--text3);font-size:11px;">No IPs being watched</div>
           </div>
-          <div id="monitorStatus" style="padding:8px 16px;font-size:10px;color:var(--text3);border-top:1px solid var(--border);"></div>`;
+          <div id="monitorStatus" style="padding:8px 16px;font-size:10px;color:var(--text3);border-top:1px solid var(--border); animation: blink 4s ease-in-out infinite;"></div>`;
 
         row.appendChild(mapWrap);
         row.appendChild(watchWrap);
@@ -4399,7 +4399,7 @@
         "--border","--border2"
       ].forEach(v => root.style.removeProperty(v));
   
-      if (btn) btn.textContent = "☀️ LIGHT";
+      if (btn) btn.textContent = "☀️";
   
       if (map) {
         map.eachLayer(l => { if (l._url) map.removeLayer(l); });
@@ -4418,7 +4418,7 @@
       root.style.setProperty("--border",  "#c8d8e4");
       root.style.setProperty("--border2", "#b0c4d4");
   
-      if (btn) btn.textContent = "🌙 DARK";
+      if (btn) btn.textContent = "🌙";
   
       if (map) {
         map.eachLayer(l => { if (l._url) map.removeLayer(l); });

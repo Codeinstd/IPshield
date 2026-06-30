@@ -12,7 +12,7 @@ router.get("/setup", requireAuth, async (req, res) => {
     const userId = req.auth.id;
 
     const existing = await db.query(
-      `SELECT mfa_enabled, email, name FROM api_keys WHERE id = $1`,
+      `SELECT mfa_enabled, email, name FROM users WHERE id = $1`,
       [userId]
     );
 
@@ -26,12 +26,12 @@ router.get("/setup", requireAuth, async (req, res) => {
       return res.status(400).json({ error: "MFA is already enabled" });
     }
 
-    const { secret, otpauth } = generateSecret(user.email || user.name);
+    const { secret, otpauth } = generateSecret(user.email);
     const qrDataUrl = await generateQR(otpauth);
 
     // Store secret temporarily — NOT enabled until /verify-setup succeeds
     await db.query(
-      `UPDATE api_keys SET mfa_secret = $1 WHERE id = $2`,
+      `UPDATE users SET mfa_secret = $1 WHERE id = $2`,
       [secret, userId]
     );
 
@@ -47,8 +47,6 @@ router.get("/setup", requireAuth, async (req, res) => {
 });
 
 // POST /api/v1/mfa/verify-setup 
-// Confirm a TOTP code against the pending secret and fully enable MFA.
-// Returns plain-text backup codes exactly once — user must save them.
 router.post("/verify-setup", requireAuth, async (req, res) => {
   try {
     const { token } = req.body;
@@ -59,7 +57,7 @@ router.post("/verify-setup", requireAuth, async (req, res) => {
     }
 
     const result = await db.query(
-      `SELECT mfa_secret, mfa_enabled FROM api_keys WHERE id = $1`,
+      `SELECT mfa_secret, mfa_enabled FROM users WHERE id = $1`,
       [userId]
     );
 
@@ -82,7 +80,7 @@ router.post("/verify-setup", requireAuth, async (req, res) => {
     const hashedCodes = await hashBackupCodes(backupCodes); // stored hashed
 
     await db.query(
-      `UPDATE api_keys
+      `UPDATE users
        SET mfa_enabled      = TRUE,
            mfa_verified_at  = NOW(),
            mfa_backup_codes = $2
@@ -103,8 +101,6 @@ router.post("/verify-setup", requireAuth, async (req, res) => {
 });
 
 // POST /api/v1/mfa/disable 
-// Disable MFA — requires a valid current TOTP code.
-// Clears secret, backup codes, and verified_at.
 router.post("/disable", requireAuth, async (req, res) => {
   try {
     const { token } = req.body;
@@ -115,7 +111,7 @@ router.post("/disable", requireAuth, async (req, res) => {
     }
 
     const result = await db.query(
-      `SELECT mfa_secret, mfa_enabled FROM api_keys WHERE id = $1`,
+      `SELECT mfa_secret, mfa_enabled FROM users WHERE id = $1`,
       [userId]
     );
 
@@ -136,7 +132,7 @@ router.post("/disable", requireAuth, async (req, res) => {
 
     // FIX: also clear mfa_backup_codes — previously left orphaned in DB
     await db.query(
-      `UPDATE api_keys
+      `UPDATE users
        SET mfa_enabled      = FALSE,
            mfa_secret       = NULL,
            mfa_verified_at  = NULL,
@@ -157,7 +153,7 @@ router.post("/disable", requireAuth, async (req, res) => {
 router.get("/status", requireAuth, async (req, res) => {
   try {
     const result = await db.query(
-      `SELECT mfa_enabled, mfa_verified_at FROM api_keys WHERE id = $1`,
+      `SELECT mfa_enabled, mfa_verified_at FROM users WHERE id = $1`,
       [req.auth.id]
     );
     if (!result.rows.length) {

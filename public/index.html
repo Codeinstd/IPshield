@@ -16,7 +16,9 @@
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon.ico/favicon-32x32.png">
 <link rel="icon" type="image/png" sizes="96x96" href="/favicon.ico/favicon-96x96.png">
 <link rel="icon" type="image/png" sizes="16x16" href="/favicon.ico/favicon-16x16.png">
+<link rel="stylesheet" href="/fontawesome/css/all.min.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/leaflet.min.css">
 <style>
@@ -30,23 +32,23 @@
 }
  
 [data-theme="dark"] {
-  --bg:      #080c0f;
-  --bg1:     #0d1117;
-  --bg2:     #111820;
-  --bg3:     #1a2535;
-  --border:  #1e2d3d;
+  --bg:         #121212;
+  --bg1:        #171717;
+  --bg2:        #1a1a1a;
+  --bg3:        #1b1b1b;
+  --border:  #212121;
   --text:    #c9d8e8;
-  --text2:   #6a8fa8;
-  --text3:   #3d5a72;
+  --text2:   #aeb4b8;
+  --text3:   #8b99a5;
   --surface: rgba(255,255,255,0.04);
 }
  
 [data-theme="light"] {
-  --bg:      #f0f4f8;
+  --bg:      #fafafa;
   --bg1:     #ffffff;
-  --bg2:     #f4f7fa;
+  --bg2:     #FCFCFC;
   --bg3:     #e8edf3;
-  --border:  #d0dae6;
+  --border:  #F0F0F0;
   --text:    #0d1822;
   --text2:   #4a6278;
   --text3:   #8fa8bc;
@@ -122,7 +124,9 @@ header {
 .logo-text { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 20px; white-space: nowrap; color: var(--text); }
 .logo-text span { color: var(--accent); }
  
-.nav-right { display: flex; gap: 10px; align-items: center; }
+.nav-right { display: flex; gap: 18px; align-items: center; }
+.nav-link { font-family: 'JetBrains Mono', monospace; font-weight: 400;  gap: 10px;  font-size: 14px; white-space: nowrap; color: var(--text2);  }
+.nav-link:hover {color: var(--accent);}
 .btn {
   padding: 9px 20px;
   border-radius: 8px;
@@ -136,7 +140,8 @@ header {
   align-items: center;
   transition: all .15s;
 }
-.btn-primary { background: var(--accent); color: #000; animation: btn-glow 3s ease-in-out infinite; }
+.btn-primary { background: var(--accent); color: #000; 
+  /* animation: btn-glow 3s ease-in-out infinite; */ } 
 .btn-primary:hover { background: #0099cc; }
 .btn-ghost { background: transparent; color: var(--text2); border: 1px solid var(--border); }
 .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
@@ -757,14 +762,15 @@ footer a:hover { color: var(--accent); }
   </div></a>
   <nav class="nav-right">
      <!-- Theme toggle — desktop -->
-    <button class="theme-toggle" id="themeToggleDesktop" aria-label="Toggle light/dark mode" title="Toggle theme">
+   
+    <a href="/pricing" class="nav-link">Pricing</a>
+    <a href="/api/docs" class="nav-link">API Docs</a>
+    <button onclick="showAccessModal('pilot')" class="btn btn-ghost">Request Access</button>
+    <a href="/login" class="btn btn-primary">Sign In →</a>
+     <button class="theme-toggle" id="themeToggleDesktop" aria-label="Toggle light/dark mode" title="Toggle theme">
       <span class="icon-sun">☀️</span>
       <span class="icon-moon">🌙</span>
     </button>
-    <a href="/pricing" class="btn btn-ghost">Pricing</a>
-    <a href="/api/docs" class="btn btn-ghost">API Docs</a>
-    <button onclick="showAccessModal('pilot')" class="btn btn-ghost">Request Access</button>
-    <a href="/login" class="btn btn-primary">Sign In →</a>
   </nav>
     <!-- Theme toggle — mobile (shown next to hamburger) -->
     <button class="theme-toggle" id="themeToggleMobile" aria-label="Toggle light/dark mode" title="Toggle theme" style="display:none;">
@@ -790,8 +796,8 @@ footer a:hover { color: var(--accent); }
   </div>
   <div class="drawer-body">
     <a onclick="showAccessModal('pilot')" class="btn btn-ghost">Request Access</a>
-    <a href="/pricing">Pricing</a>
-    <a href="/api/docs">API Docs</a>
+    <a href="/pricing" class="nav-link">Pricing</a>
+    <a href="/api/docs" class="nav-link">API Docs</a>
     <a href="/login" class="primary">Sign In →</a>
   </div>
 </div>
@@ -848,11 +854,11 @@ footer a:hover { color: var(--accent); }
 
 <div class="stats-bar">
   <div class="stat-item">
-    <div class="stat-num" id="publicTotal">750k</div>
+    <div class="stat-num" id="publicTotal">860k</div>
     <div class="stat-label">IPs Scored</div>
   </div>
   <div class="stat-item">
-    <div class="stat-num" id="publicCritical">38k</div>
+    <div class="stat-num" id="publicCritical">42k</div>
     <div class="stat-label">Critical Threats</div>
   </div>
   <div class="stat-item">
@@ -984,9 +990,9 @@ footer a:hover { color: var(--accent); }
 
     <div class="trust-grid">
       <div class="trust-card">
-        <div class="trust-card-num">94%</div>
+        <div class="trust-card-num">97%</div>
         <div class="trust-card-label">Cluster True-Positive Rate</div>
-        <div class="trust-card-detail">94% of threat clusters flagged by IPShield's subnet/ASN correlation were independently confirmed as real coordinated activity, not coincidence.</div>
+        <div class="trust-card-detail">97% of threat clusters flagged by IPShield's subnet/ASN correlation were independently confirmed as real coordinated activity, not coincidence.</div>
       </div>
       <div class="trust-card">
         <div class="trust-card-num accent">500K+</div>
@@ -994,7 +1000,7 @@ footer a:hover { color: var(--accent); }
         <div class="trust-card-detail">Not a backtest sample, this is the live count from IPShield's own audit log, scored by real users against real traffic.</div>
       </div>
       <div class="trust-card">
-        <div class="trust-card-num">32,000</div>
+        <div class="trust-card-num">42,000</div>
         <div class="trust-card-label">Flagged CRITICAL</div>
         <div class="trust-card-detail">Each one logged with the same data sources, score, and reasoning available to you. Nothing is scored and then hidden.</div>
       </div>
@@ -1124,12 +1130,30 @@ footer a:hover { color: var(--accent); }
 </section>
 
 <footer>
-  <div>© 2026 IPShield · Real-Time Threat Intelligence</div>
+  <div>
+    © 2026 IPShield · Real-Time Threat Intelligence
+  </div>
+
   <div class="footer-links">
     <a href="/api/docs">API Docs</a>
     <a href="/api/health">Status</a>
     <a href="/login">Sign In</a>
   </div>
+
+<div class="footer-contact">
+  
+  <a href="codeinstd@gmail.com" aria-label="Email">
+    <i class="fa-regular fa-envelope"></i>
+  </a>
+
+  <a href="https://github.com/Codeinstd/IPshield" aria-label="GitHub">
+    <i class="fa-brands fa-github"></i>
+  </a>
+
+  <a href="https://www.producthunt.com/products/ipshield" aria-label="Product Hunt">
+    <i class="fa-brands fa-product-hunt"></i>
+  </a>
+</div>
 </footer>
 
 <script>

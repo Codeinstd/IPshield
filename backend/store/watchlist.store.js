@@ -12,9 +12,9 @@ async function bootstrap() {
         threshold       INTEGER DEFAULT 30,
         last_score      INTEGER DEFAULT 0,
         last_risk       TEXT    DEFAULT 'UNKNOWN',
-        last_checked    BIGINT  DEFAULT 0,
-        added_at        BIGINT  NOT NULL,
-        alert_on_change BOOLEAN DEFAULT TRUE
+        last_checked    TIMESTAMPTZ,
+        added_at        TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        alert_on_change BOOLEAN NOT DEFAULT TRUE
       )
     `);
 
@@ -35,8 +35,8 @@ async function addToWatchlist({ ip, label = "", threshold = 30, alertOnChange = 
     threshold:      parseInt(threshold, 10),
     last_score:     0,
     last_risk:      "UNKNOWN",
-    last_checked:   0,
-    added_at:       Date.now(),
+    last_checked:   null,
+    added_at:       new Date(),
     alert_on_change: alertOnChange
   };
 

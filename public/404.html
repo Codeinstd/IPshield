@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>404 — Page Not Found · IPShield</title>
+ <link rel="icon" type="image/png" sizes="32x32" href="/favicon.ico/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="96x96" href="/favicon.ico/favicon-96x96.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon.ico/favicon-16x16.png">
+  <link rel="stylesheet" href="/fontawesome/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+:root {
+  --accent:   #00d9ff;
+  --critical: #ff3355;
+  --high:     #ff7700;
+  --medium:   #ffcc00;
+  --low:      #00e87c;
+}
+ 
+[data-theme="dark"] {
+  --bg:      #121212;
+  --bg1:     #121212;
+  --bg2:     #171717;
+  --bg3:     #171717;
+  --border:  #212121;
+  --text:    #c9d8e8;
+  --text2:   #aeb4b8;
+  --text3:   #8b99a5;
+  --surface: rgba(255,255,255,0.04);
+}
+ 
+[data-theme="light"] {
+  --bg:      #ffffff;
+  --bg1:     #ffffff;
+  --bg2:     #FCFCFC;
+  --bg3:     #e8edf3;
+  --border:  #F0F0F0;
+  --text:    #0d1822;
+  --text2:   #4a6278;
+  --text3:   #8fa8bc;
+  --surface: rgba(0,0,0,0.04);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--bg); color: var(--text); font-family: 'JetBrains Mono', monospace;
+  min-height: 100vh; display: flex; flex-direction: column;
+}
+a { text-decoration: none; }
+
+header {
+  display: flex; align-items: center; padding: 16px 24px;
+  border-bottom: 1px solid var(--border); background: var(--bg1);
+}
+.logo { display: flex; align-items: center; gap: 10px; }
+.logo-icon {
+  width: 32px; height: 32px; border: 2px solid var(--accent); border-radius: 6px;
+  display: flex; align-items: center; justify-content: center; color: var(--accent); font-size: 16px;
+}
+.logo-text { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 20px; color: var(--text); }
+.logo-text span { color: var(--accent); }
+
+main {
+  flex: 1; display: flex; align-items: center; justify-content: center;
+  padding: 40px 24px; text-align: center;
+}
+.code {
+  font-family: 'Syne', sans-serif; font-weight: 800; font-size: clamp(64px,14vw,140px);
+  line-height: 1; color: var(--accent); letter-spacing: -2px;
+  text-shadow: 0 0 60px rgba(0,217,255,0.25);
+}
+.bracket { color: var(--critical); }
+h1 {
+  font-family: 'Syne', sans-serif; font-weight: 800; font-size: clamp(20px,3vw,28px);
+  margin: 16px 0 12px; color: var(--text);
+}
+p {
+  font-size: 13px; color: var(--text2); line-height: 1.8; max-width: 420px;
+  margin: 0 auto 32px;
+}
+p code {
+  background: var(--bg2); border: 1px solid var(--border); border-radius: 4px;
+  padding: 1px 7px; color: var(--accent); font-size: 12px;
+}
+.actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+.btn {
+  padding: 12px 26px; border-radius: 8px; font-size: 13px; font-weight: 600;
+  letter-spacing: 1px; cursor: pointer; border: none; display: inline-flex; align-items: center;
+  transition: all .15s;
+}
+.btn-primary { background: var(--accent); color: #000; }
+.btn-primary:hover { background: #0099cc; }
+.btn-ghost { background: transparent; color: var(--text2); border: 1px solid var(--border); }
+.btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+
+footer {
+  border-top: 1px solid var(--border);
+  padding: 28px 32px;
+  display: flex; align-items: center; justify-content: space-between;
+  font-size: 11px; color: var(--text3);
+  flex-wrap: wrap; gap: 12px;
+  transition: border-color .3s;
+}
+footer a { color: var(--text3); }
+footer a:hover { color: var(--accent); }
+.footer-links { display: flex; gap: 20px; flex-wrap: wrap; }
+
+@media (max-width: 480px) {
+  .actions { flex-direction: column; width: 100%; }
+  .btn { justify-content: center; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <a href="/">
+    <div class="logo">
+      <div class="logo-icon">⬡</div>
+      <div class="logo-text">IP<span>Shield</span></div>
+    </div>
+  </a>
+</header>
+
+<main>
+  <div>
+    <div class="code"></span>404</span></div>
+    <h1>Page not found</h1>
+    <p>We couldn't find the page you're looking for. Double-check the URL, or head back to home.</p>
+    <div class="actions">
+      <a href="/" class="btn btn-primary">← Back to Home</a>
+      <a href="/api/docs" class="btn btn-ghost">API Docs</a>
+    </div>
+  </div>
+</main>
+<footer>
+  <div>
+    © 2026 IPShield · Real-Time Threat Intelligence
+  </div>
+
+  <div class="footer-links">
+    <a href="/api/health">Status</a>
+    <a href="/login">Sign In</a>
+  </div>
+
+<div class="footer-contact">
+  
+  <a href="codeinstd@gmail.com" aria-label="Email">
+    <i class="fa-regular fa-envelope"></i>
+  </a>
+
+  <a href="https://github.com/Codeinstd/IPshield" aria-label="GitHub">
+    <i class="fa-brands fa-github"></i>
+  </a>
+
+  <a href="https://www.producthunt.com/products/ipshield" aria-label="Product Hunt">
+    <i class="fa-brands fa-product-hunt"></i>
+  </a>
+</div>
+</footer>
+
+<script>
+  // Show the actual unmatched path the visitor landed on, escaped for safety.
+  const p = document.getElementById("badPath");
+  if (p) {
+    const path = window.location.pathname + window.location.search;
+    p.textContent = path && path !== "/" ? path : "that page";
+  }
+</script>
+</body>
+</html>

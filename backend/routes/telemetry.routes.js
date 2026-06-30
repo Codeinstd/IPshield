@@ -60,11 +60,26 @@ function buildDashboard(token) {
   <link rel="stylesheet" href="/leaflet.min.css">
   <style>
     :root {
-      --bg:#080c0f;--bg1:#0d1117;--bg2:#111820;--bg3:#1a2535;
-      --accent:#00d9ff;--low:#00e87c;--medium:#ffcc00;--high:#ff7700;--critical:#ff3355;
-      --text:#c9d8e8;--text2:#8fa8bc;--text3:#4a6278;--border:#1e2d3d;
-      --surface: rgba(17,24,32,0.72); --surface-hover: rgba(24,32,44,0.9);
-      --shadow-lg: 0 10px 30px rgba(0,0,0,0.35),0 0 0 1px rgba(255,255,255,0.03); --blur: blur(14px); }
+    --bg:         #121212;
+    --bg1:        #171717;
+    --bg2:        #1a1a1a;
+    --bg3:        #1b1b1b;  
+    --border:     #212121;
+    --border2:    #2E2E2E;
+    --accent:     #02bfe0 ;
+    --accent2:    #0099cc;
+    --text:       #c9d8e8;
+    --text2:      #aeb4b8;
+    --text3:      #8b99a5;
+    --critical:   #ff3355;
+    --high:       #ff7700;
+    --medium:     #ffcc00;
+    --low:        #01cd6e;
+    --info:       #00d9ff;
+    --surface: rgba(17,24,32,0.72); 
+    --surface-hover: rgba(24,32,44,0.9);
+    --shadow-lg: 0 10px 30px rgba(0,0,0,0.35),0 0 0 1px rgba(255,255,255,0.03); 
+    --blur: blur(14px); }
     * { box-sizing:border-box; margin:0; padding:0; }
     body { background:var(--bg); color:var(--text); font-family:'Inter',sans-serif; min-height:100vh; }
 

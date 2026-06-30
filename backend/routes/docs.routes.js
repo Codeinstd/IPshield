@@ -51,21 +51,21 @@ return `<!DOCTYPE html>
     </script>
   <style>
     :root {
-      --bg:       #080c0f;
-      --bg1:      #0d1117;
-      --bg2:      #111820;
-      --bg3:      #1a2535;
+       --bg:        #121212;
+      --bg1:        #121212;
+      --bg2:        #171717;
+      --bg3:        #171717;
       --accent:   #00d9ff;
       --accent2:  #0099bb;
       --low:      #00e87c;
       --medium:   #ffcc00;
       --high:     #ff7700;
       --critical: #ff3355;
-      --text:     #c9d8e8;
-      --text2:    #8fa8bc;
-      --text3:    #4a6278;
-      --border:   #1e2d3d;
-      --border2:  #2a3d52;
+      --text:    #c9d8e8;
+      --text2:   #aeb4b8;
+      --text3:   #8b99a5;
+      --border:   #212121;
+      --border2:  #212121;
       --get:      #00e87c;
       --post:     #ffcc00;
       --put:      #00aaff;

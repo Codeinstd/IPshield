@@ -32,21 +32,23 @@
 <link rel="icon" type="image/png" sizes="96x96" href="/favicon.ico/favicon-96x96.png">
 <link rel="icon" type="image/png" sizes="16x16" href="/favicon.ico/favicon-16x16.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="/fontawesome/css/all.min.css">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&amp;family=Syne:wght@400;600;700;800&amp;display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/leaflet.min.css">
 <style>
   :root {
-    --bg:         #080c0f;
-    --bg1:        #0d1117;
-    --bg2:        #111820;
-    --bg3:        #162030;
-    --border:     #1e2d3d;
-    --border2:    #243447;
+  
+    --bg:         #121212;
+    --bg1:        #171717;
+    --bg2:        #1a1a1a;
+    --bg3:        #1b1b1b;
+    --border:     #212121;
+    --border2:    #2E2E2E;
     --accent:     #02bfe0 ;
     --accent2:    #0099cc;
     --text:       #c9d8e8;
-    --text2:      #6a8fa8;
-    --text3:      #3d5a72;
+    --text2:      #aeb4b8;
+    --text3:      #8b99a5;
     --critical:   #ff3355;
     --high:       #ff7700;
     --medium:     #ffcc00;
@@ -249,7 +251,7 @@
   .sig-sev { font-size: 10px; font-weight: 700; text-transform: uppercase; color: var(--s-color); }
   /* Detail grid */
   .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-  .detail-card { background: var(--bg1); border: 0.9px solid var(--border);border-radius: 8px; padding: 16px; }
+  .detail-card { background: var(--bg2); border: 0.9px solid var(--border);border-radius: 8px; padding: 16px; }
   .detail-card-title { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px; font-family: 'JetBrains Mono', monospace; }
   .kv { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; gap: 8px; }
   .kv-key { font-size: 11px; color: var(--text3); }
@@ -341,6 +343,18 @@
   padding: 0;
   flex-shrink: 0;
 }
+
+footer {
+  border-top: 1px solid var(--border);
+  padding: 28px 32px;
+  display: flex; align-items: center; justify-content: space-between;
+  font-size: 11px; color: var(--text3);
+  flex-wrap: wrap; gap: 12px;
+  transition: border-color .3s;
+}
+footer a { color: var(--text3); }
+footer a:hover { color: var(--accent); }
+.footer-links { display: flex; gap: 20px; flex-wrap: wrap; }
 </style>
 <script id="Cookiebot" src="https://consent.cookiebot.com/uc.js" data-cbid="8703a674-8e59-41d0-a0b5-30f6b24f0dc6"  type="text/javascript"></script>
 <script id="CookieDeclaration" src="https://consent.cookiebot.com/8703a674-8e59-41d0-a0b5-30f6b24f0dc6/cd.js" type="text/javascript" async></script>
@@ -536,6 +550,30 @@
   </div>
 </div>
   </main>
+  <footer>
+  <div>
+    © 2026 IPShield · Real-Time Threat Intelligence
+  </div>
+
+  <div class="footer-links">
+    <a href="/api/health" target="_blank">Status</a>
+  </div>
+
+<div class="footer-contact">
+  
+  <a href="codeinstd@gmail.com" aria-label="Email" target="_blank">
+    <i class="fa-regular fa-envelope"></i>
+  </a>
+
+  <a href="https://github.com/Codeinstd/IPshield" aria-label="GitHub" target="_blank">
+    <i class="fa-brands fa-github"></i>
+  </a>
+
+  <a href="https://www.producthunt.com/products/ipshield" aria-label="Product Hunt" target="_blank">
+    <i class="fa-brands fa-product-hunt"></i>
+  </a>
+</div>
+</footer>
 </div>
 <script>
   async function loadDashboardStats() {

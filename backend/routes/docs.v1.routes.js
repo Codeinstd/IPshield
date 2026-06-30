@@ -13,6 +13,22 @@ See [v2 docs](/api/v2/docs) to upgrade.
 ## Authentication
 All endpoints require \`x-api-key\` header except \`/health\` and \`/docs\`.
 
+## Plans & Quotas
+Every account also has a subscription plan with its own daily quota per feature,
+separate from the IP-based rate limits above. Quotas reset at midnight UTC.
+ 
+| Feature | Free | Team |
+|---------|------|------|
+| IP score lookups / day | 5 | 500,000 |
+| Batch scoring / day | Not available | 100,000 |
+| Watched IPs (max) | 1 | 10,000 |
+ 
+Active scanning and per-account SIEM target limits are v2-only features —
+see [v2 docs](/api/v2/docs) for those quotas.
+ 
+Exceeding a quota returns \`HTTP 429\` with \`{ "error": "quota_exceeded", "plan",
+"limit", "used", "upgrade_url" }\`. See [/pricing](/pricing) to upgrade.
+
 ## Rate Limits
 | Endpoint | Limit |
 |----------|-------|
@@ -27,9 +43,28 @@ All endpoints require \`x-api-key\` header except \`/health\` and \`/docs\`.
     { url: "/api/v1",                            description: "v1 (stable)" },
     { url: "https://ipshield.live/api/v1",       description: "Production v1" }
   ],
-  components: {
+    components: {
     securitySchemes: {
       ApiKeyAuth: { type: "apiKey", in: "header", name: "x-api-key" }
+    },
+    schemas: {
+      QuotaExceeded: {
+        type: "object",
+        properties: {
+          error:       { type: "string", example: "quota_exceeded" },
+          message:     { type: "string", example: 'Daily limit for "score" reached (5/day on the free plan).' },
+          plan:        { type: "string", enum: ["free","team"], example: "free" },
+          limit:       { type: "integer", example: 5 },
+          used:        { type: "integer", example: 5 },
+          upgrade_url: { type: "string", example: "/pricing" }
+        }
+      }
+    },
+    responses: {
+      QuotaExceededResponse: {
+        description: "Daily quota exceeded for this feature on the caller's current plan.",
+        content: { "application/json": { schema: { "$ref": "#/components/schemas/QuotaExceeded" } } }
+      }
     }
   },
   security: [{ ApiKeyAuth: [] }],
@@ -54,7 +89,7 @@ All endpoints require \`x-api-key\` header except \`/health\` and \`/docs\`.
         responses: {
           200: { description: "Score result" },
           400: { description: "Invalid IP" },
-          429: { description: "Rate limited" }
+           429: { "$ref": "#/components/responses/QuotaExceededResponse" }
         }
       }
     },
@@ -68,7 +103,10 @@ All endpoints require \`x-api-key\` header except \`/health\` and \`/docs\`.
             properties: { ips: { type: "array", items: { type: "string" }, maxItems: 50, example: ["8.8.8.8","1.1.1.1"] } }
           }}}
         },
-        responses: { 200: { description: "Batch results" } }
+        responses: { 
+          200: { description: "Batch results" },
+          429: { "$ref": "#/components/responses/QuotaExceededResponse" }
+       }
       }
     },
     "/report/{ip}": {
@@ -101,7 +139,9 @@ All endpoints require \`x-api-key\` header except \`/health\` and \`/docs\`.
     "/watchlist": {
       get: {
         tags: ["Watchlist"], summary: "List watched IPs",
-        responses: { 200: { description: "Watchlist" } }
+        responses: { 
+          200: { description: "Watchlist" } 
+        }
       },
       post: {
         tags: ["Watchlist"], summary: "Add IP to watchlist",
@@ -117,7 +157,13 @@ All endpoints require \`x-api-key\` header except \`/health\` and \`/docs\`.
             }
           }}}
         },
-        responses: { 201: { description: "Added" }, 400: { description: "Invalid or full" } }
+        responses: { 
+          responses: {
+          201: { description: "Added" },
+          400: { description: "Invalid or full" },
+          429: { "$ref": "#/components/responses/QuotaExceededResponse" }
+      }
+        }
       }
     },
     "/watchlist/{ip}": {

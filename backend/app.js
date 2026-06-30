@@ -1,10 +1,11 @@
-const express    = require("express");
-const cors       = require("cors");
-const helmet     = require("helmet");
-const morgan     = require("morgan");
-const compression = require("compression");
-const path       = require("path");
-const rateLimit  = require("express-rate-limit");
+const express       = require("express");
+const cors          = require("cors");
+const helmet        = require("helmet");
+const morgan        = require("morgan");
+const compression   = require("compression");
+const path          = require("path");
+const rateLimit     = require("express-rate-limit");
+
 
 // Route imports 
 const scoreRoutes           = require("./routes/score.routes");
@@ -55,6 +56,7 @@ app.use((req, res, next) => {
   console.log("REQ:", req.originalUrl);
   next();
 });
+
 
 // Sentry (must be first handler)
 if (process.env.SENTRY_DSN) {
@@ -130,6 +132,7 @@ app.use(
         ],
 
         objectSrc: ["'none'"],
+
       },
     },
 
@@ -155,6 +158,7 @@ app.use(cors({
   methods:        ["GET", "POST", "PUT", "DELETE"],
   allowedHeaders: ["Content-Type", "x-api-key", "Authorization"],
 }));
+
 
 // Body parsing & compression
 app.use(compression());
@@ -372,6 +376,18 @@ mountShared(V2_PREFIXES, "/blacklist/cidr",      cidrRoutes);
 mountShared(V2_PREFIXES, "/cases",               casesRoutes);
 mountShared(V2_PREFIXES, "/cases",               caseAccountsRoutes);
 
+
+// serve public first
+app.use(express.static(path.join(__dirname, "../public")));
+
+// serve fontawesome
+app.use(
+  "/fontawesome",
+  express.static(
+    path.join(__dirname, "../node_modules/@fortawesome/fontawesome-free")
+  )
+);
+
 // v1 stubs — explicit 404 for v2-only endpoints
 app.use("/api/v1/blacklist", (req, res) => res.status(404).json({
   error: "not_available_in_v1", message: "Blacklist management is a v2 feature. Use /api/v2/blacklist", upgrade_url: "/api/v2/blacklist", docs: "/api/v2/docs",
@@ -381,8 +397,6 @@ app.use("/api/v1/cases", (req, res) => res.status(404).json({
   error: "not_available_in_v1", message: "Case management is a v2 feature. Use /api/v2/cases", upgrade_url: "/api/v2/cases", docs: "/api/v2/docs",
 }));
 
-//  SPA Fallback & 404
-app.use(express.static(path.join(__dirname, "../public")));
 
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "../public", "index.html"));
@@ -438,15 +452,25 @@ app.get("/reset-password", (req, res) => {
   res.sendFile(path.join(__dirname, "../public", "reset-password.html"));
 });
 
-app.get(/.*/, (req, res) => {
-  res.sendFile(path.join(__dirname, "../public", "index.html"));
+// Website 404
+app.get(/.*/, (req, res, next) => {
+  if (req.path.startsWith("/api/")) return next();
+  res.status(404).sendFile(path.join(__dirname, "../public", "404.html"));
 });
 
-app.use((req, res) => res.status(404).json({
-  error: "Not Found",
-  path:  req.path,
-  hint:  "See /api/versions for available API versions",
-}));
+// API 404
+app.use("/api", (req, res) => {
+  res.status(404).json({
+    error: "Not Found",
+    path: req.originalUrl,
+    hint: "See /api/versions for available API versions",
+  });
+});
+
+// Optional catch-all for non-GET requests
+app.use((req, res) => {
+  res.status(404).send("Not Found");
+});
 
 // Error Handlers (must be after all routes)
 if (process.env.SENTRY_DSN) {

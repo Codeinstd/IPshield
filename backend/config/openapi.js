@@ -52,6 +52,25 @@ target IP using nmap and nuclei. This requires:
 Scans run asynchronously via a job queue. Poll \`GET /scan/job/{jobId}\` until \`status\` is
 \`done\` or \`failed\`. Typical scans complete in 2–5 minutes.
 
+## Plans & Quotas
+In addition to the IP-based rate limits above, every account has a subscription
+plan with its own daily quota per feature. Quotas are tracked per account
+(shared across all API keys belonging to that account) and reset at midnight UTC.
+ 
+| Feature | Free | Team |
+|---------|------|------|
+| IP score lookups / day | 5 | 500,000 |
+| Batch scoring / day | Not available | 100,000 |
+| Active scans / day | Not available | 10,000 |
+| Watched IPs (max) | 1 | 10,000 |
+
+Exceeding a quota returns \`HTTP 429\` with \`{ "error": "quota_exceeded", "plan",
+"limit", "used", "upgrade_url" }\`. Requesting a feature not included on the
+current plan (e.g. active scanning on Free) returns \`HTTP 403\` with
+\`{ "error": "feature_not_available", "plan", "upgrade_url" }\`.
+ 
+See [/pricing](/pricing) to view or change your plan.
+
 ## Account Pages
 | Page | Description |
 |------|-------------|
@@ -82,6 +101,40 @@ Scans run asynchronously via a job queue. Poll \`GET /scan/job/{jobId}\` until \
       }
     },
     schemas: {
+
+        QuotaExceeded: {
+        type: "object",
+        properties: {
+          error:       { type: "string", example: "quota_exceeded" },
+          message:     { type: "string", example: 'Daily limit for "score" reached (5/day on the free plan).' },
+          plan:        { type: "string", enum: ["free","team"], example: "free" },
+          limit:       { type: "integer", example: 5 },
+          used:        { type: "integer", example: 5 },
+          upgrade_url: { type: "string", example: "/pricing" }
+        }
+      },
+ 
+      FeatureNotAvailable: {
+        type: "object",
+        description: "Returned when the plan doesn't include this feature at all (e.g. active scanning on Free).",
+        properties: {
+          error:       { type: "string", example: "feature_not_available" },
+          message:     { type: "string", example: 'The "active_scan" feature isn\'t included on the free plan.' },
+          plan:        { type: "string", example: "free" },
+          upgrade_url: { type: "string", example: "/pricing" }
+        }
+      },
+
+          responses: {
+      QuotaExceededResponse: {
+        description: "Daily quota exceeded for this feature on the caller's current plan.",
+        content: { "application/json": { schema: { "$ref": "#/components/schemas/QuotaExceeded" } } }
+      },
+      FeatureNotAvailableResponse: {
+        description: "This feature isn't included on the caller's current plan.",
+        content: { "application/json": { schema: { "$ref": "#/components/schemas/FeatureNotAvailable" } } }
+      }
+    },
 
       // Shared
       Error: {
@@ -618,7 +671,7 @@ Scans run asynchronously via a job queue. Poll \`GET /scan/job/{jobId}\` until \
         tags: ["Auth"], summary: "Login with email + password or API key",
         security: [],
         description: `Authenticates a user. Returns one of three responses:
-- \`{ token, user }\` — full session JWT (MFA not enabled, API key login)
+- \`{ token, user }\` full session JWT (MFA not enabled, API key login)
 - \`{ mfaRequired: true, challengeToken }\` — submit TOTP to \`/auth/login/mfa\`
 - \`{ mfaSetupRequired: true, token }\` — redirect to \`/mfa-setup\` to enrol
 
@@ -676,10 +729,10 @@ Scans run asynchronously via a job queue. Poll \`GET /scan/job/{jobId}\` until \
         tags: ["Auth"], summary: "Request a password reset link",
         security: [],
         description: `Sends a reset link to the email if an active account exists.
-Always returns \`{ ok: true }\` regardless — prevents email enumeration.
-Reset tokens expire after **1 hour** and are SHA-256 hashed in the database.
+Always returns \`{ ok: true }\` regardless, prevents email enumeration.
+Reset tokens expire after 1 hour and are SHA-256 hashed in the database.
 
-**Rate limit:** 5 attempts / 15 minutes per IP.`,
+Rate limit: 5 attempts / 15 minutes per IP.`,
         requestBody: {
           required: true,
           content: { "application/json": { schema: {
@@ -706,7 +759,7 @@ Reset tokens expire after **1 hour** and are SHA-256 hashed in the database.
         tags: ["Auth"], summary: "Set new password using reset token",
         security: [],
         description: `Sets a new password using the token from the reset email.
-The token is consumed on use — request a new one if it expires.
+The token is consumed on use, request a new one if it expires.
 Passwords must be 8–128 characters.
 
 **Rate limit:** 5 attempts / 15 minutes per IP.`,
@@ -738,7 +791,7 @@ Passwords must be 8–128 characters.
     "/v1/auth/logout": {
       post: {
         tags: ["Auth"], summary: "Logout (client-side token drop)",
-        description: "JWT is stateless — this endpoint signals intent only. The client must delete the token from localStorage.",
+        description: "JWT is stateless, this endpoint signals intent only. The client must delete the token from localStorage.",
         responses: {
           200: { description: "Logged out" }
         }
@@ -762,7 +815,7 @@ Passwords must be 8–128 characters.
         tags: ["MFA"], summary: "Generate TOTP secret and QR code",
         security: [{ BearerAuth: [] }],
         description: `Generates a new TOTP secret and returns a QR code data URL for scanning.
-The secret is stored temporarily — MFA is **not enabled** until \`/mfa/verify-setup\` succeeds.
+The secret is stored temporarily, MFA is **not enabled** until \`/mfa/verify-setup\` succeeds.
 Safe to call again if setup is interrupted; overwrites any pending unverified secret.`,
         responses: {
           200: { description: "QR code and secret", content: { "application/json": { schema: { "$ref": "#/components/schemas/MFASetupResponse" } } } },
@@ -777,7 +830,7 @@ Safe to call again if setup is interrupted; overwrites any pending unverified se
         tags: ["MFA"], summary: "Confirm TOTP code and enable MFA",
         security: [{ BearerAuth: [] }],
         description: `Verifies the 6-digit code against the pending secret and enables MFA.
-Returns **8 single-use backup codes** — these are shown exactly once and never stored in plain text.
+Returns 8 single-use backup codes, these are shown exactly once and never stored in plain text.
 Save them in a password manager immediately.`,
         requestBody: {
           required: true,
@@ -850,8 +903,8 @@ Save them in a password manager immediately.`,
         tags: ["Keys"], summary: "Create an invite link (admin)",
         security: [{ BearerAuth: [] }],
         description: `Creates a pending key and sends an activation email to the invitee.
-The activation link expires after **7 days**. If the invitee doesn't activate in time,
-create a new invite — expired invites cannot be reused.`,
+The activation link expires after 7 days. If the invitee doesn't activate in time,
+create a new invite, expired invites cannot be reused.`,
         requestBody: {
           required: true,
           content: { "application/json": { schema: { "$ref": "#/components/schemas/InviteRequest" } } }
@@ -894,7 +947,7 @@ create a new invite — expired invites cannot be reused.`,
         tags: ["Keys"], summary: "Activate account with invite token",
         security: [],
         description: `Sets email and password, activates the account, and returns the raw API key.
-**The API key is shown exactly once** — it is immediately wiped from the database after this response.
+The API key is shown exactly once, it is immediately wiped from the database after this response.
 Passwords must be 8–128 characters. The invite token is consumed and cannot be reused.`,
         parameters: [{ name: "token", in: "path", required: true, schema: { type: "string" } }],
         requestBody: {
@@ -1119,34 +1172,45 @@ Passwords must be 8–128 characters. The invite token is consumed and cannot be
 
     // Scoring 
     "/score/{ip}": {
-      get: {
-        tags: ["Scoring"], summary: "Score a single IP",
-        description: "Full risk intelligence for an IPv4 or IPv6 address.",
-        parameters: [{ name: "ip", in: "path", required: true, schema: { type: "string" }, example: "185.220.101.1" }],
-        responses: {
-          200: { description: "Score result", content: { "application/json": { schema: { "$ref": "#/components/schemas/ScoreResult" } } } },
-          400: { description: "Invalid IP" },
-          401: { description: "Missing or invalid API key" },
-          429: { description: "Rate limit exceeded" }
-        }
+  get: {
+    tags: ["Scoring"], summary: "Score a single IP",
+    description: "Full risk intelligence for an IPv4 or IPv6 address.",
+    parameters: [{ name: "ip", in: "path", required: true, schema: { type: "string" }, example: "185.220.101.1" }],
+    responses: {
+      200: { description: "Score result", content: { "application/json": { schema: { "$ref": "#/components/schemas/ScoreResult" } } } },
+      400: { description: "Invalid IP" },
+      401: { description: "Missing or invalid API key" },
+      429: {
+        description: "Either the IP-based rate limiter (30 req/min) or the plan's daily quota was exceeded — check `error` field to distinguish (`rate_limit_exceeded` vs `quota_exceeded`).",
+        content: { "application/json": { schema: {
+          oneOf: [
+            { type: "object", properties: { error: { type: "string", example: "rate_limit_exceeded" }, message: { type: "string" }, retryAfter: { type: "integer" } } },
+            { "$ref": "#/components/schemas/QuotaExceeded" }
+          ]
+        }}}
       }
-    },
+    }
+  }
+},
 
     "/score/batch": {
-      post: {
-        tags: ["Scoring"], summary: "Batch score up to 50 IPs",
-        requestBody: {
-          required: true,
-          content: { "application/json": { schema: {
-            type: "object", required: ["ips"],
-            properties: {
-              ips: { type: "array", items: { type: "string" }, minItems: 1, maxItems: 50, example: ["8.8.8.8","1.1.1.1"] }
-            }
-          }}}
-        },
-        responses: { 200: { description: "Batch results" } }
-      }
+  post: {
+    tags: ["Scoring"], summary: "Batch score up to 50 IPs",
+    requestBody: {
+      required: true,
+      content: { "application/json": { schema: {
+        type: "object", required: ["ips"],
+        properties: {
+          ips: { type: "array", items: { type: "string" }, minItems: 1, maxItems: 50, example: ["8.8.8.8","1.1.1.1"] }
+        }
+      }}}
     },
+    responses: {
+      200: { description: "Batch results" },
+      429: { "$ref": "#/components/responses/QuotaExceededResponse" }
+    }
+  }
+},
 
     "/report/{ip}": {
       get: {
@@ -1390,27 +1454,32 @@ Passwords must be 8–128 characters. The invite token is consumed and cannot be
 
     // Watchlist 
     "/watchlist": {
-      get: {
-        tags: ["Watchlist"], summary: "Get all watched IPs",
-        responses: { 200: { description: "Watchlist" } }
-      },
-      post: {
-        tags: ["Watchlist"], summary: "Add IP to watchlist",
-        requestBody: {
-          required: true,
-          content: { "application/json": { schema: {
-            type: "object", required: ["ip"],
-            properties: {
-              ip:            { type: "string" },
-              label:         { type: "string" },
-              threshold:     { type: "integer", default: 30 },
-              alertOnChange: { type: "boolean", default: true }
-            }
-          }}}
-        },
-        responses: { 201: { description: "Added" }, 400: { description: "Invalid or full" } }
-      }
+  get: {
+    tags: ["Watchlist"], summary: "Get all watched IPs",
+    responses: { 200: { description: "Watchlist" } }
+  },
+  post: {
+    tags: ["Watchlist"], summary: "Add IP to watchlist",
+    requestBody: {
+      required: true,
+      content: { "application/json": { schema: {
+        type: "object", required: ["ip"],
+        properties: {
+          ip:            { type: "string" },
+          label:         { type: "string" },
+          threshold:     { type: "integer", default: 30 },
+          alertOnChange: { type: "boolean", default: true }
+        }
+      }}}
     },
+    responses: {
+      201: { description: "Added" },
+      400: { description: "Invalid or full" },
+      403: { "$ref": "#/components/responses/FeatureNotAvailableResponse" },
+      429: { "$ref": "#/components/responses/QuotaExceededResponse" }
+    }
+  }
+},
 
     "/watchlist/{ip}": {
       delete: {
@@ -1472,22 +1541,22 @@ Passwords must be 8–128 characters. The invite token is consumed and cannot be
     "/v2/scan/{ip}": {
       post: {
         tags: ["Scanning"], summary: "Launch an active scan (nmap + nuclei)",
-        description: `Enqueues an active reconnaissance scan against the target IP. **This is not a
-passive lookup** — it sends real packets and HTTP/TLS probes to the target.
+        description: `Enqueues an active reconnaissance scan against the target IP. This is not a
+passive lookup;it sends real packets and HTTP/TLS probes to the target.
 
 Runs two scanners in parallel as a background job:
-- **nmap** — port scan (1–10000), service/version detection, default safe scripts, CVE matching via vulners NSE
-- **nuclei** — network, SSL/TLS and HTTP templates tagged \`network,ssl,tls,misconfig,exposure,default-login,takeover,tech\`. Destructive tags (\`fuzzing\`,\`dos\`,\`code\`,\`intrusive\`) are always excluded.
+- nmap: port scan (1–10000), service/version detection, default safe scripts, CVE matching via vulners NSE
+- nuclei: network, SSL/TLS and HTTP templates tagged \`network,ssl,tls,misconfig,exposure,default-login,takeover,tech\`. Destructive tags (\`fuzzing\`,\`dos\`,\`code\`,\`intrusive\`) are always excluded.
 
-**Requirements:**
+Requirements:
 - Caller's API key role must be \`analyst\` or \`admin\` — \`readonly\` keys get 403
 - \`consent: true\` must be present in the request body
-- Target IP must be public — RFC-1918, loopback and link-local ranges are rejected
+- Target IP must be public, RFC-1918, loopback and link-local ranges are rejected
 
 If a scan is already queued or running for this IP, returns 409 with the existing \`jobId\`
 instead of starting a duplicate.
 
-**Rate limit:** 5 requests / 10 minutes per key.`,
+Rate limit: 5 requests / 10 minutes per key.`,
         security: [{ ApiKeyAuth: [] }],
         parameters: [
           { name: "ip", in: "path", required: true, schema: { type: "string" }, example: "45.33.32.156" }
@@ -1499,7 +1568,7 @@ instead of starting a duplicate.
         responses: {
           202: { description: "Scan enqueued", content: { "application/json": { schema: { "$ref": "#/components/schemas/ScanStartResponse" } } } },
           400: { description: "Invalid IP, private/reserved IP range, or missing consent" },
-          403: { description: "Analyst role or higher required" },
+          403: { description: "This feature isn't included on the caller's current plan." },
           409: { description: "A scan is already in progress for this IP", content: { "application/json": { schema: {
             type: "object",
             properties: {
@@ -1508,7 +1577,15 @@ instead of starting a duplicate.
               status: { type: "string", enum: ["queued","running"] }
             }
           }}}},
-          429: { description: "Rate limit exceeded" }
+           429: {
+        description: "Either the per-key rate limiter (5 req/10min) or the plan's daily active-scan quota was exceeded.",
+        content: { "application/json": { schema: {
+          oneOf: [
+            { type: "object", properties: { error: { type: "string", example: "rate_limit_exceeded" }, message: { type: "string" }, retryAfter: { type: "integer" } } },
+            { "$ref": "#/components/schemas/QuotaExceeded" }
+          ]
+        }}}
+      },
         }
       }
     },
@@ -1517,7 +1594,7 @@ instead of starting a duplicate.
       get: {
         tags: ["Scanning"], summary: "Poll scan job status and summarised results",
         description: `Poll this endpoint every few seconds until \`status\` is \`done\` or \`failed\`.
-Returns summarised findings only — call \`GET /v2/scan/job/{jobId}/raw/{scanner}\` for the full
+Returns summarised findings only, call \`GET /v2/scan/job/{jobId}/raw/{scanner}\` for the full
 unfiltered output of either scanner.`,
         security: [{ ApiKeyAuth: [] }],
         parameters: [
@@ -1533,7 +1610,7 @@ unfiltered output of either scanner.`,
     "/v2/scan/job/{jobId}/raw/{scanner}": {
       get: {
         tags: ["Scanning"], summary: "Get full raw output for a scanner (analyst only)",
-        description: `Returns the complete unfiltered output for either scanner — full nmap port/CVE
+        description: `Returns the complete unfiltered output for either scanner, full nmap port/CVE
 data or the complete nuclei findings list. This payload can be large; only fetch it when you need
 to inspect a specific finding in depth.`,
         security: [{ ApiKeyAuth: [] }],

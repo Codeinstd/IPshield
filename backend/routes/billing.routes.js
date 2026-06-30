@@ -106,7 +106,49 @@ router.post("/checkout",
     }
   }
 );
+//paystack
+// router.post(
+//   "/checkout",
+//   requireAuth,
+//   [body("plan").equals("team")],
+//   validate,
+//   async (req, res) => {
+//     if (req.auth.type !== "user") {
+//       return res.status(403).json({ error: "user_login_required" });
+//     }
 
+//     try {
+//       const plan = getPlan(req.body.plan);
+
+//       const userResult = await db.query(
+//         `SELECT id, email FROM users WHERE id = $1`,
+//         [req.auth.id]
+//       );
+
+//       const user = userResult.rows[0];
+//       if (!user) return res.status(404).json({ error: "User not found" });
+
+//       const baseUrl = process.env.PUBLIC_BASE_URL || "https://ipshield.live";
+
+//       const response = await paystack.post("/transaction/initialize", {
+//         email: user.email,
+//         amount: plan.price * 100, // IMPORTANT: kobo
+//         callback_url: `${baseUrl}/dashboard?upgrade=success`,
+//         metadata: {
+//           user_id: user.id,
+//           plan: plan.id,
+//         },
+//       });
+
+//       return res.json({
+//         checkoutUrl: response.data.data.authorization_url,
+//       });
+//     } catch (err) {
+//       console.error("[paystack/checkout]", err.response?.data || err.message);
+//       res.status(500).json({ error: "Failed to create Paystack checkout" });
+//     }
+//   }
+// );
 // POST /api/v2/billing/portal — Stripe customer portal link, for self-serve cancel/upgrade/payment method updates
 router.post("/portal", requireAuth, async (req, res) => {
   if (req.auth.type !== "user") {

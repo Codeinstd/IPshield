@@ -88,7 +88,7 @@ router.post("/",
         await updateWatchlistEntry(ip, {
           last_score:   result.score,
           last_risk:    result.riskLevel,
-          last_checked: Date.now(),
+          last_checked: new Date(),
         });
         return res.status(201).json({ message: "Added to watchlist", entry, initialScore: result });
       } catch {

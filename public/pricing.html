@@ -5,8 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Pricing — IPShield</title>
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon.ico/favicon-32x32.png">
+<link rel="stylesheet" href="/fontawesome/css/all.min.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/leaflet.min.css">
 <style>
 :root {
   --accent:   #00d9ff;
@@ -15,14 +18,28 @@
   --medium:   #ffcc00;
   --low:      #00e87c;
 }
+ 
 [data-theme="dark"] {
-  --bg: #080c0f; --bg1: #0d1117; --bg2: #111820; --bg3: #1a2535;
-  --border: #1e2d3d; --text: #c9d8e8; --text2: #6a8fa8; --text3: #3d5a72;
+  --bg:         #121212;
+  --bg1:        #171717;
+  --bg2:        #1a1a1a;
+  --bg3:        #1b1b1b;
+  --border:  #212121;
+  --text:    #c9d8e8;
+  --text2:   #aeb4b8;
+  --text3:   #8b99a5;
   --surface: rgba(255,255,255,0.04);
 }
+ 
 [data-theme="light"] {
-  --bg: #f0f4f8; --bg1: #ffffff; --bg2: #f4f7fa; --bg3: #e8edf3;
-  --border: #d0dae6; --text: #0d1822; --text2: #4a6278; --text3: #8fa8bc;
+  --bg:      #fafafa;
+  --bg1:     #ffffff;
+  --bg2:     #FCFCFC;
+  --bg3:     #e8edf3;
+  --border:  #F0F0F0;
+  --text:    #0d1822;
+  --text2:   #4a6278;
+  --text3:   #8fa8bc;
   --surface: rgba(0,0,0,0.04);
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -44,7 +61,7 @@ header {
 }
 .logo-text { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 20px; color: var(--text); }
 .logo-text span { color: var(--accent); }
-.nav-right { display: flex; gap: 10px; align-items: center; }
+.nav-right { display: flex; gap: 18px; align-items: center; }
 .btn {
   padding: 9px 20px; border-radius: 8px; font-family: 'JetBrains Mono', monospace;
   font-size: 12px; font-weight: 600; letter-spacing: 1px; cursor: pointer; border: none;
@@ -85,6 +102,9 @@ header {
   font-size: 10px; font-weight: 700; color: var(--low); background: rgba(0,232,124,0.1);
   border: 1px solid rgba(0,232,124,0.3); padding: 2px 8px; border-radius: 10px;
 }
+
+.nav-link { font-family: 'JetBrains Mono', monospace; font-weight: 400;  gap: 10px;  font-size: 14px; white-space: nowrap; color: var(--text2);  }
+.nav-link:hover {color: var(--accent);}
 
 .plans-wrap { max-width: 1180px; margin: 0 auto; padding: 24px 24px 80px; }
 .plans-grid {
@@ -185,11 +205,12 @@ footer a:hover { color: var(--accent); }
     </div>
   </a>
   <nav class="nav-right">
-    <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+  
+    <a href="/api/docs" class="nav-link">API Docs</a>
+    <a href="/login" class="btn btn-primary">Sign In →</a>
+      <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
       <span class="icon-sun">☀️</span><span class="icon-moon">🌙</span>
     </button>
-    <a href="/api/docs" class="btn btn-ghost">API Docs</a>
-    <a href="/login" class="btn btn-primary">Sign In →</a>
   </nav>
 </header>
 
@@ -254,12 +275,30 @@ footer a:hover { color: var(--accent); }
 </div>
 
 <footer>
-  <div>© 2026 IPShield · Real-Time Threat Intelligence</div>
+  <div>
+    © 2026 IPShield · Real-Time Threat Intelligence
+  </div>
+
   <div class="footer-links">
     <a href="/api/docs">API Docs</a>
     <a href="/api/health">Status</a>
     <a href="/login">Sign In</a>
   </div>
+
+<div class="footer-contact">
+  
+  <a href="codeinstd@gmail.com" aria-label="Email">
+    <i class="fa-regular fa-envelope"></i>
+  </a>
+
+  <a href="https://github.com/Codeinstd/IPshield" aria-label="GitHub">
+    <i class="fa-brands fa-github"></i>
+  </a>
+
+  <a href="https://www.producthunt.com/products/ipshield" aria-label="Product Hunt">
+    <i class="fa-brands fa-product-hunt"></i>
+  </a>
+</div>
 </footer>
 
 <script>
