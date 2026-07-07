@@ -219,10 +219,15 @@
  
   // Theme toggle
   const toggle = document.createElement("button");
-  toggle.className     = "btn btn-ghost";
-  toggle.id            = "themeToggle";
-  toggle.textContent   = isDark ? "☀️" : "🌙";
+  toggle.className = "btn btn-ghost";
+  toggle.id = "themeToggle";
   toggle.style.cssText = "padding:6px 12px;font-size:11px;";
+
+  // initial icon
+  toggle.innerHTML = isDark
+    ? '<i class="fa-solid fa-sun"></i>'
+    : '<i class="fa-solid fa-moon"></i>';
+
   toggle.addEventListener("click", toggleTheme);
   headerRight.prepend(toggle);
 
@@ -4399,7 +4404,7 @@
         "--border","--border2"
       ].forEach(v => root.style.removeProperty(v));
   
-      if (btn) btn.textContent = "☀️";
+      if (btn) btn.innerHTML = '<i class="fa-solid fa-sun"></i>';
   
       if (map) {
         map.eachLayer(l => { if (l._url) map.removeLayer(l); });
@@ -4418,7 +4423,7 @@
       root.style.setProperty("--border",  "#c8d8e4");
       root.style.setProperty("--border2", "#b0c4d4");
   
-      if (btn) btn.textContent = "🌙";
+      if (btn) btn.innerHTML = '<i class="fa-solid fa-moon"></i>';
   
       if (map) {
         map.eachLayer(l => { if (l._url) map.removeLayer(l); });

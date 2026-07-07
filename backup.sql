@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict XRZWTdD9a8Q8ruZRerhHof9sho1v9DRbjkS3JNOLn4jn9aJxMPjnNe3XGvkk01d
+\restrict f2Rehbilf0Acs35jjQfuwio2Nh5arpBNtki7dsiRtVIbc9UfC4qNfK48WRyFI73
 
 -- Dumped from database version 18.4 (Debian 18.4-1.pgdg12+1)
 -- Dumped by pg_dump version 18.3
@@ -20,16 +20,21 @@ SET client_min_messages = warning;
 SET row_security = off;
 
 --
--- Name: public; Type: SCHEMA; Schema: -; Owner: ipshield_user
+-- Name: public; Type: SCHEMA; Schema: -; Owner: -
 --
 
--- *not* creating schema, since initdb creates it
+CREATE SCHEMA public;
 
-
-ALTER SCHEMA public OWNER TO ipshield_user;
 
 --
--- Name: set_updated_at(); Type: FUNCTION; Schema: public; Owner: ipshield_user
+-- Name: SCHEMA public; Type: COMMENT; Schema: -; Owner: -
+--
+
+COMMENT ON SCHEMA public IS 'standard public schema';
+
+
+--
+-- Name: set_updated_at(); Type: FUNCTION; Schema: public; Owner: -
 --
 
 CREATE FUNCTION public.set_updated_at() RETURNS trigger
@@ -39,14 +44,12 @@ BEGIN NEW.updated_at = NOW(); RETURN NEW; END;
 $$;
 
 
-ALTER FUNCTION public.set_updated_at() OWNER TO ipshield_user;
-
 SET default_tablespace = '';
 
 SET default_table_access_method = heap;
 
 --
--- Name: api_keys; Type: TABLE; Schema: public; Owner: ipshield_user
+-- Name: api_keys; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.api_keys (
@@ -86,10 +89,8 @@ CREATE TABLE public.api_keys (
 );
 
 
-ALTER TABLE public.api_keys OWNER TO ipshield_user;
-
 --
--- Name: api_keys_id_seq; Type: SEQUENCE; Schema: public; Owner: ipshield_user
+-- Name: api_keys_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.api_keys_id_seq
@@ -101,17 +102,15 @@ CREATE SEQUENCE public.api_keys_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.api_keys_id_seq OWNER TO ipshield_user;
-
 --
--- Name: api_keys_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: ipshield_user
+-- Name: api_keys_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.api_keys_id_seq OWNED BY public.api_keys.id;
 
 
 --
--- Name: audit_log; Type: TABLE; Schema: public; Owner: ipshield_user
+-- Name: audit_log; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.audit_log (
@@ -142,10 +141,8 @@ CREATE TABLE public.audit_log (
 );
 
 
-ALTER TABLE public.audit_log OWNER TO ipshield_user;
-
 --
--- Name: audit_log_id_seq; Type: SEQUENCE; Schema: public; Owner: ipshield_user
+-- Name: audit_log_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.audit_log_id_seq
@@ -157,17 +154,15 @@ CREATE SEQUENCE public.audit_log_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.audit_log_id_seq OWNER TO ipshield_user;
-
 --
--- Name: audit_log_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: ipshield_user
+-- Name: audit_log_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.audit_log_id_seq OWNED BY public.audit_log.id;
 
 
 --
--- Name: blacklist; Type: TABLE; Schema: public; Owner: ipshield_user
+-- Name: blacklist; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.blacklist (
@@ -184,10 +179,8 @@ CREATE TABLE public.blacklist (
 );
 
 
-ALTER TABLE public.blacklist OWNER TO ipshield_user;
-
 --
--- Name: blacklist_id_seq; Type: SEQUENCE; Schema: public; Owner: ipshield_user
+-- Name: blacklist_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.blacklist_id_seq
@@ -199,17 +192,15 @@ CREATE SEQUENCE public.blacklist_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.blacklist_id_seq OWNER TO ipshield_user;
-
 --
--- Name: blacklist_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: ipshield_user
+-- Name: blacklist_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.blacklist_id_seq OWNED BY public.blacklist.id;
 
 
 --
--- Name: case_accounts; Type: TABLE; Schema: public; Owner: ipshield_user
+-- Name: case_accounts; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.case_accounts (
@@ -223,10 +214,8 @@ CREATE TABLE public.case_accounts (
 );
 
 
-ALTER TABLE public.case_accounts OWNER TO ipshield_user;
-
 --
--- Name: case_accounts_id_seq; Type: SEQUENCE; Schema: public; Owner: ipshield_user
+-- Name: case_accounts_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.case_accounts_id_seq
@@ -238,17 +227,15 @@ CREATE SEQUENCE public.case_accounts_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.case_accounts_id_seq OWNER TO ipshield_user;
-
 --
--- Name: case_accounts_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: ipshield_user
+-- Name: case_accounts_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.case_accounts_id_seq OWNED BY public.case_accounts.id;
 
 
 --
--- Name: case_ips; Type: TABLE; Schema: public; Owner: ipshield_user
+-- Name: case_ips; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.case_ips (
@@ -262,10 +249,8 @@ CREATE TABLE public.case_ips (
 );
 
 
-ALTER TABLE public.case_ips OWNER TO ipshield_user;
-
 --
--- Name: case_ips_id_seq; Type: SEQUENCE; Schema: public; Owner: ipshield_user
+-- Name: case_ips_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.case_ips_id_seq
@@ -277,17 +262,15 @@ CREATE SEQUENCE public.case_ips_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.case_ips_id_seq OWNER TO ipshield_user;
-
 --
--- Name: case_ips_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: ipshield_user
+-- Name: case_ips_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.case_ips_id_seq OWNED BY public.case_ips.id;
 
 
 --
--- Name: case_notes; Type: TABLE; Schema: public; Owner: ipshield_user
+-- Name: case_notes; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.case_notes (
@@ -299,10 +282,8 @@ CREATE TABLE public.case_notes (
 );
 
 
-ALTER TABLE public.case_notes OWNER TO ipshield_user;
-
 --
--- Name: case_notes_id_seq; Type: SEQUENCE; Schema: public; Owner: ipshield_user
+-- Name: case_notes_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.case_notes_id_seq
@@ -314,17 +295,15 @@ CREATE SEQUENCE public.case_notes_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.case_notes_id_seq OWNER TO ipshield_user;
-
 --
--- Name: case_notes_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: ipshield_user
+-- Name: case_notes_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.case_notes_id_seq OWNED BY public.case_notes.id;
 
 
 --
--- Name: cases; Type: TABLE; Schema: public; Owner: ipshield_user
+-- Name: cases; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.cases (
@@ -343,10 +322,8 @@ CREATE TABLE public.cases (
 );
 
 
-ALTER TABLE public.cases OWNER TO ipshield_user;
-
 --
--- Name: cases_id_seq; Type: SEQUENCE; Schema: public; Owner: ipshield_user
+-- Name: cases_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.cases_id_seq
@@ -358,17 +335,15 @@ CREATE SEQUENCE public.cases_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.cases_id_seq OWNER TO ipshield_user;
-
 --
--- Name: cases_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: ipshield_user
+-- Name: cases_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.cases_id_seq OWNED BY public.cases.id;
 
 
 --
--- Name: cidr_blocks; Type: TABLE; Schema: public; Owner: ipshield_user
+-- Name: cidr_blocks; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.cidr_blocks (
@@ -385,10 +360,8 @@ CREATE TABLE public.cidr_blocks (
 );
 
 
-ALTER TABLE public.cidr_blocks OWNER TO ipshield_user;
-
 --
--- Name: cidr_blocks_id_seq; Type: SEQUENCE; Schema: public; Owner: ipshield_user
+-- Name: cidr_blocks_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.cidr_blocks_id_seq
@@ -400,17 +373,15 @@ CREATE SEQUENCE public.cidr_blocks_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.cidr_blocks_id_seq OWNER TO ipshield_user;
-
 --
--- Name: cidr_blocks_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: ipshield_user
+-- Name: cidr_blocks_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.cidr_blocks_id_seq OWNED BY public.cidr_blocks.id;
 
 
 --
--- Name: key_usage_log; Type: TABLE; Schema: public; Owner: ipshield_user
+-- Name: key_usage_log; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.key_usage_log (
@@ -424,10 +395,8 @@ CREATE TABLE public.key_usage_log (
 );
 
 
-ALTER TABLE public.key_usage_log OWNER TO ipshield_user;
-
 --
--- Name: key_usage_log_id_seq; Type: SEQUENCE; Schema: public; Owner: ipshield_user
+-- Name: key_usage_log_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.key_usage_log_id_seq
@@ -438,17 +407,15 @@ CREATE SEQUENCE public.key_usage_log_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.key_usage_log_id_seq OWNER TO ipshield_user;
-
 --
--- Name: key_usage_log_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: ipshield_user
+-- Name: key_usage_log_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.key_usage_log_id_seq OWNED BY public.key_usage_log.id;
 
 
 --
--- Name: scan_findings; Type: TABLE; Schema: public; Owner: ipshield_user
+-- Name: scan_findings; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.scan_findings (
@@ -459,10 +426,8 @@ CREATE TABLE public.scan_findings (
 );
 
 
-ALTER TABLE public.scan_findings OWNER TO ipshield_user;
-
 --
--- Name: scan_jobs; Type: TABLE; Schema: public; Owner: ipshield_user
+-- Name: scan_jobs; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.scan_jobs (
@@ -479,10 +444,8 @@ CREATE TABLE public.scan_jobs (
 );
 
 
-ALTER TABLE public.scan_jobs OWNER TO ipshield_user;
-
 --
--- Name: scan_jobs_id_seq; Type: SEQUENCE; Schema: public; Owner: ipshield_user
+-- Name: scan_jobs_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.scan_jobs_id_seq
@@ -494,17 +457,15 @@ CREATE SEQUENCE public.scan_jobs_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.scan_jobs_id_seq OWNER TO ipshield_user;
-
 --
--- Name: scan_jobs_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: ipshield_user
+-- Name: scan_jobs_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.scan_jobs_id_seq OWNED BY public.scan_jobs.id;
 
 
 --
--- Name: scan_ports; Type: TABLE; Schema: public; Owner: ipshield_user
+-- Name: scan_ports; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.scan_ports (
@@ -515,10 +476,8 @@ CREATE TABLE public.scan_ports (
 );
 
 
-ALTER TABLE public.scan_ports OWNER TO ipshield_user;
-
 --
--- Name: scan_results; Type: TABLE; Schema: public; Owner: ipshield_user
+-- Name: scan_results; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.scan_results (
@@ -533,10 +492,8 @@ CREATE TABLE public.scan_results (
 );
 
 
-ALTER TABLE public.scan_results OWNER TO ipshield_user;
-
 --
--- Name: scan_results_id_seq; Type: SEQUENCE; Schema: public; Owner: ipshield_user
+-- Name: scan_results_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.scan_results_id_seq
@@ -548,17 +505,15 @@ CREATE SEQUENCE public.scan_results_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.scan_results_id_seq OWNER TO ipshield_user;
-
 --
--- Name: scan_results_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: ipshield_user
+-- Name: scan_results_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.scan_results_id_seq OWNED BY public.scan_results.id;
 
 
 --
--- Name: scans; Type: TABLE; Schema: public; Owner: ipshield_user
+-- Name: scans; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.scans (
@@ -569,10 +524,8 @@ CREATE TABLE public.scans (
 );
 
 
-ALTER TABLE public.scans OWNER TO ipshield_user;
-
 --
--- Name: score_cache; Type: TABLE; Schema: public; Owner: ipshield_user
+-- Name: score_cache; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.score_cache (
@@ -586,10 +539,8 @@ CREATE TABLE public.score_cache (
 );
 
 
-ALTER TABLE public.score_cache OWNER TO ipshield_user;
-
 --
--- Name: siem_targets; Type: TABLE; Schema: public; Owner: ipshield_user
+-- Name: siem_targets; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.siem_targets (
@@ -610,10 +561,8 @@ CREATE TABLE public.siem_targets (
 );
 
 
-ALTER TABLE public.siem_targets OWNER TO ipshield_user;
-
 --
--- Name: siem_targets_id_seq; Type: SEQUENCE; Schema: public; Owner: ipshield_user
+-- Name: siem_targets_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.siem_targets_id_seq
@@ -625,17 +574,15 @@ CREATE SEQUENCE public.siem_targets_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.siem_targets_id_seq OWNER TO ipshield_user;
-
 --
--- Name: siem_targets_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: ipshield_user
+-- Name: siem_targets_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.siem_targets_id_seq OWNED BY public.siem_targets.id;
 
 
 --
--- Name: telemetry; Type: TABLE; Schema: public; Owner: ipshield_user
+-- Name: telemetry; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.telemetry (
@@ -650,10 +597,8 @@ CREATE TABLE public.telemetry (
 );
 
 
-ALTER TABLE public.telemetry OWNER TO ipshield_user;
-
 --
--- Name: telemetry_id_seq; Type: SEQUENCE; Schema: public; Owner: ipshield_user
+-- Name: telemetry_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.telemetry_id_seq
@@ -665,17 +610,15 @@ CREATE SEQUENCE public.telemetry_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.telemetry_id_seq OWNER TO ipshield_user;
-
 --
--- Name: telemetry_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: ipshield_user
+-- Name: telemetry_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.telemetry_id_seq OWNED BY public.telemetry.id;
 
 
 --
--- Name: telemetry_requests; Type: TABLE; Schema: public; Owner: ipshield_user
+-- Name: telemetry_requests; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.telemetry_requests (
@@ -695,10 +638,8 @@ CREATE TABLE public.telemetry_requests (
 );
 
 
-ALTER TABLE public.telemetry_requests OWNER TO ipshield_user;
-
 --
--- Name: telemetry_requests_id_seq; Type: SEQUENCE; Schema: public; Owner: ipshield_user
+-- Name: telemetry_requests_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.telemetry_requests_id_seq
@@ -709,17 +650,15 @@ CREATE SEQUENCE public.telemetry_requests_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.telemetry_requests_id_seq OWNER TO ipshield_user;
-
 --
--- Name: telemetry_requests_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: ipshield_user
+-- Name: telemetry_requests_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.telemetry_requests_id_seq OWNED BY public.telemetry_requests.id;
 
 
 --
--- Name: threat_clusters; Type: TABLE; Schema: public; Owner: ipshield_user
+-- Name: threat_clusters; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.threat_clusters (
@@ -737,10 +676,8 @@ CREATE TABLE public.threat_clusters (
 );
 
 
-ALTER TABLE public.threat_clusters OWNER TO ipshield_user;
-
 --
--- Name: threat_clusters_id_seq; Type: SEQUENCE; Schema: public; Owner: ipshield_user
+-- Name: threat_clusters_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.threat_clusters_id_seq
@@ -752,17 +689,15 @@ CREATE SEQUENCE public.threat_clusters_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.threat_clusters_id_seq OWNER TO ipshield_user;
-
 --
--- Name: threat_clusters_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: ipshield_user
+-- Name: threat_clusters_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.threat_clusters_id_seq OWNED BY public.threat_clusters.id;
 
 
 --
--- Name: usage_events; Type: TABLE; Schema: public; Owner: ipshield_user
+-- Name: usage_events; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.usage_events (
@@ -777,10 +712,8 @@ CREATE TABLE public.usage_events (
 );
 
 
-ALTER TABLE public.usage_events OWNER TO ipshield_user;
-
 --
--- Name: usage_events_id_seq; Type: SEQUENCE; Schema: public; Owner: ipshield_user
+-- Name: usage_events_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.usage_events_id_seq
@@ -791,17 +724,15 @@ CREATE SEQUENCE public.usage_events_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.usage_events_id_seq OWNER TO ipshield_user;
-
 --
--- Name: usage_events_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: ipshield_user
+-- Name: usage_events_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.usage_events_id_seq OWNED BY public.usage_events.id;
 
 
 --
--- Name: users; Type: TABLE; Schema: public; Owner: ipshield_user
+-- Name: users; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.users (
@@ -817,15 +748,19 @@ CREATE TABLE public.users (
     current_period_end timestamp with time zone,
     cancel_at_period_end boolean DEFAULT false NOT NULL,
     updated_at timestamp with time zone DEFAULT now() NOT NULL,
+    mfa_secret text,
+    mfa_enabled boolean DEFAULT false NOT NULL,
+    mfa_verified_at timestamp with time zone,
+    mfa_backup_codes text[],
+    reset_token text,
+    reset_token_expires timestamp with time zone,
     CONSTRAINT users_plan_check CHECK ((plan = ANY (ARRAY['free'::text, 'team'::text]))),
     CONSTRAINT users_subscription_status_check CHECK ((subscription_status = ANY (ARRAY['inactive'::text, 'trialing'::text, 'active'::text, 'past_due'::text, 'canceled'::text, 'unpaid'::text])))
 );
 
 
-ALTER TABLE public.users OWNER TO ipshield_user;
-
 --
--- Name: users_id_seq; Type: SEQUENCE; Schema: public; Owner: ipshield_user
+-- Name: users_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.users_id_seq
@@ -837,17 +772,15 @@ CREATE SEQUENCE public.users_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.users_id_seq OWNER TO ipshield_user;
-
 --
--- Name: users_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: ipshield_user
+-- Name: users_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.users_id_seq OWNED BY public.users.id;
 
 
 --
--- Name: watchlist; Type: TABLE; Schema: public; Owner: ipshield_user
+-- Name: watchlist; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.watchlist (
@@ -862,140 +795,138 @@ CREATE TABLE public.watchlist (
 );
 
 
-ALTER TABLE public.watchlist OWNER TO ipshield_user;
-
 --
--- Name: api_keys id; Type: DEFAULT; Schema: public; Owner: ipshield_user
+-- Name: api_keys id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.api_keys ALTER COLUMN id SET DEFAULT nextval('public.api_keys_id_seq'::regclass);
 
 
 --
--- Name: audit_log id; Type: DEFAULT; Schema: public; Owner: ipshield_user
+-- Name: audit_log id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.audit_log ALTER COLUMN id SET DEFAULT nextval('public.audit_log_id_seq'::regclass);
 
 
 --
--- Name: blacklist id; Type: DEFAULT; Schema: public; Owner: ipshield_user
+-- Name: blacklist id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.blacklist ALTER COLUMN id SET DEFAULT nextval('public.blacklist_id_seq'::regclass);
 
 
 --
--- Name: case_accounts id; Type: DEFAULT; Schema: public; Owner: ipshield_user
+-- Name: case_accounts id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.case_accounts ALTER COLUMN id SET DEFAULT nextval('public.case_accounts_id_seq'::regclass);
 
 
 --
--- Name: case_ips id; Type: DEFAULT; Schema: public; Owner: ipshield_user
+-- Name: case_ips id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.case_ips ALTER COLUMN id SET DEFAULT nextval('public.case_ips_id_seq'::regclass);
 
 
 --
--- Name: case_notes id; Type: DEFAULT; Schema: public; Owner: ipshield_user
+-- Name: case_notes id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.case_notes ALTER COLUMN id SET DEFAULT nextval('public.case_notes_id_seq'::regclass);
 
 
 --
--- Name: cases id; Type: DEFAULT; Schema: public; Owner: ipshield_user
+-- Name: cases id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.cases ALTER COLUMN id SET DEFAULT nextval('public.cases_id_seq'::regclass);
 
 
 --
--- Name: cidr_blocks id; Type: DEFAULT; Schema: public; Owner: ipshield_user
+-- Name: cidr_blocks id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.cidr_blocks ALTER COLUMN id SET DEFAULT nextval('public.cidr_blocks_id_seq'::regclass);
 
 
 --
--- Name: key_usage_log id; Type: DEFAULT; Schema: public; Owner: ipshield_user
+-- Name: key_usage_log id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.key_usage_log ALTER COLUMN id SET DEFAULT nextval('public.key_usage_log_id_seq'::regclass);
 
 
 --
--- Name: scan_jobs id; Type: DEFAULT; Schema: public; Owner: ipshield_user
+-- Name: scan_jobs id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.scan_jobs ALTER COLUMN id SET DEFAULT nextval('public.scan_jobs_id_seq'::regclass);
 
 
 --
--- Name: scan_results id; Type: DEFAULT; Schema: public; Owner: ipshield_user
+-- Name: scan_results id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.scan_results ALTER COLUMN id SET DEFAULT nextval('public.scan_results_id_seq'::regclass);
 
 
 --
--- Name: siem_targets id; Type: DEFAULT; Schema: public; Owner: ipshield_user
+-- Name: siem_targets id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.siem_targets ALTER COLUMN id SET DEFAULT nextval('public.siem_targets_id_seq'::regclass);
 
 
 --
--- Name: telemetry id; Type: DEFAULT; Schema: public; Owner: ipshield_user
+-- Name: telemetry id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.telemetry ALTER COLUMN id SET DEFAULT nextval('public.telemetry_id_seq'::regclass);
 
 
 --
--- Name: telemetry_requests id; Type: DEFAULT; Schema: public; Owner: ipshield_user
+-- Name: telemetry_requests id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.telemetry_requests ALTER COLUMN id SET DEFAULT nextval('public.telemetry_requests_id_seq'::regclass);
 
 
 --
--- Name: threat_clusters id; Type: DEFAULT; Schema: public; Owner: ipshield_user
+-- Name: threat_clusters id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.threat_clusters ALTER COLUMN id SET DEFAULT nextval('public.threat_clusters_id_seq'::regclass);
 
 
 --
--- Name: usage_events id; Type: DEFAULT; Schema: public; Owner: ipshield_user
+-- Name: usage_events id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.usage_events ALTER COLUMN id SET DEFAULT nextval('public.usage_events_id_seq'::regclass);
 
 
 --
--- Name: users id; Type: DEFAULT; Schema: public; Owner: ipshield_user
+-- Name: users id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.users ALTER COLUMN id SET DEFAULT nextval('public.users_id_seq'::regclass);
 
 
 --
--- Data for Name: api_keys; Type: TABLE DATA; Schema: public; Owner: ipshield_user
+-- Data for Name: api_keys; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.api_keys (id, name, role, created_at, last_used, email, status, invite_token, invited_by, invited_at, activated_at, revoked_at, revoke_reason, daily_limit, daily_used, total_used, last_reset, notes, key_preview, suspended_at, key_hash, key, password_hash, mfa_secret, mfa_enabled, mfa_verified_at, mfa_backup_codes, invite_expires_at, reset_token, reset_token_expires, user_id) FROM stdin;
-1	admin-key	admin	2026-05-25 14:38:07.968197+00	\N	designer@ipshield.live	active	\N	\N	\N	\N	\N	\N	999999	0	0	2026-05-31	\N	\N	\N	\N	\N	$2b$12$MO7ChPqDMso9p9dB/JOXjunVpyk.OB4t83pjm.9NUn8nH9lHOM9n2	MJRVUZJ4BZVCY7LP	t	2026-06-11 10:52:28.998874+00	{$2b$10$Cfeqp0UKzOgbnx3o9mbRq.uZw.hEQtzY3d1vhvb8mE3p77C.Kgfpu,$2b$10$NrjIq6dE23qJj63CyzxJdOCaHTGMAa0FvI7xyeM8I/nsFDsgd9nKS,$2b$10$LHXP5n46crD4j2pQ1tnOnOYPQwbecVsN3qIQaxY7QIUj75cO2O5km,$2b$10$0MaIpfwJiMpIn2U39tUjn.9KAfbEkKVsKb2nccaG2bW3KT29cmJWy,$2b$10$HUWO289dvp5mSfVy0EvgMeF0aE1MU2aOAQH.bS5yNGy6GliegL5si,$2b$10$glu8flPrVR9BaLiYAHscB.zS.bVaLamciWoi3L47tAP2TVbkJDv4.,$2b$10$GKxfnMZa4hirbNjHvb.kt.P6msErLj1.V/kSONB3TzmffPrG2MCeq}	\N	\N	\N	\N
-42	Viju Dev	readonly	2026-06-04 20:06:22.492139+00	\N	serenitykid01@gmail.com	active	\N	designer@ipshield.live	2026-06-04 20:06:22.492139+00	2026-06-04 21:28:49.321682+00	\N	\N	1000	0	0	2026-06-04	You're invited to test Ipshield as an analyst	ips_22efcb99••••••••••••	\N	b9413fd2747e13451d473d665d2a5a044ecc95c5d42eb5d6216612cf46ae03cb	\N	$2b$12$hgaql5OXMpr4Pm14fcqOrudU9d3C70KUiet1lYA4p2fdQVDsefQUO	Y2TFZSVPIFKCYNKLZF7PQWIVZOODPGAE	t	2026-06-11 05:28:52.795669+00	\N	\N	6decda0d2d1cf8a6cad2a9cda2a37c3fc8af116822a10aa09636f02d7bea7537	2026-06-13 07:26:04.51+00	\N
-71	Dave Code	analyst	2026-06-14 14:38:57.657276+00	\N	codeinstd@gmail.com	active	\N	designer@ipshield.live	2026-06-14 14:38:57.657276+00	2026-06-14 14:39:45.364776+00	\N	\N	1000	0	0	2026-06-14	\N	b431c1ef••••••••••••••••	\N	edc752a1489b0ba9ed828b458c3423a8c776ef6a0835b8985d122b3d40418404	\N	$2b$12$EPhthc4Bx9e7DQXrrflRMusvRCUvV1EZ6t6bThXuXo7BEoGSDrAK6	PZNH2LQPJ4DFQESM	t	2026-06-14 14:40:37.970313+00	{$2b$10$Ivk2EA56u7PWmNbSPOxEuOfnLWCngnWL2Ho6sdxno/HZrwGrbeAum,$2b$10$R/Z5bRe8Japt8Tee48uzZuG6zFv9jdMPs7mW6RlnLCKqOHBgqyRte,$2b$10$opOROzddKMSm6BRQ7zKbs.R.10IYCmdg3DEXNETITU1sEoVc9rLma,$2b$10$OdFf5Ck7ca3yvUkV8ka3A./aEI/y.eBSWnLVTCUtpJmKQLgLXwkoa,$2b$10$FvNp07hIwCairFbhF1jSm.L3IPYRLKrnzKsprOH/ju9XPiGZoAnh.,$2b$10$JZ2HYRVpHoWR2ACk6ctkdungX3lXnk1pHFmNUcuWh7rBDedEOGFm2,$2b$10$P/BigHDUnFdMX6uFzNCsfeSUw3rknKtfhhvkWHMKzMgHTrxObMqnm,$2b$10$SYdHrsuMSudBe4fTYG5rUeivGLubpJubSmAm2eywmDDD0eZCsGL6O}	\N	\N	\N	\N
+1	admin-key	admin	2026-05-25 14:38:07.968197+00	\N	designer@ipshield.live	active	\N	\N	\N	\N	\N	\N	999999	0	0	2026-05-31	\N	\N	\N	\N	\N	$2b$12$MO7ChPqDMso9p9dB/JOXjunVpyk.OB4t83pjm.9NUn8nH9lHOM9n2	MJRVUZJ4BZVCY7LP	t	2026-06-11 10:52:28.998874+00	{$2b$10$Cfeqp0UKzOgbnx3o9mbRq.uZw.hEQtzY3d1vhvb8mE3p77C.Kgfpu,$2b$10$NrjIq6dE23qJj63CyzxJdOCaHTGMAa0FvI7xyeM8I/nsFDsgd9nKS,$2b$10$LHXP5n46crD4j2pQ1tnOnOYPQwbecVsN3qIQaxY7QIUj75cO2O5km,$2b$10$0MaIpfwJiMpIn2U39tUjn.9KAfbEkKVsKb2nccaG2bW3KT29cmJWy,$2b$10$HUWO289dvp5mSfVy0EvgMeF0aE1MU2aOAQH.bS5yNGy6GliegL5si,$2b$10$glu8flPrVR9BaLiYAHscB.zS.bVaLamciWoi3L47tAP2TVbkJDv4.,$2b$10$GKxfnMZa4hirbNjHvb.kt.P6msErLj1.V/kSONB3TzmffPrG2MCeq}	\N	\N	\N	6
+42	Viju Dev	readonly	2026-06-04 20:06:22.492139+00	\N	serenitykid01@gmail.com	active	\N	designer@ipshield.live	2026-06-04 20:06:22.492139+00	2026-06-04 21:28:49.321682+00	\N	\N	1000	0	0	2026-06-04	You're invited to test Ipshield as an analyst	ips_22efcb99••••••••••••	\N	b9413fd2747e13451d473d665d2a5a044ecc95c5d42eb5d6216612cf46ae03cb	\N	$2b$12$hgaql5OXMpr4Pm14fcqOrudU9d3C70KUiet1lYA4p2fdQVDsefQUO	Y2TFZSVPIFKCYNKLZF7PQWIVZOODPGAE	t	2026-06-11 05:28:52.795669+00	\N	\N	6decda0d2d1cf8a6cad2a9cda2a37c3fc8af116822a10aa09636f02d7bea7537	2026-06-13 07:26:04.51+00	7
+71	Dave Code	analyst	2026-06-14 14:38:57.657276+00	\N	codeinstd@gmail.com	active	\N	designer@ipshield.live	2026-06-14 14:38:57.657276+00	2026-06-14 14:39:45.364776+00	\N	\N	1000	0	0	2026-06-14	\N	b431c1ef••••••••••••••••	\N	edc752a1489b0ba9ed828b458c3423a8c776ef6a0835b8985d122b3d40418404	\N	$2b$12$EPhthc4Bx9e7DQXrrflRMusvRCUvV1EZ6t6bThXuXo7BEoGSDrAK6	PZNH2LQPJ4DFQESM	t	2026-06-14 14:40:37.970313+00	{$2b$10$Ivk2EA56u7PWmNbSPOxEuOfnLWCngnWL2Ho6sdxno/HZrwGrbeAum,$2b$10$R/Z5bRe8Japt8Tee48uzZuG6zFv9jdMPs7mW6RlnLCKqOHBgqyRte,$2b$10$opOROzddKMSm6BRQ7zKbs.R.10IYCmdg3DEXNETITU1sEoVc9rLma,$2b$10$OdFf5Ck7ca3yvUkV8ka3A./aEI/y.eBSWnLVTCUtpJmKQLgLXwkoa,$2b$10$FvNp07hIwCairFbhF1jSm.L3IPYRLKrnzKsprOH/ju9XPiGZoAnh.,$2b$10$JZ2HYRVpHoWR2ACk6ctkdungX3lXnk1pHFmNUcuWh7rBDedEOGFm2,$2b$10$P/BigHDUnFdMX6uFzNCsfeSUw3rknKtfhhvkWHMKzMgHTrxObMqnm,$2b$10$SYdHrsuMSudBe4fTYG5rUeivGLubpJubSmAm2eywmDDD0eZCsGL6O}	\N	\N	\N	8
 \.
 
 
 --
--- Data for Name: audit_log; Type: TABLE DATA; Schema: public; Owner: ipshield_user
+-- Data for Name: audit_log; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.audit_log (id, ip, score, risk_level, action, is_proxy, is_tor, is_dc, country, isp, asn, cached, scored_at, city, is_feodo, is_spamhaus, is_et, otx_pulses, processing_ms, api_version, row_hash, prev_hash, confidence, confidence_reasons) FROM stdin;
@@ -1079,11 +1010,36 @@ COPY public.audit_log (id, ip, score, risk_level, action, is_proxy, is_tor, is_d
 78	185.220.101.1	100	CRITICAL	BLOCK	t	f	f	Germany	Stiftung Erneuerbare Freiheit	AS60729 Stiftung Erneuerbare Freiheit	f	2026-06-23 01:37:57.857385+00	Brandenburg an der Havel	f	f	f	0	6012	v2	5d2418fd12f81c6230745f1b686c52190f013cb83610639b8474eeabffd3372f	c85a3af29a7a3279259d095dd34e2eb0d58cb00e9dd47e2b4af0e25c4046855a	HIGH	["OTX lookup unavailable (missing API key or request failed)"]
 79	185.220.101.1	100	CRITICAL	BLOCK	t	f	f	Germany	Stiftung Erneuerbare Freiheit	AS60729 Stiftung Erneuerbare Freiheit	f	2026-06-23 01:44:35.978722+00	Brandenburg an der Havel	f	f	f	0	6021	v2	657f16538ed31df0314ca01e365cde1de60871c2723a989d6fbb121e7939eab6	5d2418fd12f81c6230745f1b686c52190f013cb83610639b8474eeabffd3372f	HIGH	["OTX lookup unavailable (missing API key or request failed)"]
 80	102.212.140.250	0	LOW	ALLOW	f	f	f	Nigeria	Sabi Networks Limited	AS329233 SABI NETWORKS LIMITED	f	2026-06-25 16:44:49.803802+00	Ifako	f	f	f	0	2516	v2	dee506809c46b18736210060f20fbbebddc329a3620e61d4c042ff1ed05755b9	657f16538ed31df0314ca01e365cde1de60871c2723a989d6fbb121e7939eab6	HIGH	[]
+81	154.120.82.172	0	LOW	ALLOW	f	f	f	Nigeria	SP 120	AS37340 SPECTRANET LIMITED	f	2026-06-26 09:41:12.275615+00	Lagos	f	f	f	0	1785	v2	3729670c4d8055fb70a2b16ca7888dd5ac3b11276dc48c8da545f3e8a0f4ae24	dee506809c46b18736210060f20fbbebddc329a3620e61d4c042ff1ed05755b9	HIGH	[]
+82	154.120.82.172	0	LOW	ALLOW	f	f	f	Nigeria	SP 120	AS37340 SPECTRANET LIMITED	f	2026-06-26 09:49:07.172431+00	Lagos	f	f	f	0	2012	v2	fb9dec74ce1838b5a792b0d2c24716ba7cc104cae8275f05039aac5e6aabaeb2	3729670c4d8055fb70a2b16ca7888dd5ac3b11276dc48c8da545f3e8a0f4ae24	HIGH	[]
+83	154.118.37.182	0	LOW	ALLOW	f	f	f	Nigeria	SP 118	AS37340 SPECTRANET LIMITED	f	2026-06-26 13:20:11.015391+00	Lagos	f	f	f	0	9329	v2	072d0441da8eb8b43bda3f0c4be613344752b8a6796a4a4ecf61135819788efa	fb9dec74ce1838b5a792b0d2c24716ba7cc104cae8275f05039aac5e6aabaeb2	HIGH	[]
+84	154.118.37.182	0	LOW	ALLOW	f	f	f	Nigeria	SP 118	AS37340 SPECTRANET LIMITED	f	2026-06-26 14:30:20.074743+00	Lagos	f	f	f	0	1849	v2	290b84c1dd39fd9b485786aaed839d3842135bd696c30676733df7cd2eacff71	072d0441da8eb8b43bda3f0c4be613344752b8a6796a4a4ecf61135819788efa	HIGH	[]
+85	185.220.101.1	100	CRITICAL	BLOCK	t	f	f	Germany	Stiftung Erneuerbare Freiheit	AS60729 Stiftung Erneuerbare Freiheit	f	2026-06-26 14:31:10.746209+00	Brandenburg an der Havel	f	f	f	0	6022	v2	1948b8247be486bdd161869314da5e06100df84ef29673656b97283d3a43f043	290b84c1dd39fd9b485786aaed839d3842135bd696c30676733df7cd2eacff71	HIGH	["OTX lookup unavailable (missing API key or request failed)"]
+86	154.120.82.172	0	LOW	ALLOW	f	f	f	Nigeria	SP 120	AS37340 SPECTRANET LIMITED	f	2026-06-26 14:31:37.565955+00	Lagos	f	f	f	0	1639	v2	28d94244b6f832780d1c526de48fe128c511b8e3e48ad802d2d10b04a7ad8208	1948b8247be486bdd161869314da5e06100df84ef29673656b97283d3a43f043	HIGH	[]
+87	45.33.32.156	26	LOW	ALLOW	f	f	t	United States	Akamai Technologies, Inc.	AS63949 Akamai Connected Cloud	f	2026-06-26 14:31:52.30556+00	Fremont	f	f	f	3	670	v2	e70e08a032a8a356c9766df212011abfd0dae1d0f79cb2d7a155f48f2832da62	28d94244b6f832780d1c526de48fe128c511b8e3e48ad802d2d10b04a7ad8208	HIGH	[]
+88	1.1.1.1	0	LOW	ALLOW	f	f	f	—	—	—	f	2026-06-26 14:36:38.794261+00	—	f	f	f	0	24031	v2	58fe18c567ceb5fdfbf0e558f306309189ad4cf1f09e4f9f003d65910f0d41a7	e70e08a032a8a356c9766df212011abfd0dae1d0f79cb2d7a155f48f2832da62	LOW	["Geolocation lookup failed — country/region/ISP unavailable", "WHOIS lookup failed across all registries (ARIN, RIPE, APNIC)", "OTX lookup unavailable (missing API key or request failed)", "Reverse DNS lookup timed out — PTR-based signals may be incomplete"]
+89	102.212.140.250	0	LOW	ALLOW	f	f	f	Nigeria	Sabi Networks Limited	AS329233 SABI NETWORKS LIMITED	f	2026-06-27 12:41:10.372101+00	Ifako	f	f	f	0	2732	v2	b58ab1419d41c85d0841f5bdcaf9c2cb7f07c85853c7fa2dbc0d028bdd267ee4	58fe18c567ceb5fdfbf0e558f306309189ad4cf1f09e4f9f003d65910f0d41a7	HIGH	[]
+90	102.212.140.245	0	LOW	ALLOW	f	f	f	Nigeria	Sabi Networks Limited	AS329233 SABI NETWORKS LIMITED	f	2026-06-27 12:41:22.985426+00	Ifako	f	f	f	0	4005	v2	73c37258f0470f345e287b6707f253b40a9230cca96befe9be68aecb41eb05fb	b58ab1419d41c85d0841f5bdcaf9c2cb7f07c85853c7fa2dbc0d028bdd267ee4	MEDIUM	["Reverse DNS lookup timed out — PTR-based signals may be incomplete"]
+91	102.212.140.225	0	LOW	ALLOW	f	f	f	Nigeria	Sabi Networks Limited	AS329233 SABI NETWORKS LIMITED	f	2026-06-27 12:41:39.315201+00	Ifako	f	f	f	0	3782	v2	e981b8ba1a3a9e5bd4d8ed7a2329abe7791e3c2a42aa5ec34e916fa90a633333	73c37258f0470f345e287b6707f253b40a9230cca96befe9be68aecb41eb05fb	HIGH	[]
+92	102.212.140.215	0	LOW	ALLOW	f	f	f	Nigeria	Sabi Networks Limited	AS329233 SABI NETWORKS LIMITED	f	2026-06-27 12:41:52.472723+00	Ifako	f	f	f	0	2334	v2	da273538cc515574e426a7e92316d7fc52968fdd4c3dd15df51301d4137041c4	e981b8ba1a3a9e5bd4d8ed7a2329abe7791e3c2a42aa5ec34e916fa90a633333	HIGH	[]
+93	102.212.140.205	0	LOW	ALLOW	f	f	f	Nigeria	Sabi Networks Limited	AS329233 SABI NETWORKS LIMITED	f	2026-06-27 12:42:03.194634+00	Ifako	f	f	f	0	2304	v2	c6fc85f161713262f2992b46c2af0c314eeb8f8ca405d120b44f84c92ba83f6f	da273538cc515574e426a7e92316d7fc52968fdd4c3dd15df51301d4137041c4	HIGH	[]
+94	102.91.104.47	0	LOW	ALLOW	f	f	t	Nigeria	MTN NIGERIA Communication limited	AS29465 MTN NIGERIA Communication limited	f	2026-06-30 04:30:56.854829+00	Abuja	f	f	f	0	7896	v2	fe67b4bc4246e4aba0d7be57b8fa714f4018e58ee2bf156ffdfe2c772b7ba0a8	c6fc85f161713262f2992b46c2af0c314eeb8f8ca405d120b44f84c92ba83f6f	HIGH	[]
+95	102.91.104.47	0	LOW	ALLOW	f	f	t	Nigeria	MTN NIGERIA Communication limited	AS29465 MTN NIGERIA Communication limited	t	2026-06-30 04:32:35.51934+00	Abuja	f	f	f	0	7896	v2	30d7f52eb6550c69804d74c14983a2283afd50a3aec4e67c282118e9377a756b	fe67b4bc4246e4aba0d7be57b8fa714f4018e58ee2bf156ffdfe2c772b7ba0a8	HIGH	[]
+96	185.220.101.1	100	CRITICAL	BLOCK	t	f	f	Germany	Stiftung Erneuerbare Freiheit	AS60729 Stiftung Erneuerbare Freiheit	f	2026-06-30 04:42:44.995758+00	Brandenburg an der Havel	f	f	f	0	12501	v2	0f329ce03383ad3fd2026557d57ca3702512f367596e3f4f62c8f9f2614192b8	30d7f52eb6550c69804d74c14983a2283afd50a3aec4e67c282118e9377a756b	MEDIUM	["OTX lookup unavailable (missing API key or request failed)", "Reverse DNS lookup timed out — PTR-based signals may be incomplete"]
+97	198.20.69.98	0	LOW	ALLOW	f	f	t	United States	SingleHop	AS32475 Internap Holding LLC	f	2026-06-30 05:16:12.775565+00	Encinitas	f	f	f	0	17034	v2	7b5e97d660f31cbbb3a8b2a6c74144d66644453ab30a636eb01ef1b087173ae1	0f329ce03383ad3fd2026557d57ca3702512f367596e3f4f62c8f9f2614192b8	MEDIUM	["OTX lookup unavailable (missing API key or request failed)", "Reverse DNS lookup timed out — PTR-based signals may be incomplete"]
+98	198.20.69.98	0	LOW	ALLOW	f	f	t	United States	SingleHop	AS32475 Internap Holding LLC	t	2026-06-30 05:16:18.343228+00	Encinitas	f	f	f	0	17034	v2	d3d641601ba56ed843e3e87906121c7c3c9945c4e766935e34473a28ddd47616	7b5e97d660f31cbbb3a8b2a6c74144d66644453ab30a636eb01ef1b087173ae1	MEDIUM	["OTX lookup unavailable (missing API key or request failed)", "Reverse DNS lookup timed out — PTR-based signals may be incomplete"]
+99	198.20.69.98	0	LOW	ALLOW	f	f	t	United States	SingleHop	AS32475 Internap Holding LLC	t	2026-06-30 05:16:59.229665+00	Encinitas	f	f	f	0	17034	v2	8a300e50c6f03ff00434a45e38de841cf8298f580bf6675dc259c6c5a0c9ce24	d3d641601ba56ed843e3e87906121c7c3c9945c4e766935e34473a28ddd47616	MEDIUM	["OTX lookup unavailable (missing API key or request failed)", "Reverse DNS lookup timed out — PTR-based signals may be incomplete"]
+100	1.1.1.1	0	LOW	ALLOW	f	f	t	Australia	Cloudflare, Inc	AS13335 Cloudflare, Inc.	f	2026-06-30 05:17:45.652259+00	South Brisbane	f	f	f	0	19585	v2	a045b2746e1a533b1b1a11a1b98f80c622d7ed889f7054c2d1e432fe6e66649e	8a300e50c6f03ff00434a45e38de841cf8298f580bf6675dc259c6c5a0c9ce24	HIGH	[]
+101	1.1.1.1	0	LOW	ALLOW	f	f	t	Australia	Cloudflare, Inc	AS13335 Cloudflare, Inc.	t	2026-06-30 05:21:33.107085+00	South Brisbane	f	f	f	0	19585	v2	934da915829c5c672d9e48335b1c9031ad69cfd0abce4f41283b299975cd1999	a045b2746e1a533b1b1a11a1b98f80c622d7ed889f7054c2d1e432fe6e66649e	HIGH	[]
+102	102.91.78.15	0	LOW	ALLOW	f	f	t	Nigeria	MTN NIGERIA Communication limited	AS29465 MTN NIGERIA Communication limited	f	2026-07-05 19:04:54.754011+00	Abuja	f	f	f	0	6679	v2	ee2da34fea255146bc8decadc0a4ca3b4122b460dc69247243650f353ba8005f	934da915829c5c672d9e48335b1c9031ad69cfd0abce4f41283b299975cd1999	HIGH	[]
+103	1.1.1.1	0	LOW	ALLOW	f	f	t	Australia	Cloudflare, Inc	AS13335 Cloudflare, Inc.	f	2026-07-05 19:05:58.856144+00	South Brisbane	f	f	f	0	6028	v2	c51ee4f7720686c203129936b846cc1b170ca2b8694eeb99e20f90d4b7d5f275	ee2da34fea255146bc8decadc0a4ca3b4122b460dc69247243650f353ba8005f	HIGH	["OTX lookup unavailable (missing API key or request failed)"]
+104	1.1.1.1	0	LOW	ALLOW	f	f	t	Australia	Cloudflare, Inc	AS13335 Cloudflare, Inc.	f	2026-07-05 19:08:43.233975+00	South Brisbane	f	f	f	0	4833	v2	a161d917044423cc53ee4e0de2b284dcec2cbf7cdf33366948c2a08b58df9b82	c51ee4f7720686c203129936b846cc1b170ca2b8694eeb99e20f90d4b7d5f275	HIGH	[]
+105	45.33.32.156	11	LOW	ALLOW	f	f	t	United States	Akamai Technologies, Inc.	AS63949 Akamai Connected Cloud	f	2026-07-05 19:09:58.672743+00	Fremont	f	f	f	0	6024	v2	a69b72245fe2802990c1ac721bd93572e96b6372f3de9754b29c8ad9637477db	a161d917044423cc53ee4e0de2b284dcec2cbf7cdf33366948c2a08b58df9b82	MEDIUM	["OTX lookup unavailable (missing API key or request failed)", "Reverse DNS lookup timed out — PTR-based signals may be incomplete"]
 \.
 
 
 --
--- Data for Name: blacklist; Type: TABLE DATA; Schema: public; Owner: ipshield_user
+-- Data for Name: blacklist; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.blacklist (id, ip, severity, category, reason, added_by, added_at, expires_at, tags) FROM stdin;
@@ -1091,7 +1047,7 @@ COPY public.blacklist (id, ip, severity, category, reason, added_by, added_at, e
 
 
 --
--- Data for Name: case_accounts; Type: TABLE DATA; Schema: public; Owner: ipshield_user
+-- Data for Name: case_accounts; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.case_accounts (id, case_id, account_id, account_type, note, added_at) FROM stdin;
@@ -1099,7 +1055,7 @@ COPY public.case_accounts (id, case_id, account_id, account_type, note, added_at
 
 
 --
--- Data for Name: case_ips; Type: TABLE DATA; Schema: public; Owner: ipshield_user
+-- Data for Name: case_ips; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.case_ips (id, case_id, ip, score, risk_level, note, added_at) FROM stdin;
@@ -1107,7 +1063,7 @@ COPY public.case_ips (id, case_id, ip, score, risk_level, note, added_at) FROM s
 
 
 --
--- Data for Name: case_notes; Type: TABLE DATA; Schema: public; Owner: ipshield_user
+-- Data for Name: case_notes; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.case_notes (id, case_id, note, author, created_at) FROM stdin;
@@ -1115,7 +1071,7 @@ COPY public.case_notes (id, case_id, note, author, created_at) FROM stdin;
 
 
 --
--- Data for Name: cases; Type: TABLE DATA; Schema: public; Owner: ipshield_user
+-- Data for Name: cases; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.cases (id, title, description, severity, status, assigned_to, tags, created_at, updated_at, closed_at) FROM stdin;
@@ -1123,7 +1079,7 @@ COPY public.cases (id, title, description, severity, status, assigned_to, tags, 
 
 
 --
--- Data for Name: cidr_blocks; Type: TABLE DATA; Schema: public; Owner: ipshield_user
+-- Data for Name: cidr_blocks; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.cidr_blocks (id, cidr, asn, severity, reason, added_by, added_at, expires_at, tags) FROM stdin;
@@ -1132,7 +1088,7 @@ COPY public.cidr_blocks (id, cidr, asn, severity, reason, added_by, added_at, ex
 
 
 --
--- Data for Name: key_usage_log; Type: TABLE DATA; Schema: public; Owner: ipshield_user
+-- Data for Name: key_usage_log; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.key_usage_log (id, key_id, date, requests, scores, cache_hits, errors) FROM stdin;
@@ -1140,7 +1096,7 @@ COPY public.key_usage_log (id, key_id, date, requests, scores, cache_hits, error
 
 
 --
--- Data for Name: scan_findings; Type: TABLE DATA; Schema: public; Owner: ipshield_user
+-- Data for Name: scan_findings; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.scan_findings (scan_id, severity, template, matched) FROM stdin;
@@ -1148,7 +1104,7 @@ COPY public.scan_findings (scan_id, severity, template, matched) FROM stdin;
 
 
 --
--- Data for Name: scan_jobs; Type: TABLE DATA; Schema: public; Owner: ipshield_user
+-- Data for Name: scan_jobs; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.scan_jobs (id, job_id, ip, status, requested_by, consent, created_at, started_at, completed_at, error) FROM stdin;
@@ -1157,7 +1113,7 @@ COPY public.scan_jobs (id, job_id, ip, status, requested_by, consent, created_at
 
 
 --
--- Data for Name: scan_ports; Type: TABLE DATA; Schema: public; Owner: ipshield_user
+-- Data for Name: scan_ports; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.scan_ports (scan_id, port, service, version) FROM stdin;
@@ -1165,7 +1121,7 @@ COPY public.scan_ports (scan_id, port, service, version) FROM stdin;
 
 
 --
--- Data for Name: scan_results; Type: TABLE DATA; Schema: public; Owner: ipshield_user
+-- Data for Name: scan_results; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.scan_results (id, job_id, ip, scanner, raw, summary, severity, created_at) FROM stdin;
@@ -1173,7 +1129,7 @@ COPY public.scan_results (id, job_id, ip, scanner, raw, summary, severity, creat
 
 
 --
--- Data for Name: scans; Type: TABLE DATA; Schema: public; Owner: ipshield_user
+-- Data for Name: scans; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.scans (id, target, status, created_at) FROM stdin;
@@ -1181,7 +1137,7 @@ COPY public.scans (id, target, status, created_at) FROM stdin;
 
 
 --
--- Data for Name: score_cache; Type: TABLE DATA; Schema: public; Owner: ipshield_user
+-- Data for Name: score_cache; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.score_cache (ip, score, risk_level, payload, cached_at, expires_at, hit_count) FROM stdin;
@@ -1189,7 +1145,7 @@ COPY public.score_cache (ip, score, risk_level, payload, cached_at, expires_at, 
 
 
 --
--- Data for Name: siem_targets; Type: TABLE DATA; Schema: public; Owner: ipshield_user
+-- Data for Name: siem_targets; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.siem_targets (id, name, type, url, token, enabled, min_score, min_risk, verify_ssl, created_at, last_sent, last_error) FROM stdin;
@@ -1197,7 +1153,7 @@ COPY public.siem_targets (id, name, type, url, token, enabled, min_score, min_ri
 
 
 --
--- Data for Name: telemetry; Type: TABLE DATA; Schema: public; Owner: ipshield_user
+-- Data for Name: telemetry; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.telemetry (id, method, route, status_code, duration_ms, api_key_id, api_version, recorded_at) FROM stdin;
@@ -1205,7 +1161,7 @@ COPY public.telemetry (id, method, route, status_code, duration_ms, api_key_id, 
 
 
 --
--- Data for Name: telemetry_requests; Type: TABLE DATA; Schema: public; Owner: ipshield_user
+-- Data for Name: telemetry_requests; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.telemetry_requests (id, ts, method, path, route, status, duration_ms, req_bytes, res_bytes, api_key, api_version, ip, error) FROM stdin;
@@ -11571,6 +11527,11 @@ COPY public.telemetry_requests (id, ts, method, path, route, status, duration_ms
 10360	1781344540607	GET	/	GET /api/v1/stats/	200	1738	0	119	\N	v1	127.0.0.1	\N
 10361	1781344540872	GET	/	GET /api/v1/stats/	304	264	0	0	\N	v1	127.0.0.1	\N
 10363	1781344553951	GET	/185.220.101.1	GET /api/v2/score/:ip	200	6424	0	0	\N	v2	127.0.0.1	\N
+12788	1782799819795	POST	/login	POST /api/v1/auth/login	500	5007	63	83	\N	v1	127.0.0.1	\N
+12789	1782799831003	POST	/login	POST /api/v1/auth/login	200	666	63	204	\N	v1	127.0.0.1	\N
+12790	1782799840068	POST	/login/mfa	POST /api/v1/auth/login/mfa	200	341	206	277	\N	v1	127.0.0.1	\N
+12863	1783025108850	GET	/api/v1	GET /api/v1	200	1	0	557	\N	v2	124.156.204.51	\N
+12903	1783278391197	GET	/	GET /api/v1/watchlist/	304	2	0	0	\N	v1	127.0.0.1	\N
 10362	1781344541149	GET	/	GET /api/v1/stats/	304	275	0	0	\N	v1	127.0.0.1	\N
 10364	1781344659091	GET	/	GET /api/v2/watchlist/	304	3	0	0	\N	v2	127.0.0.1	\N
 10365	1781348333433	GET	/api/.env	GET /.*/	206	49	0	0	\N	v2	50.116.75.86	\N
@@ -12042,8 +12003,16 @@ COPY public.telemetry_requests (id, ts, method, path, route, status, duration_ms
 10831	1781618659327	GET	/	GET /api/v1/stats/	304	948	0	0	\N	v1	127.0.0.1	\N
 10832	1781618684053	GET	/	GET /api/v2/watchlist/	304	1	0	0	\N	v2	127.0.0.1	\N
 10833	1781618684056	GET	/me	GET /api/v1/keys/me	304	0	0	0	\N	v1	127.0.0.1	\N
+12791	1782799840289	GET	/me	GET /api/v1/keys/me	304	3	0	0	\N	v1	127.0.0.1	\N
+12795	1782799842639	GET	/	GET /api/v1/stats/	304	304	0	0	\N	v1	127.0.0.1	\N
+12864	1783105426896	GET	/plans	GET /api/v2/billing/plans	304	1	0	0	\N	v2	102.92.24.174	\N
+12904	1783278507578	GET	/	GET /api/v1/watchlist/	304	8	0	0	\N	v1	127.0.0.1	\N
 10834	1781618684055	GET	/me	GET /api/v1/keys/me	304	3	0	0	\N	v1	127.0.0.1	\N
 10836	1781618684620	GET	/	GET /api/v1/stats/	304	292	0	0	\N	v1	127.0.0.1	\N
+12792	1782799840278	GET	/me	GET /api/v1/keys/me	304	8	0	0	\N	v1	127.0.0.1	\N
+12865	1783108815848	GET	/api/versions	GET /api/versions	200	1	0	557	\N	v2	217.113.194.185	\N
+12866	1783108833337	GET	/dashboard	GET /api/telemetry/dashboard	401	1	0	56	\N	v2	217.113.194.186	\N
+12905	1783278507577	GET	/me	GET /api/v1/keys/me	304	4	0	0	\N	v1	127.0.0.1	\N
 10835	1781618684326	GET	/	GET /api/v1/stats/	304	293	0	0	\N	v1	127.0.0.1	\N
 10837	1781618684898	GET	/	GET /api/v1/stats/	304	275	0	0	\N	v1	127.0.0.1	\N
 10838	1781618804064	GET	/	GET /api/v2/watchlist/	304	3	0	0	\N	v2	127.0.0.1	\N
@@ -12116,6 +12085,11 @@ COPY public.telemetry_requests (id, ts, method, path, route, status, duration_ms
 10905	1781620936457	GET	/	GET /api/v1/stats/	304	277	0	0	\N	v1	127.0.0.1	\N
 10906	1781620945967	POST	/start	POST /api/scans/start	500	3	40	32	\N	v2	127.0.0.1	\N
 10907	1781620958581	GET	/stats	GET /api/v2/cases/stats	200	279	0	41	\N	v2	127.0.0.1	\N
+12793	1782799840276	GET	/	GET /api/v2/watchlist/	304	8	0	0	\N	v2	127.0.0.1	\N
+12798	1782799843448	GET	/me	GET /api/v2/billing/me	304	609	0	0	\N	v2	127.0.0.1	\N
+12867	1783246463169	GET	/plans	GET /api/v2/billing/plans	304	3	0	0	\N	v2	102.91.103.179	\N
+12868	1783246485197	GET	/plans	GET /api/v2/billing/plans	304	1	0	0	\N	v2	102.91.103.179	\N
+12906	1783278507584	GET	/me	GET /api/v1/keys/me	304	2	0	0	\N	v1	127.0.0.1	\N
 10908	1781620959106	GET	/	GET /api/v2/cases/	200	521	0	22	\N	v2	127.0.0.1	\N
 10909	1781621052667	GET	/	GET /api/v2/watchlist/	304	1	0	0	\N	v2	127.0.0.1	\N
 10910	1781621832451	POST	/login	POST /api/v1/auth/login	200	695	63	204	\N	v1	127.0.0.1	\N
@@ -12193,6 +12167,12 @@ COPY public.telemetry_requests (id, ts, method, path, route, status, duration_ms
 10989	1781622799337	GET	/sample/splunk	GET /api/v2/siem/sample/:format	200	2	0	942	\N	v2	127.0.0.1	\N
 10990	1781622801376	GET	/targets	GET /api/v2/siem/targets	304	339	0	0	\N	v2	127.0.0.1	\N
 10992	1781622805128	GET	/	GET /api/v1/watchlist/	200	1	0	105	\N	v1	127.0.0.1	\N
+12794	1782799842333	GET	/	GET /api/v1/stats/	200	2090	0	120	\N	v1	127.0.0.1	\N
+12797	1782799842945	GET	/	GET /api/v1/stats/	304	304	0	0	\N	v1	127.0.0.1	\N
+12869	1783246600999	GET	/endpoint	GET /api/telemetry/endpoint	401	1	0	56	\N	v2	102.91.103.179	\N
+12907	1783278509400	GET	/	GET /api/v1/stats/	200	1887	0	120	\N	v1	127.0.0.1	\N
+12909	1783278510391	GET	/me	GET /api/v2/billing/me	304	598	0	0	\N	v2	127.0.0.1	\N
+12911	1783278511571	GET	/	GET /api/v1/stats/	304	308	0	0	\N	v1	127.0.0.1	\N
 10980	1781622784373	GET	/	GET /api/v2/keys/	200	643	0	0	\N	v2	127.0.0.1	\N
 10981	1781622786080	GET	/	GET /api/v1/telemetry/	200	3	0	0	\N	v1	127.0.0.1	\N
 10982	1781622791128	GET	/	GET /api/v2/threat/clusters/	200	378	0	25	\N	v2	127.0.0.1	\N
@@ -12201,6 +12181,11 @@ COPY public.telemetry_requests (id, ts, method, path, route, status, duration_ms
 10986	1781622798936	GET	/status	GET /api/v2/siem/status	200	2	0	123	\N	v2	127.0.0.1	\N
 10988	1781622799325	GET	/targets	GET /api/v2/siem/targets	200	387	0	24	\N	v2	127.0.0.1	\N
 10993	1781622805427	GET	/	GET /api/v1/stats/	200	297	0	119	\N	v1	127.0.0.1	\N
+12796	1782799842838	GET	/me	GET /api/v2/billing/me	200	2481	0	422	\N	v2	127.0.0.1	\N
+12870	1783278182560	POST	/login	POST /api/v1/auth/login	200	712	63	204	\N	v1	127.0.0.1	\N
+12871	1783278198697	POST	/login/mfa	POST /api/v1/auth/login/mfa	200	304	206	277	\N	v1	127.0.0.1	\N
+12908	1783278509786	GET	/me	GET /api/v2/billing/me	304	2198	0	0	\N	v2	127.0.0.1	\N
+12912	1783278523862	GET	/1.1.1.1	GET /api/v1/score/:ip	200	7300	0	0	\N	v1	127.0.0.1	\N
 10991	1781622805131	GET	/me	GET /api/v1/keys/me	304	1	0	0	\N	v1	127.0.0.1	\N
 10994	1781642105307	POST	/login	POST /api/v1/auth/login	200	625	63	204	\N	v1	127.0.0.1	\N
 10995	1781642114740	POST	/login/mfa	POST /api/v1/auth/login/mfa	200	295	206	322	\N	v1	127.0.0.1	\N
@@ -12449,9 +12434,18 @@ COPY public.telemetry_requests (id, ts, method, path, route, status, duration_ms
 11239	1781757555493	GET	/	GET /api/v1/stats/	304	324	0	0	\N	v1	127.0.0.1	\N
 11241	1781757557742	GET	/	GET /api/v2/cases/	200	655	0	22	\N	v2	127.0.0.1	\N
 11243	1781757587961	GET	/198.20.69.98	GET /api/v2/whois/:ip	200	3209	0	0	\N	v2	127.0.0.1	\N
+12799	1782799958146	GET	/plans	GET /api/v2/billing/plans	304	1	0	0	\N	v2	127.0.0.1	\N
+12872	1783278198829	GET	/	GET /api/v2/watchlist/	304	2	0	0	\N	v2	127.0.0.1	\N
+12876	1783278201067	GET	/	GET /api/v1/stats/	304	300	0	0	\N	v1	127.0.0.1	\N
+12910	1783278511261	GET	/	GET /api/v1/stats/	304	1859	0	0	\N	v1	127.0.0.1	\N
 11238	1781757555164	GET	/	GET /api/v1/stats/	304	282	0	0	\N	v1	127.0.0.1	\N
 11240	1781757557079	GET	/stats	GET /api/v2/cases/stats	200	290	0	41	\N	v2	127.0.0.1	\N
 11245	1781757594638	GET	/	GET /api/v1/stats/	200	314	0	119	\N	v1	127.0.0.1	\N
+12800	1782800157986	GET	/plans	GET /api/v2/billing/plans	304	2	0	0	\N	v2	127.0.0.1	\N
+12873	1783278198833	GET	/me	GET /api/v1/keys/me	304	5	0	0	\N	v1	127.0.0.1	\N
+12879	1783278201707	GET	/me	GET /api/v2/billing/me	304	606	0	0	\N	v2	127.0.0.1	\N
+12880	1783278205338	GET	/me	GET /api/v2/billing/me	304	667	0	0	\N	v2	127.0.0.1	\N
+12913	1783278564269	GET	/search	GET /api/v2/audit/search	200	2097	0	0	\N	v2	127.0.0.1	\N
 11242	1781757569015	GET	/198.20.69.98	GET /api/v2/score/:ip	200	7481	0	0	\N	v2	127.0.0.1	\N
 11244	1781757594343	GET	/	GET /api/v2/watchlist/	304	2	0	0	\N	v2	127.0.0.1	\N
 11246	1781757594345	GET	/me	GET /api/v1/keys/me	304	2	0	0	\N	v1	127.0.0.1	\N
@@ -12519,8 +12513,21 @@ COPY public.telemetry_requests (id, ts, method, path, route, status, duration_ms
 11308	1781759272654	GET	/	GET /api/v1/stats/	200	2	0	119	\N	v1	154.118.73.142	\N
 11311	1781759274725	GET	/stats	GET /api/v2/cases/stats	200	5	0	59	ips_3abb7e90e164	v2	154.118.73.142	\N
 11312	1781759275198	GET	/	GET /api/v2/cases/	200	5	0	291	ips_3abb7e90e164	v2	154.118.73.142	\N
+12801	1782800298976	GET	/plans	GET /api/v2/billing/plans	304	8	0	0	\N	v2	102.91.104.47	\N
+12874	1783278198836	GET	/me	GET /api/v1/keys/me	304	1	0	0	\N	v1	127.0.0.1	\N
+12914	1783278566183	GET	/search	GET /api/v2/audit/search	304	1905	0	0	\N	v2	127.0.0.1	\N
+12916	1783278569177	GET	/search	GET /api/v2/audit/search	200	309	0	0	\N	v2	127.0.0.1	\N
 11309	1781759273268	GET	/	GET /api/v1/stats/	200	3	0	119	\N	v1	154.118.73.142	\N
 11310	1781759273340	GET	/me	GET /api/v1/keys/me	200	1	0	70	\N	v1	154.118.73.142	\N
+12802	1782800313818	GET	/plans	GET /api/v2/billing/plans	304	2	0	0	\N	v2	102.91.104.47	\N
+12803	1782800354800	GET	/endpoint	GET /api/telemetry/endpoint	403	3	0	27	ips_3abb7e90e164	v2	102.91.104.47	\N
+12875	1783278200764	GET	/	GET /api/v1/stats/	304	1989	0	0	\N	v1	127.0.0.1	\N
+12878	1783278201359	GET	/	GET /api/v1/stats/	304	289	0	0	\N	v1	127.0.0.1	\N
+12915	1783278567847	GET	/search	GET /api/v2/audit/search	200	292	0	0	\N	v2	127.0.0.1	\N
+12917	1783278570127	GET	/search	GET /api/v2/audit/search	200	299	0	0	\N	v2	127.0.0.1	\N
+12918	1783278573920	GET	/1.1.1.1	GET /api/v1/timeline/:ip	401	2	0	56	\N	v1	127.0.0.1	\N
+12919	1783278581038	GET	/1.1.1.1	GET /api/v1/timeline/:ip	401	1	0	56	\N	v1	127.0.0.1	\N
+12920	1783278588202	GET	/me	GET /api/v2/billing/me	200	608	0	422	\N	v2	127.0.0.1	\N
 11313	1781759275622	GET	/4	GET /api/v2/cases/:id	200	7	0	389	ips_3abb7e90e164	v2	154.118.73.142	\N
 11314	1781760906809	GET	/api/my-ip	GET /.*/	200	21	0	0	\N	v2	127.0.0.1	\N
 11315	1781760912869	GET	/api/my-ip	GET /.*/	304	2	0	0	\N	v2	127.0.0.1	\N
@@ -12653,12 +12660,19 @@ COPY public.telemetry_requests (id, ts, method, path, route, status, duration_ms
 11442	1782016884721	GET	/	GET /api/v2/cases/	200	646	0	291	\N	v2	127.0.0.1	\N
 11443	1782016885332	GET	/4	GET /api/v2/cases/:id	200	599	0	389	\N	v2	127.0.0.1	\N
 11444	1782016890542	DELETE	/4	DELETE /api/v2/cases/:id	200	284	0	26	\N	v2	127.0.0.1	\N
+12804	1782801508509	GET	/activate/	GET /api/keys/:id	401	2	0	56	\N	v2	102.91.104.47	\N
+12877	1783278201100	GET	/me	GET /api/v2/billing/me	200	2245	0	393	\N	v2	127.0.0.1	\N
+12921	1783278599310	GET	/45.33.32.156	GET /api/v1/score/:ip	200	8430	0	0	\N	v1	127.0.0.1	\N
 11445	1782016890829	GET	/stats	GET /api/v2/cases/stats	200	275	0	41	\N	v2	127.0.0.1	\N
 11447	1782016901397	GET	/search	GET /api/v2/audit/search	200	309	0	0	\N	v2	127.0.0.1	\N
 11448	1782016906948	GET	/search	GET /api/v2/audit/search	200	327	0	0	\N	v2	127.0.0.1	\N
 11449	1782016909817	GET	/search	GET /api/v2/audit/search	200	345	0	0	\N	v2	127.0.0.1	\N
 11450	1782016913870	GET	/search	GET /api/v2/audit/search	304	297	0	0	\N	v2	127.0.0.1	\N
 11451	1782016915652	GET	/search	GET /api/v2/audit/search	304	359	0	0	\N	v2	127.0.0.1	\N
+12805	1782801718072	GET	/plans	GET /api/v2/billing/plans	304	1	0	0	\N	v2	102.91.104.47	\N
+12882	1783278221356	GET	/me	GET /api/v1/keys/me	304	2	0	0	\N	v1	127.0.0.1	\N
+12887	1783278225127	GET	/	GET /api/v2/watchlist/	200	1	0	105	\N	v2	127.0.0.1	\N
+12922	1783278603424	GET	/search	GET /api/v2/audit/search	200	4107	0	0	\N	v2	127.0.0.1	\N
 11446	1782016891077	GET	/	GET /api/v2/cases/	200	525	0	22	\N	v2	127.0.0.1	\N
 11452	1782017022472	GET	/endpoint	GET /api/telemetry/endpoint	401	4	0	56	\N	v2	127.0.0.1	\N
 11453	1782017029787	GET	/endpoint	GET /api/telemetry/endpoint	401	2	0	56	\N	v2	127.0.0.1	\N
@@ -12729,6 +12743,10 @@ COPY public.telemetry_requests (id, ts, method, path, route, status, duration_ms
 11518	1782177774480	GET	/	GET /api/v1/stats/	304	1665	0	0	\N	v1	127.0.0.1	\N
 11519	1782177776549	GET	/	GET /api/v1/stats/	304	2068	0	0	\N	v1	127.0.0.1	\N
 11521	1782177783099	GET	/185.220.101.1	GET /api/v2/score/:ip	200	8736	0	0	\N	v2	127.0.0.1	\N
+12806	1782802273381	GET	/v1docs	GET /api/.*/	404	2	0	96	\N	v2	102.91.104.47	\N
+12881	1783278221351	GET	/me	GET /api/v1/keys/me	304	4	0	0	\N	v1	127.0.0.1	\N
+12923	1783278603707	GET	/me	GET /api/v2/billing/me	200	4226	0	422	\N	v2	127.0.0.1	\N
+12924	1783278627578	GET	/	GET /api/v1/watchlist/	304	2	0	0	\N	v1	127.0.0.1	\N
 11520	1782177776832	GET	/	GET /api/v1/stats/	304	282	0	0	\N	v1	127.0.0.1	\N
 11522	1782177892868	GET	/	GET /api/v2/watchlist/	304	1	0	0	\N	v2	127.0.0.1	\N
 11523	1782178012799	GET	/	GET /api/v2/watchlist/	304	2	0	0	\N	v2	127.0.0.1	\N
@@ -12833,11 +12851,1250 @@ COPY public.telemetry_requests (id, ts, method, path, route, status, duration_ms
 11622	1782447871887	GET	/me	GET /api/v2/billing/me	404	328	0	26	\N	v2	127.0.0.1	\N
 11623	1782447987408	GET	/	GET /api/v2/watchlist/	304	2	0	0	\N	v2	127.0.0.1	\N
 11624	1782448107420	GET	/	GET /api/v2/watchlist/	304	2	0	0	\N	v2	127.0.0.1	\N
+11625	1782449767040	POST	/login	POST /api/v1/auth/login	200	659	63	204	\N	v1	127.0.0.1	\N
+11626	1782449779382	POST	/login/mfa	POST /api/v1/auth/login/mfa	401	363	206	26	\N	v1	127.0.0.1	\N
+11627	1782449795296	POST	/login/mfa	POST /api/v1/auth/login/mfa	401	294	206	26	\N	v1	127.0.0.1	\N
+11628	1782449803059	POST	/login	POST /api/v1/auth/login	200	678	63	204	\N	v1	127.0.0.1	\N
+11629	1782449808265	POST	/login/mfa	POST /api/v1/auth/login/mfa	401	344	206	26	\N	v1	127.0.0.1	\N
+11630	1782449815562	POST	/login	POST /api/v1/auth/login	200	721	57	204	\N	v1	127.0.0.1	\N
+11631	1782449821864	POST	/login/mfa	POST /api/v1/auth/login/mfa	401	343	206	26	\N	v1	127.0.0.1	\N
+11632	1782450020466	POST	/login	POST /api/v1/auth/login	200	659	63	204	\N	v1	127.0.0.1	\N
+11633	1782450027798	POST	/login/mfa	POST /api/v1/auth/login/mfa	200	354	206	277	\N	v1	127.0.0.1	\N
+11634	1782450028674	GET	/me	GET /api/v2/billing/me	200	580	0	361	\N	v2	127.0.0.1	\N
+11635	1782450029262	GET	/me	GET /api/v2/billing/me	304	585	0	0	\N	v2	127.0.0.1	\N
+11636	1782450028022	GET	/	GET /api/v2/watchlist/	304	3	0	0	\N	v2	127.0.0.1	\N
+11637	1782450028029	GET	/me	GET /api/v1/keys/me	304	1	0	0	\N	v1	127.0.0.1	\N
+11638	1782450028028	GET	/me	GET /api/v1/keys/me	200	7	0	70	\N	v1	127.0.0.1	\N
+11639	1782450029873	GET	/	GET /api/v1/stats/	304	1896	0	0	\N	v1	127.0.0.1	\N
+11640	1782450030170	GET	/	GET /api/v1/stats/	304	296	0	0	\N	v1	127.0.0.1	\N
+11641	1782450030460	GET	/	GET /api/v1/stats/	304	287	0	0	\N	v1	127.0.0.1	\N
+11642	1782450031172	GET	/me	GET /api/v2/billing/me	304	614	0	0	\N	v2	127.0.0.1	\N
+11643	1782450053158	POST	/checkout	POST /api/v2/billing/checkout	500	2150	15	45	\N	v2	127.0.0.1	\N
+11644	1782450093585	GET	/plans	GET /api/v2/billing/plans	200	1	0	466	\N	v2	127.0.0.1	\N
+11645	1782450114667	POST	/login	POST /api/v1/auth/login	200	629	57	204	\N	v1	127.0.0.1	\N
+11646	1782450127980	POST	/login/mfa	POST /api/v1/auth/login/mfa	200	300	206	275	\N	v1	127.0.0.1	\N
+11647	1782450128842	GET	/me	GET /api/v2/billing/me	304	577	0	0	\N	v2	127.0.0.1	\N
+11648	1782450128211	GET	/me	GET /api/v1/keys/me	304	1	0	0	\N	v1	127.0.0.1	\N
+11649	1782450128197	GET	/	GET /api/v2/watchlist/	304	1	0	0	\N	v2	127.0.0.1	\N
+11650	1782450128206	GET	/me	GET /api/v1/keys/me	200	3	0	69	\N	v1	127.0.0.1	\N
+11651	1782450130479	GET	/	GET /api/v1/stats/	304	2304	0	0	\N	v1	127.0.0.1	\N
+11652	1782450130873	GET	/	GET /api/v1/stats/	304	392	0	0	\N	v1	127.0.0.1	\N
+11653	1782450131163	GET	/me	GET /api/v2/billing/me	304	2320	0	0	\N	v2	127.0.0.1	\N
+11654	1782450131165	GET	/	GET /api/v1/stats/	304	290	0	0	\N	v1	127.0.0.1	\N
+11655	1782450135466	GET	/me	GET /api/v2/billing/me	304	678	0	0	\N	v2	127.0.0.1	\N
+11656	1782450173255	GET	/me	GET /api/v2/billing/me	304	2398	0	0	\N	v2	127.0.0.1	\N
+11657	1782450248200	GET	/	GET /api/v2/watchlist/	304	1	0	0	\N	v2	127.0.0.1	\N
+11658	1782450344755	GET	/me	GET /api/v1/keys/me	304	3	0	0	\N	v1	127.0.0.1	\N
+11659	1782450344751	GET	/me	GET /api/v1/keys/me	304	9	0	0	\N	v1	127.0.0.1	\N
+11660	1782450344743	GET	/	GET /api/v2/watchlist/	304	2	0	0	\N	v2	127.0.0.1	\N
+11661	1782450346970	GET	/	GET /api/v1/stats/	304	2256	0	0	\N	v1	127.0.0.1	\N
+11662	1782450347098	GET	/me	GET /api/v2/billing/me	304	2291	0	0	\N	v2	127.0.0.1	\N
+11663	1782450347261	GET	/	GET /api/v1/stats/	304	287	0	0	\N	v1	127.0.0.1	\N
+11664	1782450347548	GET	/	GET /api/v1/stats/	304	286	0	0	\N	v1	127.0.0.1	\N
+11665	1782450347658	GET	/me	GET /api/v2/billing/me	304	559	0	0	\N	v2	127.0.0.1	\N
+11666	1782450348241	GET	/me	GET /api/v2/billing/me	304	580	0	0	\N	v2	127.0.0.1	\N
+11667	1782450384772	GET	/	GET /api/v2/watchlist/	304	1	0	0	\N	v2	127.0.0.1	\N
+11668	1782450384776	GET	/me	GET /api/v1/keys/me	304	1	0	0	\N	v1	127.0.0.1	\N
+11669	1782450384773	GET	/me	GET /api/v1/keys/me	304	1	0	0	\N	v1	127.0.0.1	\N
+11670	1782450386762	GET	/	GET /api/v1/stats/	304	2016	0	0	\N	v1	127.0.0.1	\N
+11671	1782450386922	GET	/me	GET /api/v2/billing/me	304	2090	0	0	\N	v2	127.0.0.1	\N
+11672	1782450387063	GET	/	GET /api/v1/stats/	304	299	0	0	\N	v1	127.0.0.1	\N
+11673	1782450387361	GET	/	GET /api/v1/stats/	304	297	0	0	\N	v1	127.0.0.1	\N
+11674	1782450387520	GET	/me	GET /api/v2/billing/me	304	595	0	0	\N	v2	127.0.0.1	\N
+11675	1782450388101	GET	/me	GET /api/v2/billing/me	304	579	0	0	\N	v2	127.0.0.1	\N
+11676	1782450504781	GET	/	GET /api/v2/watchlist/	304	1	0	0	\N	v2	127.0.0.1	\N
+11677	1782450672204	GET	/	GET /api/v2/watchlist/	304	2	0	0	\N	v2	127.0.0.1	\N
+11678	1782450679399	GET	/me	GET /api/v1/keys/me	304	2	0	0	\N	v1	127.0.0.1	\N
+11679	1782450679403	GET	/me	GET /api/v1/keys/me	304	1	0	0	\N	v1	127.0.0.1	\N
+11680	1782450679393	GET	/	GET /api/v2/watchlist/	304	4	0	0	\N	v2	127.0.0.1	\N
+11681	1782450681569	GET	/	GET /api/v1/stats/	304	2207	0	0	\N	v1	127.0.0.1	\N
+11682	1782450681852	GET	/me	GET /api/v2/billing/me	304	2387	0	0	\N	v2	127.0.0.1	\N
+11683	1782450682437	GET	/me	GET /api/v2/billing/me	304	583	0	0	\N	v2	127.0.0.1	\N
+11684	1782450683440	GET	/	GET /api/v1/stats/	304	1869	0	0	\N	v1	127.0.0.1	\N
+11685	1782450683733	GET	/	GET /api/v1/stats/	304	290	0	0	\N	v1	127.0.0.1	\N
+11686	1782450782709	POST	/login	POST /api/v1/auth/login	200	752	63	204	\N	v1	127.0.0.1	\N
+11687	1782450798296	POST	/login/mfa	POST /api/v1/auth/login/mfa	200	304	206	277	\N	v1	127.0.0.1	\N
+11688	1782450798524	GET	/me	GET /api/v1/keys/me	200	3	0	70	\N	v1	127.0.0.1	\N
+11689	1782450798519	GET	/	GET /api/v2/watchlist/	200	1	0	105	\N	v2	127.0.0.1	\N
+11690	1782450798527	GET	/me	GET /api/v1/keys/me	304	1	0	0	\N	v1	127.0.0.1	\N
+11691	1782450800498	GET	/	GET /api/v1/stats/	200	2006	0	119	\N	v1	127.0.0.1	\N
+11692	1782450800895	GET	/	GET /api/v1/stats/	304	396	0	0	\N	v1	127.0.0.1	\N
+11693	1782450801202	GET	/	GET /api/v1/stats/	304	305	0	0	\N	v1	127.0.0.1	\N
+11694	1782450801203	GET	/me	GET /api/v2/billing/me	200	2624	0	361	\N	v2	127.0.0.1	\N
+11695	1782450801904	GET	/me	GET /api/v2/billing/me	304	700	0	0	\N	v2	127.0.0.1	\N
+11696	1782450918646	GET	/	GET /api/v2/watchlist/	304	3	0	0	\N	v2	127.0.0.1	\N
+11697	1782450930650	GET	/me	GET /api/v1/keys/me	304	3	0	0	\N	v1	127.0.0.1	\N
+11698	1782450930648	GET	/	GET /api/v2/watchlist/	304	2	0	0	\N	v2	127.0.0.1	\N
+11699	1782450930655	GET	/me	GET /api/v1/keys/me	304	1	0	0	\N	v1	127.0.0.1	\N
+11700	1782450932752	GET	/	GET /api/v1/stats/	304	2142	0	0	\N	v1	127.0.0.1	\N
+11701	1782450933045	GET	/	GET /api/v1/stats/	304	292	0	0	\N	v1	127.0.0.1	\N
+11702	1782450933047	GET	/me	GET /api/v2/billing/me	304	2318	0	0	\N	v2	127.0.0.1	\N
+11703	1782450933338	GET	/	GET /api/v1/stats/	304	290	0	0	\N	v1	127.0.0.1	\N
+11704	1782450933632	GET	/me	GET /api/v2/billing/me	304	584	0	0	\N	v2	127.0.0.1	\N
+11705	1782451007066	GET	/search	GET /api/v2/audit/search	200	2133	0	0	\N	v2	127.0.0.1	\N
+11706	1782451009083	GET	/search	GET /api/v2/audit/search	304	1874	0	0	\N	v2	127.0.0.1	\N
+11707	1782451050647	GET	/	GET /api/v2/watchlist/	304	1	0	0	\N	v2	127.0.0.1	\N
+11708	1782451107364	POST	/login	POST /api/v1/auth/login	200	637	63	204	\N	v1	127.0.0.1	\N
+11709	1782451121613	POST	/login/mfa	POST /api/v1/auth/login/mfa	200	422	206	277	\N	v1	127.0.0.1	\N
+11710	1782451122473	GET	/me	GET /api/v2/billing/me	304	572	0	0	\N	v2	127.0.0.1	\N
+11711	1782451121837	GET	/	GET /api/v2/watchlist/	304	2	0	0	\N	v2	127.0.0.1	\N
+11712	1782451121843	GET	/me	GET /api/v1/keys/me	304	1	0	0	\N	v1	127.0.0.1	\N
+11713	1782451121838	GET	/me	GET /api/v1/keys/me	304	2	0	0	\N	v1	127.0.0.1	\N
+11714	1782451123798	GET	/	GET /api/v1/stats/	304	1983	0	0	\N	v1	127.0.0.1	\N
+11715	1782451124195	GET	/	GET /api/v1/stats/	304	396	0	0	\N	v1	127.0.0.1	\N
+11716	1782451124583	GET	/	GET /api/v1/stats/	304	386	0	0	\N	v1	127.0.0.1	\N
+11717	1782451124886	GET	/me	GET /api/v2/billing/me	304	2411	0	0	\N	v2	127.0.0.1	\N
+11718	1782451241846	GET	/	GET /api/v2/watchlist/	304	1	0	0	\N	v2	127.0.0.1	\N
+11719	1782451251407	GET	/me	GET /api/v1/keys/me	304	8	0	0	\N	v1	127.0.0.1	\N
+11720	1782451251396	GET	/	GET /api/v2/watchlist/	304	2	0	0	\N	v2	127.0.0.1	\N
+11721	1782451251397	GET	/me	GET /api/v1/keys/me	304	2	0	0	\N	v1	127.0.0.1	\N
+11722	1782451253183	GET	/	GET /api/v1/stats/	304	1813	0	0	\N	v1	127.0.0.1	\N
+11723	1782451253601	GET	/me	GET /api/v2/billing/me	304	2134	0	0	\N	v2	127.0.0.1	\N
+11724	1782451254197	GET	/me	GET /api/v2/billing/me	304	590	0	0	\N	v2	127.0.0.1	\N
+11725	1782451255092	GET	/	GET /api/v1/stats/	304	1907	0	0	\N	v1	127.0.0.1	\N
+11726	1782451255444	GET	/	GET /api/v1/stats/	304	351	0	0	\N	v1	127.0.0.1	\N
+12807	1782803062319	GET	/plans	GET /api/v2/billing/plans	304	1	0	0	\N	v2	102.91.104.47	\N
+12883	1783278221349	GET	/	GET /api/v2/watchlist/	304	2	0	0	\N	v2	127.0.0.1	\N
+12889	1783278225423	GET	/	GET /api/v1/stats/	200	297	0	120	\N	v1	127.0.0.1	\N
+12925	1783278870662	GET	/plans	GET /api/v2/billing/plans	304	2	0	0	\N	v2	127.0.0.1	\N
+11727	1782451264842	GET	/search	GET /api/v2/audit/search	304	325	0	0	\N	v2	127.0.0.1	\N
+11728	1782451332953	GET	/me	GET /api/v2/billing/me	304	2447	0	0	\N	v2	127.0.0.1	\N
+11729	1782451347451	GET	/me	GET /api/v1/keys/me	304	2	0	0	\N	v1	127.0.0.1	\N
+11731	1782451347571	GET	/me	GET /api/v1/keys/me	304	1	0	0	\N	v1	127.0.0.1	\N
+11730	1782451347565	GET	/	GET /api/v2/watchlist/	304	1	0	0	\N	v2	127.0.0.1	\N
+11732	1782451347569	GET	/me	GET /api/v1/keys/me	304	2	0	0	\N	v1	127.0.0.1	\N
+11733	1782451350694	GET	/plans	GET /api/v2/billing/plans	200	7	0	466	\N	v2	127.0.0.1	\N
+11734	1782451358393	GET	/me	GET /api/v2/billing/me	401	2	0	50	\N	v2	127.0.0.1	\N
+11735	1782451368335	POST	/login	POST /api/v1/auth/login	200	612	63	204	\N	v1	127.0.0.1	\N
+11736	1782451374541	POST	/login/mfa	POST /api/v1/auth/login/mfa	200	396	206	277	\N	v1	127.0.0.1	\N
+11737	1782451374751	GET	/	GET /api/v2/watchlist/	304	2	0	0	\N	v2	127.0.0.1	\N
+11738	1782451374755	GET	/me	GET /api/v1/keys/me	304	1	0	0	\N	v1	127.0.0.1	\N
+11739	1782451374753	GET	/me	GET /api/v1/keys/me	304	3	0	0	\N	v1	127.0.0.1	\N
+11740	1782451375007	GET	/	GET /api/v1/stats/	200	286	0	119	\N	v1	127.0.0.1	\N
+11741	1782451375393	GET	/	GET /api/v1/stats/	304	382	0	0	\N	v1	127.0.0.1	\N
+11742	1782451375400	GET	/me	GET /api/v2/billing/me	200	572	0	361	\N	v2	127.0.0.1	\N
+11743	1782451375669	GET	/	GET /api/v1/stats/	304	275	0	0	\N	v1	127.0.0.1	\N
+11744	1782451375981	GET	/me	GET /api/v2/billing/me	304	580	0	0	\N	v2	127.0.0.1	\N
+11745	1782451377507	GET	/me	GET /api/v2/billing/me	304	600	0	0	\N	v2	127.0.0.1	\N
+11746	1782451494752	GET	/	GET /api/v2/watchlist/	304	1	0	0	\N	v2	127.0.0.1	\N
+11747	1782451544270	GET	/me	GET /api/v1/keys/me	304	1	0	0	\N	v1	127.0.0.1	\N
+11748	1782451544264	GET	/	GET /api/v2/watchlist/	304	1	0	0	\N	v2	127.0.0.1	\N
+11749	1782451544267	GET	/me	GET /api/v1/keys/me	304	4	0	0	\N	v1	127.0.0.1	\N
+11750	1782451546125	GET	/	GET /api/v1/stats/	304	1893	0	0	\N	v1	127.0.0.1	\N
+11751	1782451546471	GET	/me	GET /api/v2/billing/me	304	2119	0	0	\N	v2	127.0.0.1	\N
+11752	1782451547034	GET	/me	GET /api/v2/billing/me	304	563	0	0	\N	v2	127.0.0.1	\N
+11753	1782451547877	GET	/me	GET /api/v2/billing/me	304	563	0	0	\N	v2	127.0.0.1	\N
+11754	1782451547934	GET	/	GET /api/v1/stats/	304	1810	0	0	\N	v1	127.0.0.1	\N
+11755	1782451548232	GET	/	GET /api/v1/stats/	304	298	0	0	\N	v1	127.0.0.1	\N
+11756	1782451664234	GET	/	GET /api/v2/watchlist/	304	3	0	0	\N	v2	127.0.0.1	\N
+11757	1782452090301	POST	/login	POST /api/v1/auth/login	200	2460	63	204	\N	v1	127.0.0.1	\N
+11758	1782452104101	POST	/login/mfa	POST /api/v1/auth/login/mfa	200	285	206	277	\N	v1	127.0.0.1	\N
+11759	1782452104950	GET	/me	GET /api/v1/keys/me	304	1	0	0	\N	v1	127.0.0.1	\N
+11760	1782452104946	GET	/	GET /api/v2/watchlist/	304	1	0	0	\N	v2	127.0.0.1	\N
+11761	1782452104948	GET	/me	GET /api/v1/keys/me	304	3	0	0	\N	v1	127.0.0.1	\N
+11762	1782452106951	GET	/	GET /api/v1/stats/	304	2034	0	0	\N	v1	127.0.0.1	\N
+11763	1782452107245	GET	/	GET /api/v1/stats/	304	291	0	0	\N	v1	127.0.0.1	\N
+11764	1782452107330	GET	/me	GET /api/v2/billing/me	304	2324	0	0	\N	v2	127.0.0.1	\N
+11765	1782452107546	GET	/	GET /api/v1/stats/	304	299	0	0	\N	v1	127.0.0.1	\N
+11766	1782452107895	GET	/me	GET /api/v2/billing/me	304	561	0	0	\N	v2	127.0.0.1	\N
+11767	1782452154945	GET	/me	GET /api/v2/billing/me	304	2292	0	0	\N	v2	127.0.0.1	\N
+11768	1782452224949	GET	/	GET /api/v2/watchlist/	304	2	0	0	\N	v2	127.0.0.1	\N
+11769	1782452229878	GET	/me	GET /api/v2/billing/me	304	571	0	0	\N	v2	127.0.0.1	\N
+11770	1782452344953	GET	/	GET /api/v2/watchlist/	304	3	0	0	\N	v2	127.0.0.1	\N
+11771	1782452408993	GET	/	GET /api/v2/watchlist/	304	2	0	0	\N	v2	127.0.0.1	\N
+11772	1782452409001	GET	/me	GET /api/v1/keys/me	304	3	0	0	\N	v1	127.0.0.1	\N
+11773	1782452408996	GET	/me	GET /api/v1/keys/me	304	5	0	0	\N	v1	127.0.0.1	\N
+11774	1782452411129	GET	/	GET /api/v1/stats/	304	2158	0	0	\N	v1	127.0.0.1	\N
+11775	1782452411394	GET	/me	GET /api/v2/billing/me	304	2337	0	0	\N	v2	127.0.0.1	\N
+11776	1782452411432	GET	/	GET /api/v1/stats/	304	300	0	0	\N	v1	127.0.0.1	\N
+11777	1782452411725	GET	/	GET /api/v1/stats/	304	291	0	0	\N	v1	127.0.0.1	\N
+11778	1782452411989	GET	/me	GET /api/v2/billing/me	304	593	0	0	\N	v2	127.0.0.1	\N
+11779	1782452416087	GET	/search	GET /api/v2/audit/search	304	296	0	0	\N	v2	127.0.0.1	\N
+11780	1782452529503	GET	/	GET /api/v2/watchlist/	304	2	0	0	\N	v2	127.0.0.1	\N
+11781	1782452629510	GET	/me	GET /api/v2/billing/me	304	2119	0	0	\N	v2	127.0.0.1	\N
+11782	1782452639131	GET	/me	GET /api/v2/billing/me	304	645	0	0	\N	v2	127.0.0.1	\N
+11783	1782452648996	GET	/	GET /api/v2/watchlist/	304	2	0	0	\N	v2	127.0.0.1	\N
+11784	1782452666967	GET	/stats	GET /api/v2/cases/stats	200	1922	0	41	\N	v2	127.0.0.1	\N
+11785	1782452667548	GET	/	GET /api/v2/cases/	200	573	0	22	\N	v2	127.0.0.1	\N
+11786	1782452678670	GET	/me	GET /api/v2/billing/me	304	647	0	0	\N	v2	127.0.0.1	\N
+11787	1782452682839	POST	/checkout	POST /api/v2/billing/checkout	500	1302	15	45	\N	v2	127.0.0.1	\N
+11788	1782452694302	GET	/plans	GET /api/v2/billing/plans	304	1	0	0	\N	v2	127.0.0.1	\N
+11789	1782453077324	GET	/plans	GET /api/v2/billing/plans	304	2	0	0	\N	v2	127.0.0.1	\N
+11790	1782453146672	GET	/plans	GET /api/v2/billing/plans	304	3	0	0	\N	v2	127.0.0.1	\N
+11791	1782453148643	GET	/plans	GET /api/v2/billing/plans	304	1	0	0	\N	v2	127.0.0.1	\N
+11792	1782453166706	GET	/plans	GET /api/v2/billing/plans	200	1	0	466	\N	v2	127.0.0.1	\N
+11793	1782453184240	GET	/plans	GET /api/v2/billing/plans	304	1	0	0	\N	v2	127.0.0.1	\N
+11794	1782453187048	GET	/plans	GET /api/v2/billing/plans	304	1	0	0	\N	v2	127.0.0.1	\N
+11795	1782453210739	GET	/plans	GET /api/v2/billing/plans	304	1	0	0	\N	v2	127.0.0.1	\N
+11796	1782453235614	GET	/plans	GET /api/v2/billing/plans	304	1	0	0	\N	v2	127.0.0.1	\N
+11797	1782453345475	GET	/plans	GET /api/v2/billing/plans	304	1	0	0	\N	v2	127.0.0.1	\N
+11798	1782453441058	GET	/plans	GET /api/v2/billing/plans	304	1	0	0	\N	v2	127.0.0.1	\N
+11799	1782453498073	GET	/plans	GET /api/v2/billing/plans	304	0	0	0	\N	v2	127.0.0.1	\N
+11800	1782453498539	GET	/plans	GET /api/v2/billing/plans	304	1	0	0	\N	v2	127.0.0.1	\N
+11801	1782453578714	GET	/plans	GET /api/v2/billing/plans	304	1	0	0	\N	v2	127.0.0.1	\N
+11802	1782453724622	GET	/plans	GET /api/v2/billing/plans	304	1	0	0	\N	v2	127.0.0.1	\N
+11803	1782453725876	GET	/plans	GET /api/v2/billing/plans	304	1	0	0	\N	v2	127.0.0.1	\N
+11804	1782453730270	GET	/plans	GET /api/v2/billing/plans	304	2	0	0	\N	v2	127.0.0.1	\N
+11805	1782466074646	POST	/login	POST /api/v1/auth/login	200	2204	63	204	\N	v1	127.0.0.1	\N
+11806	1782466080871	POST	/login/mfa	POST /api/v1/auth/login/mfa	200	307	206	277	\N	v1	127.0.0.1	\N
+11807	1782466082339	GET	/	GET /api/v2/watchlist/	304	1	0	0	\N	v2	127.0.0.1	\N
+11808	1782466082343	GET	/me	GET /api/v1/keys/me	304	2	0	0	\N	v1	127.0.0.1	\N
+11809	1782466082347	GET	/me	GET /api/v1/keys/me	304	1	0	0	\N	v1	127.0.0.1	\N
+11810	1782466084440	GET	/	GET /api/v1/stats/	304	2135	0	0	\N	v1	127.0.0.1	\N
+11811	1782466084727	GET	/	GET /api/v1/stats/	304	286	0	0	\N	v1	127.0.0.1	\N
+11812	1782466084748	GET	/me	GET /api/v2/billing/me	304	2338	0	0	\N	v2	127.0.0.1	\N
+11813	1782466085024	GET	/	GET /api/v1/stats/	304	296	0	0	\N	v1	127.0.0.1	\N
+11814	1782466085362	GET	/me	GET /api/v2/billing/me	304	613	0	0	\N	v2	127.0.0.1	\N
+11815	1782466202344	GET	/	GET /api/v2/watchlist/	304	3	0	0	\N	v2	127.0.0.1	\N
+11816	1782466302171	POST	/login	POST /api/v1/auth/login	200	2488	57	204	\N	v1	127.0.0.1	\N
+11817	1782466313021	POST	/login/mfa	POST /api/v1/auth/login/mfa	401	1035	206	53	\N	v1	127.0.0.1	\N
+11818	1782466319835	POST	/login/mfa	POST /api/v1/auth/login/mfa	200	345	206	275	\N	v1	127.0.0.1	\N
+11819	1782466320706	GET	/me	GET /api/v2/billing/me	304	566	0	0	\N	v2	127.0.0.1	\N
+11820	1782466320073	GET	/me	GET /api/v1/keys/me	200	2	0	69	\N	v1	127.0.0.1	\N
+11821	1782466321960	GET	/	GET /api/v1/stats/	304	1921	0	0	\N	v1	127.0.0.1	\N
+11822	1782466320071	GET	/	GET /api/v2/watchlist/	304	1	0	0	\N	v2	127.0.0.1	\N
+11823	1782466320077	GET	/me	GET /api/v1/keys/me	304	1	0	0	\N	v1	127.0.0.1	\N
+11824	1782466322262	GET	/	GET /api/v1/stats/	304	293	0	0	\N	v1	127.0.0.1	\N
+11825	1782466322549	GET	/	GET /api/v1/stats/	304	285	0	0	\N	v1	127.0.0.1	\N
+11826	1782466322827	GET	/me	GET /api/v2/billing/me	304	2120	0	0	\N	v2	127.0.0.1	\N
+11827	1782466408282	GET	/	GET /api/v2/watchlist/	304	0	0	0	\N	v2	127.0.0.1	\N
+11828	1782466408286	GET	/me	GET /api/v1/keys/me	304	1	0	0	\N	v1	127.0.0.1	\N
+11829	1782466408284	GET	/me	GET /api/v1/keys/me	304	1	0	0	\N	v1	127.0.0.1	\N
+11830	1782466410716	GET	/me	GET /api/v2/billing/me	304	2330	0	0	\N	v2	127.0.0.1	\N
+11831	1782466411161	GET	/	GET /api/v1/stats/	304	2898	0	0	\N	v1	127.0.0.1	\N
+11832	1782466411303	GET	/me	GET /api/v2/billing/me	304	585	0	0	\N	v2	127.0.0.1	\N
+11833	1782466411462	GET	/	GET /api/v1/stats/	304	299	0	0	\N	v1	127.0.0.1	\N
+11834	1782466411765	GET	/	GET /api/v1/stats/	304	301	0	0	\N	v1	127.0.0.1	\N
+11835	1782466428496	GET	/me	GET /api/v1/keys/me	304	4	0	0	\N	v1	127.0.0.1	\N
+11836	1782466428489	GET	/	GET /api/v2/watchlist/	304	2	0	0	\N	v2	127.0.0.1	\N
+11837	1782466428497	GET	/me	GET /api/v1/keys/me	304	1	0	0	\N	v1	127.0.0.1	\N
+11838	1782466428765	GET	/	GET /api/v1/stats/	304	301	0	0	\N	v1	127.0.0.1	\N
+11839	1782466429149	GET	/me	GET /api/v2/billing/me	304	594	0	0	\N	v2	127.0.0.1	\N
+11840	1782466429718	GET	/me	GET /api/v2/billing/me	304	567	0	0	\N	v2	127.0.0.1	\N
+11841	1782466430929	GET	/	GET /api/v1/stats/	304	2162	0	0	\N	v1	127.0.0.1	\N
+11842	1782466431237	GET	/	GET /api/v1/stats/	304	307	0	0	\N	v1	127.0.0.1	\N
+11843	1782466548496	GET	/	GET /api/v2/watchlist/	304	2	0	0	\N	v2	127.0.0.1	\N
+11844	1782466700523	POST	/login	POST /api/v1/auth/login	200	2346	63	204	\N	v1	127.0.0.1	\N
+11845	1782466707255	POST	/login/mfa	POST /api/v1/auth/login/mfa	200	307	206	277	\N	v1	127.0.0.1	\N
+11846	1782466707503	GET	/me	GET /api/v1/keys/me	304	1	0	0	\N	v1	127.0.0.1	\N
+11847	1782466707485	GET	/	GET /api/v2/watchlist/	304	3	0	0	\N	v2	127.0.0.1	\N
+11848	1782466707500	GET	/me	GET /api/v1/keys/me	200	16	0	70	\N	v1	127.0.0.1	\N
+11849	1782466709440	GET	/	GET /api/v1/stats/	304	2002	0	0	\N	v1	127.0.0.1	\N
+11850	1782466709736	GET	/	GET /api/v1/stats/	304	295	0	0	\N	v1	127.0.0.1	\N
+11851	1782466709846	GET	/me	GET /api/v2/billing/me	304	2295	0	0	\N	v2	127.0.0.1	\N
+11852	1782466710046	GET	/	GET /api/v1/stats/	304	308	0	0	\N	v1	127.0.0.1	\N
+11853	1782466710413	GET	/me	GET /api/v2/billing/me	304	565	0	0	\N	v2	127.0.0.1	\N
+11854	1782466769990	GET	/	GET /api/v2/watchlist/	304	1	0	0	\N	v2	127.0.0.1	\N
+11855	1782466769996	GET	/me	GET /api/v1/keys/me	304	1	0	0	\N	v1	127.0.0.1	\N
+11856	1782466769991	GET	/me	GET /api/v1/keys/me	304	3	0	0	\N	v1	127.0.0.1	\N
+11857	1782466776455	GET	/me	GET /api/v1/keys/me	304	1	0	0	\N	v1	127.0.0.1	\N
+11858	1782466776455	GET	/	GET /api/v2/watchlist/	304	0	0	0	\N	v2	127.0.0.1	\N
+11859	1782466776457	GET	/me	GET /api/v1/keys/me	304	1	0	0	\N	v1	127.0.0.1	\N
+11860	1782466776740	GET	/	GET /api/v1/stats/	200	305	0	119	\N	v1	127.0.0.1	\N
+11861	1782466777041	GET	/	GET /api/v1/stats/	304	299	0	0	\N	v1	127.0.0.1	\N
+11862	1782466777108	GET	/me	GET /api/v2/billing/me	200	587	0	361	\N	v2	127.0.0.1	\N
+11863	1782466777449	GET	/	GET /api/v1/stats/	304	405	0	0	\N	v1	127.0.0.1	\N
+11864	1782466777748	GET	/me	GET /api/v2/billing/me	304	639	0	0	\N	v2	127.0.0.1	\N
+11865	1782466856221	POST	/login	POST /api/v1/auth/login	200	630	63	204	\N	v1	127.0.0.1	\N
+11866	1782466864996	POST	/login/mfa	POST /api/v1/auth/login/mfa	200	394	206	277	\N	v1	127.0.0.1	\N
+11867	1782466865860	GET	/me	GET /api/v2/billing/me	200	559	0	393	\N	v2	127.0.0.1	\N
+11868	1782466866470	GET	/me	GET /api/v2/billing/me	304	609	0	0	\N	v2	127.0.0.1	\N
+11869	1782466865229	GET	/me	GET /api/v1/keys/me	304	5	0	0	\N	v1	127.0.0.1	\N
+11870	1782466865222	GET	/	GET /api/v2/watchlist/	304	2	0	0	\N	v2	127.0.0.1	\N
+11871	1782466866981	GET	/	GET /api/v1/stats/	304	1806	0	0	\N	v1	127.0.0.1	\N
+11872	1782466865233	GET	/me	GET /api/v1/keys/me	304	2	0	0	\N	v1	127.0.0.1	\N
+11873	1782466867290	GET	/	GET /api/v1/stats/	304	306	0	0	\N	v1	127.0.0.1	\N
+11874	1782466867574	GET	/	GET /api/v1/stats/	304	282	0	0	\N	v1	127.0.0.1	\N
+11875	1782466872540	GET	/154.120.82.172	GET /api/v2/score/:ip	200	4127	0	0	\N	v2	127.0.0.1	\N
+11876	1782466985860	GET	/	GET /api/v2/watchlist/	304	2	0	0	\N	v2	127.0.0.1	\N
+11877	1782467105314	GET	/	GET /api/v2/watchlist/	304	3	0	0	\N	v2	127.0.0.1	\N
+11878	1782467329148	POST	/login	POST /api/v1/auth/login	200	625	63	204	\N	v1	127.0.0.1	\N
+11879	1782467339487	POST	/login/mfa	POST /api/v1/auth/login/mfa	200	327	206	277	\N	v1	127.0.0.1	\N
+11880	1782467340393	GET	/me	GET /api/v2/billing/me	304	569	0	0	\N	v2	127.0.0.1	\N
+11881	1782467340973	GET	/me	GET /api/v2/billing/me	304	575	0	0	\N	v2	127.0.0.1	\N
+11882	1782467339740	GET	/	GET /api/v2/watchlist/	304	3	0	0	\N	v2	127.0.0.1	\N
+11883	1782467339756	GET	/me	GET /api/v1/keys/me	304	5	0	0	\N	v1	127.0.0.1	\N
+11884	1782467339743	GET	/me	GET /api/v1/keys/me	304	5	0	0	\N	v1	127.0.0.1	\N
+11885	1782467341614	GET	/	GET /api/v1/stats/	200	1910	0	119	\N	v1	127.0.0.1	\N
+11886	1782467341902	GET	/	GET /api/v1/stats/	304	286	0	0	\N	v1	127.0.0.1	\N
+11887	1782467342183	GET	/	GET /api/v1/stats/	304	279	0	0	\N	v1	127.0.0.1	\N
+11888	1782467347967	GET	/154.120.82.172	GET /api/v2/score/:ip	200	5087	0	0	\N	v2	127.0.0.1	\N
+11889	1782467361221	GET	/me	GET /api/v2/billing/me	200	627	0	422	\N	v2	127.0.0.1	\N
+11890	1782467375404	POST	/checkout	POST /api/v2/billing/checkout	500	4818	15	45	\N	v2	127.0.0.1	\N
+11891	1782467459732	GET	/	GET /api/v2/watchlist/	200	1	0	270	\N	v2	127.0.0.1	\N
+11892	1782467463004	POST	/	POST /api/v2/watchlist/	201	4346	84	0	\N	v2	127.0.0.1	\N
+11893	1782467463016	GET	/	GET /api/v2/watchlist/	200	2	0	278	\N	v2	127.0.0.1	\N
+11894	1782467648799	GET	/me	GET /api/v2/billing/me	304	2225	0	0	\N	v2	127.0.0.1	\N
+11895	1782467652260	POST	/checkout	POST /api/v2/billing/checkout	500	1485	15	45	\N	v2	127.0.0.1	\N
+11896	1782467699741	GET	/	GET /api/v2/watchlist/	304	3	0	0	\N	v2	127.0.0.1	\N
+11897	1782467819736	GET	/	GET /api/v2/watchlist/	304	3	0	0	\N	v2	127.0.0.1	\N
+11898	1782467896434	POST	/login	POST /api/v1/auth/login	200	2197	57	204	\N	v1	127.0.0.1	\N
+11899	1782467909742	POST	/login/mfa	POST /api/v1/auth/login/mfa	200	293	206	275	\N	v1	127.0.0.1	\N
+11900	1782467910653	GET	/me	GET /api/v2/billing/me	200	587	0	393	\N	v2	127.0.0.1	\N
+11901	1782467909999	GET	/	GET /api/v2/watchlist/	304	1	0	0	\N	v2	127.0.0.1	\N
+11902	1782467910002	GET	/me	GET /api/v1/keys/me	200	3	0	69	\N	v1	127.0.0.1	\N
+11903	1782467911885	GET	/	GET /api/v1/stats/	200	1956	0	119	\N	v1	127.0.0.1	\N
+11904	1782467910005	GET	/me	GET /api/v1/keys/me	304	2	0	0	\N	v1	127.0.0.1	\N
+11905	1782467912202	GET	/	GET /api/v1/stats/	304	314	0	0	\N	v1	127.0.0.1	\N
+11906	1782467912488	GET	/	GET /api/v1/stats/	304	284	0	0	\N	v1	127.0.0.1	\N
+11907	1782467912769	GET	/me	GET /api/v2/billing/me	304	2115	0	0	\N	v2	127.0.0.1	\N
+11908	1782467914484	GET	/me	GET /api/v2/billing/me	304	599	0	0	\N	v2	127.0.0.1	\N
+11909	1782467917786	POST	/checkout	POST /api/v2/billing/checkout	500	2429	15	45	\N	v2	127.0.0.1	\N
+11910	1782468030826	GET	/	GET /api/v2/watchlist/	200	2	0	105	\N	v2	127.0.0.1	\N
+11911	1782468150822	GET	/	GET /api/v2/watchlist/	304	4	0	0	\N	v2	127.0.0.1	\N
+11912	1782468236716	GET	/api/_debug_env_path	GET /.*/	200	8	0	0	\N	v2	127.0.0.1	\N
+11913	1782476478228	GET	/api/versions	GET /api/versions	200	1	0	557	\N	v2	74.7.227.15	\N
+11914	1782476900818	GET	/dashboard	GET /api/telemetry/dashboard	401	1	0	56	\N	v2	65.21.124.77	\N
+11915	1782476901057	GET	/api/versions	GET /api/versions	200	1	0	557	\N	v2	65.21.124.77	\N
+11916	1782476983166	GET	/api/.env	GET /.*/	200	6	0	0	\N	v2	113.142.138.12	\N
+11917	1782477214389	GET	/api/config	GET /.*/	200	3	0	0	\N	v2	64.89.161.85	\N
+11918	1782477214459	GET	/api/env	GET /.*/	200	46	0	0	\N	v2	64.89.161.85	\N
+11919	1782477273294	GET	/api/settings	GET /.*/	200	3	0	0	\N	v2	152.42.253.238	\N
+11920	1782477279193	GET	/api/env	GET /.*/	200	5	0	0	\N	v2	3.144.208.13	\N
+11921	1782479345035	GET	/dashboard	GET /api/telemetry/dashboard	401	1	0	56	\N	v2	148.113.205.188	\N
+11922	1782479345280	GET	/api/versions	GET /api/versions	200	1	0	557	\N	v2	148.113.205.188	\N
+11923	1782479401338	GET	/api/_debug_env_	GET /.*/	200	18	0	0	\N	v2	127.0.0.1	\N
+11924	1782479680420	POST	/login	POST /api/v1/auth/login	500	5007	63	83	\N	v1	127.0.0.1	\N
+11925	1782479708354	POST	/login	POST /api/v1/auth/login	200	2336	63	204	\N	v1	127.0.0.1	\N
+11926	1782479724221	POST	/login/mfa	POST /api/v1/auth/login/mfa	200	2296	206	277	\N	v1	127.0.0.1	\N
+11927	1782479729423	GET	/api/v1/stats	GET /	500	5011	0	270	\N	v2	127.0.0.1	\N
+11928	1782479734440	GET	/api/v1/stats	GET /	500	5011	0	270	\N	v2	127.0.0.1	\N
+11929	1782479743951	GET	/api/v1/stats	GET /	500	5008	0	358	\N	v2	127.0.0.1	\N
+11930	1782479748962	GET	/api/v1/stats	GET /	500	5009	0	270	\N	v2	127.0.0.1	\N
+11931	1782479753973	GET	/api/v1/stats	GET /	500	5009	0	270	\N	v2	127.0.0.1	\N
+11932	1782479765645	GET	/api/v1/stats	GET /	500	5009	0	358	\N	v2	127.0.0.1	\N
+11933	1782479770655	GET	/api/v1/stats	GET /	500	5009	0	270	\N	v2	127.0.0.1	\N
+11934	1782479775668	GET	/api/v1/stats	GET /	500	5008	0	270	\N	v2	127.0.0.1	\N
+11935	1782479854131	GET	/	GET /api/v2/watchlist/	304	1	0	0	\N	v2	127.0.0.1	\N
+11936	1782479860585	GET	/	GET /api/v1/stats/	200	6485	0	119	\N	v1	127.0.0.1	\N
+11937	1782479864213	GET	/me	GET /api/v2/billing/me	500	5008	0	59	\N	v2	127.0.0.1	\N
+11938	1782479865589	GET	/api/v1/stats	GET /	500	5003	0	358	\N	v2	127.0.0.1	\N
+11939	1782479870595	GET	/api/v1/stats	GET /	500	5003	0	358	\N	v2	127.0.0.1	\N
+11940	1782479925975	POST	/login	POST /api/v1/auth/login	200	789	63	204	\N	v1	127.0.0.1	\N
+11941	1782479938447	POST	/login/mfa	POST /api/v1/auth/login/mfa	200	2831	206	277	\N	v1	127.0.0.1	\N
+11942	1782479943642	GET	/api/v1/stats	GET /	500	5011	0	270	\N	v2	127.0.0.1	\N
+11943	1782479948654	GET	/api/v1/stats	GET /	500	5008	0	270	\N	v2	127.0.0.1	\N
+11944	1782479958428	GET	/api/v1/stats	GET /	500	5005	0	358	\N	v2	127.0.0.1	\N
+11945	1782479963437	GET	/api/v1/stats	GET /	500	5006	0	270	\N	v2	127.0.0.1	\N
+11946	1782479963534	GET	/me	GET /api/v2/billing/me	500	5004	0	59	\N	v2	127.0.0.1	\N
+11947	1782479968884	GET	/	GET /api/v1/stats/	200	5445	0	119	\N	v1	127.0.0.1	\N
+11948	1782479979093	GET	/me	GET /api/v2/billing/me	200	4224	0	422	\N	v2	127.0.0.1	\N
+11949	1782479982734	GET	/	GET /api/v2/watchlist/	304	2	0	0	\N	v2	127.0.0.1	\N
+11950	1782479982735	GET	/me	GET /api/v1/keys/me	304	2	0	0	\N	v1	127.0.0.1	\N
+11951	1782479984836	GET	/	GET /api/v1/stats/	304	2122	0	0	\N	v1	127.0.0.1	\N
+11952	1782479987797	GET	/me	GET /api/v2/billing/me	500	5004	0	59	\N	v2	127.0.0.1	\N
+11953	1782479989844	GET	/api/v1/stats	GET /	500	5006	0	358	\N	v2	127.0.0.1	\N
+11954	1782479990909	GET	/me	GET /api/v2/billing/me	200	3108	0	422	\N	v2	127.0.0.1	\N
+11955	1782479991699	GET	/	GET /api/v1/stats/	200	1853	0	119	\N	v1	127.0.0.1	\N
+11956	1782480019266	GET	/154.118.37.182	GET /api/v2/score/:ip	200	27897	0	0	\N	v2	127.0.0.1	\N
+11957	1782480028752	GET	/154.118.37.182	GET /api/v2/report/:ip	200	3745	0	0	\N	v2	127.0.0.1	\N
+11958	1782480055808	GET	/me	GET /api/v2/billing/me	304	4895	0	0	\N	v2	127.0.0.1	\N
+11959	1782480330061	GET	/plans	GET /api/v2/billing/plans	304	1	0	0	\N	v2	127.0.0.1	\N
+11960	1782480908086	GET	/plans	GET /api/v2/billing/plans	304	4	0	0	\N	v2	127.0.0.1	\N
+11961	1782480964773	GET	/plans	GET /api/v2/billing/plans	304	1	0	0	\N	v2	127.0.0.1	\N
+11962	1782480987764	POST	/login	POST /api/v1/auth/login	200	2200	63	204	\N	v1	127.0.0.1	\N
+11963	1782480998391	POST	/login/mfa	POST /api/v1/auth/login/mfa	200	2609	206	277	\N	v1	127.0.0.1	\N
+11964	1782481003585	GET	/api/v1/stats	GET /	500	5012	0	270	\N	v2	127.0.0.1	\N
+11965	1782481008597	GET	/api/v1/stats	GET /	500	5007	0	270	\N	v2	127.0.0.1	\N
+11966	1782481013615	GET	/api/v1/stats	GET /	500	5010	0	270	\N	v2	127.0.0.1	\N
+11967	1782481021191	GET	/me	GET /api/v2/billing/me	500	5007	0	59	\N	v2	127.0.0.1	\N
+11968	1782481029222	GET	/api/v1/stats	GET /	500	5013	0	358	\N	v2	127.0.0.1	\N
+11969	1782481034233	GET	/api/v1/stats	GET /	500	5009	0	270	\N	v2	127.0.0.1	\N
+11970	1782481034322	GET	/me	GET /api/v2/billing/me	500	5006	0	59	\N	v2	127.0.0.1	\N
+11971	1782481036379	GET	/	GET /api/v1/stats/	200	2138	0	119	\N	v1	127.0.0.1	\N
+11972	1782481036545	GET	/me	GET /api/v2/billing/me	200	2218	0	422	\N	v2	127.0.0.1	\N
+11973	1782481039163	POST	/checkout	POST /api/v2/billing/checkout	500	1265	15	45	\N	v2	127.0.0.1	\N
+11974	1782481137474	GET	/me	GET /api/v1/keys/me	304	3	0	0	\N	v1	127.0.0.1	\N
+11975	1782481137478	GET	/me	GET /api/v1/keys/me	304	3	0	0	\N	v1	127.0.0.1	\N
+11976	1782481137472	GET	/	GET /api/v2/watchlist/	304	1	0	0	\N	v2	127.0.0.1	\N
+11977	1782481139631	GET	/	GET /api/v1/stats/	304	2176	0	0	\N	v1	127.0.0.1	\N
+11978	1782481139778	GET	/me	GET /api/v2/billing/me	304	2240	0	0	\N	v2	127.0.0.1	\N
+11979	1782481139913	GET	/	GET /api/v1/stats/	304	279	0	0	\N	v1	127.0.0.1	\N
+11980	1782481140210	GET	/	GET /api/v1/stats/	304	294	0	0	\N	v1	127.0.0.1	\N
+11981	1782481140332	GET	/me	GET /api/v2/billing/me	304	552	0	0	\N	v2	127.0.0.1	\N
+11982	1782481141975	GET	/me	GET /api/v2/billing/me	304	722	0	0	\N	v2	127.0.0.1	\N
+11983	1782481146639	POST	/checkout	POST /api/v2/billing/checkout	500	1276	15	45	\N	v2	127.0.0.1	\N
+11984	1782481725161	GET	/plans	GET /api/v2/billing/plans	304	4	0	0	\N	v2	127.0.0.1	\N
+11985	1782481728168	GET	/me	GET /api/v2/billing/me	304	2927	0	0	\N	v2	127.0.0.1	\N
+11986	1782481739269	GET	/	GET /api/v1/stats/	304	1947	0	0	\N	v1	127.0.0.1	\N
+11987	1782481742417	GET	/me	GET /api/v2/billing/me	500	5007	0	59	\N	v2	127.0.0.1	\N
+11988	1782481747967	GET	/me	GET /api/v2/billing/me	200	5547	0	422	\N	v2	127.0.0.1	\N
+11989	1782481749298	GET	/api/v1/stats	GET /	500	5012	0	270	\N	v2	127.0.0.1	\N
+11990	1782481750806	GET	/me	GET /api/v2/billing/me	304	2837	0	0	\N	v2	127.0.0.1	\N
+11991	1782481758873	GET	/plans	GET /api/v2/billing/plans	304	1	0	0	\N	v2	127.0.0.1	\N
+11992	1782482245427	GET	/plans	GET /api/v2/billing/plans	200	3	0	497	\N	v2	127.0.0.1	\N
+11993	1782482249165	GET	/plans	GET /api/v2/billing/plans	304	1	0	0	\N	v2	127.0.0.1	\N
+11994	1782482567575	GET	/plans	GET /api/v2/billing/plans	304	2	0	0	\N	v2	127.0.0.1	\N
+11995	1782482569683	GET	/plans	GET /api/v2/billing/plans	304	1	0	0	\N	v2	127.0.0.1	\N
+11996	1782482629931	GET	/plans	GET /api/v2/billing/plans	304	2	0	0	\N	v2	127.0.0.1	\N
+11997	1782482633016	GET	/plans	GET /api/v2/billing/plans	304	2	0	0	\N	v2	127.0.0.1	\N
+11998	1782482634950	GET	/plans	GET /api/v2/billing/plans	304	1	0	0	\N	v2	127.0.0.1	\N
+11999	1782482657785	GET	/plans	GET /api/v2/billing/plans	304	1	0	0	\N	v2	127.0.0.1	\N
+12000	1782482679775	GET	/plans	GET /api/v2/billing/plans	200	1	0	497	\N	v2	127.0.0.1	\N
+12001	1782482705031	GET	/plans	GET /api/v2/billing/plans	200	3	0	506	\N	v2	127.0.0.1	\N
+12002	1782483352347	GET	/plans	GET /api/v2/billing/plans	304	1	0	0	\N	v2	127.0.0.1	\N
+12003	1782483515443	GET	/plans	GET /api/v2/billing/plans	304	1	0	0	\N	v2	127.0.0.1	\N
+12004	1782483586043	GET	/plans	GET /api/v2/billing/plans	304	1	0	0	\N	v2	127.0.0.1	\N
+12005	1782484034005	POST	/login	POST /api/v1/auth/login	200	4989	63	204	\N	v1	127.0.0.1	\N
+12006	1782484039492	POST	/login/mfa	POST /api/v1/auth/login/mfa	200	501	206	277	\N	v1	127.0.0.1	\N
+12007	1782484039668	GET	/plans	GET /api/v2/billing/plans	304	2	0	0	\N	v2	127.0.0.1	\N
+12008	1782484046250	GET	/me	GET /api/v2/billing/me	200	6508	0	422	\N	v2	127.0.0.1	\N
+12009	1782484057743	POST	/checkout	POST /api/v2/billing/checkout	500	11484	15	45	\N	v2	127.0.0.1	\N
+12010	1782484197859	POST	/login	POST /api/v1/auth/login	200	2475	63	204	\N	v1	127.0.0.1	\N
+12011	1782484204004	POST	/login/mfa	POST /api/v1/auth/login/mfa	200	285	206	277	\N	v1	127.0.0.1	\N
+12012	1782484205278	GET	/me	GET /api/v1/keys/me	304	2	0	0	\N	v1	127.0.0.1	\N
+12013	1782484205275	GET	/me	GET /api/v1/keys/me	304	1	0	0	\N	v1	127.0.0.1	\N
+12014	1782484205272	GET	/	GET /api/v2/watchlist/	304	4	0	0	\N	v2	127.0.0.1	\N
+12015	1782484207074	GET	/	GET /api/v1/stats/	200	1838	0	119	\N	v1	127.0.0.1	\N
+12016	1782484207386	GET	/	GET /api/v1/stats/	304	297	0	0	\N	v1	127.0.0.1	\N
+12017	1782484207566	GET	/me	GET /api/v2/billing/me	200	2223	0	422	\N	v2	127.0.0.1	\N
+12018	1782484207672	GET	/	GET /api/v1/stats/	304	283	0	0	\N	v1	127.0.0.1	\N
+12019	1782484208159	GET	/me	GET /api/v2/billing/me	304	589	0	0	\N	v2	127.0.0.1	\N
+12020	1782484210552	GET	/me	GET /api/v2/billing/me	304	572	0	0	\N	v2	127.0.0.1	\N
+12021	1782484220743	GET	/154.118.37.182	GET /api/v2/score/:ip	200	4220	0	0	\N	v2	127.0.0.1	\N
+12022	1782484228874	GET	/	GET /api/v2/cases/	200	568	0	22	\N	v2	127.0.0.1	\N
+12023	1782484230791	GET	/stats	GET /api/v2/cases/stats	304	353	0	0	\N	v2	127.0.0.1	\N
+12024	1782484231362	GET	/	GET /api/v2/cases/	304	556	0	0	\N	v2	127.0.0.1	\N
+12025	1782484241959	POST	/	POST /api/v2/blacklist/	201	730	99	230	\N	v2	127.0.0.1	\N
+12026	1782484250428	GET	/	GET /api/v2/blacklist/	200	616	0	224	\N	v2	127.0.0.1	\N
+12027	1782484254745	DELETE	/14	DELETE /api/v2/blacklist/:id	200	291	0	21	\N	v2	127.0.0.1	\N
+12028	1782484255393	GET	/	GET /api/v2/blacklist/	200	639	0	35	\N	v2	127.0.0.1	\N
+12029	1782484259880	GET	/search	GET /api/v2/audit/search	200	376	0	0	\N	v2	127.0.0.1	\N
+12030	1782484271466	GET	/185.220.101.1	GET /api/v2/score/:ip	200	8499	0	0	\N	v2	127.0.0.1	\N
+12031	1782484271806	GET	/search	GET /api/v2/audit/search	200	331	0	0	\N	v2	127.0.0.1	\N
+12032	1782484281144	GET	/185.220.101.1	GET /api/v2/whois/:ip	200	1189	0	0	\N	v2	127.0.0.1	\N
+12033	1782484298309	GET	/154.120.82.172	GET /api/v2/score/:ip	200	4204	0	0	\N	v2	127.0.0.1	\N
+12034	1782484298597	GET	/search	GET /api/v2/audit/search	200	281	0	0	\N	v2	127.0.0.1	\N
+12035	1782484302528	GET	/154.120.82.172	GET /api/v2/whois/:ip	200	1223	0	0	\N	v2	127.0.0.1	\N
+12036	1782484312984	GET	/45.33.32.156	GET /api/v2/score/:ip	200	2962	0	0	\N	v2	127.0.0.1	\N
+12037	1782484313295	GET	/search	GET /api/v2/audit/search	200	299	0	0	\N	v2	127.0.0.1	\N
+12038	1782484318089	GET	/45.33.32.156	GET /api/v2/whois/:ip	200	672	0	0	\N	v2	127.0.0.1	\N
+12039	1782484322543	GET	/8.8.8.8	GET /api/v2/score/:ip	429	572	0	156	\N	v2	127.0.0.1	\N
+12040	1782484325274	GET	/	GET /api/v2/watchlist/	304	2	0	0	\N	v2	127.0.0.1	\N
+12041	1782484342637	GET	/	GET /api/v2/watchlist/	304	1	0	0	\N	v2	127.0.0.1	\N
+12042	1782484342641	GET	/me	GET /api/v1/keys/me	304	5	0	0	\N	v1	127.0.0.1	\N
+12043	1782484342647	GET	/me	GET /api/v1/keys/me	304	2	0	0	\N	v1	127.0.0.1	\N
+12044	1782484342911	GET	/	GET /api/v1/stats/	200	296	0	119	\N	v1	127.0.0.1	\N
+12045	1782484343187	GET	/	GET /api/v1/stats/	304	274	0	0	\N	v1	127.0.0.1	\N
+12046	1782484343480	GET	/	GET /api/v1/stats/	304	291	0	0	\N	v1	127.0.0.1	\N
+12047	1782484344791	GET	/me	GET /api/v2/billing/me	200	2094	0	422	\N	v2	127.0.0.1	\N
+12048	1782484345379	GET	/me	GET /api/v2/billing/me	304	587	0	0	\N	v2	127.0.0.1	\N
+12049	1782484346258	GET	/1.1.1.1	GET /api/v2/score/:ip	429	569	0	156	\N	v2	127.0.0.1	\N
+12050	1782484351462	GET	/plans	GET /api/v2/billing/plans	304	1	0	0	\N	v2	127.0.0.1	\N
+12051	1782484368466	POST	/login	POST /api/v1/auth/login	200	644	63	204	\N	v1	127.0.0.1	\N
+12052	1782484375434	POST	/login/mfa	POST /api/v1/auth/login/mfa	200	284	206	277	\N	v1	127.0.0.1	\N
+12053	1782484375646	GET	/me	GET /api/v1/keys/me	304	1	0	0	\N	v1	127.0.0.1	\N
+12054	1782484375644	GET	/me	GET /api/v1/keys/me	304	3	0	0	\N	v1	127.0.0.1	\N
+12055	1782484375642	GET	/	GET /api/v2/watchlist/	304	2	0	0	\N	v2	127.0.0.1	\N
+12056	1782484377560	GET	/198.20.69.98	GET /api/v2/score/:ip	429	571	0	156	\N	v2	127.0.0.1	\N
+12057	1782484377608	GET	/	GET /api/v1/stats/	304	1987	0	0	\N	v1	127.0.0.1	\N
+12058	1782484377902	GET	/	GET /api/v1/stats/	304	293	0	0	\N	v1	127.0.0.1	\N
+12059	1782484378187	GET	/	GET /api/v1/stats/	304	284	0	0	\N	v1	127.0.0.1	\N
+12060	1782484378708	GET	/me	GET /api/v2/billing/me	304	3016	0	0	\N	v2	127.0.0.1	\N
+12061	1782484379283	GET	/me	GET /api/v2/billing/me	304	573	0	0	\N	v2	127.0.0.1	\N
+12062	1782484383245	GET	/me	GET /api/v2/billing/me	304	639	0	0	\N	v2	127.0.0.1	\N
+12063	1782484406620	GET	/me	GET /api/v2/billing/me	304	566	0	0	\N	v2	127.0.0.1	\N
+12064	1782484423005	GET	/me	GET /api/v1/keys/me	304	5	0	0	\N	v1	127.0.0.1	\N
+12065	1782484423003	GET	/	GET /api/v2/watchlist/	304	4	0	0	\N	v2	127.0.0.1	\N
+12066	1782484423007	GET	/me	GET /api/v1/keys/me	304	0	0	0	\N	v1	127.0.0.1	\N
+12067	1782484425177	GET	/	GET /api/v1/stats/	304	2201	0	0	\N	v1	127.0.0.1	\N
+12068	1782484425351	GET	/me	GET /api/v2/billing/me	304	2281	0	0	\N	v2	127.0.0.1	\N
+12069	1782484425512	GET	/	GET /api/v1/stats/	304	332	0	0	\N	v1	127.0.0.1	\N
+12072	1782484426498	GET	/me	GET /api/v2/billing/me	304	585	0	0	\N	v2	127.0.0.1	\N
+12073	1782484429438	POST	/checkout	POST /api/v2/billing/checkout	500	1242	15	45	\N	v2	127.0.0.1	\N
+12808	1782814305820	GET	/activate/	GET /api/keys/:id	401	2	0	56	\N	v2	102.91.104.47	\N
+12809	1782814322542	GET	/v1docs	GET /api/.*/	404	1	0	96	\N	v2	102.91.104.47	\N
+12884	1783278223102	GET	/	GET /api/v1/stats/	304	1774	0	0	\N	v1	127.0.0.1	\N
+12892	1783278225980	GET	/me	GET /api/v2/billing/me	200	825	0	393	\N	v2	127.0.0.1	\N
+12070	1782484425806	GET	/	GET /api/v1/stats/	304	293	0	0	\N	v1	127.0.0.1	\N
+12810	1782842667020	POST	/login	POST /api/v1/auth/login	200	2582	63	204	\N	v1	102.90.98.199	\N
+12811	1782842674889	POST	/login/mfa	POST /api/v1/auth/login/mfa	200	8	206	277	\N	v1	102.90.98.199	\N
+12814	1782842677948	GET	/me	GET /api/v1/keys/me	200	2	0	70	\N	v1	102.90.98.199	\N
+12815	1782842677982	GET	/	GET /api/v1/stats/	304	2	0	0	\N	v1	102.90.98.199	\N
+12816	1782842678280	GET	/me	GET /api/v1/keys/me	304	1	0	0	\N	v1	102.90.98.199	\N
+12817	1782842678291	GET	/me	GET /api/v2/billing/me	200	4	0	422	\N	v2	102.90.98.199	\N
+12818	1782842678307	GET	/	GET /api/v1/stats/	304	2	0	0	\N	v1	102.90.98.199	\N
+12819	1782842678634	GET	/me	GET /api/v2/billing/me	304	3	0	0	\N	v2	102.90.98.199	\N
+12820	1782842688305	GET	/1.1.1.1	GET /api/v2/score/:ip	429	9	0	156	\N	v2	102.90.98.199	\N
+12821	1782842690578	GET	/45.33.32.156	GET /api/v2/score/:ip	429	7	0	156	\N	v2	102.90.98.199	\N
+12822	1782842715244	GET	/me	GET /api/v2/billing/me	304	3	0	0	\N	v2	102.90.98.199	\N
+12885	1783278223537	GET	/me	GET /api/v2/billing/me	304	2158	0	0	\N	v2	127.0.0.1	\N
+12891	1783278225739	GET	/me	GET /api/v2/billing/me	200	585	0	393	\N	v2	127.0.0.1	\N
+12071	1782484425909	GET	/me	GET /api/v2/billing/me	304	556	0	0	\N	v2	127.0.0.1	\N
+12074	1782484510384	POST	/login	POST /api/v1/auth/login	200	644	57	204	\N	v1	127.0.0.1	\N
+12075	1782484518826	POST	/login/mfa	POST /api/v1/auth/login/mfa	401	963	206	53	\N	v1	127.0.0.1	\N
+12076	1782484522696	POST	/login/mfa	POST /api/v1/auth/login/mfa	401	1035	206	53	\N	v1	127.0.0.1	\N
+12077	1782484527961	POST	/login/mfa	POST /api/v1/auth/login/mfa	200	385	206	275	\N	v1	127.0.0.1	\N
+12078	1782484528169	GET	/me	GET /api/v1/keys/me	200	2	0	69	\N	v1	127.0.0.1	\N
+12079	1782484528173	GET	/me	GET /api/v1/keys/me	304	1	0	0	\N	v1	127.0.0.1	\N
+12080	1782484528164	GET	/	GET /api/v2/watchlist/	304	1	0	0	\N	v2	127.0.0.1	\N
+12081	1782484530158	GET	/	GET /api/v1/stats/	304	2019	0	0	\N	v1	127.0.0.1	\N
+12082	1782484530340	GET	/me	GET /api/v2/billing/me	200	2119	0	393	\N	v2	127.0.0.1	\N
+12083	1782484530452	GET	/	GET /api/v1/stats/	304	292	0	0	\N	v1	127.0.0.1	\N
+12084	1782484530749	GET	/	GET /api/v1/stats/	304	295	0	0	\N	v1	127.0.0.1	\N
+12085	1782484530906	GET	/me	GET /api/v2/billing/me	304	564	0	0	\N	v2	127.0.0.1	\N
+12086	1782484535077	GET	/me	GET /api/v2/billing/me	304	636	0	0	\N	v2	127.0.0.1	\N
+12087	1782484648174	GET	/	GET /api/v2/watchlist/	304	1	0	0	\N	v2	127.0.0.1	\N
+12088	1782484806959	HEAD	/api/config	HEAD /.*/	200	97	0	69626	\N	v2	217.181.87.118	\N
+12089	1782484807767	GET	/api/config	GET /.*/	200	3	0	0	\N	v2	217.181.87.118	\N
+12090	1782484858238	GET	/me	GET /api/v2/billing/me	200	6200	0	422	\N	v2	127.0.0.1	\N
+12091	1782484945592	GET	/	GET /api/v2/watchlist/	304	1	0	0	\N	v2	127.0.0.1	\N
+12092	1782486043446	GET	/plans	GET /api/v2/billing/plans	200	2	0	506	\N	v2	154.118.37.182	\N
+12093	1782486092510	GET	/plans	GET /api/v2/billing/plans	304	2	0	0	\N	v2	154.118.37.182	\N
+12094	1782486360139	GET	/plans	GET /api/v2/billing/plans	304	1	0	0	\N	v2	154.118.37.182	\N
+12095	1782486614352	GET	/plans	GET /api/v2/billing/plans	304	1	0	0	\N	v2	154.118.37.182	\N
+12096	1782487694028	GET	/dashboard	GET /api/telemetry/dashboard	401	95	0	56	\N	v2	65.21.124.77	\N
+12097	1782487694532	GET	/api/versions	GET /api/versions	200	106	0	557	\N	v2	65.21.124.77	\N
+12098	1782488090670	GET	/endpoint	GET /api/telemetry/endpoint	401	1	0	56	\N	v2	102.89.23.189	\N
+12099	1782488100175	POST	/api/v2/v1/auth/login	POST /api/v2/v1/auth/login	404	1	2	106	\N	v2	102.89.23.189	\N
+12100	1782488159228	GET	/plans	GET /api/v2/billing/plans	200	1	0	506	\N	v2	102.89.23.189	\N
+12101	1782505090990	GET	/plans	GET /api/v2/billing/plans	200	3	0	506	\N	v2	102.89.22.112	\N
+12102	1782544074129	GET	/api/.env	GET /.*/	200	3	0	0	\N	v2	98.92.62.3	\N
+12103	1782544080094	GET	/api/v1/.env	GET /.*/	200	3	0	0	\N	v2	98.92.62.3	\N
+12104	1782544080192	GET	/api/v2/.env	GET /.*/	200	2	0	0	\N	v2	98.92.62.3	\N
+12105	1782544080847	GET	/api/v3/.env	GET /.*/	200	3	0	0	\N	v2	98.92.62.3	\N
+12106	1782544080966	GET	/api/dev/.env	GET /.*/	200	2	0	0	\N	v2	98.92.62.3	\N
+12107	1782544081161	GET	/api/staging/.env	GET /.*/	200	3	0	0	\N	v2	98.92.62.3	\N
+12108	1782562034723	GET	/plans	GET /api/v2/billing/plans	304	2	0	0	\N	v2	102.89.75.80	\N
+12109	1782564012135	POST	/login	POST /api/v1/auth/login	200	2202	64	204	\N	v1	102.212.140.250	\N
+12110	1782564046223	POST	/login/mfa	POST /api/v1/auth/login/mfa	200	14	206	287	\N	v1	102.212.140.250	\N
+12111	1782564047627	GET	/	GET /api/v1/stats/	200	400	0	119	\N	v1	102.212.140.250	\N
+12112	1782564050892	GET	/	GET /api/v2/watchlist/	200	1	0	103	\N	v2	102.212.140.250	\N
+12113	1782564050894	GET	/me	GET /api/v1/keys/me	200	2	0	74	\N	v1	102.212.140.250	\N
+12114	1782564050920	GET	/	GET /api/v1/stats/	304	3	0	0	\N	v1	102.212.140.250	\N
+12115	1782564051163	GET	/me	GET /api/v1/keys/me	304	1	0	0	\N	v1	102.212.140.250	\N
+12116	1782564051183	GET	/me	GET /api/v2/billing/me	200	3	0	393	\N	v2	102.212.140.250	\N
+12117	1782564051377	GET	/	GET /api/v1/stats/	304	58	0	0	\N	v1	102.212.140.250	\N
+12118	1782564051762	GET	/me	GET /api/v2/billing/me	304	3	0	0	\N	v2	102.212.140.250	\N
+12119	1782564070379	GET	/102.212.140.250	GET /api/v2/score/:ip	200	2752	0	0	\N	v2	102.212.140.250	\N
+12120	1782564082991	GET	/102.212.140.245	GET /api/v2/score/:ip	200	4022	0	0	\N	v2	102.212.140.250	\N
+12121	1782564099321	GET	/102.212.140.225	GET /api/v2/score/:ip	200	3795	0	0	\N	v2	102.212.140.250	\N
+12122	1782564112478	GET	/102.212.140.215	GET /api/v2/score/:ip	200	2345	0	0	\N	v2	102.212.140.250	\N
+12123	1782564123208	GET	/102.212.140.205	GET /api/v2/score/:ip	200	2324	0	0	\N	v2	102.212.140.250	\N
+12124	1782564132646	GET	/102.212.140.212	GET /api/v2/score/:ip	429	3	0	156	\N	v2	102.212.140.250	\N
+12125	1782564172010	GET	/	GET /api/v2/watchlist/	304	4	0	0	\N	v2	102.212.140.250	\N
+12126	1782564292135	GET	/	GET /api/v2/watchlist/	304	1	0	0	\N	v2	102.212.140.250	\N
+12127	1782572817934	GET	/api/.env	GET /.*/	200	4	0	0	\N	v2	35.183.68.94	\N
+12128	1782572828495	GET	/api/v1/.env	GET /.*/	200	2	0	0	\N	v2	35.183.68.94	\N
+12129	1782572828734	GET	/api/v2/.env	GET /.*/	200	2	0	0	\N	v2	35.183.68.94	\N
+12130	1782572830132	GET	/api/v3/.env	GET /.*/	200	3	0	0	\N	v2	35.183.68.94	\N
+12131	1782572830334	GET	/api/dev/.env	GET /.*/	200	3	0	0	\N	v2	35.183.68.94	\N
+12132	1782572830587	GET	/api/staging/.env	GET /.*/	200	3	0	0	\N	v2	35.183.68.94	\N
+12133	1782576855719	GET	/plans	GET /api/v2/billing/plans	304	1	0	0	\N	v2	102.89.75.80	\N
+12134	1782587879331	GET	/api/.env	GET /.*/	200	403	0	0	\N	v2	85.155.151.138	\N
+12135	1782587880911	GET	/dashboard	GET /api/telemetry/dashboard	401	10	0	56	\N	v2	85.155.151.138	\N
+12136	1782587881979	GET	/api/versions	GET /api/versions	200	1	0	557	\N	v2	85.155.151.138	\N
+12137	1782625250915	GET	/api/.env	GET /.*/	200	6	0	0	\N	v2	162.141.167.16	\N
+12138	1782625252239	GET	/dashboard	GET /api/telemetry/dashboard	401	3	0	56	\N	v2	162.141.167.16	\N
+12139	1782625253215	GET	/api/versions	GET /api/versions	200	1	0	557	\N	v2	162.141.167.16	\N
+12140	1782653767858	GET	/api/.env	GET /.*/	200	4	0	0	\N	v2	158.94.210.233	\N
+12141	1782653777743	GET	/api/.env	GET /.*/	200	3	0	0	\N	v2	158.94.210.233	\N
+12142	1782653845904	GET	/api/phpinfo.php	GET /.*/	206	2	0	0	\N	v2	158.94.210.233	\N
+12143	1782653846671	GET	/api/phpinfo.php	GET /.*/	206	3	0	0	\N	v2	158.94.210.233	\N
+12144	1782653846940	GET	/api/info.php	GET /.*/	206	3	0	0	\N	v2	158.94.210.233	\N
+12145	1782653847479	GET	/api/info.php	GET /.*/	206	3	0	0	\N	v2	158.94.210.233	\N
+12146	1782654732741	GET	/plans	GET /api/v2/billing/plans	200	1	0	506	\N	v2	102.88.112.216	\N
+12147	1782656661810	GET	/plans	GET /api/v2/billing/plans	304	1	0	0	\N	v2	102.88.108.133	\N
+12148	1782747095834	GET	/plans	GET /api/v2/billing/plans	304	2	0	0	\N	v2	127.0.0.1	\N
+12149	1782749628549	GET	/endpoint	GET /api/telemetry/endpoint	401	1	0	56	\N	v2	102.89.33.87	\N
+12150	1782749630545	GET	/endpoint	GET /api/telemetry/endpoint	401	1	0	56	\N	v2	102.89.33.87	\N
+12151	1782749632235	GET	/endpoint	GET /api/telemetry/endpoint	401	1	0	56	\N	v2	102.89.33.87	\N
+12152	1782749636966	GET	/endpoint	GET /api/telemetry/endpoint	401	1	0	56	\N	v2	102.89.33.87	\N
+12153	1782751596932	GET	/plans	GET /api/v2/billing/plans	304	1	0	0	\N	v2	102.90.99.238	\N
+12154	1782763964909	GET	/api/env	GET /.*/	200	3	0	0	\N	v2	144.172.116.30	\N
+12155	1782763964966	GET	/api/config	GET /.*/	200	2	0	0	\N	v2	144.172.116.30	\N
+12156	1782763994015	GET	/plans	GET /api/v2/billing/plans	304	2	0	0	\N	v2	127.0.0.1	\N
+12157	1782764029714	GET	/plans	GET /api/v2/billing/plans	304	1	0	0	\N	v2	127.0.0.1	\N
+12158	1782764080580	GET	/plans	GET /api/v2/billing/plans	304	1	0	0	\N	v2	127.0.0.1	\N
+12159	1782764101876	GET	/plans	GET /api/v2/billing/plans	304	1	0	0	\N	v2	127.0.0.1	\N
+12160	1782764119952	GET	/plans	GET /api/v2/billing/plans	304	1	0	0	\N	v2	127.0.0.1	\N
+12161	1782764134214	GET	/plans	GET /api/v2/billing/plans	304	1	0	0	\N	v2	127.0.0.1	\N
+12162	1782764194639	GET	/plans	GET /api/v2/billing/plans	304	1	0	0	\N	v2	127.0.0.1	\N
+12163	1782764226938	GET	/plans	GET /api/v2/billing/plans	304	1	0	0	\N	v2	127.0.0.1	\N
+12164	1782769038609	GET	/api/versions	GET /api/versions	200	1	0	557	\N	v2	217.113.194.184	\N
+12165	1782769134677	GET	/dashboard	GET /api/telemetry/dashboard	401	1	0	56	\N	v2	217.113.194.191	\N
+12166	1782789341477	GET	/endpoint	GET /api/telemetry/endpoint	401	3	0	56	\N	v2	127.0.0.1	\N
+12167	1782790443675	GET	/plans	GET /api/v2/billing/plans	304	2	0	0	\N	v2	127.0.0.1	\N
+12168	1782791322792	GET	/plans	GET /api/v2/billing/plans	304	1	0	0	\N	v2	127.0.0.1	\N
+12169	1782791323772	GET	/plans	GET /api/v2/billing/plans	304	1	0	0	\N	v2	127.0.0.1	\N
+12170	1782791325855	GET	/plans	GET /api/v2/billing/plans	200	1	0	506	\N	v2	127.0.0.1	\N
+12171	1782791339342	GET	/plans	GET /api/v2/billing/plans	304	1	0	0	\N	v2	127.0.0.1	\N
+12172	1782791505380	GET	/plans	GET /api/v2/billing/plans	304	3	0	0	\N	v2	127.0.0.1	\N
+12173	1782793821611	POST	/login	POST /api/v1/auth/login	200	2901	63	204	\N	v1	127.0.0.1	\N
+12174	1782793831599	POST	/login/mfa	POST /api/v1/auth/login/mfa	200	335	206	277	\N	v1	127.0.0.1	\N
+12175	1782793831721	GET	/me	GET /api/v1/keys/me	200	3	0	70	\N	v1	127.0.0.1	\N
+12176	1782793831717	GET	/	GET /api/v1/watchlist/	200	2	0	105	\N	v1	127.0.0.1	\N
+12177	1782793831725	GET	/me	GET /api/v1/keys/me	304	1	0	0	\N	v1	127.0.0.1	\N
+12178	1782793833965	GET	/	GET /api/v1/stats/	200	2289	0	119	\N	v1	127.0.0.1	\N
+12179	1782793834326	GET	/	GET /api/v1/stats/	304	357	0	0	\N	v1	127.0.0.1	\N
+12180	1782793834463	GET	/me	GET /api/v2/billing/me	200	2718	0	393	\N	v2	127.0.0.1	\N
+12181	1782793834719	GET	/	GET /api/v1/stats/	304	391	0	0	\N	v1	127.0.0.1	\N
+12182	1782793835128	GET	/me	GET /api/v2/billing/me	304	661	0	0	\N	v2	127.0.0.1	\N
+12183	1782793857913	GET	/102.91.104.47	GET /api/v1/score/:ip	200	10639	0	0	\N	v1	127.0.0.1	\N
+12184	1782793882058	GET	/me	GET /api/v1/keys/me	304	1	0	0	\N	v1	127.0.0.1	\N
+12185	1782793882155	GET	/me	GET /api/v1/keys/me	304	1	0	0	\N	v1	127.0.0.1	\N
+12186	1782793882154	GET	/me	GET /api/v1/keys/me	304	4	0	0	\N	v1	127.0.0.1	\N
+12187	1782793882151	GET	/	GET /api/v1/watchlist/	304	2	0	0	\N	v1	127.0.0.1	\N
+12188	1782793886701	GET	/	GET /api/v1/stats/	200	351	0	119	\N	v1	127.0.0.1	\N
+12189	1782793887024	GET	/me	GET /api/v2/billing/me	200	617	0	422	\N	v2	127.0.0.1	\N
+12190	1782793938651	GET	/me	GET /api/v1/keys/me	304	1	0	0	\N	v1	127.0.0.1	\N
+12191	1782793938646	GET	/	GET /api/v1/watchlist/	304	1	0	0	\N	v1	127.0.0.1	\N
+12192	1782793938648	GET	/me	GET /api/v1/keys/me	304	1	0	0	\N	v1	127.0.0.1	\N
+12193	1782793940704	GET	/	GET /api/v1/stats/	304	2075	0	0	\N	v1	127.0.0.1	\N
+12194	1782793941009	GET	/	GET /api/v1/stats/	304	304	0	0	\N	v1	127.0.0.1	\N
+12195	1782793941020	GET	/me	GET /api/v2/billing/me	304	2337	0	0	\N	v2	127.0.0.1	\N
+12196	1782793941323	GET	/	GET /api/v1/stats/	304	313	0	0	\N	v1	127.0.0.1	\N
+12197	1782793941726	GET	/me	GET /api/v2/billing/me	304	705	0	0	\N	v2	127.0.0.1	\N
+12198	1782793956616	GET	/102.91.104.47	GET /api/v1/score/:ip	200	2764	0	0	\N	v1	127.0.0.1	\N
+12199	1782794021068	GET	/me	GET /api/v1/keys/me	304	3	0	0	\N	v1	127.0.0.1	\N
+12200	1782794021066	GET	/	GET /api/v1/watchlist/	304	1	0	0	\N	v1	127.0.0.1	\N
+12201	1782794021072	GET	/me	GET /api/v1/keys/me	304	2	0	0	\N	v1	127.0.0.1	\N
+12202	1782794023546	GET	/	GET /api/v1/stats/	200	2502	0	119	\N	v1	127.0.0.1	\N
+12203	1782794023853	GET	/	GET /api/v1/stats/	304	305	0	0	\N	v1	127.0.0.1	\N
+12204	1782794023947	GET	/me	GET /api/v2/billing/me	200	2837	0	422	\N	v2	127.0.0.1	\N
+12205	1782794024156	GET	/	GET /api/v1/stats/	304	301	0	0	\N	v1	127.0.0.1	\N
+12206	1782794050169	POST	/login	POST /api/v1/auth/login	200	656	63	204	\N	v1	127.0.0.1	\N
+12207	1782794054888	POST	/login/mfa	POST /api/v1/auth/login/mfa	200	346	206	277	\N	v1	127.0.0.1	\N
+12208	1782794054985	GET	/me	GET /api/v1/keys/me	304	5	0	0	\N	v1	127.0.0.1	\N
+12209	1782794054982	GET	/	GET /api/v1/watchlist/	304	1	0	0	\N	v1	127.0.0.1	\N
+12210	1782794054988	GET	/me	GET /api/v1/keys/me	304	2	0	0	\N	v1	127.0.0.1	\N
+12211	1782794057059	GET	/	GET /api/v1/stats/	304	2102	0	0	\N	v1	127.0.0.1	\N
+12212	1782794057141	GET	/me	GET /api/v2/billing/me	200	2147	0	422	\N	v2	127.0.0.1	\N
+12213	1782794057441	GET	/	GET /api/v1/stats/	304	380	0	0	\N	v1	127.0.0.1	\N
+12214	1782794057739	GET	/	GET /api/v1/stats/	304	296	0	0	\N	v1	127.0.0.1	\N
+12215	1782794057750	GET	/me	GET /api/v2/billing/me	304	606	0	0	\N	v2	127.0.0.1	\N
+12216	1782794088828	GET	/me	GET /api/v1/keys/me	304	3	0	0	\N	v1	127.0.0.1	\N
+12217	1782794088826	GET	/	GET /api/v1/watchlist/	304	1	0	0	\N	v1	127.0.0.1	\N
+12218	1782794088831	GET	/me	GET /api/v1/keys/me	304	1	0	0	\N	v1	127.0.0.1	\N
+12219	1782794090942	GET	/	GET /api/v1/stats/	304	2137	0	0	\N	v1	127.0.0.1	\N
+12220	1782794091242	GET	/me	GET /api/v2/billing/me	304	2393	0	0	\N	v2	127.0.0.1	\N
+12221	1782794091243	GET	/	GET /api/v1/stats/	304	300	0	0	\N	v1	127.0.0.1	\N
+12222	1782794091556	GET	/	GET /api/v1/stats/	304	311	0	0	\N	v1	127.0.0.1	\N
+12223	1782794091951	GET	/me	GET /api/v2/billing/me	304	707	0	0	\N	v2	127.0.0.1	\N
+12224	1782794104798	GET	/me	GET /api/v1/keys/me	304	2	0	0	\N	v1	127.0.0.1	\N
+12225	1782794104800	GET	/me	GET /api/v1/keys/me	304	1	0	0	\N	v1	127.0.0.1	\N
+12226	1782794104797	GET	/	GET /api/v1/watchlist/	304	1	0	0	\N	v1	127.0.0.1	\N
+12227	1782794105079	GET	/	GET /api/v1/stats/	304	301	0	0	\N	v1	127.0.0.1	\N
+12228	1782794105421	GET	/me	GET /api/v2/billing/me	304	601	0	0	\N	v2	127.0.0.1	\N
+12229	1782794106019	GET	/me	GET /api/v2/billing/me	304	597	0	0	\N	v2	127.0.0.1	\N
+12230	1782794107411	GET	/	GET /api/v1/stats/	304	2329	0	0	\N	v1	127.0.0.1	\N
+12231	1782794107827	GET	/	GET /api/v1/stats/	304	414	0	0	\N	v1	127.0.0.1	\N
+12232	1782794172635	GET	/me	GET /api/v1/keys/me	304	3	0	0	\N	v1	127.0.0.1	\N
+12233	1782794172642	GET	/me	GET /api/v1/keys/me	304	5	0	0	\N	v1	127.0.0.1	\N
+12234	1782794172630	GET	/	GET /api/v1/watchlist/	304	0	0	0	\N	v1	127.0.0.1	\N
+12235	1782794174797	GET	/	GET /api/v1/stats/	304	2188	0	0	\N	v1	127.0.0.1	\N
+12236	1782794174963	GET	/me	GET /api/v2/billing/me	304	2287	0	0	\N	v2	127.0.0.1	\N
+12237	1782794175104	GET	/	GET /api/v1/stats/	304	305	0	0	\N	v1	127.0.0.1	\N
+12238	1782794175415	GET	/	GET /api/v1/stats/	304	309	0	0	\N	v1	127.0.0.1	\N
+12239	1782794175568	GET	/me	GET /api/v2/billing/me	304	597	0	0	\N	v2	127.0.0.1	\N
+12240	1782794211221	GET	/me	GET /api/v1/keys/me	304	4	0	0	\N	v1	127.0.0.1	\N
+12241	1782794211224	GET	/me	GET /api/v1/keys/me	304	1	0	0	\N	v1	127.0.0.1	\N
+12242	1782794211219	GET	/	GET /api/v1/watchlist/	304	5	0	0	\N	v1	127.0.0.1	\N
+12243	1782794212690	GET	/me	GET /api/v1/keys/me	304	2	0	0	\N	v1	127.0.0.1	\N
+12244	1782794212691	GET	/me	GET /api/v1/keys/me	304	1	0	0	\N	v1	127.0.0.1	\N
+12245	1782794213761	GET	/me	GET /api/v2/billing/me	200	1053	0	422	\N	v2	127.0.0.1	\N
+12246	1782794212688	GET	/	GET /api/v1/watchlist/	304	1	0	0	\N	v1	127.0.0.1	\N
+12247	1782794214366	GET	/me	GET /api/v2/billing/me	304	603	0	0	\N	v2	127.0.0.1	\N
+12248	1782794214811	GET	/	GET /api/v1/stats/	200	2142	0	119	\N	v1	127.0.0.1	\N
+12249	1782794215111	GET	/	GET /api/v1/stats/	304	299	0	0	\N	v1	127.0.0.1	\N
+12250	1782794215426	GET	/	GET /api/v1/stats/	304	314	0	0	\N	v1	127.0.0.1	\N
+12251	1782794225546	GET	/	GET /api/v1/watchlist/	304	1	0	0	\N	v1	127.0.0.1	\N
+12252	1782794225549	GET	/me	GET /api/v1/keys/me	304	1	0	0	\N	v1	127.0.0.1	\N
+12253	1782794225547	GET	/me	GET /api/v1/keys/me	304	1	0	0	\N	v1	127.0.0.1	\N
+12254	1782794225825	GET	/	GET /api/v1/stats/	304	298	0	0	\N	v1	127.0.0.1	\N
+12255	1782794226128	GET	/	GET /api/v1/stats/	304	303	0	0	\N	v1	127.0.0.1	\N
+12256	1782794226156	GET	/me	GET /api/v2/billing/me	304	588	0	0	\N	v2	127.0.0.1	\N
+12257	1782794226436	GET	/	GET /api/v1/stats/	304	307	0	0	\N	v1	127.0.0.1	\N
+12258	1782794226774	GET	/me	GET /api/v2/billing/me	304	618	0	0	\N	v2	127.0.0.1	\N
+12259	1782794270861	GET	/	GET /api/v1/watchlist/	304	1	0	0	\N	v1	127.0.0.1	\N
+12260	1782794270865	GET	/me	GET /api/v1/keys/me	304	2	0	0	\N	v1	127.0.0.1	\N
+12261	1782794270868	GET	/me	GET /api/v1/keys/me	304	1	0	0	\N	v1	127.0.0.1	\N
+12262	1782794272881	GET	/	GET /api/v1/stats/	304	2034	0	0	\N	v1	127.0.0.1	\N
+12263	1782794273314	GET	/me	GET /api/v2/billing/me	304	2414	0	0	\N	v2	127.0.0.1	\N
+12264	1782794273918	GET	/me	GET /api/v2/billing/me	304	602	0	0	\N	v2	127.0.0.1	\N
+12265	1782794274759	GET	/	GET /api/v1/stats/	304	1875	0	0	\N	v1	127.0.0.1	\N
+12266	1782794275064	GET	/	GET /api/v1/stats/	304	303	0	0	\N	v1	127.0.0.1	\N
+12267	1782794287275	GET	/me	GET /api/v1/keys/me	304	3	0	0	\N	v1	127.0.0.1	\N
+12268	1782794287275	GET	/	GET /api/v2/watchlist/	304	1	0	0	\N	v2	127.0.0.1	\N
+12269	1782794287612	GET	/	GET /api/v1/stats/	304	340	0	0	\N	v1	127.0.0.1	\N
+12270	1782794287993	GET	/me	GET /api/v2/billing/me	304	710	0	0	\N	v2	127.0.0.1	\N
+12271	1782794305416	GET	/stats	GET /api/v2/cases/stats	304	321	0	0	\N	v2	127.0.0.1	\N
+12272	1782794306026	GET	/	GET /api/v2/cases/	304	603	0	0	\N	v2	127.0.0.1	\N
+12273	1782794327951	GET	/me	GET /api/v2/billing/me	304	613	0	0	\N	v2	127.0.0.1	\N
+12274	1782794353133	GET	/me	GET /api/v1/keys/me	304	3	0	0	\N	v1	127.0.0.1	\N
+12275	1782794353139	GET	/me	GET /api/v1/keys/me	304	3	0	0	\N	v1	127.0.0.1	\N
+12276	1782794353132	GET	/	GET /api/v2/watchlist/	304	2	0	0	\N	v2	127.0.0.1	\N
+12277	1782794355198	GET	/	GET /api/v1/stats/	304	2094	0	0	\N	v1	127.0.0.1	\N
+12278	1782794355343	GET	/me	GET /api/v2/billing/me	304	2174	0	0	\N	v2	127.0.0.1	\N
+12280	1782794355808	GET	/	GET /api/v1/stats/	304	302	0	0	\N	v1	127.0.0.1	\N
+12282	1782794385426	GET	/me	GET /api/v1/keys/me	304	2	0	0	\N	v1	127.0.0.1	\N
+12283	1782794385429	GET	/me	GET /api/v1/keys/me	304	1	0	0	\N	v1	127.0.0.1	\N
+12285	1782794385710	GET	/	GET /api/v1/stats/	304	306	0	0	\N	v1	127.0.0.1	\N
+12812	1782842675985	GET	/	GET /api/v1/stats/	200	13	0	120	\N	v1	102.90.98.199	\N
+12813	1782842677947	GET	/	GET /api/v2/watchlist/	200	1	0	103	ips_3abb7e90e164	v2	102.90.98.199	\N
+12886	1783278224151	GET	/me	GET /api/v2/billing/me	304	611	0	0	\N	v2	127.0.0.1	\N
+12888	1783278225133	GET	/me	GET /api/v1/keys/me	200	1	0	70	\N	v1	127.0.0.1	\N
+12279	1782794355505	GET	/	GET /api/v1/stats/	304	306	0	0	\N	v1	127.0.0.1	\N
+12284	1782794385423	GET	/	GET /api/v2/watchlist/	304	1	0	0	\N	v2	127.0.0.1	\N
+12288	1782794388031	GET	/	GET /api/v1/stats/	304	305	0	0	\N	v1	127.0.0.1	\N
+12823	1782882069995	GET	/dashboard	GET /api/telemetry/dashboard	401	1	0	56	\N	v2	144.217.135.233	\N
+12890	1783278225421	GET	/	GET /api/v1/stats/	200	307	0	120	\N	v1	127.0.0.1	\N
+12281	1782794355959	GET	/me	GET /api/v2/billing/me	304	614	0	0	\N	v2	127.0.0.1	\N
+12286	1782794387720	GET	/me	GET /api/v2/billing/me	304	2267	0	0	\N	v2	127.0.0.1	\N
+12287	1782794387724	GET	/	GET /api/v1/stats/	304	2013	0	0	\N	v1	127.0.0.1	\N
+12289	1782794388331	GET	/me	GET /api/v2/billing/me	304	609	0	0	\N	v2	127.0.0.1	\N
+12290	1782794424867	GET	/me	GET /api/v1/keys/me	304	2	0	0	\N	v1	127.0.0.1	\N
+12291	1782794424869	GET	/me	GET /api/v1/keys/me	304	1	0	0	\N	v1	127.0.0.1	\N
+12292	1782794424866	GET	/	GET /api/v2/watchlist/	304	1	0	0	\N	v2	127.0.0.1	\N
+12293	1782794426826	GET	/	GET /api/v1/stats/	304	1976	0	0	\N	v1	127.0.0.1	\N
+12294	1782794427169	GET	/me	GET /api/v2/billing/me	304	2269	0	0	\N	v2	127.0.0.1	\N
+12295	1782794427773	GET	/me	GET /api/v2/billing/me	304	602	0	0	\N	v2	127.0.0.1	\N
+12296	1782794428686	GET	/	GET /api/v1/stats/	304	1858	0	0	\N	v1	127.0.0.1	\N
+12297	1782794429086	GET	/	GET /api/v1/stats/	304	398	0	0	\N	v1	127.0.0.1	\N
+12298	1782794471924	GET	/me	GET /api/v1/keys/me	304	2	0	0	\N	v1	127.0.0.1	\N
+12299	1782794471919	GET	/me	GET /api/v1/keys/me	304	2	0	0	\N	v1	127.0.0.1	\N
+12300	1782794471917	GET	/	GET /api/v2/watchlist/	304	1	0	0	\N	v2	127.0.0.1	\N
+12301	1782794474149	GET	/	GET /api/v1/stats/	304	2254	0	0	\N	v1	127.0.0.1	\N
+12302	1782794474260	GET	/me	GET /api/v2/billing/me	304	2320	0	0	\N	v2	127.0.0.1	\N
+12303	1782794474460	GET	/	GET /api/v1/stats/	304	307	0	0	\N	v1	127.0.0.1	\N
+12304	1782794474767	GET	/	GET /api/v1/stats/	304	306	0	0	\N	v1	127.0.0.1	\N
+12305	1782794474877	GET	/me	GET /api/v2/billing/me	304	616	0	0	\N	v2	127.0.0.1	\N
+12306	1782794514228	GET	/	GET /api/v2/watchlist/	304	2	0	0	\N	v2	127.0.0.1	\N
+12307	1782794514232	GET	/me	GET /api/v1/keys/me	304	1	0	0	\N	v1	127.0.0.1	\N
+12308	1782794514230	GET	/me	GET /api/v1/keys/me	304	3	0	0	\N	v1	127.0.0.1	\N
+12309	1782794516096	GET	/	GET /api/v1/stats/	304	1887	0	0	\N	v1	127.0.0.1	\N
+12310	1782794516399	GET	/	GET /api/v1/stats/	304	302	0	0	\N	v1	127.0.0.1	\N
+12311	1782794516577	GET	/me	GET /api/v2/billing/me	304	2326	0	0	\N	v2	127.0.0.1	\N
+12312	1782794516710	GET	/	GET /api/v1/stats/	304	310	0	0	\N	v1	127.0.0.1	\N
+12313	1782794517197	GET	/me	GET /api/v2/billing/me	304	618	0	0	\N	v2	127.0.0.1	\N
+12314	1782794525962	GET	/me	GET /api/v1/keys/me	304	2	0	0	\N	v1	127.0.0.1	\N
+12315	1782794526040	GET	/	GET /api/v2/watchlist/	304	1	0	0	\N	v2	127.0.0.1	\N
+12316	1782794526041	GET	/me	GET /api/v1/keys/me	304	2	0	0	\N	v1	127.0.0.1	\N
+12317	1782794526337	GET	/	GET /api/v1/stats/	304	314	0	0	\N	v1	127.0.0.1	\N
+12318	1782794526645	GET	/	GET /api/v1/stats/	304	306	0	0	\N	v1	127.0.0.1	\N
+12319	1782794526945	GET	/	GET /api/v1/stats/	304	300	0	0	\N	v1	127.0.0.1	\N
+12320	1782794526043	GET	/me	GET /api/v1/keys/me	304	1	0	0	\N	v1	127.0.0.1	\N
+12321	1782794528414	GET	/me	GET /api/v2/billing/me	304	2354	0	0	\N	v2	127.0.0.1	\N
+12322	1782794529133	GET	/me	GET /api/v2/billing/me	304	716	0	0	\N	v2	127.0.0.1	\N
+12323	1782794537961	GET	/me	GET /api/v1/keys/me	304	1	0	0	\N	v1	127.0.0.1	\N
+12324	1782794538041	GET	/me	GET /api/v1/keys/me	304	1	0	0	\N	v1	127.0.0.1	\N
+12325	1782794538042	GET	/	GET /api/v2/watchlist/	304	5	0	0	\N	v2	127.0.0.1	\N
+12326	1782794538044	GET	/me	GET /api/v1/keys/me	304	1	0	0	\N	v1	127.0.0.1	\N
+12327	1782794538319	GET	/	GET /api/v1/stats/	304	292	0	0	\N	v1	127.0.0.1	\N
+12328	1782794538632	GET	/	GET /api/v1/stats/	304	311	0	0	\N	v1	127.0.0.1	\N
+12329	1782794538663	GET	/me	GET /api/v2/billing/me	304	603	0	0	\N	v2	127.0.0.1	\N
+12330	1782794538932	GET	/	GET /api/v1/stats/	304	299	0	0	\N	v1	127.0.0.1	\N
+12331	1782794539270	GET	/me	GET /api/v2/billing/me	304	605	0	0	\N	v2	127.0.0.1	\N
+12332	1782794566015	GET	/185.220.101.1	GET /api/v2/score/:ip	200	15048	0	0	\N	v2	127.0.0.1	\N
+12333	1782794693996	GET	/status	GET /api/v1/mfa/status	404	3308	0	26	\N	v1	127.0.0.1	\N
+12334	1782794695896	GET	/setup	GET /api/v1/mfa/setup	404	1893	0	26	\N	v1	127.0.0.1	\N
+12335	1782794695959	GET	/status	GET /api/v1/mfa/status	404	1961	0	26	\N	v1	127.0.0.1	\N
+12336	1782794696258	GET	/setup	GET /api/v1/mfa/setup	404	289	0	26	\N	v1	127.0.0.1	\N
+12337	1782794717128	GET	/	GET /api/v2/watchlist/	304	2	0	0	\N	v2	127.0.0.1	\N
+12338	1782794717385	GET	/	GET /api/v1/stats/	200	306	0	119	\N	v1	127.0.0.1	\N
+12339	1782794717130	GET	/me	GET /api/v1/keys/me	304	3	0	0	\N	v1	127.0.0.1	\N
+12340	1782794717132	GET	/me	GET /api/v1/keys/me	304	1	0	0	\N	v1	127.0.0.1	\N
+12341	1782794719279	GET	/	GET /api/v1/stats/	304	1891	0	0	\N	v1	127.0.0.1	\N
+12342	1782794719387	GET	/me	GET /api/v2/billing/me	200	2194	0	422	\N	v2	127.0.0.1	\N
+12343	1782794719580	GET	/	GET /api/v1/stats/	304	299	0	0	\N	v1	127.0.0.1	\N
+12344	1782794720012	GET	/me	GET /api/v2/billing/me	304	623	0	0	\N	v2	127.0.0.1	\N
+12345	1782794722767	GET	/status	GET /api/v1/mfa/status	404	370	0	26	\N	v1	127.0.0.1	\N
+12346	1782794723181	GET	/setup	GET /api/v1/mfa/setup	404	405	0	26	\N	v1	127.0.0.1	\N
+12347	1782794736896	GET	/me	GET /api/v1/keys/me	304	2	0	0	\N	v1	127.0.0.1	\N
+12348	1782794736897	GET	/me	GET /api/v1/keys/me	304	1	0	0	\N	v1	127.0.0.1	\N
+12349	1782794736894	GET	/	GET /api/v2/watchlist/	304	1	0	0	\N	v2	127.0.0.1	\N
+12350	1782794737156	GET	/	GET /api/v1/stats/	304	315	0	0	\N	v1	127.0.0.1	\N
+12351	1782794737458	GET	/	GET /api/v1/stats/	304	301	0	0	\N	v1	127.0.0.1	\N
+12352	1782794737524	GET	/me	GET /api/v2/billing/me	304	574	0	0	\N	v2	127.0.0.1	\N
+12353	1782794737771	GET	/	GET /api/v1/stats/	304	311	0	0	\N	v1	127.0.0.1	\N
+12354	1782794738144	GET	/me	GET /api/v2/billing/me	304	619	0	0	\N	v2	127.0.0.1	\N
+12355	1782794739257	GET	/status	GET /api/v1/mfa/status	404	385	0	26	\N	v1	127.0.0.1	\N
+12358	1782794769669	GET	/setup	GET /api/v1/mfa/setup	404	387	0	26	\N	v1	127.0.0.1	\N
+12359	1782794778626	GET	/stats	GET /api/v2/keys/stats	200	329	0	115	\N	v2	127.0.0.1	\N
+12824	1782898117478	GET	/endpoint	GET /api/telemetry/endpoint	401	4	0	56	\N	v2	102.88.109.161	\N
+12825	1782898120811	GET	/endpoint	GET /api/telemetry/endpoint	401	1	0	56	\N	v2	102.88.109.161	\N
+12826	1782898123219	GET	/endpoint	GET /api/telemetry/endpoint	401	1	0	56	\N	v2	102.88.109.161	\N
+12827	1782898125482	GET	/endpoint	GET /api/telemetry/endpoint	401	2	0	56	\N	v2	102.88.109.161	\N
+12828	1782898127100	GET	/endpoint	GET /api/telemetry/endpoint	401	1	0	56	\N	v2	102.88.109.161	\N
+12829	1782898129619	GET	/endpoint	GET /api/telemetry/endpoint	401	1	0	56	\N	v2	102.88.109.161	\N
+12830	1782898132447	GET	/endpoint	GET /api/telemetry/endpoint	401	1	0	56	\N	v2	102.88.109.161	\N
+12831	1782898134688	GET	/endpoint	GET /api/telemetry/endpoint	401	1	0	56	\N	v2	102.88.109.161	\N
+12832	1782898136205	GET	/endpoint	GET /api/telemetry/endpoint	401	1	0	56	\N	v2	102.88.109.161	\N
+12833	1782898138404	GET	/endpoint	GET /api/telemetry/endpoint	401	1	0	56	\N	v2	102.88.109.161	\N
+12834	1782898143151	GET	/endpoint	GET /api/telemetry/endpoint	401	1	0	56	\N	v2	102.88.109.161	\N
+12835	1782898145959	GET	/endpoint	GET /api/telemetry/endpoint	401	1	0	56	\N	v2	102.88.109.161	\N
+12836	1782898148728	GET	/endpoint	GET /api/telemetry/endpoint	401	1	0	56	\N	v2	102.88.109.161	\N
+12837	1782898151424	GET	/endpoint	GET /api/telemetry/endpoint	401	1	0	56	\N	v2	102.88.109.161	\N
+12838	1782898152904	GET	/endpoint	GET /api/telemetry/endpoint	401	1	0	56	\N	v2	102.88.109.161	\N
+12839	1782898156205	GET	/endpoint	GET /api/telemetry/endpoint	401	1	0	56	\N	v2	102.88.109.161	\N
+12840	1782898162646	GET	/endpoint	GET /api/telemetry/endpoint	401	1	0	56	\N	v2	102.88.109.161	\N
+12841	1782898164423	GET	/endpoint	GET /api/telemetry/endpoint	401	1	0	56	\N	v2	102.88.109.161	\N
+12842	1782898167301	GET	/endpoint	GET /api/telemetry/endpoint	401	1	0	56	\N	v2	102.88.109.161	\N
+12843	1782898174019	GET	/endpoint	GET /api/telemetry/endpoint	401	1	0	56	\N	v2	102.88.109.161	\N
+12844	1782898181720	GET	/endpoint	GET /api/telemetry/endpoint	401	1	0	56	\N	v2	102.88.109.161	\N
+12845	1782898187761	GET	/endpoint	GET /api/telemetry/endpoint	401	1	0	56	\N	v2	102.88.109.161	\N
+12846	1782898194177	GET	/endpoint	GET /api/telemetry/endpoint	401	1	0	56	\N	v2	102.88.109.161	\N
+12847	1782898198027	GET	/endpoint	GET /api/telemetry/endpoint	401	1	0	56	\N	v2	102.88.109.161	\N
+12848	1782898201051	GET	/endpoint	GET /api/telemetry/endpoint	401	1	0	56	\N	v2	102.88.109.161	\N
+12849	1782898204090	GET	/endpoint	GET /api/telemetry/endpoint	401	1	0	56	\N	v2	102.88.109.161	\N
+12850	1782898209419	GET	/endpoint	GET /api/telemetry/endpoint	401	1	0	56	\N	v2	102.88.109.161	\N
+12851	1782898219166	GET	/endpoint	GET /api/telemetry/endpoint	401	1	0	56	\N	v2	102.88.109.161	\N
+12852	1782898227072	GET	/endpoint	GET /api/telemetry/endpoint	401	1	0	56	\N	v2	102.88.109.161	\N
+12853	1782898236973	GET	/endpoint	GET /api/telemetry/endpoint	401	1	0	56	\N	v2	102.88.109.161	\N
+12854	1782898243743	GET	/endpoint	GET /api/telemetry/endpoint	401	1	0	56	\N	v2	102.88.109.161	\N
+12855	1782898252100	GET	/endpoint	GET /api/telemetry/endpoint	401	1	0	56	\N	v2	102.88.109.161	\N
+12893	1783278225128	GET	/me	GET /api/v1/keys/me	200	1	0	70	\N	v1	127.0.0.1	\N
+12356	1782794739664	GET	/setup	GET /api/v1/mfa/setup	404	401	0	26	\N	v1	127.0.0.1	\N
+12357	1782794769274	GET	/status	GET /api/v1/mfa/status	404	399	0	26	\N	v1	127.0.0.1	\N
+12360	1782794779295	GET	/	GET /api/v2/keys/	200	656	0	0	\N	v2	127.0.0.1	\N
+12361	1782794815311	POST	/login	POST /api/v1/auth/login	200	635	57	204	\N	v1	127.0.0.1	\N
+12362	1782794827118	POST	/login/mfa	POST /api/v1/auth/login/mfa	200	498	206	275	\N	v1	127.0.0.1	\N
+12363	1782794827343	GET	/me	GET /api/v1/keys/me	200	4	0	69	\N	v1	127.0.0.1	\N
+12364	1782794827346	GET	/me	GET /api/v1/keys/me	304	1	0	0	\N	v1	127.0.0.1	\N
+12365	1782794827338	GET	/	GET /api/v2/watchlist/	304	1	0	0	\N	v2	127.0.0.1	\N
+12366	1782794829195	GET	/	GET /api/v1/stats/	304	1885	0	0	\N	v1	127.0.0.1	\N
+12367	1782794829496	GET	/	GET /api/v1/stats/	304	300	0	0	\N	v1	127.0.0.1	\N
+12368	1782794829694	GET	/me	GET /api/v2/billing/me	200	2286	0	393	\N	v2	127.0.0.1	\N
+12369	1782794829801	GET	/	GET /api/v1/stats/	304	303	0	0	\N	v1	127.0.0.1	\N
+12370	1782794830298	GET	/me	GET /api/v2/billing/me	304	601	0	0	\N	v2	127.0.0.1	\N
+12371	1782794831070	GET	/status	GET /api/v1/mfa/status	404	1842	0	26	\N	v1	127.0.0.1	\N
+12372	1782794831414	GET	/setup	GET /api/v1/mfa/setup	404	337	0	26	\N	v1	127.0.0.1	\N
+12373	1782794836235	GET	/status	GET /api/v1/mfa/status	404	353	0	26	\N	v1	127.0.0.1	\N
+12374	1782794836540	GET	/setup	GET /api/v1/mfa/setup	404	302	0	26	\N	v1	127.0.0.1	\N
+12375	1782794841058	GET	/	GET /api/v2/watchlist/	304	1	0	0	\N	v2	127.0.0.1	\N
+12376	1782794841060	GET	/me	GET /api/v1/keys/me	304	3	0	0	\N	v1	127.0.0.1	\N
+12377	1782794841063	GET	/me	GET /api/v1/keys/me	304	1	0	0	\N	v1	127.0.0.1	\N
+12378	1782794841328	GET	/	GET /api/v1/stats/	304	302	0	0	\N	v1	127.0.0.1	\N
+12379	1782794841626	GET	/	GET /api/v1/stats/	304	297	0	0	\N	v1	127.0.0.1	\N
+12380	1782794841722	GET	/me	GET /api/v2/billing/me	304	599	0	0	\N	v2	127.0.0.1	\N
+12381	1782794841976	GET	/	GET /api/v1/stats/	304	348	0	0	\N	v1	127.0.0.1	\N
+12382	1782794842332	GET	/me	GET /api/v2/billing/me	304	609	0	0	\N	v2	127.0.0.1	\N
+12383	1782794843087	GET	/status	GET /api/v1/mfa/status	404	444	0	26	\N	v1	127.0.0.1	\N
+12384	1782794843395	GET	/setup	GET /api/v1/mfa/setup	404	305	0	26	\N	v1	127.0.0.1	\N
+12385	1782794896533	GET	/status	GET /api/v1/mfa/status	404	2053	0	26	\N	v1	127.0.0.1	\N
+12386	1782794898581	GET	/setup	GET /api/v1/mfa/setup	404	2020	0	26	\N	v1	127.0.0.1	\N
+12387	1782794931389	GET	/	GET /api/v2/watchlist/	304	3	0	0	\N	v2	127.0.0.1	\N
+12388	1782794931394	GET	/me	GET /api/v1/keys/me	304	1	0	0	\N	v1	127.0.0.1	\N
+12389	1782794931392	GET	/me	GET /api/v1/keys/me	304	5	0	0	\N	v1	127.0.0.1	\N
+12390	1782794933595	GET	/	GET /api/v1/stats/	304	2230	0	0	\N	v1	127.0.0.1	\N
+12391	1782794933904	GET	/	GET /api/v1/stats/	304	307	0	0	\N	v1	127.0.0.1	\N
+12392	1782794934085	GET	/me	GET /api/v2/billing/me	304	2624	0	0	\N	v2	127.0.0.1	\N
+12393	1782794934212	GET	/	GET /api/v1/stats/	304	304	0	0	\N	v1	127.0.0.1	\N
+12394	1782794934665	GET	/me	GET /api/v2/billing/me	304	577	0	0	\N	v2	127.0.0.1	\N
+12395	1782794934789	GET	/status	GET /api/v1/mfa/status	404	1883	0	26	\N	v1	127.0.0.1	\N
+12396	1782794935095	GET	/setup	GET /api/v1/mfa/setup	404	302	0	26	\N	v1	127.0.0.1	\N
+12397	1782795051394	GET	/	GET /api/v2/watchlist/	304	1	0	0	\N	v2	127.0.0.1	\N
+12398	1782795171365	GET	/	GET /api/v2/watchlist/	304	1	0	0	\N	v2	127.0.0.1	\N
+12399	1782795291366	GET	/	GET /api/v2/watchlist/	304	2	0	0	\N	v2	127.0.0.1	\N
+12400	1782795550005	POST	/login	POST /api/v1/auth/login	200	664	57	204	\N	v1	127.0.0.1	\N
+12401	1782795557815	POST	/login/mfa	POST /api/v1/auth/login/mfa	200	321	206	275	\N	v1	127.0.0.1	\N
+12402	1782795558734	GET	/	GET /api/v1/stats/	304	302	0	0	\N	v1	127.0.0.1	\N
+12403	1782795558462	GET	/me	GET /api/v1/keys/me	304	1	0	0	\N	v1	127.0.0.1	\N
+12404	1782795558456	GET	/	GET /api/v2/watchlist/	304	3	0	0	\N	v2	127.0.0.1	\N
+12405	1782795560248	GET	/status	GET /api/v1/mfa/status	200	299	0	56	\N	v1	127.0.0.1	\N
+12406	1782795558460	GET	/me	GET /api/v1/keys/me	304	2	0	0	\N	v1	127.0.0.1	\N
+12407	1782795560736	GET	/	GET /api/v1/stats/	304	2001	0	0	\N	v1	127.0.0.1	\N
+12408	1782795560927	GET	/me	GET /api/v2/billing/me	304	2426	0	0	\N	v2	127.0.0.1	\N
+12409	1782795561040	GET	/	GET /api/v1/stats/	304	303	0	0	\N	v1	127.0.0.1	\N
+12410	1782795561551	GET	/me	GET /api/v2/billing/me	304	621	0	0	\N	v2	127.0.0.1	\N
+12411	1782795572078	POST	/login	POST /api/v1/auth/login	200	743	63	204	\N	v1	127.0.0.1	\N
+12412	1782795576830	POST	/login/mfa	POST /api/v1/auth/login/mfa	200	320	206	277	\N	v1	127.0.0.1	\N
+12413	1782795576923	GET	/me	GET /api/v1/keys/me	200	4	0	70	\N	v1	127.0.0.1	\N
+12414	1782795576927	GET	/me	GET /api/v1/keys/me	304	1	0	0	\N	v1	127.0.0.1	\N
+12415	1782795576920	GET	/	GET /api/v2/watchlist/	304	1	0	0	\N	v2	127.0.0.1	\N
+12416	1782795577233	GET	/	GET /api/v1/stats/	304	330	0	0	\N	v1	127.0.0.1	\N
+12417	1782795577530	GET	/me	GET /api/v2/billing/me	200	588	0	422	\N	v2	127.0.0.1	\N
+12418	1782795577532	GET	/	GET /api/v1/stats/	304	297	0	0	\N	v1	127.0.0.1	\N
+12419	1782795577849	GET	/	GET /api/v1/stats/	304	316	0	0	\N	v1	127.0.0.1	\N
+12420	1782795578130	GET	/me	GET /api/v2/billing/me	304	597	0	0	\N	v2	127.0.0.1	\N
+12421	1782796423852	POST	/login	POST /api/v1/auth/login	200	2614	63	204	\N	v1	127.0.0.1	\N
+12422	1782796428748	POST	/login/mfa	POST /api/v1/auth/login/mfa	200	330	206	277	\N	v1	127.0.0.1	\N
+12423	1782796429493	GET	/me	GET /api/v1/keys/me	304	2	0	0	\N	v1	127.0.0.1	\N
+12424	1782796429480	GET	/	GET /api/v2/watchlist/	304	2	0	0	\N	v2	127.0.0.1	\N
+12425	1782796429507	GET	/me	GET /api/v1/keys/me	304	12	0	0	\N	v1	127.0.0.1	\N
+12426	1782796431295	GET	/	GET /api/v1/stats/	200	1867	0	119	\N	v1	127.0.0.1	\N
+12427	1782796431754	GET	/me	GET /api/v2/billing/me	200	2235	0	422	\N	v2	127.0.0.1	\N
+12428	1782796432538	GET	/me	GET /api/v2/billing/me	304	781	0	0	\N	v2	127.0.0.1	\N
+12429	1782796433256	GET	/	GET /api/v1/stats/	304	1960	0	0	\N	v1	127.0.0.1	\N
+12430	1782796433563	GET	/	GET /api/v1/stats/	304	304	0	0	\N	v1	127.0.0.1	\N
+12431	1782796465852	GET	/	GET /api/v2/watchlist/	304	1	0	0	\N	v2	127.0.0.1	\N
+12432	1782796465858	GET	/me	GET /api/v1/keys/me	304	7	0	0	\N	v1	127.0.0.1	\N
+12433	1782796465861	GET	/me	GET /api/v1/keys/me	304	1	0	0	\N	v1	127.0.0.1	\N
+12434	1782796467707	GET	/	GET /api/v1/stats/	304	1895	0	0	\N	v1	127.0.0.1	\N
+12435	1782796468018	GET	/	GET /api/v1/stats/	304	310	0	0	\N	v1	127.0.0.1	\N
+12436	1782796468164	GET	/me	GET /api/v2/billing/me	304	2255	0	0	\N	v2	127.0.0.1	\N
+12437	1782796468306	GET	/	GET /api/v1/stats/	304	287	0	0	\N	v1	127.0.0.1	\N
+12438	1782796468800	GET	/me	GET /api/v2/billing/me	304	634	0	0	\N	v2	127.0.0.1	\N
+12439	1782796504349	GET	/me	GET /api/v1/keys/me	304	1	0	0	\N	v1	127.0.0.1	\N
+12440	1782796504341	GET	/	GET /api/v2/watchlist/	304	1	0	0	\N	v2	127.0.0.1	\N
+12441	1782796504344	GET	/me	GET /api/v1/keys/me	304	3	0	0	\N	v1	127.0.0.1	\N
+12442	1782796506180	GET	/	GET /api/v1/stats/	304	1886	0	0	\N	v1	127.0.0.1	\N
+12443	1782796506765	GET	/me	GET /api/v2/billing/me	304	2357	0	0	\N	v2	127.0.0.1	\N
+12444	1782796507360	GET	/me	GET /api/v2/billing/me	304	594	0	0	\N	v2	127.0.0.1	\N
+12445	1782796508091	GET	/	GET /api/v1/stats/	304	1910	0	0	\N	v1	127.0.0.1	\N
+12446	1782796508395	GET	/	GET /api/v1/stats/	304	303	0	0	\N	v1	127.0.0.1	\N
+12447	1782796615803	GET	/	GET /api/v2/watchlist/	304	1	0	0	\N	v2	127.0.0.1	\N
+12448	1782796615811	GET	/me	GET /api/v1/keys/me	304	7	0	0	\N	v1	127.0.0.1	\N
+12449	1782796615814	GET	/me	GET /api/v1/keys/me	304	1	0	0	\N	v1	127.0.0.1	\N
+12450	1782796617661	GET	/	GET /api/v1/stats/	200	1882	0	119	\N	v1	127.0.0.1	\N
+12451	1782796618110	GET	/me	GET /api/v2/billing/me	200	2222	0	422	\N	v2	127.0.0.1	\N
+12452	1782796618716	GET	/me	GET /api/v2/billing/me	200	604	0	422	\N	v2	127.0.0.1	\N
+12453	1782796619616	GET	/	GET /api/v1/stats/	304	1953	0	0	\N	v1	127.0.0.1	\N
+12454	1782796619922	GET	/	GET /api/v1/stats/	304	301	0	0	\N	v1	127.0.0.1	\N
+12455	1782796620219	GET	/198.20.69.98	GET /api/v2/score/:ip	200	2425	0	0	\N	v2	127.0.0.1	\N
+12456	1782796620671	GET	/search	GET /api/v2/audit/search	200	323	0	0	\N	v2	127.0.0.1	\N
+12457	1782796620822	GET	/198.20.69.98	GET /api/v2/score/:ip	429	599	0	156	\N	v2	127.0.0.1	\N
+12458	1782796636036	POST	/login	POST /api/v1/auth/login	200	693	57	204	\N	v1	127.0.0.1	\N
+12459	1782796642113	POST	/login/mfa	POST /api/v1/auth/login/mfa	200	307	206	275	\N	v1	127.0.0.1	\N
+12460	1782796642321	GET	/	GET /api/v2/watchlist/	304	1	0	0	\N	v2	127.0.0.1	\N
+12461	1782796642326	GET	/me	GET /api/v1/keys/me	304	1	0	0	\N	v1	127.0.0.1	\N
+12462	1782796642324	GET	/me	GET /api/v1/keys/me	200	3	0	69	\N	v1	127.0.0.1	\N
+12463	1782796642608	GET	/	GET /api/v1/stats/	200	316	0	119	\N	v1	127.0.0.1	\N
+12464	1782796642904	GET	/	GET /api/v1/stats/	304	295	0	0	\N	v1	127.0.0.1	\N
+12465	1782796642979	GET	/me	GET /api/v2/billing/me	200	586	0	393	\N	v2	127.0.0.1	\N
+12466	1782796643592	GET	/me	GET /api/v2/billing/me	304	612	0	0	\N	v2	127.0.0.1	\N
+12467	1782796643753	GET	/	GET /api/v1/stats/	304	846	0	0	\N	v1	127.0.0.1	\N
+12468	1782796666731	GET	/1.1.1.1	GET /api/v2/score/:ip	200	22375	0	0	\N	v2	127.0.0.1	\N
+12469	1782796666731	GET	/search	GET /api/v2/audit/search	200	383	0	0	\N	v2	127.0.0.1	\N
+12470	1782796667042	GET	/search	GET /api/v2/audit/search	304	306	0	0	\N	v2	127.0.0.1	\N
+12471	1782796762331	GET	/	GET /api/v2/watchlist/	304	4	0	0	\N	v2	127.0.0.1	\N
+12472	1782796855835	GET	/	GET /api/v2/watchlist/	304	3	0	0	\N	v2	127.0.0.1	\N
+12473	1782796855840	GET	/me	GET /api/v1/keys/me	304	0	0	0	\N	v1	127.0.0.1	\N
+12474	1782796855838	GET	/me	GET /api/v1/keys/me	304	1	0	0	\N	v1	127.0.0.1	\N
+12475	1782796857886	GET	/	GET /api/v1/stats/	200	2068	0	120	\N	v1	127.0.0.1	\N
+12476	1782796858116	GET	/me	GET /api/v2/billing/me	200	2182	0	422	\N	v2	127.0.0.1	\N
+12477	1782796858179	GET	/	GET /api/v1/stats/	304	291	0	0	\N	v1	127.0.0.1	\N
+12478	1782796858466	GET	/	GET /api/v1/stats/	304	286	0	0	\N	v1	127.0.0.1	\N
+12479	1782796858718	GET	/me	GET /api/v2/billing/me	304	600	0	0	\N	v2	127.0.0.1	\N
+12480	1782796894256	GET	/1.1.1.1	GET /api/v2/score/:ip	200	4409	0	0	\N	v2	127.0.0.1	\N
+12481	1782796899209	GET	/1.1.1.1	GET /api/v2/whois/:ip	200	1514	0	0	\N	v2	127.0.0.1	\N
+12482	1782796908928	GET	/search	GET /api/v2/audit/search	200	332	0	0	\N	v2	127.0.0.1	\N
+12483	1782796911979	GET	/search	GET /api/v2/audit/search	200	413	0	0	\N	v2	127.0.0.1	\N
+12484	1782796922012	POST	/	POST /api/v2/watchlist/	201	712	70	0	\N	v2	127.0.0.1	\N
+12485	1782796922081	GET	/	GET /api/v2/watchlist/	200	1	0	264	\N	v2	127.0.0.1	\N
+12486	1782796975840	GET	/	GET /api/v2/watchlist/	304	1	0	0	\N	v2	127.0.0.1	\N
+12487	1782797096404	GET	/	GET /api/v2/watchlist/	304	1	0	0	\N	v2	127.0.0.1	\N
+12488	1782797216398	GET	/	GET /api/v2/watchlist/	304	1	0	0	\N	v2	127.0.0.1	\N
+12489	1782797505104	POST	/login	POST /api/v1/auth/login	200	645	63	204	\N	v1	127.0.0.1	\N
+12490	1782797518656	POST	/login/mfa	POST /api/v1/auth/login/mfa	200	383	206	277	\N	v1	127.0.0.1	\N
+12491	1782797519357	GET	/me	GET /api/v1/keys/me	304	1	0	0	\N	v1	127.0.0.1	\N
+12492	1782797519324	GET	/	GET /api/v2/watchlist/	200	3	0	105	\N	v2	127.0.0.1	\N
+12493	1782797519355	GET	/me	GET /api/v1/keys/me	200	1	0	70	\N	v1	127.0.0.1	\N
+12494	1782797521207	GET	/	GET /api/v1/stats/	200	1929	0	120	\N	v1	127.0.0.1	\N
+12495	1782797521826	GET	/me	GET /api/v2/billing/me	200	2372	0	422	\N	v2	127.0.0.1	\N
+12502	1782797547644	GET	/	GET /api/v2/watchlist/	200	1	0	290	\N	v2	127.0.0.1	\N
+12505	1782797573209	GET	/	GET /api/v2/keys/	304	596	0	0	\N	v2	127.0.0.1	\N
+12506	1782797594099	GET	/stats	GET /api/v2/keys/stats	304	305	0	0	\N	v2	127.0.0.1	\N
+12515	1782797617258	GET	/	GET /api/v1/telemetry/	200	5	0	0	\N	v1	127.0.0.1	\N
+12516	1782797619826	POST	/6/resolve	POST /api/v2/threat/clusters/:id/resolve	200	328	0	30	\N	v2	127.0.0.1	\N
+12518	1782797623470	POST	/5/resolve	POST /api/v2/threat/clusters/:id/resolve	200	324	0	30	\N	v2	127.0.0.1	\N
+12525	1782797647202	GET	/history	GET /api/v1/telemetry/history	304	2	0	0	\N	v1	127.0.0.1	\N
+12529	1782797667199	GET	/history	GET /api/v1/telemetry/history	304	2	0	0	\N	v1	127.0.0.1	\N
+12531	1782797677204	GET	/history	GET /api/v1/telemetry/history	304	4	0	0	\N	v1	127.0.0.1	\N
+12533	1782797687199	GET	/history	GET /api/v1/telemetry/history	304	2	0	0	\N	v1	127.0.0.1	\N
+12535	1782797697200	GET	/history	GET /api/v1/telemetry/history	304	2	0	0	\N	v1	127.0.0.1	\N
+12537	1782797707203	GET	/history	GET /api/v1/telemetry/history	304	3	0	0	\N	v1	127.0.0.1	\N
+12539	1782797717200	GET	/history	GET /api/v1/telemetry/history	304	2	0	0	\N	v1	127.0.0.1	\N
+12541	1782797727201	GET	/history	GET /api/v1/telemetry/history	304	2	0	0	\N	v1	127.0.0.1	\N
+12543	1782797737199	GET	/history	GET /api/v1/telemetry/history	304	2	0	0	\N	v1	127.0.0.1	\N
+12549	1782797753172	GET	/history	GET /api/v1/telemetry/history	304	4	0	0	\N	v1	127.0.0.1	\N
+12856	1782922475344	GET	/plans	GET /api/v2/billing/plans	304	5	0	0	\N	v2	102.88.109.161	\N
+12894	1783278226987	GET	/	GET /api/v1/stats/	200	1855	0	120	\N	v1	127.0.0.1	\N
+12895	1783278228270	GET	/me	GET /api/v2/billing/me	304	669	0	0	\N	v2	127.0.0.1	\N
+12496	1782797522440	GET	/me	GET /api/v2/billing/me	304	612	0	0	\N	v2	127.0.0.1	\N
+12497	1782797523152	GET	/	GET /api/v1/stats/	304	1944	0	0	\N	v1	127.0.0.1	\N
+12498	1782797523464	GET	/	GET /api/v1/stats/	304	310	0	0	\N	v1	127.0.0.1	\N
+12499	1782797532766	GET	/search	GET /api/v2/audit/search	304	313	0	0	\N	v2	127.0.0.1	\N
+12500	1782797534259	GET	/1.1.1.1	GET /api/v2/score/:ip	429	690	0	156	\N	v2	127.0.0.1	\N
+12501	1782797547629	POST	/	POST /api/v2/watchlist/	201	7546	70	0	\N	v2	127.0.0.1	\N
+12503	1782797558743	GET	/status	GET /api/v1/mfa/status	200	313	0	56	\N	v1	127.0.0.1	\N
+12504	1782797572600	GET	/stats	GET /api/v2/keys/stats	304	319	0	0	\N	v2	127.0.0.1	\N
+12507	1782797594731	GET	/	GET /api/v2/keys/	304	621	0	0	\N	v2	127.0.0.1	\N
+12508	1782797597476	GET	/	GET /api/v1/telemetry/	200	4	0	0	\N	v1	127.0.0.1	\N
+12509	1782797607102	GET	/dashboard	GET /api/v1/telemetry/dashboard	200	3	0	0	\N	v1	127.0.0.1	\N
+12510	1782797607203	GET	/	GET /api/v1/telemetry/	200	4	0	0	\N	v1	127.0.0.1	\N
+12511	1782797607202	GET	/history	GET /api/v1/telemetry/history	200	3	0	2	\N	v1	127.0.0.1	\N
+12512	1782797614550	GET	/	GET /api/v2/threat/clusters/	200	302	0	675	\N	v2	127.0.0.1	\N
+12513	1782797614561	GET	/6/ips	GET /api/v2/threat/clusters/:id/ips	401	1	0	56	\N	v2	127.0.0.1	\N
+12514	1782797617257	GET	/history	GET /api/v1/telemetry/history	304	2	0	0	\N	v1	127.0.0.1	\N
+12517	1782797619837	GET	/5/ips	GET /api/v2/threat/clusters/:id/ips	401	4	0	56	\N	v2	127.0.0.1	\N
+12519	1782797627258	GET	/	GET /api/v1/telemetry/	200	2	0	0	\N	v1	127.0.0.1	\N
+12520	1782797627258	GET	/history	GET /api/v1/telemetry/history	304	1	0	0	\N	v1	127.0.0.1	\N
+12521	1782797637200	GET	/	GET /api/v1/telemetry/	200	5	0	0	\N	v1	127.0.0.1	\N
+12522	1782797637200	GET	/history	GET /api/v1/telemetry/history	304	3	0	0	\N	v1	127.0.0.1	\N
+12523	1782797640254	GET	/	GET /api/v2/watchlist/	304	1	0	0	\N	v2	127.0.0.1	\N
+12524	1782797647202	GET	/	GET /api/v1/telemetry/	200	4	0	0	\N	v1	127.0.0.1	\N
+12526	1782797657201	GET	/	GET /api/v1/telemetry/	200	3	0	0	\N	v1	127.0.0.1	\N
+12527	1782797657201	GET	/history	GET /api/v1/telemetry/history	304	1	0	0	\N	v1	127.0.0.1	\N
+12528	1782797667199	GET	/	GET /api/v1/telemetry/	200	2	0	0	\N	v1	127.0.0.1	\N
+12530	1782797677205	GET	/	GET /api/v1/telemetry/	200	6	0	0	\N	v1	127.0.0.1	\N
+12532	1782797687199	GET	/	GET /api/v1/telemetry/	200	3	0	0	\N	v1	127.0.0.1	\N
+12534	1782797697202	GET	/	GET /api/v1/telemetry/	200	4	0	0	\N	v1	127.0.0.1	\N
+12536	1782797707204	GET	/	GET /api/v1/telemetry/	200	5	0	0	\N	v1	127.0.0.1	\N
+12538	1782797717201	GET	/	GET /api/v1/telemetry/	200	3	0	0	\N	v1	127.0.0.1	\N
+12540	1782797727202	GET	/	GET /api/v1/telemetry/	200	4	0	0	\N	v1	127.0.0.1	\N
+12542	1782797737199	GET	/	GET /api/v1/telemetry/	200	3	0	0	\N	v1	127.0.0.1	\N
+12544	1782797745865	GET	/dashboard	GET /api/v1/telemetry/dashboard	304	1	0	0	\N	v1	127.0.0.1	\N
+12545	1782797746009	GET	/history	GET /api/v1/telemetry/history	304	2	0	0	\N	v1	127.0.0.1	\N
+12546	1782797746010	GET	/	GET /api/v1/telemetry/	200	3	0	0	\N	v1	127.0.0.1	\N
+12547	1782797753038	GET	/dashboard	GET /api/v1/telemetry/dashboard	304	2	0	0	\N	v1	127.0.0.1	\N
+12548	1782797753173	GET	/	GET /api/v1/telemetry/	200	5	0	0	\N	v1	127.0.0.1	\N
+12550	1782797760251	GET	/	GET /api/v2/watchlist/	304	1	0	0	\N	v2	127.0.0.1	\N
+12551	1782797786888	GET	/	GET /api/v1/telemetry/	200	6	0	0	\N	v1	127.0.0.1	\N
+12552	1782797786885	GET	/history	GET /api/v1/telemetry/history	304	3	0	0	\N	v1	127.0.0.1	\N
+12553	1782797796886	GET	/history	GET /api/v1/telemetry/history	304	3	0	0	\N	v1	127.0.0.1	\N
+12554	1782797796888	GET	/	GET /api/v1/telemetry/	200	6	0	0	\N	v1	127.0.0.1	\N
+12555	1782797806888	GET	/history	GET /api/v1/telemetry/history	304	3	0	0	\N	v1	127.0.0.1	\N
+12556	1782797806889	GET	/	GET /api/v1/telemetry/	200	5	0	0	\N	v1	127.0.0.1	\N
+12557	1782797816883	GET	/history	GET /api/v1/telemetry/history	304	3	0	0	\N	v1	127.0.0.1	\N
+12558	1782797816884	GET	/	GET /api/v1/telemetry/	200	5	0	0	\N	v1	127.0.0.1	\N
+12559	1782797826888	GET	/	GET /api/v1/telemetry/	200	6	0	0	\N	v1	127.0.0.1	\N
+12560	1782797826885	GET	/history	GET /api/v1/telemetry/history	304	3	0	0	\N	v1	127.0.0.1	\N
+12561	1782797836884	GET	/	GET /api/v1/telemetry/	200	6	0	0	\N	v1	127.0.0.1	\N
+12562	1782797836883	GET	/history	GET /api/v1/telemetry/history	304	4	0	0	\N	v1	127.0.0.1	\N
+12563	1782797846881	GET	/history	GET /api/v1/telemetry/history	304	2	0	0	\N	v1	127.0.0.1	\N
+12564	1782797846882	GET	/	GET /api/v1/telemetry/	200	4	0	0	\N	v1	127.0.0.1	\N
+12565	1782797856887	GET	/	GET /api/v1/telemetry/	200	7	0	0	\N	v1	127.0.0.1	\N
+12566	1782797856885	GET	/history	GET /api/v1/telemetry/history	304	4	0	0	\N	v1	127.0.0.1	\N
+12567	1782797867258	GET	/history	GET /api/v1/telemetry/history	304	1	0	0	\N	v1	127.0.0.1	\N
+12568	1782797867259	GET	/	GET /api/v1/telemetry/	200	5	0	0	\N	v1	127.0.0.1	\N
+12569	1782797877267	GET	/history	GET /api/v1/telemetry/history	304	4	0	0	\N	v1	127.0.0.1	\N
+12570	1782797877268	GET	/	GET /api/v1/telemetry/	200	6	0	0	\N	v1	127.0.0.1	\N
+12571	1782797886884	GET	/history	GET /api/v1/telemetry/history	304	3	0	0	\N	v1	127.0.0.1	\N
+12572	1782797886885	GET	/	GET /api/v1/telemetry/	200	5	0	0	\N	v1	127.0.0.1	\N
+12573	1782797896884	GET	/	GET /api/v1/telemetry/	200	5	0	0	\N	v1	127.0.0.1	\N
+12574	1782797896883	GET	/history	GET /api/v1/telemetry/history	304	4	0	0	\N	v1	127.0.0.1	\N
+12575	1782797906882	GET	/	GET /api/v1/telemetry/	200	4	0	0	\N	v1	127.0.0.1	\N
+12576	1782797906881	GET	/history	GET /api/v1/telemetry/history	304	3	0	0	\N	v1	127.0.0.1	\N
+12577	1782797916885	GET	/history	GET /api/v1/telemetry/history	304	2	0	0	\N	v1	127.0.0.1	\N
+12578	1782797916886	GET	/	GET /api/v1/telemetry/	200	4	0	0	\N	v1	127.0.0.1	\N
+12580	1782797926880	GET	/history	GET /api/v1/telemetry/history	304	2	0	0	\N	v1	127.0.0.1	\N
+12582	1782797936885	GET	/	GET /api/v1/telemetry/	200	3	0	0	\N	v1	127.0.0.1	\N
+12584	1782797946885	GET	/	GET /api/v1/telemetry/	200	4	0	0	\N	v1	127.0.0.1	\N
+12586	1782797957252	GET	/	GET /api/v1/telemetry/	200	2	0	0	\N	v1	127.0.0.1	\N
+12587	1782797958679	POST	/login	POST /api/v1/auth/login	200	631	63	204	\N	v1	127.0.0.1	\N
+12593	1782797971709	GET	/	GET /api/v1/stats/	304	309	0	0	\N	v1	127.0.0.1	\N
+12857	1782991869195	GET	/plans	GET /api/v2/billing/plans	200	1	0	506	\N	v2	197.210.70.170	\N
+12896	1783278295390	GET	/102.91.78.15	GET /api/v2/score/:ip	200	12156	0	0	\N	v2	127.0.0.1	\N
+12897	1783278315612	GET	/me	GET /api/v2/billing/me	304	580	0	0	\N	v2	127.0.0.1	\N
+12898	1783278343646	GET	/me	GET /api/v1/keys/me	304	3	0	0	\N	v1	127.0.0.1	\N
+12579	1782797926881	GET	/	GET /api/v1/telemetry/	200	3	0	0	\N	v1	127.0.0.1	\N
+12581	1782797936884	GET	/history	GET /api/v1/telemetry/history	304	2	0	0	\N	v1	127.0.0.1	\N
+12583	1782797946884	GET	/history	GET /api/v1/telemetry/history	304	2	0	0	\N	v1	127.0.0.1	\N
+12585	1782797957252	GET	/history	GET /api/v1/telemetry/history	304	1	0	0	\N	v1	127.0.0.1	\N
+12588	1782797967250	GET	/history	GET /api/v1/telemetry/history	304	2	0	0	\N	v1	127.0.0.1	\N
+12591	1782797971087	GET	/	GET /api/v1/stats/	304	310	0	0	\N	v1	127.0.0.1	\N
+12858	1782997522789	GET	/.env	GET /api/.*/	404	1	0	94	\N	v2	157.173.208.242	\N
+12859	1782997522993	GET	/.env.save	GET /api/.*/	404	1	0	99	\N	v2	157.173.208.242	\N
+12899	1783278343649	GET	/	GET /api/v1/watchlist/	304	1	0	0	\N	v1	127.0.0.1	\N
+12589	1782797967252	GET	/	GET /api/v1/telemetry/	200	4	0	0	\N	v1	127.0.0.1	\N
+12590	1782797970612	POST	/login/mfa	POST /api/v1/auth/login/mfa	200	308	206	277	\N	v1	127.0.0.1	\N
+12592	1782797971399	GET	/	GET /api/v1/stats/	304	311	0	0	\N	v1	127.0.0.1	\N
+12594	1782797970796	GET	/	GET /api/v2/watchlist/	304	2	0	0	\N	v2	127.0.0.1	\N
+12595	1782797970799	GET	/me	GET /api/v1/keys/me	304	4	0	0	\N	v1	127.0.0.1	\N
+12596	1782797970802	GET	/me	GET /api/v1/keys/me	304	1	0	0	\N	v1	127.0.0.1	\N
+12597	1782797974426	GET	/me	GET /api/v2/billing/me	304	3545	0	0	\N	v2	127.0.0.1	\N
+12598	1782797975041	GET	/me	GET /api/v2/billing/me	304	613	0	0	\N	v2	127.0.0.1	\N
+12599	1782797977253	GET	/	GET /api/v1/telemetry/	200	5	0	0	\N	v1	127.0.0.1	\N
+12600	1782797977251	GET	/history	GET /api/v1/telemetry/history	304	3	0	0	\N	v1	127.0.0.1	\N
+12601	1782797983029	DELETE	/1.1.1.1	DELETE /api/v2/watchlist/:ip	200	373	0	51	\N	v2	127.0.0.1	\N
+12602	1782797983040	GET	/	GET /api/v2/watchlist/	200	1	0	105	\N	v2	127.0.0.1	\N
+12603	1782797987253	GET	/	GET /api/v1/telemetry/	200	5	0	0	\N	v1	127.0.0.1	\N
+12604	1782797987253	GET	/history	GET /api/v1/telemetry/history	304	1	0	0	\N	v1	127.0.0.1	\N
+12605	1782797997247	GET	/	GET /api/v1/telemetry/	200	2	0	0	\N	v1	127.0.0.1	\N
+12606	1782797997246	GET	/history	GET /api/v1/telemetry/history	304	0	0	0	\N	v1	127.0.0.1	\N
+12607	1782798007256	GET	/history	GET /api/v1/telemetry/history	304	2	0	0	\N	v1	127.0.0.1	\N
+12608	1782798007261	GET	/	GET /api/v1/telemetry/	200	8	0	0	\N	v1	127.0.0.1	\N
+12609	1782798009777	GET	/	GET /api/v2/watchlist/	304	1	0	0	\N	v2	127.0.0.1	\N
+12610	1782798010086	GET	/	GET /api/v1/stats/	304	327	0	0	\N	v1	127.0.0.1	\N
+12611	1782798010392	GET	/	GET /api/v1/stats/	304	304	0	0	\N	v1	127.0.0.1	\N
+12612	1782798009779	GET	/me	GET /api/v1/keys/me	304	0	0	0	\N	v1	127.0.0.1	\N
+12613	1782798009778	GET	/me	GET /api/v1/keys/me	304	2	0	0	\N	v1	127.0.0.1	\N
+12614	1782798012061	GET	/me	GET /api/v2/billing/me	304	2243	0	0	\N	v2	127.0.0.1	\N
+12615	1782798012406	GET	/	GET /api/v1/stats/	304	2013	0	0	\N	v1	127.0.0.1	\N
+12616	1782798012720	GET	/me	GET /api/v2/billing/me	304	656	0	0	\N	v2	127.0.0.1	\N
+12617	1782798026152	GET	/me	GET /api/v1/keys/me	304	0	0	0	\N	v1	127.0.0.1	\N
+12618	1782798026151	GET	/me	GET /api/v1/keys/me	304	1	0	0	\N	v1	127.0.0.1	\N
+12619	1782798026150	GET	/	GET /api/v2/watchlist/	304	3	0	0	\N	v2	127.0.0.1	\N
+12620	1782798026441	GET	/	GET /api/v1/stats/	304	313	0	0	\N	v1	127.0.0.1	\N
+12621	1782798026755	GET	/	GET /api/v1/stats/	304	313	0	0	\N	v1	127.0.0.1	\N
+12622	1782798026780	GET	/me	GET /api/v2/billing/me	304	590	0	0	\N	v2	127.0.0.1	\N
+12623	1782798027083	GET	/	GET /api/v1/stats/	304	325	0	0	\N	v1	127.0.0.1	\N
+12624	1782798027408	GET	/me	GET /api/v2/billing/me	304	627	0	0	\N	v2	127.0.0.1	\N
+12625	1782798070162	GET	/endpoint	GET /api/telemetry/endpoint	401	3	0	56	\N	v2	127.0.0.1	\N
+12626	1782798076262	GET	/	GET /api/v1/telemetry/	200	2	0	0	\N	v1	127.0.0.1	\N
+12627	1782798076262	GET	/history	GET /api/v1/telemetry/history	304	1	0	0	\N	v1	127.0.0.1	\N
+12628	1782798081865	GET	/endpoint	GET /api/telemetry/endpoint	401	2	0	56	\N	v2	127.0.0.1	\N
+12629	1782798090499	GET	/status	GET /api/v1/mfa/status	304	312	0	0	\N	v1	127.0.0.1	\N
+12630	1782798092805	GET	/stats	GET /api/v2/keys/stats	304	330	0	0	\N	v2	127.0.0.1	\N
+12631	1782798093516	GET	/	GET /api/v2/keys/	304	697	0	0	\N	v2	127.0.0.1	\N
+12632	1782798128033	GET	/	GET /api/v2/keys/	200	2278	0	0	\N	v2	127.0.0.1	\N
+12633	1782798129465	GET	/	GET /api/v2/keys/	200	2262	0	21	\N	v2	127.0.0.1	\N
+12634	1782798129609	GET	/	GET /api/v2/keys/	200	605	0	21	\N	v2	127.0.0.1	\N
+12635	1782798130494	GET	/	GET /api/v2/keys/	200	2435	0	21	\N	v2	127.0.0.1	\N
+12636	1782798131811	GET	/	GET /api/v2/keys/	304	774	0	0	\N	v2	127.0.0.1	\N
+12637	1782798133758	GET	/	GET /api/v2/keys/	304	686	0	0	\N	v2	127.0.0.1	\N
+12638	1782798136253	GET	/history	GET /api/v1/telemetry/history	304	3	0	0	\N	v1	127.0.0.1	\N
+12639	1782798136257	GET	/	GET /api/v2/keys/	304	720	0	0	\N	v2	127.0.0.1	\N
+12640	1782798136254	GET	/	GET /api/v1/telemetry/	200	4	0	0	\N	v1	127.0.0.1	\N
+12641	1782798146156	GET	/	GET /api/v2/watchlist/	304	1	0	0	\N	v2	127.0.0.1	\N
+12642	1782798196250	GET	/	GET /api/v1/telemetry/	200	4	0	0	\N	v1	127.0.0.1	\N
+12643	1782798196250	GET	/history	GET /api/v1/telemetry/history	304	2	0	0	\N	v1	127.0.0.1	\N
+12644	1782798225787	GET	/dashboard	GET /api/telemetry/dashboard	401	2	0	56	\N	v2	127.0.0.1	\N
+12645	1782798237574	GET	/plans	GET /api/v2/billing/plans	304	6	0	0	\N	v2	127.0.0.1	\N
+12646	1782798256249	GET	/history	GET /api/v1/telemetry/history	304	2	0	0	\N	v1	127.0.0.1	\N
+12647	1782798256253	GET	/	GET /api/v1/telemetry/	200	8	0	0	\N	v1	127.0.0.1	\N
+12648	1782798280120	POST	/login	POST /api/v1/auth/login	200	740	63	204	\N	v1	127.0.0.1	\N
+12649	1782798289510	POST	/login/mfa	POST /api/v1/auth/login/mfa	200	405	206	277	\N	v1	127.0.0.1	\N
+12650	1782798289655	GET	/	GET /api/v2/watchlist/	304	3	0	0	\N	v2	127.0.0.1	\N
+12651	1782798289654	GET	/me	GET /api/v1/keys/me	304	1	0	0	\N	v1	127.0.0.1	\N
+12652	1782798289657	GET	/me	GET /api/v1/keys/me	304	1	0	0	\N	v1	127.0.0.1	\N
+12653	1782798291525	GET	/	GET /api/v1/stats/	304	1894	0	0	\N	v1	127.0.0.1	\N
+12654	1782798291865	GET	/me	GET /api/v2/billing/me	304	2173	0	0	\N	v2	127.0.0.1	\N
+12655	1782798291871	GET	/	GET /api/v1/stats/	304	343	0	0	\N	v1	127.0.0.1	\N
+12656	1782798292176	GET	/	GET /api/v1/stats/	304	303	0	0	\N	v1	127.0.0.1	\N
+12657	1782798292476	GET	/me	GET /api/v2/billing/me	304	607	0	0	\N	v2	127.0.0.1	\N
+12658	1782798316252	GET	/	GET /api/v1/telemetry/	200	4	0	0	\N	v1	127.0.0.1	\N
+12659	1782798316249	GET	/history	GET /api/v1/telemetry/history	304	2	0	0	\N	v1	127.0.0.1	\N
+12662	1782798323549	GET	/history	GET /api/v1/telemetry/history	304	2	0	0	\N	v1	127.0.0.1	\N
+12666	1782798343640	GET	/	GET /api/v1/telemetry/	200	5	0	0	\N	v1	127.0.0.1	\N
+12668	1782798353639	GET	/history	GET /api/v1/telemetry/history	304	2	0	0	\N	v1	127.0.0.1	\N
+12672	1782798370614	GET	/history	GET /api/v1/telemetry/history	304	2	0	0	\N	v1	127.0.0.1	\N
+12673	1782798371422	GET	/dashboard	GET /api/v1/telemetry/dashboard	304	2	0	0	\N	v1	127.0.0.1	\N
+12860	1783020749912	GET	/dashboard	GET /api/telemetry/dashboard	401	1	0	56	\N	v2	170.106.15.3	\N
+12900	1783278345611	GET	/	GET /api/v1/stats/	200	1963	0	120	\N	v1	127.0.0.1	\N
+12660	1782798321312	GET	/	GET /api/v1/telemetry/	200	3	0	0	\N	v1	127.0.0.1	\N
+12661	1782798323445	GET	/dashboard	GET /api/v1/telemetry/dashboard	200	4	0	0	\N	v1	127.0.0.1	\N
+12663	1782798323550	GET	/	GET /api/v1/telemetry/	200	4	0	0	\N	v1	127.0.0.1	\N
+12664	1782798331613	GET	/dashboard	GET /api/v1/telemetry/dashboard	401	1	0	56	\N	v1	127.0.0.1	\N
+12667	1782798353640	GET	/	GET /api/v1/telemetry/	200	4	0	0	\N	v1	127.0.0.1	\N
+12670	1782798363644	GET	/history	GET /api/v1/telemetry/history	304	2	0	0	\N	v1	127.0.0.1	\N
+12671	1782798370470	GET	/dashboard	GET /api/v1/telemetry/dashboard	304	1	0	0	\N	v1	127.0.0.1	\N
+12674	1782798371556	GET	/history	GET /api/v1/telemetry/history	304	3	0	0	\N	v1	127.0.0.1	\N
+12861	1783023519773	GET	/api/versions	GET /api/versions	200	2	0	557	\N	v2	43.166.129.247	\N
+12901	1783278345789	GET	/me	GET /api/v2/billing/me	304	2134	0	0	\N	v2	127.0.0.1	\N
+12665	1782798343639	GET	/history	GET /api/v1/telemetry/history	304	2	0	0	\N	v1	127.0.0.1	\N
+12669	1782798363645	GET	/	GET /api/v1/telemetry/	200	7	0	0	\N	v1	127.0.0.1	\N
+12675	1782798370616	GET	/	GET /api/v1/telemetry/	200	5	0	0	\N	v1	127.0.0.1	\N
+12676	1782798371556	GET	/	GET /api/v1/telemetry/	200	4	0	0	\N	v1	127.0.0.1	\N
+12677	1782798376301	GET	/history	GET /api/v1/telemetry/history	304	2	0	0	\N	v1	127.0.0.1	\N
+12678	1782798376303	GET	/	GET /api/v1/telemetry/	200	5	0	0	\N	v1	127.0.0.1	\N
+12679	1782798381560	GET	/history	GET /api/v1/telemetry/history	304	3	0	0	\N	v1	127.0.0.1	\N
+12680	1782798381561	GET	/	GET /api/v1/telemetry/	200	6	0	0	\N	v1	127.0.0.1	\N
+12681	1782798410300	GET	/	GET /api/v2/watchlist/	304	1	0	0	\N	v2	127.0.0.1	\N
+12682	1782798411558	GET	/history	GET /api/v1/telemetry/history	200	2	0	2	\N	v1	127.0.0.1	\N
+12683	1782798411559	GET	/	GET /api/v1/telemetry/	200	6	0	0	\N	v1	127.0.0.1	\N
+12684	1782798421558	GET	/history	GET /api/v1/telemetry/history	304	2	0	0	\N	v1	127.0.0.1	\N
+12685	1782798421558	GET	/	GET /api/v1/telemetry/	200	3	0	0	\N	v1	127.0.0.1	\N
+12686	1782798431560	GET	/history	GET /api/v1/telemetry/history	304	2	0	0	\N	v1	127.0.0.1	\N
+12687	1782798431560	GET	/	GET /api/v1/telemetry/	200	4	0	0	\N	v1	127.0.0.1	\N
+12688	1782798436303	GET	/	GET /api/v1/telemetry/	200	4	0	0	\N	v1	127.0.0.1	\N
+12689	1782798436301	GET	/history	GET /api/v1/telemetry/history	304	2	0	0	\N	v1	127.0.0.1	\N
+12690	1782798441557	GET	/	GET /api/v1/telemetry/	200	4	0	0	\N	v1	127.0.0.1	\N
+12691	1782798441556	GET	/history	GET /api/v1/telemetry/history	304	2	0	0	\N	v1	127.0.0.1	\N
+12692	1782798451556	GET	/history	GET /api/v1/telemetry/history	304	2	0	0	\N	v1	127.0.0.1	\N
+12693	1782798451558	GET	/	GET /api/v1/telemetry/	200	4	0	0	\N	v1	127.0.0.1	\N
+12694	1782798461560	GET	/	GET /api/v1/telemetry/	200	5	0	0	\N	v1	127.0.0.1	\N
+12695	1782798461558	GET	/history	GET /api/v1/telemetry/history	304	3	0	0	\N	v1	127.0.0.1	\N
+12696	1782798471569	GET	/	GET /api/v1/telemetry/	200	4	0	0	\N	v1	127.0.0.1	\N
+12697	1782798471568	GET	/history	GET /api/v1/telemetry/history	304	2	0	0	\N	v1	127.0.0.1	\N
+12698	1782798481559	GET	/history	GET /api/v1/telemetry/history	304	3	0	0	\N	v1	127.0.0.1	\N
+12699	1782798481561	GET	/	GET /api/v1/telemetry/	200	6	0	0	\N	v1	127.0.0.1	\N
+12700	1782798491561	GET	/history	GET /api/v1/telemetry/history	304	4	0	0	\N	v1	127.0.0.1	\N
+12701	1782798491562	GET	/	GET /api/v1/telemetry/	200	6	0	0	\N	v1	127.0.0.1	\N
+12702	1782798496303	GET	/	GET /api/v1/telemetry/	200	4	0	0	\N	v1	127.0.0.1	\N
+12703	1782798496302	GET	/history	GET /api/v1/telemetry/history	304	2	0	0	\N	v1	127.0.0.1	\N
+12704	1782798501583	GET	/history	GET /api/v1/telemetry/history	304	3	0	0	\N	v1	127.0.0.1	\N
+12705	1782798501584	GET	/	GET /api/v1/telemetry/	200	4	0	0	\N	v1	127.0.0.1	\N
+12706	1782798511558	GET	/history	GET /api/v1/telemetry/history	304	3	0	0	\N	v1	127.0.0.1	\N
+12707	1782798511559	GET	/	GET /api/v1/telemetry/	200	4	0	0	\N	v1	127.0.0.1	\N
+12708	1782798521559	GET	/	GET /api/v1/telemetry/	200	4	0	0	\N	v1	127.0.0.1	\N
+12709	1782798521558	GET	/history	GET /api/v1/telemetry/history	304	2	0	0	\N	v1	127.0.0.1	\N
+12710	1782798531557	GET	/history	GET /api/v1/telemetry/history	304	3	0	0	\N	v1	127.0.0.1	\N
+12711	1782798531558	GET	/	GET /api/v1/telemetry/	200	5	0	0	\N	v1	127.0.0.1	\N
+12712	1782798541558	GET	/	GET /api/v1/telemetry/	200	3	0	0	\N	v1	127.0.0.1	\N
+12713	1782798541556	GET	/history	GET /api/v1/telemetry/history	304	2	0	0	\N	v1	127.0.0.1	\N
+12714	1782798551561	GET	/	GET /api/v1/telemetry/	200	4	0	0	\N	v1	127.0.0.1	\N
+12715	1782798551560	GET	/history	GET /api/v1/telemetry/history	304	3	0	0	\N	v1	127.0.0.1	\N
+12716	1782798556305	GET	/	GET /api/v1/telemetry/	200	5	0	0	\N	v1	127.0.0.1	\N
+12717	1782798556304	GET	/history	GET /api/v1/telemetry/history	304	3	0	0	\N	v1	127.0.0.1	\N
+12718	1782798561557	GET	/	GET /api/v1/telemetry/	200	5	0	0	\N	v1	127.0.0.1	\N
+12719	1782798561556	GET	/history	GET /api/v1/telemetry/history	304	3	0	0	\N	v1	127.0.0.1	\N
+12720	1782798568946	GET	/history	GET /api/v1/telemetry/history	304	5	0	0	\N	v1	127.0.0.1	\N
+12721	1782798568956	GET	/	GET /api/v1/telemetry/	200	17	0	0	\N	v1	127.0.0.1	\N
+12722	1782798571570	GET	/history	GET /api/v1/telemetry/history	304	3	0	0	\N	v1	127.0.0.1	\N
+12723	1782798571571	GET	/	GET /api/v1/telemetry/	200	4	0	0	\N	v1	127.0.0.1	\N
+12724	1782798581553	GET	/	GET /api/v1/telemetry/	200	1	0	0	\N	v1	127.0.0.1	\N
+12725	1782798581553	GET	/history	GET /api/v1/telemetry/history	304	1	0	0	\N	v1	127.0.0.1	\N
+12726	1782798591561	GET	/history	GET /api/v1/telemetry/history	304	3	0	0	\N	v1	127.0.0.1	\N
+12727	1782798591561	GET	/	GET /api/v1/telemetry/	200	5	0	0	\N	v1	127.0.0.1	\N
+12728	1782798601560	GET	/	GET /api/v1/telemetry/	200	6	0	0	\N	v1	127.0.0.1	\N
+12729	1782798601556	GET	/history	GET /api/v1/telemetry/history	304	1	0	0	\N	v1	127.0.0.1	\N
+12730	1782798611554	GET	/history	GET /api/v1/telemetry/history	304	1	0	0	\N	v1	127.0.0.1	\N
+12731	1782798611556	GET	/	GET /api/v1/telemetry/	200	2	0	0	\N	v1	127.0.0.1	\N
+12732	1782798621558	GET	/history	GET /api/v1/telemetry/history	304	3	0	0	\N	v1	127.0.0.1	\N
+12733	1782798621559	GET	/	GET /api/v1/telemetry/	200	5	0	0	\N	v1	127.0.0.1	\N
+12734	1782798631556	GET	/history	GET /api/v1/telemetry/history	304	2	0	0	\N	v1	127.0.0.1	\N
+12735	1782798631557	GET	/	GET /api/v1/telemetry/	200	3	0	0	\N	v1	127.0.0.1	\N
+12736	1782798641560	GET	/history	GET /api/v1/telemetry/history	304	3	0	0	\N	v1	127.0.0.1	\N
+12737	1782798641562	GET	/	GET /api/v1/telemetry/	200	6	0	0	\N	v1	127.0.0.1	\N
+12738	1782799313835	GET	/plans	GET /api/v2/billing/plans	304	3	0	0	\N	v2	127.0.0.1	\N
+12739	1782799560307	POST	/login	POST /api/v1/auth/login	200	2344	63	204	\N	v1	127.0.0.1	\N
+12740	1782799567236	POST	/login/mfa	POST /api/v1/auth/login/mfa	200	346	206	277	\N	v1	127.0.0.1	\N
+12741	1782799567879	GET	/me	GET /api/v1/keys/me	304	5	0	0	\N	v1	127.0.0.1	\N
+12742	1782799567865	GET	/	GET /api/v2/watchlist/	304	1	0	0	\N	v2	127.0.0.1	\N
+12743	1782799567872	GET	/me	GET /api/v1/keys/me	304	5	0	0	\N	v1	127.0.0.1	\N
+12744	1782799569896	GET	/	GET /api/v1/stats/	304	2064	0	0	\N	v1	127.0.0.1	\N
+12745	1782799570204	GET	/me	GET /api/v2/billing/me	304	2271	0	0	\N	v2	127.0.0.1	\N
+12746	1782799570207	GET	/	GET /api/v1/stats/	304	309	0	0	\N	v1	127.0.0.1	\N
+12747	1782799570515	GET	/	GET /api/v1/stats/	304	303	0	0	\N	v1	127.0.0.1	\N
+12748	1782799570794	GET	/me	GET /api/v2/billing/me	304	582	0	0	\N	v2	127.0.0.1	\N
+12749	1782799574396	GET	/me	GET /api/v1/keys/me	304	2	0	0	\N	v1	127.0.0.1	\N
+12750	1782799574394	GET	/	GET /api/v2/watchlist/	304	1	0	0	\N	v2	127.0.0.1	\N
+12751	1782799574397	GET	/me	GET /api/v1/keys/me	304	1	0	0	\N	v1	127.0.0.1	\N
+12752	1782799574663	GET	/	GET /api/v1/stats/	304	294	0	0	\N	v1	127.0.0.1	\N
+12753	1782799575029	GET	/me	GET /api/v2/billing/me	304	573	0	0	\N	v2	127.0.0.1	\N
+12754	1782799575617	GET	/me	GET /api/v2/billing/me	304	587	0	0	\N	v2	127.0.0.1	\N
+12755	1782799576814	GET	/	GET /api/v1/stats/	304	2150	0	0	\N	v1	127.0.0.1	\N
+12756	1782799577114	GET	/	GET /api/v1/stats/	304	299	0	0	\N	v1	127.0.0.1	\N
+12757	1782799582656	GET	/	GET /api/v2/watchlist/	304	1	0	0	\N	v2	127.0.0.1	\N
+12758	1782799582657	GET	/me	GET /api/v1/keys/me	304	2	0	0	\N	v1	127.0.0.1	\N
+12759	1782799582659	GET	/me	GET /api/v1/keys/me	304	1	0	0	\N	v1	127.0.0.1	\N
+12760	1782799582935	GET	/	GET /api/v1/stats/	304	299	0	0	\N	v1	127.0.0.1	\N
+12761	1782799583222	GET	/	GET /api/v1/stats/	304	286	0	0	\N	v1	127.0.0.1	\N
+12762	1782799583315	GET	/me	GET /api/v2/billing/me	304	600	0	0	\N	v2	127.0.0.1	\N
+12763	1782799583527	GET	/	GET /api/v1/stats/	304	302	0	0	\N	v1	127.0.0.1	\N
+12764	1782799583963	GET	/me	GET /api/v2/billing/me	304	646	0	0	\N	v2	127.0.0.1	\N
+12765	1782799600619	GET	/	GET /api/v2/watchlist/	304	1	0	0	\N	v2	127.0.0.1	\N
+12766	1782799600621	GET	/me	GET /api/v1/keys/me	304	1	0	0	\N	v1	127.0.0.1	\N
+12767	1782799600624	GET	/me	GET /api/v1/keys/me	304	1	0	0	\N	v1	127.0.0.1	\N
+12768	1782799600897	GET	/	GET /api/v1/stats/	304	303	0	0	\N	v1	127.0.0.1	\N
+12769	1782799601193	GET	/	GET /api/v1/stats/	304	294	0	0	\N	v1	127.0.0.1	\N
+12770	1782799601266	GET	/me	GET /api/v2/billing/me	304	577	0	0	\N	v2	127.0.0.1	\N
+12771	1782799601508	GET	/	GET /api/v1/stats/	304	315	0	0	\N	v1	127.0.0.1	\N
+12772	1782799601944	GET	/me	GET /api/v1/keys/me	304	1	0	0	\N	v1	127.0.0.1	\N
+12773	1782799601947	GET	/me	GET /api/v1/keys/me	304	1	0	0	\N	v1	127.0.0.1	\N
+12774	1782799601943	GET	/	GET /api/v2/watchlist/	304	1	0	0	\N	v2	127.0.0.1	\N
+12775	1782799602216	GET	/	GET /api/v1/stats/	304	297	0	0	\N	v1	127.0.0.1	\N
+12776	1782799602506	GET	/	GET /api/v1/stats/	304	289	0	0	\N	v1	127.0.0.1	\N
+12777	1782799602621	GET	/me	GET /api/v2/billing/me	200	611	0	422	\N	v2	127.0.0.1	\N
+12778	1782799602809	GET	/	GET /api/v1/stats/	304	302	0	0	\N	v1	127.0.0.1	\N
+12779	1782799603246	GET	/me	GET /api/v2/billing/me	304	624	0	0	\N	v2	127.0.0.1	\N
+12780	1782799605013	GET	/me	GET /api/v1/keys/me	304	1	0	0	\N	v1	127.0.0.1	\N
+12781	1782799605011	GET	/	GET /api/v2/watchlist/	304	5	0	0	\N	v2	127.0.0.1	\N
+12782	1782799605010	GET	/me	GET /api/v1/keys/me	304	3	0	0	\N	v1	127.0.0.1	\N
+12783	1782799605294	GET	/	GET /api/v1/stats/	304	306	0	0	\N	v1	127.0.0.1	\N
+12784	1782799605735	GET	/	GET /api/v1/stats/	304	441	0	0	\N	v1	127.0.0.1	\N
+12785	1782799605736	GET	/me	GET /api/v2/billing/me	304	664	0	0	\N	v2	127.0.0.1	\N
+12786	1782799606152	GET	/	GET /api/v1/stats/	304	414	0	0	\N	v1	127.0.0.1	\N
+12787	1782799606472	GET	/me	GET /api/v2/billing/me	304	734	0	0	\N	v2	127.0.0.1	\N
+12862	1783023814872	GET	/api/v2	GET /api/v2	200	1	0	557	\N	v2	43.155.157.239	\N
+12902	1783278359497	GET	/1.1.1.1	GET /api/v1/score/:ip	200	8392	0	0	\N	v1	127.0.0.1	\N
 \.
 
 
 --
--- Data for Name: threat_clusters; Type: TABLE DATA; Schema: public; Owner: ipshield_user
+-- Data for Name: threat_clusters; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.threat_clusters (id, cluster_key, cluster_type, ip_count, max_score, severity, first_seen, last_seen, resolved, details) FROM stdin;
@@ -12845,28 +14102,39 @@ COPY public.threat_clusters (id, cluster_key, cluster_type, ip_count, max_score,
 2	asn:—	asn	3	0	LOW	2026-05-31 04:15:33.155499+00	2026-05-31 04:15:53.326515+00	t	{"asn": "—", "isp": "Private / RFC1918", "windowMins": 30, "triggeredBy": "192.168.1.25"}
 3	subnet:192.168.1.0/24	subnet	3	0	LOW	2026-05-31 04:35:39.928158+00	2026-05-31 04:35:47.476479+00	t	{"subnet": "192.168.1.0/24", "windowMins": 30, "triggeredBy": "192.168.1.25"}
 4	asn:—	asn	3	0	LOW	2026-05-31 04:35:40.749704+00	2026-05-31 04:35:48.346832+00	t	{"asn": "—", "isp": "Private / RFC1918", "windowMins": 30, "triggeredBy": "192.168.1.25"}
+6	asn:AS329233 SABI NETWORKS LIMITED	asn	5	0	LOW	2026-06-27 12:41:39.328474+00	2026-06-27 12:42:03.212721+00	t	{"asn": "AS329233 SABI NETWORKS LIMITED", "isp": "Sabi Networks Limited", "windowMins": 30, "triggeredBy": "102.212.140.205"}
+5	subnet:102.212.140.0/24	subnet	5	0	LOW	2026-06-27 12:41:39.323635+00	2026-06-27 12:42:03.204603+00	t	{"subnet": "102.212.140.0/24", "windowMins": 30, "triggeredBy": "102.212.140.205"}
 \.
 
 
 --
--- Data for Name: usage_events; Type: TABLE DATA; Schema: public; Owner: ipshield_user
+-- Data for Name: usage_events; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.usage_events (id, user_id, api_key_id, feature, day, count, updated_at) FROM stdin;
+1	6	\N	score	2026-06-26	5	2026-06-26 14:31:51.075366+00
+6	8	\N	score	2026-06-26	1	2026-06-26 14:36:01.596176+00
+7	7	\N	score	2026-06-27	5	2026-06-27 12:42:00.886274+00
+12	6	\N	score	2026-06-30	5	2026-06-30 05:16:58.647852+00
+17	8	\N	score	2026-06-30	2	2026-06-30 05:21:32.495853+00
+19	6	\N	score	2026-07-05	2	2026-07-05 19:09:52.048325+00
 \.
 
 
 --
--- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: ipshield_user
+-- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY public.users (id, email, password_hash, role, created_at, plan, stripe_customer_id, stripe_subscription_id, subscription_status, current_period_end, cancel_at_period_end, updated_at) FROM stdin;
-5	admin@ipshield.local	$2b$10$vA7sLI6ytUNzMHa.auLa4OeTGvBQTlFPRi8pd0IimMwuFn/KHBx2W	admin	2026-06-02 04:42:50.870109	free	\N	\N	inactive	\N	f	2026-06-25 20:26:05.28971+00
+COPY public.users (id, email, password_hash, role, created_at, plan, stripe_customer_id, stripe_subscription_id, subscription_status, current_period_end, cancel_at_period_end, updated_at, mfa_secret, mfa_enabled, mfa_verified_at, mfa_backup_codes, reset_token, reset_token_expires) FROM stdin;
+5	admin@ipshield.local	$2b$10$vA7sLI6ytUNzMHa.auLa4OeTGvBQTlFPRi8pd0IimMwuFn/KHBx2W	admin	2026-06-02 04:42:50.870109	free	\N	\N	inactive	\N	f	2026-06-25 20:26:05.28971+00	\N	f	\N	\N	\N	\N
+7	serenitykid01@gmail.com	$2b$12$hgaql5OXMpr4Pm14fcqOrudU9d3C70KUiet1lYA4p2fdQVDsefQUO	readonly	2026-06-04 21:28:49.321682	free	\N	\N	inactive	\N	f	2026-06-26 04:40:46.491521+00	Y2TFZSVPIFKCYNKLZF7PQWIVZOODPGAE	t	2026-06-11 05:28:52.795669+00	\N	\N	\N
+6	designer@ipshield.live	$2b$12$MO7ChPqDMso9p9dB/JOXjunVpyk.OB4t83pjm.9NUn8nH9lHOM9n2	admin	2026-05-25 14:38:07.968197	free	cus_Ulzsiv27Zo0puH	\N	inactive	\N	f	2026-06-26 05:00:52.623758+00	MJRVUZJ4BZVCY7LP	t	2026-06-11 10:52:28.998874+00	{$2b$10$Cfeqp0UKzOgbnx3o9mbRq.uZw.hEQtzY3d1vhvb8mE3p77C.Kgfpu,$2b$10$NrjIq6dE23qJj63CyzxJdOCaHTGMAa0FvI7xyeM8I/nsFDsgd9nKS,$2b$10$LHXP5n46crD4j2pQ1tnOnOYPQwbecVsN3qIQaxY7QIUj75cO2O5km,$2b$10$0MaIpfwJiMpIn2U39tUjn.9KAfbEkKVsKb2nccaG2bW3KT29cmJWy,$2b$10$HUWO289dvp5mSfVy0EvgMeF0aE1MU2aOAQH.bS5yNGy6GliegL5si,$2b$10$glu8flPrVR9BaLiYAHscB.zS.bVaLamciWoi3L47tAP2TVbkJDv4.,$2b$10$GKxfnMZa4hirbNjHvb.kt.P6msErLj1.V/kSONB3TzmffPrG2MCeq}	\N	\N
+8	codeinstd@gmail.com	$2b$12$EPhthc4Bx9e7DQXrrflRMusvRCUvV1EZ6t6bThXuXo7BEoGSDrAK6	analyst	2026-06-14 14:39:45.364776	free	cus_Um4gQUc6GOBqKa	\N	inactive	\N	f	2026-06-26 09:58:37.897915+00	PZNH2LQPJ4DFQESM	t	2026-06-14 14:40:37.970313+00	{$2b$10$Ivk2EA56u7PWmNbSPOxEuOfnLWCngnWL2Ho6sdxno/HZrwGrbeAum,$2b$10$R/Z5bRe8Japt8Tee48uzZuG6zFv9jdMPs7mW6RlnLCKqOHBgqyRte,$2b$10$opOROzddKMSm6BRQ7zKbs.R.10IYCmdg3DEXNETITU1sEoVc9rLma,$2b$10$OdFf5Ck7ca3yvUkV8ka3A./aEI/y.eBSWnLVTCUtpJmKQLgLXwkoa,$2b$10$FvNp07hIwCairFbhF1jSm.L3IPYRLKrnzKsprOH/ju9XPiGZoAnh.,$2b$10$JZ2HYRVpHoWR2ACk6ctkdungX3lXnk1pHFmNUcuWh7rBDedEOGFm2,$2b$10$P/BigHDUnFdMX6uFzNCsfeSUw3rknKtfhhvkWHMKzMgHTrxObMqnm,$2b$10$SYdHrsuMSudBe4fTYG5rUeivGLubpJubSmAm2eywmDDD0eZCsGL6O}	\N	\N
 \.
 
 
 --
--- Data for Name: watchlist; Type: TABLE DATA; Schema: public; Owner: ipshield_user
+-- Data for Name: watchlist; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.watchlist (ip, label, threshold, last_score, last_risk, last_checked, added_at, alert_on_change) FROM stdin;
@@ -12874,126 +14142,126 @@ COPY public.watchlist (ip, label, threshold, last_score, last_risk, last_checked
 
 
 --
--- Name: api_keys_id_seq; Type: SEQUENCE SET; Schema: public; Owner: ipshield_user
+-- Name: api_keys_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.api_keys_id_seq', 71, true);
 
 
 --
--- Name: audit_log_id_seq; Type: SEQUENCE SET; Schema: public; Owner: ipshield_user
+-- Name: audit_log_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.audit_log_id_seq', 80, true);
-
-
---
--- Name: blacklist_id_seq; Type: SEQUENCE SET; Schema: public; Owner: ipshield_user
---
-
-SELECT pg_catalog.setval('public.blacklist_id_seq', 13, true);
+SELECT pg_catalog.setval('public.audit_log_id_seq', 105, true);
 
 
 --
--- Name: case_accounts_id_seq; Type: SEQUENCE SET; Schema: public; Owner: ipshield_user
+-- Name: blacklist_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.blacklist_id_seq', 14, true);
+
+
+--
+-- Name: case_accounts_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.case_accounts_id_seq', 1, false);
 
 
 --
--- Name: case_ips_id_seq; Type: SEQUENCE SET; Schema: public; Owner: ipshield_user
+-- Name: case_ips_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.case_ips_id_seq', 4, true);
 
 
 --
--- Name: case_notes_id_seq; Type: SEQUENCE SET; Schema: public; Owner: ipshield_user
+-- Name: case_notes_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.case_notes_id_seq', 1, true);
 
 
 --
--- Name: cases_id_seq; Type: SEQUENCE SET; Schema: public; Owner: ipshield_user
+-- Name: cases_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.cases_id_seq', 4, true);
 
 
 --
--- Name: cidr_blocks_id_seq; Type: SEQUENCE SET; Schema: public; Owner: ipshield_user
+-- Name: cidr_blocks_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.cidr_blocks_id_seq', 1, true);
 
 
 --
--- Name: key_usage_log_id_seq; Type: SEQUENCE SET; Schema: public; Owner: ipshield_user
+-- Name: key_usage_log_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.key_usage_log_id_seq', 590, true);
 
 
 --
--- Name: scan_jobs_id_seq; Type: SEQUENCE SET; Schema: public; Owner: ipshield_user
+-- Name: scan_jobs_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.scan_jobs_id_seq', 1, true);
 
 
 --
--- Name: scan_results_id_seq; Type: SEQUENCE SET; Schema: public; Owner: ipshield_user
+-- Name: scan_results_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.scan_results_id_seq', 1, false);
 
 
 --
--- Name: siem_targets_id_seq; Type: SEQUENCE SET; Schema: public; Owner: ipshield_user
+-- Name: siem_targets_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.siem_targets_id_seq', 1, false);
 
 
 --
--- Name: telemetry_id_seq; Type: SEQUENCE SET; Schema: public; Owner: ipshield_user
+-- Name: telemetry_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.telemetry_id_seq', 1, false);
 
 
 --
--- Name: telemetry_requests_id_seq; Type: SEQUENCE SET; Schema: public; Owner: ipshield_user
+-- Name: telemetry_requests_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.telemetry_requests_id_seq', 11624, true);
-
-
---
--- Name: threat_clusters_id_seq; Type: SEQUENCE SET; Schema: public; Owner: ipshield_user
---
-
-SELECT pg_catalog.setval('public.threat_clusters_id_seq', 4, true);
+SELECT pg_catalog.setval('public.telemetry_requests_id_seq', 12925, true);
 
 
 --
--- Name: usage_events_id_seq; Type: SEQUENCE SET; Schema: public; Owner: ipshield_user
+-- Name: threat_clusters_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.usage_events_id_seq', 1, false);
-
-
---
--- Name: users_id_seq; Type: SEQUENCE SET; Schema: public; Owner: ipshield_user
---
-
-SELECT pg_catalog.setval('public.users_id_seq', 5, true);
+SELECT pg_catalog.setval('public.threat_clusters_id_seq', 6, true);
 
 
 --
--- Name: api_keys api_keys_email_unique; Type: CONSTRAINT; Schema: public; Owner: ipshield_user
+-- Name: usage_events_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.usage_events_id_seq', 20, true);
+
+
+--
+-- Name: users_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.users_id_seq', 8, true);
+
+
+--
+-- Name: api_keys api_keys_email_unique; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.api_keys
@@ -13001,7 +14269,7 @@ ALTER TABLE ONLY public.api_keys
 
 
 --
--- Name: api_keys api_keys_invite_token_key; Type: CONSTRAINT; Schema: public; Owner: ipshield_user
+-- Name: api_keys api_keys_invite_token_key; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.api_keys
@@ -13009,7 +14277,7 @@ ALTER TABLE ONLY public.api_keys
 
 
 --
--- Name: api_keys api_keys_pkey; Type: CONSTRAINT; Schema: public; Owner: ipshield_user
+-- Name: api_keys api_keys_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.api_keys
@@ -13017,7 +14285,7 @@ ALTER TABLE ONLY public.api_keys
 
 
 --
--- Name: audit_log audit_log_pkey; Type: CONSTRAINT; Schema: public; Owner: ipshield_user
+-- Name: audit_log audit_log_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.audit_log
@@ -13025,7 +14293,7 @@ ALTER TABLE ONLY public.audit_log
 
 
 --
--- Name: blacklist blacklist_ip_key; Type: CONSTRAINT; Schema: public; Owner: ipshield_user
+-- Name: blacklist blacklist_ip_key; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.blacklist
@@ -13033,7 +14301,7 @@ ALTER TABLE ONLY public.blacklist
 
 
 --
--- Name: blacklist blacklist_pkey; Type: CONSTRAINT; Schema: public; Owner: ipshield_user
+-- Name: blacklist blacklist_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.blacklist
@@ -13041,7 +14309,7 @@ ALTER TABLE ONLY public.blacklist
 
 
 --
--- Name: case_accounts case_accounts_case_id_account_id_key; Type: CONSTRAINT; Schema: public; Owner: ipshield_user
+-- Name: case_accounts case_accounts_case_id_account_id_key; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.case_accounts
@@ -13049,7 +14317,7 @@ ALTER TABLE ONLY public.case_accounts
 
 
 --
--- Name: case_accounts case_accounts_pkey; Type: CONSTRAINT; Schema: public; Owner: ipshield_user
+-- Name: case_accounts case_accounts_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.case_accounts
@@ -13057,7 +14325,7 @@ ALTER TABLE ONLY public.case_accounts
 
 
 --
--- Name: case_ips case_ips_case_id_ip_key; Type: CONSTRAINT; Schema: public; Owner: ipshield_user
+-- Name: case_ips case_ips_case_id_ip_key; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.case_ips
@@ -13065,7 +14333,7 @@ ALTER TABLE ONLY public.case_ips
 
 
 --
--- Name: case_ips case_ips_pkey; Type: CONSTRAINT; Schema: public; Owner: ipshield_user
+-- Name: case_ips case_ips_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.case_ips
@@ -13073,7 +14341,7 @@ ALTER TABLE ONLY public.case_ips
 
 
 --
--- Name: case_notes case_notes_pkey; Type: CONSTRAINT; Schema: public; Owner: ipshield_user
+-- Name: case_notes case_notes_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.case_notes
@@ -13081,7 +14349,7 @@ ALTER TABLE ONLY public.case_notes
 
 
 --
--- Name: cases cases_pkey; Type: CONSTRAINT; Schema: public; Owner: ipshield_user
+-- Name: cases cases_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.cases
@@ -13089,7 +14357,7 @@ ALTER TABLE ONLY public.cases
 
 
 --
--- Name: cidr_blocks cidr_blocks_cidr_key; Type: CONSTRAINT; Schema: public; Owner: ipshield_user
+-- Name: cidr_blocks cidr_blocks_cidr_key; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.cidr_blocks
@@ -13097,7 +14365,7 @@ ALTER TABLE ONLY public.cidr_blocks
 
 
 --
--- Name: cidr_blocks cidr_blocks_pkey; Type: CONSTRAINT; Schema: public; Owner: ipshield_user
+-- Name: cidr_blocks cidr_blocks_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.cidr_blocks
@@ -13105,7 +14373,7 @@ ALTER TABLE ONLY public.cidr_blocks
 
 
 --
--- Name: key_usage_log key_usage_log_key_id_date_key; Type: CONSTRAINT; Schema: public; Owner: ipshield_user
+-- Name: key_usage_log key_usage_log_key_id_date_key; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.key_usage_log
@@ -13113,7 +14381,7 @@ ALTER TABLE ONLY public.key_usage_log
 
 
 --
--- Name: key_usage_log key_usage_log_pkey; Type: CONSTRAINT; Schema: public; Owner: ipshield_user
+-- Name: key_usage_log key_usage_log_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.key_usage_log
@@ -13121,7 +14389,7 @@ ALTER TABLE ONLY public.key_usage_log
 
 
 --
--- Name: scan_jobs scan_jobs_job_id_key; Type: CONSTRAINT; Schema: public; Owner: ipshield_user
+-- Name: scan_jobs scan_jobs_job_id_key; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.scan_jobs
@@ -13129,7 +14397,7 @@ ALTER TABLE ONLY public.scan_jobs
 
 
 --
--- Name: scan_jobs scan_jobs_pkey; Type: CONSTRAINT; Schema: public; Owner: ipshield_user
+-- Name: scan_jobs scan_jobs_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.scan_jobs
@@ -13137,7 +14405,7 @@ ALTER TABLE ONLY public.scan_jobs
 
 
 --
--- Name: scan_results scan_results_pkey; Type: CONSTRAINT; Schema: public; Owner: ipshield_user
+-- Name: scan_results scan_results_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.scan_results
@@ -13145,7 +14413,7 @@ ALTER TABLE ONLY public.scan_results
 
 
 --
--- Name: scans scans_pkey; Type: CONSTRAINT; Schema: public; Owner: ipshield_user
+-- Name: scans scans_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.scans
@@ -13153,7 +14421,7 @@ ALTER TABLE ONLY public.scans
 
 
 --
--- Name: score_cache score_cache_pkey; Type: CONSTRAINT; Schema: public; Owner: ipshield_user
+-- Name: score_cache score_cache_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.score_cache
@@ -13161,7 +14429,7 @@ ALTER TABLE ONLY public.score_cache
 
 
 --
--- Name: siem_targets siem_targets_name_key; Type: CONSTRAINT; Schema: public; Owner: ipshield_user
+-- Name: siem_targets siem_targets_name_key; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.siem_targets
@@ -13169,7 +14437,7 @@ ALTER TABLE ONLY public.siem_targets
 
 
 --
--- Name: siem_targets siem_targets_pkey; Type: CONSTRAINT; Schema: public; Owner: ipshield_user
+-- Name: siem_targets siem_targets_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.siem_targets
@@ -13177,7 +14445,7 @@ ALTER TABLE ONLY public.siem_targets
 
 
 --
--- Name: telemetry telemetry_pkey; Type: CONSTRAINT; Schema: public; Owner: ipshield_user
+-- Name: telemetry telemetry_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.telemetry
@@ -13185,7 +14453,7 @@ ALTER TABLE ONLY public.telemetry
 
 
 --
--- Name: telemetry_requests telemetry_requests_pkey; Type: CONSTRAINT; Schema: public; Owner: ipshield_user
+-- Name: telemetry_requests telemetry_requests_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.telemetry_requests
@@ -13193,7 +14461,7 @@ ALTER TABLE ONLY public.telemetry_requests
 
 
 --
--- Name: threat_clusters threat_clusters_pkey; Type: CONSTRAINT; Schema: public; Owner: ipshield_user
+-- Name: threat_clusters threat_clusters_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.threat_clusters
@@ -13201,7 +14469,7 @@ ALTER TABLE ONLY public.threat_clusters
 
 
 --
--- Name: api_keys unique_email; Type: CONSTRAINT; Schema: public; Owner: ipshield_user
+-- Name: api_keys unique_email; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.api_keys
@@ -13209,7 +14477,7 @@ ALTER TABLE ONLY public.api_keys
 
 
 --
--- Name: api_keys unique_key_hash; Type: CONSTRAINT; Schema: public; Owner: ipshield_user
+-- Name: api_keys unique_key_hash; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.api_keys
@@ -13217,7 +14485,7 @@ ALTER TABLE ONLY public.api_keys
 
 
 --
--- Name: usage_events usage_events_pkey; Type: CONSTRAINT; Schema: public; Owner: ipshield_user
+-- Name: usage_events usage_events_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.usage_events
@@ -13225,7 +14493,15 @@ ALTER TABLE ONLY public.usage_events
 
 
 --
--- Name: users users_email_key; Type: CONSTRAINT; Schema: public; Owner: ipshield_user
+-- Name: usage_events usage_events_user_feature_day_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.usage_events
+    ADD CONSTRAINT usage_events_user_feature_day_key UNIQUE (user_id, feature, day);
+
+
+--
+-- Name: users users_email_key; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.users
@@ -13233,7 +14509,7 @@ ALTER TABLE ONLY public.users
 
 
 --
--- Name: users users_pkey; Type: CONSTRAINT; Schema: public; Owner: ipshield_user
+-- Name: users users_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.users
@@ -13241,7 +14517,7 @@ ALTER TABLE ONLY public.users
 
 
 --
--- Name: watchlist watchlist_pkey; Type: CONSTRAINT; Schema: public; Owner: ipshield_user
+-- Name: watchlist watchlist_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.watchlist
@@ -13249,301 +14525,308 @@ ALTER TABLE ONLY public.watchlist
 
 
 --
--- Name: api_keys_user_id_idx; Type: INDEX; Schema: public; Owner: ipshield_user
+-- Name: api_keys_user_id_idx; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX api_keys_user_id_idx ON public.api_keys USING btree (user_id);
 
 
 --
--- Name: idx_api_keys_email; Type: INDEX; Schema: public; Owner: ipshield_user
+-- Name: idx_api_keys_email; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX idx_api_keys_email ON public.api_keys USING btree (email);
 
 
 --
--- Name: idx_api_keys_invite_token; Type: INDEX; Schema: public; Owner: ipshield_user
+-- Name: idx_api_keys_invite_token; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX idx_api_keys_invite_token ON public.api_keys USING btree (invite_token);
 
 
 --
--- Name: idx_api_keys_status; Type: INDEX; Schema: public; Owner: ipshield_user
+-- Name: idx_api_keys_status; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX idx_api_keys_status ON public.api_keys USING btree (status);
 
 
 --
--- Name: idx_audit_ip; Type: INDEX; Schema: public; Owner: ipshield_user
+-- Name: idx_audit_ip; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX idx_audit_ip ON public.audit_log USING btree (ip);
 
 
 --
--- Name: idx_audit_log_confidence; Type: INDEX; Schema: public; Owner: ipshield_user
+-- Name: idx_audit_log_confidence; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX idx_audit_log_confidence ON public.audit_log USING btree (confidence);
 
 
 --
--- Name: idx_audit_log_id_desc; Type: INDEX; Schema: public; Owner: ipshield_user
+-- Name: idx_audit_log_id_desc; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX idx_audit_log_id_desc ON public.audit_log USING btree (id DESC);
 
 
 --
--- Name: idx_audit_log_risk_level; Type: INDEX; Schema: public; Owner: ipshield_user
+-- Name: idx_audit_log_risk_level; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX idx_audit_log_risk_level ON public.audit_log USING btree (risk_level);
 
 
 --
--- Name: idx_audit_log_score; Type: INDEX; Schema: public; Owner: ipshield_user
+-- Name: idx_audit_log_score; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX idx_audit_log_score ON public.audit_log USING btree (score);
 
 
 --
--- Name: idx_audit_risk; Type: INDEX; Schema: public; Owner: ipshield_user
+-- Name: idx_audit_risk; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX idx_audit_risk ON public.audit_log USING btree (risk_level);
 
 
 --
--- Name: idx_audit_scored_at; Type: INDEX; Schema: public; Owner: ipshield_user
+-- Name: idx_audit_scored_at; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX idx_audit_scored_at ON public.audit_log USING btree (scored_at DESC);
 
 
 --
--- Name: idx_blacklist_expires_at; Type: INDEX; Schema: public; Owner: ipshield_user
+-- Name: idx_blacklist_expires_at; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX idx_blacklist_expires_at ON public.blacklist USING btree (expires_at);
 
 
 --
--- Name: idx_blacklist_ip; Type: INDEX; Schema: public; Owner: ipshield_user
+-- Name: idx_blacklist_ip; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX idx_blacklist_ip ON public.blacklist USING btree (ip);
 
 
 --
--- Name: idx_blacklist_severity; Type: INDEX; Schema: public; Owner: ipshield_user
+-- Name: idx_blacklist_severity; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX idx_blacklist_severity ON public.blacklist USING btree (severity);
 
 
 --
--- Name: idx_case_accounts_case_id; Type: INDEX; Schema: public; Owner: ipshield_user
+-- Name: idx_case_accounts_case_id; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX idx_case_accounts_case_id ON public.case_accounts USING btree (case_id);
 
 
 --
--- Name: idx_case_ips_case_id; Type: INDEX; Schema: public; Owner: ipshield_user
+-- Name: idx_case_ips_case_id; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX idx_case_ips_case_id ON public.case_ips USING btree (case_id);
 
 
 --
--- Name: idx_case_notes_case_id; Type: INDEX; Schema: public; Owner: ipshield_user
+-- Name: idx_case_notes_case_id; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX idx_case_notes_case_id ON public.case_notes USING btree (case_id);
 
 
 --
--- Name: idx_cases_severity; Type: INDEX; Schema: public; Owner: ipshield_user
+-- Name: idx_cases_severity; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX idx_cases_severity ON public.cases USING btree (severity);
 
 
 --
--- Name: idx_cases_status; Type: INDEX; Schema: public; Owner: ipshield_user
+-- Name: idx_cases_status; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX idx_cases_status ON public.cases USING btree (status);
 
 
 --
--- Name: idx_cidr_blocks_asn; Type: INDEX; Schema: public; Owner: ipshield_user
+-- Name: idx_cidr_blocks_asn; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX idx_cidr_blocks_asn ON public.cidr_blocks USING btree (asn);
 
 
 --
--- Name: idx_cidr_blocks_cidr; Type: INDEX; Schema: public; Owner: ipshield_user
+-- Name: idx_cidr_blocks_cidr; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX idx_cidr_blocks_cidr ON public.cidr_blocks USING gist (cidr inet_ops);
 
 
 --
--- Name: idx_cidr_blocks_expires_at; Type: INDEX; Schema: public; Owner: ipshield_user
+-- Name: idx_cidr_blocks_expires_at; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX idx_cidr_blocks_expires_at ON public.cidr_blocks USING btree (expires_at);
 
 
 --
--- Name: idx_key_usage_log_date; Type: INDEX; Schema: public; Owner: ipshield_user
+-- Name: idx_key_usage_log_date; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX idx_key_usage_log_date ON public.key_usage_log USING btree (date DESC);
 
 
 --
--- Name: idx_key_usage_log_key_id; Type: INDEX; Schema: public; Owner: ipshield_user
+-- Name: idx_key_usage_log_key_id; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX idx_key_usage_log_key_id ON public.key_usage_log USING btree (key_id);
 
 
 --
--- Name: idx_scan_jobs_ip; Type: INDEX; Schema: public; Owner: ipshield_user
+-- Name: idx_scan_jobs_ip; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX idx_scan_jobs_ip ON public.scan_jobs USING btree (ip);
 
 
 --
--- Name: idx_scan_jobs_status; Type: INDEX; Schema: public; Owner: ipshield_user
+-- Name: idx_scan_jobs_status; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX idx_scan_jobs_status ON public.scan_jobs USING btree (status);
 
 
 --
--- Name: idx_scan_results_ip; Type: INDEX; Schema: public; Owner: ipshield_user
+-- Name: idx_scan_results_ip; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX idx_scan_results_ip ON public.scan_results USING btree (ip);
 
 
 --
--- Name: idx_scan_results_job; Type: INDEX; Schema: public; Owner: ipshield_user
+-- Name: idx_scan_results_job; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX idx_scan_results_job ON public.scan_results USING btree (job_id);
 
 
 --
--- Name: idx_scan_results_job_id; Type: INDEX; Schema: public; Owner: ipshield_user
+-- Name: idx_scan_results_job_id; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX idx_scan_results_job_id ON public.scan_results USING btree (job_id);
 
 
 --
--- Name: idx_score_cache_expires_at; Type: INDEX; Schema: public; Owner: ipshield_user
+-- Name: idx_score_cache_expires_at; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX idx_score_cache_expires_at ON public.score_cache USING btree (expires_at);
 
 
 --
--- Name: idx_tel_key; Type: INDEX; Schema: public; Owner: ipshield_user
+-- Name: idx_tel_key; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX idx_tel_key ON public.telemetry_requests USING btree (api_key);
 
 
 --
--- Name: idx_tel_route; Type: INDEX; Schema: public; Owner: ipshield_user
+-- Name: idx_tel_route; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX idx_tel_route ON public.telemetry_requests USING btree (route);
 
 
 --
--- Name: idx_tel_ts; Type: INDEX; Schema: public; Owner: ipshield_user
+-- Name: idx_tel_ts; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX idx_tel_ts ON public.telemetry_requests USING btree (ts);
 
 
 --
--- Name: idx_telemetry_api_key_id; Type: INDEX; Schema: public; Owner: ipshield_user
+-- Name: idx_telemetry_api_key_id; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX idx_telemetry_api_key_id ON public.telemetry USING btree (api_key_id);
 
 
 --
--- Name: idx_telemetry_recorded_at; Type: INDEX; Schema: public; Owner: ipshield_user
+-- Name: idx_telemetry_recorded_at; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX idx_telemetry_recorded_at ON public.telemetry USING btree (recorded_at DESC);
 
 
 --
--- Name: idx_telemetry_route; Type: INDEX; Schema: public; Owner: ipshield_user
+-- Name: idx_telemetry_route; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX idx_telemetry_route ON public.telemetry USING btree (route);
 
 
 --
--- Name: idx_threat_clusters_key; Type: INDEX; Schema: public; Owner: ipshield_user
+-- Name: idx_threat_clusters_key; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE UNIQUE INDEX idx_threat_clusters_key ON public.threat_clusters USING btree (cluster_key) WHERE (resolved = false);
 
 
 --
--- Name: idx_threat_clusters_last_seen; Type: INDEX; Schema: public; Owner: ipshield_user
+-- Name: idx_threat_clusters_last_seen; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX idx_threat_clusters_last_seen ON public.threat_clusters USING btree (last_seen DESC);
 
 
 --
--- Name: usage_events_key_feature_day_idx; Type: INDEX; Schema: public; Owner: ipshield_user
+-- Name: usage_events_key_feature_day_idx; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE UNIQUE INDEX usage_events_key_feature_day_idx ON public.usage_events USING btree (api_key_id, feature, day) WHERE (api_key_id IS NOT NULL);
 
 
 --
--- Name: usage_events_user_feature_day_idx; Type: INDEX; Schema: public; Owner: ipshield_user
+-- Name: usage_events_unique; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX usage_events_unique ON public.usage_events USING btree (user_id, feature, day);
+
+
+--
+-- Name: usage_events_user_feature_day_idx; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE UNIQUE INDEX usage_events_user_feature_day_idx ON public.usage_events USING btree (user_id, feature, day) WHERE (user_id IS NOT NULL);
 
 
 --
--- Name: users_stripe_customer_id_idx; Type: INDEX; Schema: public; Owner: ipshield_user
+-- Name: users_stripe_customer_id_idx; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE UNIQUE INDEX users_stripe_customer_id_idx ON public.users USING btree (stripe_customer_id) WHERE (stripe_customer_id IS NOT NULL);
 
 
 --
--- Name: users_stripe_subscription_id_idx; Type: INDEX; Schema: public; Owner: ipshield_user
+-- Name: users_stripe_subscription_id_idx; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE UNIQUE INDEX users_stripe_subscription_id_idx ON public.users USING btree (stripe_subscription_id) WHERE (stripe_subscription_id IS NOT NULL);
 
 
 --
--- Name: audit_log audit_log_no_delete; Type: RULE; Schema: public; Owner: ipshield_user
+-- Name: audit_log audit_log_no_delete; Type: RULE; Schema: public; Owner: -
 --
 
 CREATE RULE audit_log_no_delete AS
@@ -13551,7 +14834,7 @@ CREATE RULE audit_log_no_delete AS
 
 
 --
--- Name: audit_log audit_log_no_update; Type: RULE; Schema: public; Owner: ipshield_user
+-- Name: audit_log audit_log_no_update; Type: RULE; Schema: public; Owner: -
 --
 
 CREATE RULE audit_log_no_update AS
@@ -13559,14 +14842,14 @@ CREATE RULE audit_log_no_update AS
 
 
 --
--- Name: cases trg_cases_updated_at; Type: TRIGGER; Schema: public; Owner: ipshield_user
+-- Name: cases trg_cases_updated_at; Type: TRIGGER; Schema: public; Owner: -
 --
 
 CREATE TRIGGER trg_cases_updated_at BEFORE UPDATE ON public.cases FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
 
 
 --
--- Name: api_keys api_keys_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: ipshield_user
+-- Name: api_keys api_keys_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.api_keys
@@ -13574,7 +14857,7 @@ ALTER TABLE ONLY public.api_keys
 
 
 --
--- Name: case_accounts case_accounts_case_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: ipshield_user
+-- Name: case_accounts case_accounts_case_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.case_accounts
@@ -13582,7 +14865,7 @@ ALTER TABLE ONLY public.case_accounts
 
 
 --
--- Name: case_ips case_ips_case_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: ipshield_user
+-- Name: case_ips case_ips_case_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.case_ips
@@ -13590,7 +14873,7 @@ ALTER TABLE ONLY public.case_ips
 
 
 --
--- Name: case_notes case_notes_case_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: ipshield_user
+-- Name: case_notes case_notes_case_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.case_notes
@@ -13598,7 +14881,7 @@ ALTER TABLE ONLY public.case_notes
 
 
 --
--- Name: key_usage_log key_usage_log_key_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: ipshield_user
+-- Name: key_usage_log key_usage_log_key_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.key_usage_log
@@ -13606,7 +14889,7 @@ ALTER TABLE ONLY public.key_usage_log
 
 
 --
--- Name: scan_results scan_results_job_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: ipshield_user
+-- Name: scan_results scan_results_job_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.scan_results
@@ -13614,7 +14897,7 @@ ALTER TABLE ONLY public.scan_results
 
 
 --
--- Name: telemetry telemetry_api_key_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: ipshield_user
+-- Name: telemetry telemetry_api_key_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.telemetry
@@ -13622,7 +14905,7 @@ ALTER TABLE ONLY public.telemetry
 
 
 --
--- Name: usage_events usage_events_api_key_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: ipshield_user
+-- Name: usage_events usage_events_api_key_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.usage_events
@@ -13630,7 +14913,7 @@ ALTER TABLE ONLY public.usage_events
 
 
 --
--- Name: usage_events usage_events_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: ipshield_user
+-- Name: usage_events usage_events_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.usage_events
@@ -13638,36 +14921,8 @@ ALTER TABLE ONLY public.usage_events
 
 
 --
--- Name: DEFAULT PRIVILEGES FOR SEQUENCES; Type: DEFAULT ACL; Schema: -; Owner: postgres
---
-
-ALTER DEFAULT PRIVILEGES FOR ROLE postgres GRANT ALL ON SEQUENCES TO ipshield_user;
-
-
---
--- Name: DEFAULT PRIVILEGES FOR TYPES; Type: DEFAULT ACL; Schema: -; Owner: postgres
---
-
-ALTER DEFAULT PRIVILEGES FOR ROLE postgres GRANT ALL ON TYPES TO ipshield_user;
-
-
---
--- Name: DEFAULT PRIVILEGES FOR FUNCTIONS; Type: DEFAULT ACL; Schema: -; Owner: postgres
---
-
-ALTER DEFAULT PRIVILEGES FOR ROLE postgres GRANT ALL ON FUNCTIONS TO ipshield_user;
-
-
---
--- Name: DEFAULT PRIVILEGES FOR TABLES; Type: DEFAULT ACL; Schema: -; Owner: postgres
---
-
-ALTER DEFAULT PRIVILEGES FOR ROLE postgres GRANT ALL ON TABLES TO ipshield_user;
-
-
---
 -- PostgreSQL database dump complete
 --
 
-\unrestrict XRZWTdD9a8Q8ruZRerhHof9sho1v9DRbjkS3JNOLn4jn9aJxMPjnNe3XGvkk01d
+\unrestrict f2Rehbilf0Acs35jjQfuwio2Nh5arpBNtki7dsiRtVIbc9UfC4qNfK48WRyFI73
 

@@ -35,7 +35,7 @@
   --bg:         #121212;
   --bg1:        #171717;
   --bg2:        #1a1a1a;
-  --bg3:        #1b1b1b;
+  --bg3:        #171717;
   --border:  #212121;
   --text:    #c9d8e8;
   --text2:   #aeb4b8;
@@ -66,27 +66,57 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 16px;
-  transition: border-color .2s, background .2s, transform .15s;
-  flex-shrink: 0;
   position: relative;
   overflow: hidden;
+  transition: border-color .2s, background .2s, transform .15s;
 }
+
 .theme-toggle:hover {
   border-color: var(--accent);
   transform: rotate(15deg);
 }
+
+/* Shared icon styles */
 .theme-toggle .icon-sun,
 .theme-toggle .icon-moon {
   position: absolute;
-  transition: opacity .25s, transform .25s;
+  font-size: 1rem;
   line-height: 1;
+  transition: opacity .25s ease, transform .25s ease;
 }
-[data-theme="dark"]  .icon-sun  { opacity: 1; transform: scale(1); }
-[data-theme="dark"]  .icon-moon { opacity: 0; transform: scale(0.5); }
-[data-theme="light"] .icon-sun  { opacity: 0; transform: scale(0.5); }
-[data-theme="light"] .icon-moon { opacity: 1; transform: scale(1); }
- 
+
+/* Natural icon colors */
+.theme-toggle .icon-sun {
+  color: #fbbf24; 
+}
+
+.theme-toggle .icon-moon {
+  color: #fbbf24;
+}
+
+/* Dark theme: show sun */
+[data-theme="dark"] .theme-toggle .icon-sun {
+  opacity: 1;
+  transform: scale(1);
+}
+
+[data-theme="dark"] .theme-toggle .icon-moon {
+  opacity: 0;
+  transform: scale(.5) rotate(-90deg);
+}
+
+/* Light theme: show moon */
+[data-theme="light"] .theme-toggle .icon-sun {
+  opacity: 0;
+  transform: scale(.5) rotate(90deg);
+}
+
+[data-theme="light"] .theme-toggle .icon-moon {
+  opacity: 1;
+  transform: scale(1);
+}
+
+
 /*  Base reset */
 *  { box-sizing: border-box; margin: 0; padding: 0; }
 body {
@@ -381,7 +411,45 @@ footer a:hover { color: var(--accent); }
   padding: 72px 24px;
   transition: background .3s;
 }
-.platform-inner { max-width: 1060px; margin: 0 auto; }
+.platform-inner { max-width: 1180px; margin: 0 auto; }
+
+/* Bento grid layout */
+.bento-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 20px;
+}
+.bento-card {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 16px; padding: 30px;
+  transition: border-color .2s, transform .2s, background .3s;
+  display: flex; flex-direction: column; gap: 8px;
+}
+.bento-card:hover { border-color: rgba(0,217,255,0.3); transform: translateY(-4px); }
+.bento-card.span-7 { grid-column: span 7; }
+.bento-card.span-5 { grid-column: span 5; }
+.bento-card.wide-layout { flex-direction: column; align-items: normal; }
+.bento-card.wide-layout .bento-text { flex: 0 0 44%; }
+.bento-card.wide-layout .bento-visual { flex: 1; min-width: 0; }
+.bento-eyebrow { font-size: 11px; color: var(--accent); letter-spacing: 3px; text-transform: uppercase; margin-bottom: 12px; }
+.bento-heading { font-family: 'Syne', sans-serif; font-size: clamp(17px,2.4vw,21px); font-weight: 800; margin-bottom: 12px; line-height: 1.3; color: var(--text); }
+.bento-body { font-size: 12.5px; color: var(--text2); line-height: 1.85; margin-bottom: 16px; }
+.bento-checklist { display: flex; flex-direction: column; gap: 9px; }
+.bento-check-item { display: flex; align-items: center; gap: 10px; font-size: 11.5px; color: var(--text2); }
+.bento-check-icon { color: var(--low); font-size: 13px; flex-shrink: 0; }
+
+@media (max-width: 1000px) {
+  .bento-card.wide-layout { flex-direction: column; align-items: stretch; }
+  .bento-card.wide-layout .bento-text { flex: none; }
+}
+@media (max-width: 900px) {
+  .bento-card.span-7, .bento-card.span-5 { grid-column: span 12; }
+}
+@media (max-width: 480px) {
+  .bento-card { padding: 20px; }
+}
+
+/* legacy platform-row styles retained for mock panel internals */
 .platform-row { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center; margin-bottom: 80px; }
 .platform-row:last-child { margin-bottom: 0; }
 .platform-row-reverse { direction: rtl; }
@@ -395,10 +463,11 @@ footer a:hover { color: var(--accent); }
  
 /* Mock panels */
 .platform-mock {
-  background: var(--bg2); border: 1px solid var(--border);
+  background: var(--bg1); border: 1px solid var(--border);
   border-radius: 12px; padding: 20px;
   position: relative; overflow: hidden;
   transition: background .3s, border-color .3s;
+  width: 100%;
 }
 .platform-mock::after {
   content: ''; position: absolute; left: 0; right: 0; height: 1px;
@@ -710,8 +779,6 @@ footer a:hover { color: var(--accent); }
   .nav-right { display: none; }
   .nav-hamburger { display: flex; }
   header { padding: 14px 16px; }
-  .platform-row { grid-template-columns: 1fr; gap: 28px; margin-bottom: 56px; }
-  .platform-row-reverse { direction: ltr; }
   .platform-section { padding: 52px 20px; }
 }
 @media(max-width:600px) {
@@ -737,7 +804,7 @@ footer a:hover { color: var(--accent); }
 }
 @media(max-width:480px) {
   .platform-section { padding: 40px 16px; }
-  .platform-row { margin-bottom: 40px; gap: 20px; }
+  .bento-grid { gap: 14px; }
   .platform-mock { padding: 14px; }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -768,14 +835,15 @@ footer a:hover { color: var(--accent); }
     <button onclick="showAccessModal('pilot')" class="btn btn-ghost">Request Access</button>
     <a href="/login" class="btn btn-primary">Sign In →</a>
      <button class="theme-toggle" id="themeToggleDesktop" aria-label="Toggle light/dark mode" title="Toggle theme">
-      <span class="icon-sun">☀️</span>
-      <span class="icon-moon">🌙</span>
+      <i class="fa-solid fa-sun icon-sun"></i>
+      <i class="fa-solid fa-moon icon-moon"></i>
     </button>
   </nav>
     <!-- Theme toggle — mobile (shown next to hamburger) -->
     <button class="theme-toggle" id="themeToggleMobile" aria-label="Toggle light/dark mode" title="Toggle theme" style="display:none;">
-      <span class="icon-sun">☀️</span>
-      <span class="icon-moon">🌙</span>
+   
+      <i class="fa-solid fa-sun icon-sun"></i>
+      <i class="fa-solid fa-moon icon-moon"></i>
     </button>
     
     <button class="nav-hamburger" id="mainHamburger" aria-label="Open menu" aria-expanded="false">
@@ -875,108 +943,112 @@ footer a:hover { color: var(--accent); }
   <div class="platform-inner">
     <div class="section-title" style="margin-bottom:48px;">Built for security teams, not just lookups</div>
 
-    <!-- Watchlist -->
-    <div class="platform-row">
-      <div class="platform-text">
-        <div class="platform-eyebrow">Continuous Monitoring</div>
-        <div class="platform-heading">Watch IPs & get alerted when risk changes</div>
-        <div class="platform-body">Watch any IP.IPShield continuously re-scores it and alerts you when risk crosses your defined threshold, before it turns into an incident.</div>
-        <div class="checklist">
-          <div class="check-item"><span class="check-icon">✓</span>Set per-IP alert thresholds (0–100)</div>
-          <div class="check-item"><span class="check-icon">✓</span>Automatic re-score polling on a schedule</div>
-          <div class="check-item"><span class="check-icon">✓</span>Instant alerts via SIEM or webhook on risk change</div>
-          <div class="check-item"><span class="check-icon">✓</span>Score trend bar for each watched IP</div>
-        </div>
-      </div>
-      <div class="platform-mock">
-        <div class="mock-label">WATCHLIST</div>
-        <div class="mock-watch-row"><div class="mock-watch-info"><div class="mock-ip">185.220.101.1</div><div class="mock-bar-bg"><div class="mock-bar" data-width="94%" style="background:var(--critical);"></div></div></div><div class="mock-watch-score"><div class="mock-score" style="color:var(--critical);">94</div><div class="mock-risk" style="color:var(--critical);">CRITICAL</div></div></div>
-        <div class="mock-watch-row"><div class="mock-watch-info"><div class="mock-ip">45.33.32.156</div><div class="mock-bar-bg"><div class="mock-bar" data-width="71%" style="background:var(--high);"></div></div></div><div class="mock-watch-score"><div class="mock-score" style="color:var(--high);">71</div><div class="mock-risk" style="color:var(--high);">HIGH</div></div></div>
-        <div class="mock-watch-row"><div class="mock-watch-info"><div class="mock-ip">198.20.69.98</div><div class="mock-bar-bg"><div class="mock-bar" data-width="42%" style="background:var(--medium);"></div></div></div><div class="mock-watch-score"><div class="mock-score" style="color:var(--medium);">42</div><div class="mock-risk" style="color:var(--medium);">MEDIUM</div></div></div>
-        <div class="mock-watch-row" style="border-bottom:none;"><div class="mock-watch-info"><div class="mock-ip">8.8.8.8</div><div class="mock-bar-bg"><div class="mock-bar" data-width="3%" style="background:var(--low);"></div></div></div><div class="mock-watch-score"><div class="mock-score" style="color:var(--low);">3</div><div class="mock-risk" style="color:var(--low);">LOW</div></div></div>
-      </div>
-    </div>
+    <div class="bento-grid">
 
-    <!-- Audit -->
-    <div class="platform-row platform-row-reverse">
-      <div class="platform-text">
-        <div class="platform-eyebrow">Complete Audit Trail</div>
-        <div class="platform-heading">Every score. Every flag. Every timestamp.</div>
-        <div class="platform-body">IPShield logs every scored IP to a persistent database with an immutable hash chain.</div>
-        <div class="checklist">
-          <div class="check-item"><span class="check-icon">✓</span>Persistent PostgreSQL-backed audit history</div>
-          <div class="check-item"><span class="check-icon">✓</span>Filter by risk, score range, proxy, Tor, datacenter</div>
-          <div class="check-item"><span class="check-icon">✓</span>Search by IP, country or ISP</div>
-          <div class="check-item"><span class="check-icon">✓</span>Threat feed indicators (Feodo, Spamhaus, ET, OTX)</div>
+      <!-- Watchlist — wide -->
+      <div class="bento-card span-7 wide-layout">
+        <div class="bento-text">
+          <div class="bento-eyebrow">Continuous Monitoring</div>
+          <div class="bento-heading">Watch IPs & get alerted when risk changes</div>
+          <div class="bento-body">Watch any IP. IPShield continuously re-scores it and alerts you when risk crosses your defined threshold, before it turns into an incident.</div>
+          <div class="bento-checklist">
+            <div class="bento-check-item"><span class="bento-check-icon">✓</span>Set per-IP alert thresholds (0–100)</div>
+            <div class="bento-check-item"><span class="bento-check-icon">✓</span>Automatic re-score polling on a schedule</div>
+            <div class="bento-check-item"><span class="bento-check-icon">✓</span>Instant alerts via SIEM or webhook</div>
+          </div>
+        </div>
+        <div class="bento-visual">
+          <div class="platform-mock">
+            <div class="mock-label">WATCHLIST</div>
+            <div class="mock-watch-row"><div class="mock-watch-info"><div class="mock-ip">185.220.101.1</div><div class="mock-bar-bg"><div class="mock-bar" data-width="94%" style="background:var(--critical);"></div></div></div><div class="mock-watch-score"><div class="mock-score" style="color:var(--critical);">94</div><div class="mock-risk" style="color:var(--critical);">CRITICAL</div></div></div>
+            <div class="mock-watch-row"><div class="mock-watch-info"><div class="mock-ip">45.33.32.156</div><div class="mock-bar-bg"><div class="mock-bar" data-width="71%" style="background:var(--high);"></div></div></div><div class="mock-watch-score"><div class="mock-score" style="color:var(--high);">71</div><div class="mock-risk" style="color:var(--high);">HIGH</div></div></div>
+            <div class="mock-watch-row"><div class="mock-watch-info"><div class="mock-ip">198.20.69.98</div><div class="mock-bar-bg"><div class="mock-bar" data-width="42%" style="background:var(--medium);"></div></div></div><div class="mock-watch-score"><div class="mock-score" style="color:var(--medium);">42</div><div class="mock-risk" style="color:var(--medium);">MEDIUM</div></div></div>
+            <div class="mock-watch-row" style="border-bottom:none;"><div class="mock-watch-info"><div class="mock-ip">8.8.8.8</div><div class="mock-bar-bg"><div class="mock-bar" data-width="3%" style="background:var(--low);"></div></div></div><div class="mock-watch-score"><div class="mock-score" style="color:var(--low);">3</div><div class="mock-risk" style="color:var(--low);">LOW</div></div></div>
+          </div>
         </div>
       </div>
-      <div class="platform-mock">
-        <div class="mock-label">AUDIT LOG</div>
-        <div class="mock-chips"><span class="mock-chip mock-chip-active">ALL</span><span class="mock-chip">CRITICAL</span><span class="mock-chip">HIGH</span><span class="mock-chip">MEDIUM</span><span class="mock-chip">LOW</span></div>
-        <div class="mock-audit-row"><span class="mock-ip" style="flex:1;">91.108.56.181</span><span class="mock-flag">[F·S]</span><span class="mock-badge" style="background:rgba(255,51,85,0.15);color:var(--critical);">CRITICAL</span><span class="mock-score" style="color:var(--critical);">97</span></div>
-        <div class="mock-audit-row"><span class="mock-ip" style="flex:1;">185.220.101.34</span><span class="mock-flag">[F]</span><span class="mock-badge" style="background:rgba(255,51,85,0.15);color:var(--critical);">CRITICAL</span><span class="mock-score" style="color:var(--critical);">91</span></div>
-        <div class="mock-audit-row"><span class="mock-ip" style="flex:1;">45.33.32.156</span><span class="mock-badge" style="background:rgba(255,119,0,0.15);color:var(--high);">HIGH</span><span class="mock-score" style="color:var(--high);">71</span></div>
-        <div class="mock-audit-row"><span class="mock-ip" style="flex:1;">198.20.69.98</span><span class="mock-badge" style="background:rgba(255,204,0,0.12);color:var(--medium);">MEDIUM</span><span class="mock-score" style="color:var(--medium);">42</span></div>
-        <div class="mock-audit-row" style="border-bottom:none;"><span class="mock-ip" style="flex:1;">1.1.1.1</span><span class="mock-badge" style="background:rgba(0,232,124,0.12);color:var(--low);">LOW</span><span class="mock-score" style="color:var(--low);">2</span></div>
-      </div>
-    </div>
 
-    <!-- Active Scanning -->
-    <div class="platform-row">
-      <div class="platform-text">
-        <div class="platform-eyebrow">Active Reconnaissance</div>
-        <div class="platform-heading">Go beyond passive intel, scan on demand</div>
-        <div class="platform-body">When passive scoring isn't enough, launch an active scan directly from any result. IPShield runs nmap and nuclei in parallel, fingerprinting open services and matching them against known CVEs.</div>
-        <div class="checklist">
-          <div class="check-item"><span class="check-icon">✓</span>nmap port scan with service &amp; version detection</div>
-          <div class="check-item"><span class="check-icon">✓</span>Automatic CVE matching via vulners NSE</div>
-          <div class="check-item"><span class="check-icon">✓</span>nuclei templates for misconfig, SSL/TLS, exposures</div>
-          <div class="check-item"><span class="check-icon">✓</span>Consent-gated private IP ranges, blocked by default</div>
+      <!-- Audit — narrow -->
+      <div class="bento-card span-5">
+        <div class="bento-text">
+          <div class="bento-eyebrow">Complete Audit Trail</div>
+          <div class="bento-heading">Every score. Every flag. Every timestamp.</div>
+          <div class="bento-body">Logs every scored IP to a persistent database with an immutable hash chain.</div>
+          <div class="bento-checklist">
+            <div class="bento-check-item"><span class="bento-check-icon">✓</span>Persistent PostgreSQL-backed history</div>
+            <div class="bento-check-item"><span class="bento-check-icon">✓</span>Filter by risk, proxy, Tor, datacenter</div>
+            <div class="bento-check-item"><span class="bento-check-icon">✓</span>Feodo, Spamhaus, ET, OTX indicators</div>
+          </div>
+        </div>
+        <div class="bento-visual">
+          <div class="platform-mock">
+            <div class="mock-label">AUDIT LOG</div>
+            <div class="mock-chips"><span class="mock-chip mock-chip-active">ALL</span><span class="mock-chip">CRITICAL</span><span class="mock-chip">HIGH</span><span class="mock-chip">MEDIUM</span><span class="mock-chip">LOW</span></div>
+            <div class="mock-audit-row"><span class="mock-ip" style="flex:1;">91.108.56.181</span><span class="mock-flag">[F·S]</span><span class="mock-badge" style="background:rgba(255,51,85,0.15);color:var(--critical);">CRITICAL</span><span class="mock-score" style="color:var(--critical);">97</span></div>
+            <div class="mock-audit-row"><span class="mock-ip" style="flex:1;">185.220.101.34</span><span class="mock-flag">[F]</span><span class="mock-badge" style="background:rgba(255,51,85,0.15);color:var(--critical);">CRITICAL</span><span class="mock-score" style="color:var(--critical);">91</span></div>
+            <div class="mock-audit-row"><span class="mock-ip" style="flex:1;">45.33.32.156</span><span class="mock-badge" style="background:rgba(255,119,0,0.15);color:var(--high);">HIGH</span><span class="mock-score" style="color:var(--high);">71</span></div>
+            <div class="mock-audit-row" style="border-bottom:none;"><span class="mock-ip" style="flex:1;">1.1.1.1</span><span class="mock-badge" style="background:rgba(0,232,124,0.12);color:var(--low);">LOW</span><span class="mock-score" style="color:var(--low);">2</span></div>
+          </div>
         </div>
       </div>
-      <div class="platform-mock">
-        <div class="mock-label">ACTIVE SCAN — 45.33.32.156</div>
-        <span class="mock-consent-tag">⚠ CONSENT REQUIRED</span>
-        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;">
-          <span class="mock-scan-port">22 ssh</span>
-          <span class="mock-scan-port">80 http</span>
-          <span class="mock-scan-port">443 https</span>
-          <span class="mock-scan-port">3306 mysql</span>
-        </div>
-        <div class="mock-scan-finding"><span class="mock-scan-sev" style="color:var(--critical);">CRITICAL</span><span style="flex:1;font-family:monospace;color:var(--accent);">CVE-2024-3094</span><span style="color:var(--text2);">9.8</span></div>
-        <div class="mock-scan-finding"><span class="mock-scan-sev" style="color:var(--high);">HIGH</span><span style="flex:1;color:var(--text);">Outdated TLS 1.0 enabled</span></div>
-        <div class="mock-scan-finding"><span class="mock-scan-sev" style="color:var(--medium);">MEDIUM</span><span style="flex:1;color:var(--text);">Default MySQL credentials exposed</span></div>
-        <div class="mock-scan-finding" style="border-bottom:none;"><span class="mock-scan-sev" style="color:var(--low);">INFO</span><span style="flex:1;color:var(--text);">nginx/1.18.0 banner disclosed</span></div>
-      </div>
-    </div>
 
-    <!-- Telemetry -->
-    <div class="platform-row platform-row-reverse">
-      <div class="platform-text">
-        <div class="platform-eyebrow">API Observability</div>
-        <div class="platform-heading">Live telemetry. Zero extra tooling.</div>
-        <div class="platform-body">A built-in observability dashboard shows request volume, error rates, top endpoints, all in real time.</div>
-        <div class="checklist">
-          <div class="check-item"><span class="check-icon">✓</span>Real-time request and error rate counters</div>
-          <div class="check-item"><span class="check-icon">✓</span>P50 / P95 / P99 latency per endpoint</div>
-          <div class="check-item"><span class="check-icon">✓</span>Top API consumers by request volume</div>
-          <div class="check-item"><span class="check-icon">✓</span>Hourly traffic sparkline (last 24h)</div>
-          <div class="check-item"><span class="check-icon">✓</span>Live request log with method, status and latency</div>
+      <!-- Active Scanning — narrow -->
+      <div class="bento-card span-5">
+        <div class="bento-text">
+          <div class="bento-eyebrow">Active Reconnaissance</div>
+          <div class="bento-heading">Go beyond passive intel, scan on demand</div>
+          <div class="bento-body">Launch an active scan from any result. IPShield runs nmap and nuclei in parallel, matching services against known CVEs.</div>
+          <div class="bento-checklist">
+            <div class="bento-check-item"><span class="bento-check-icon">✓</span>nmap port scan with version detection</div>
+            <div class="bento-check-item"><span class="bento-check-icon">✓</span>Automatic CVE matching via vulners NSE</div>
+            <div class="bento-check-item"><span class="bento-check-icon">✓</span>Consent-gated private ranges</div>
+          </div>
+        </div>
+        <div class="bento-visual">
+          <div class="platform-mock">
+            <div class="mock-label">ACTIVE SCAN — 45.33.32.156</div>
+            <span class="mock-consent-tag">⚠ CONSENT REQUIRED</span>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;">
+              <span class="mock-scan-port">22 ssh</span>
+              <span class="mock-scan-port">80 http</span>
+              <span class="mock-scan-port">443 https</span>
+              <span class="mock-scan-port">3306 mysql</span>
+            </div>
+            <div class="mock-scan-finding"><span class="mock-scan-sev" style="color:var(--critical);">CRITICAL</span><span style="flex:1;font-family:monospace;color:var(--accent);">CVE-2024-3094</span><span style="color:var(--text2);">9.8</span></div>
+            <div class="mock-scan-finding"><span class="mock-scan-sev" style="color:var(--high);">HIGH</span><span style="flex:1;color:var(--text);">Outdated TLS 1.0 enabled</span></div>
+            <div class="mock-scan-finding" style="border-bottom:none;"><span class="mock-scan-sev" style="color:var(--medium);">MEDIUM</span><span style="flex:1;color:var(--text);">Default MySQL creds exposed</span></div>
+          </div>
         </div>
       </div>
-      <div class="platform-mock">
-        <div class="mock-label">LIVE TELEMETRY</div>
-        <div class="mock-stats-grid">
-          <div class="mock-stat-card"><div class="mock-stat-val" style="color:var(--accent);" data-countup="12.4" data-suffix="k" data-decimals="1">12.4k</div><div class="mock-stat-label">Requests</div></div>
-          <div class="mock-stat-card"><div class="mock-stat-val" style="color:var(--low);" data-countup="0.3" data-suffix="%" data-decimals="1">0.3%</div><div class="mock-stat-label">Error Rate</div></div>
-          <div class="mock-stat-card"><div class="mock-stat-val" style="color:var(--medium);" data-countup="84" data-suffix="ms" data-decimals="0">84ms</div><div class="mock-stat-label">Avg Latency</div></div>
-          <div class="mock-stat-card"><div class="mock-stat-val" style="color:var(--low);" data-countup="99.9" data-suffix="%" data-decimals="1">99.9%</div><div class="mock-stat-label">Uptime</div></div>
+
+      <!-- Telemetry — wide -->
+      <div class="bento-card span-7 wide-layout">
+        <div class="bento-text">
+          <div class="bento-eyebrow">API Observability</div>
+          <div class="bento-heading">Live telemetry. Zero extra tooling.</div>
+          <div class="bento-body">A built-in observability dashboard shows request volume, error rates, and top endpoints, all in real time.</div>
+          <div class="bento-checklist">
+            <div class="bento-check-item"><span class="bento-check-icon">✓</span>Real-time request and error rate counters</div>
+            <div class="bento-check-item"><span class="bento-check-icon">✓</span>P50 / P95 / P99 latency per endpoint</div>
+            <div class="bento-check-item"><span class="bento-check-icon">✓</span>Live request log with method & status</div>
+          </div>
         </div>
-        <div class="mock-label" style="margin-bottom:8px;">TOP ENDPOINTS</div>
-        <div class="mock-endpoint-row"><span class="mock-ip" style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--accent);">GET /api/score/:ip</span><span style="color:var(--text2);font-size:10px;">8,241</span><span style="color:var(--text3);font-size:10px;">112ms</span></div>
-        <div class="mock-endpoint-row"><span class="mock-ip" style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--accent);">POST /api/score/batch</span><span style="color:var(--text2);font-size:10px;">1,833</span><span style="color:var(--text3);font-size:10px;">340ms</span></div>
-        <div class="mock-endpoint-row" style="border-bottom:none;"><span class="mock-ip" style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--accent);">GET /api/whois/:ip</span><span style="color:var(--text2);font-size:10px;">982</span><span style="color:var(--text3);font-size:10px;">201ms</span></div>
+        <div class="bento-visual">
+          <div class="platform-mock">
+            <div class="mock-label">LIVE TELEMETRY</div>
+            <div class="mock-stats-grid">
+              <div class="mock-stat-card"><div class="mock-stat-val" style="color:var(--accent);" data-countup="12.4" data-suffix="k" data-decimals="1">12.4k</div><div class="mock-stat-label">Requests</div></div>
+              <div class="mock-stat-card"><div class="mock-stat-val" style="color:var(--low);" data-countup="0.3" data-suffix="%" data-decimals="1">0.3%</div><div class="mock-stat-label">Error Rate</div></div>
+              <div class="mock-stat-card"><div class="mock-stat-val" style="color:var(--medium);" data-countup="84" data-suffix="ms" data-decimals="0">84ms</div><div class="mock-stat-label">Avg Latency</div></div>
+              <div class="mock-stat-card"><div class="mock-stat-val" style="color:var(--low);" data-countup="99.9" data-suffix="%" data-decimals="1">99.9%</div><div class="mock-stat-label">Uptime</div></div>
+            </div>
+            <div class="mock-label" style="margin-bottom:8px;">TOP ENDPOINTS</div>
+            <div class="mock-endpoint-row"><span class="mock-ip" style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--accent);">GET /api/score/:ip</span><span style="color:var(--text2);font-size:10px;">8,241</span><span style="color:var(--text3);font-size:10px;">112ms</span></div>
+            <div class="mock-endpoint-row" style="border-bottom:none;"><span class="mock-ip" style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--accent);">POST /api/score/batch</span><span style="color:var(--text2);font-size:10px;">1,833</span><span style="color:var(--text3);font-size:10px;">340ms</span></div>
+          </div>
+        </div>
       </div>
+
     </div>
   </div>
 </section>
@@ -1142,7 +1214,7 @@ footer a:hover { color: var(--accent); }
 
 <div class="footer-contact">
   
-  <a href="codeinstd@gmail.com" aria-label="Email">
+  <a href="ipshieldsentinel@gmail.com" aria-label="Email">
     <i class="fa-regular fa-envelope"></i>
   </a>
 
@@ -1469,11 +1541,9 @@ async function submitAccessRequest() {
  
   const grid = document.querySelector(".features-grid");
   if (grid) { grid.classList.add("stagger"); observer.observe(grid); }
- 
-  document.querySelectorAll(".platform-row").forEach(row => {
-    row.classList.add("fade-up");
-    observer.observe(row);
-  });
+
+  const bento = document.querySelector(".bento-grid");
+  if (bento) { bento.classList.add("stagger"); observer.observe(bento); }
  
   function countUp(el) {
     const target   = parseFloat(el.dataset.countup);

@@ -6,7 +6,7 @@ async function resolveOwner(auth) {
 
   if (auth.type === "user") {
     const result = await db.query(
-      `SELECT id, plan, subscription_status FROM users WHERE id = $1`,
+      `SELECT id, role, plan, subscription_status FROM users WHERE id = $1`,
       [auth.id]
     );
     return result.rows[0] || null;
@@ -14,7 +14,7 @@ async function resolveOwner(auth) {
 
   if (auth.type === "api_key") {
     const result = await db.query(
-      `SELECT u.id, u.plan, u.subscription_status
+      `SELECT u.id, u.role, u.plan, u.subscription_status
        FROM api_keys k
        JOIN users u ON u.id = k.user_id
        WHERE k.id = $1`,
@@ -28,11 +28,30 @@ async function resolveOwner(auth) {
 
 function effectivePlan(owner) {
   if (!owner) return "free";
+  if (owner.role === "admin") {
+    // Locally: unlimited so development is never quota-blocked.
+    // Production: team-tier limits so admins have generous headroom without
+    // needing a paid subscription themselves.
+    return process.env.NODE_ENV === "production" ? "team" : "enterprise";
+  }
   if (owner.plan === "enterprise") return "enterprise";
   const current = owner.subscription_status === "active" || owner.subscription_status === "trialing";
   return current ? owner.plan : "free";
 }
 
+/**
+ * requireQuota(feature)
+ *
+ * - Looks up the caller's effective plan.
+ * - If the feature's limit for that plan is `false`, blocks with 403 (feature
+ *   not available on this tier — upsell).
+ * - If the limit is `null`, unlimited — passes through, still records usage.
+ * - Otherwise checks today's usage_events counter for this owner+feature; if
+ *   at or above the limit, blocks with 429. If not, increments and continues.
+ *
+ * Legacy API keys with no linked user_id (owner === null) fall back to the
+ * free tier, matching how they'd behave if they'd just signed up today.
+ */
 function requireQuota(feature) {
   return async function quotaMiddleware(req, res, next) {
     try {
@@ -49,6 +68,9 @@ function requireQuota(feature) {
         });
       }
 
+      // Identify the counter row: prefer the linked user, fall back to the
+      // api_key id itself so unlinked legacy keys still get a real per-key quota
+      // rather than silently bypassing limits altogether.
       const ownerUserId = owner ? owner.id : null;
       const ownerKeyId  = (!owner && req.auth?.type === "api_key") ? req.auth.id : null;
 
@@ -95,11 +117,10 @@ async function getUsage(userId, apiKeyId, feature) {
 async function incrementUsage(userId, apiKeyId, feature) {
   const ownerCol = userId ? "user_id" : "api_key_id";
   const ownerVal = userId || apiKeyId;
-  const conflictPredicate = userId ? "WHERE user_id IS NOT NULL" : "WHERE api_key_id IS NOT NULL";
   await db.query(
     `INSERT INTO usage_events (${ownerCol}, feature, day, count)
      VALUES ($1, $2, CURRENT_DATE, 1)
-     ON CONFLICT (${ownerCol}, feature, day) ${conflictPredicate}
+     ON CONFLICT (${ownerCol}, feature, day)
      DO UPDATE SET count = usage_events.count + 1, updated_at = NOW()`,
     [ownerVal, feature]
   );

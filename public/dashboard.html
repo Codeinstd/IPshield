@@ -75,6 +75,17 @@
     pointer-events: none; z-index: 9999;
     font-family: 'JetBrains Mono', monospace;
   }
+  #themeToggle i {
+  color: gold;
+  transition: color 0.3s ease, transform 0.3s ease;
+}
+
+/* optional hover effect */
+#themeToggle:hover i {
+  color: #ffd700;
+  transform: scale(1.1);
+}
+
   /* Grid noise texture */
   body::after {
     content: '';
