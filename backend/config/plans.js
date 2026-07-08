@@ -28,6 +28,7 @@ const PLANS = {
       siem_targets: 5000,
     },
   },
+
 };
 
 const PLAN_ORDER = ["free", "team"];

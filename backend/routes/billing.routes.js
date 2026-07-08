@@ -1,4 +1,3 @@
-
 const express = require("express");
 const router  = express.Router();
 const { body, validationResult } = require("express-validator");
@@ -17,16 +16,15 @@ function validate(req, res, next) {
 
 // GET /api/v2/billing/plans — public, powers the pricing page
 router.get("/plans", (req, res) => {
-res.json({
-  plans: PLAN_ORDER.map(id => {
-    const {
-      stripePriceId,
-      ...publicPlan
-    } = getPlan(id);
-
-    return publicPlan;
-  })
-});
+  res.json({
+    plans: PLAN_ORDER.map(id => {
+      const p = PLANS[id];
+      return {
+        id: p.id, name: p.name, priceMonthly: p.priceMonthly,
+        description: p.description, featureLimits: p.featureLimits,
+      };
+    }),
+  });
 });
 
 // GET /api/v2/billing/me — current user's plan, status, and today's usage
@@ -36,7 +34,7 @@ router.get("/me", requireAuth, async (req, res) => {
   }
   try {
     const result = await db.query(
-      `SELECT plan, subscription_status, current_period_end, cancel_at_period_end
+      `SELECT role, plan, subscription_status, current_period_end, cancel_at_period_end
        FROM users WHERE id = $1`,
       [req.auth.id]
     );
@@ -47,12 +45,46 @@ router.get("/me", requireAuth, async (req, res) => {
       [req.auth.id]
     );
 
-    res.json({
-      ...result.rows[0],
-      planDetails: getPlan(result.rows[0].plan),
-      usageToday: usage.rows,
-    });
-  } catch (err) {
+    const row = result.rows[0];
+
+    // Mirror quota.js effectivePlan() so the dashboard reflects what the
+    // middleware actually enforces, not just the raw DB value.
+    // Admin accounts: unlimited locally (enterprise), team limits in prod.
+    let effectivePlan = row.plan;
+   // Local admins bypass quotas. Reflect that in the dashboard without
+// changing the actual subscription stored in the database.
+if (
+  row.role === "admin" &&
+  process.env.NODE_ENV !== "production"
+) {
+  return res.json({
+    ...row,
+    plan: "admin",
+    planDetails: {
+      id: "admin",
+      name: "Admin (Local)",
+      featureLimits: {
+        score: null,
+        batch: null,
+        active_scan: null,
+        watchlist: null,
+        siem_targets: null,
+      },
+    },
+    usageToday: usage.rows,
+  });
+}
+
+// Everyone else (including production admins) uses their actual plan.
+res.json({
+  ...row,
+  plan: row.plan,
+  planDetails: getPlan(row.plan),
+  usageToday: usage.rows,
+});
+  } 
+  
+  catch (err) {
     console.error("[billing/me]", err.message);
     res.status(500).json({ error: err.message });
   }
@@ -106,49 +138,7 @@ router.post("/checkout",
     }
   }
 );
-//paystack
-// router.post(
-//   "/checkout",
-//   requireAuth,
-//   [body("plan").equals("team")],
-//   validate,
-//   async (req, res) => {
-//     if (req.auth.type !== "user") {
-//       return res.status(403).json({ error: "user_login_required" });
-//     }
 
-//     try {
-//       const plan = getPlan(req.body.plan);
-
-//       const userResult = await db.query(
-//         `SELECT id, email FROM users WHERE id = $1`,
-//         [req.auth.id]
-//       );
-
-//       const user = userResult.rows[0];
-//       if (!user) return res.status(404).json({ error: "User not found" });
-
-//       const baseUrl = process.env.PUBLIC_BASE_URL || "https://ipshield.live";
-
-//       const response = await paystack.post("/transaction/initialize", {
-//         email: user.email,
-//         amount: plan.price * 100, // IMPORTANT: kobo
-//         callback_url: `${baseUrl}/dashboard?upgrade=success`,
-//         metadata: {
-//           user_id: user.id,
-//           plan: plan.id,
-//         },
-//       });
-
-//       return res.json({
-//         checkoutUrl: response.data.data.authorization_url,
-//       });
-//     } catch (err) {
-//       console.error("[paystack/checkout]", err.response?.data || err.message);
-//       res.status(500).json({ error: "Failed to create Paystack checkout" });
-//     }
-//   }
-// );
 // POST /api/v2/billing/portal — Stripe customer portal link, for self-serve cancel/upgrade/payment method updates
 router.post("/portal", requireAuth, async (req, res) => {
   if (req.auth.type !== "user") {
