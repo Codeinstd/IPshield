@@ -20,8 +20,11 @@ router.get("/plans", (req, res) => {
     plans: PLAN_ORDER.map(id => {
       const p = PLANS[id];
       return {
-        id: p.id, name: p.name, priceMonthly: p.priceMonthly,
-        description: p.description, featureLimits: p.featureLimits,
+        id: p.id,
+        name: p.name,
+        priceYearly: p.priceYearly,
+        description: p.description,
+        featureLimits: p.featureLimits,
       };
     }),
   });
