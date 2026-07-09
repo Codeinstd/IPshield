@@ -49,13 +49,8 @@ router.get("/me", requireAuth, async (req, res) => {
     );
 
     const row = result.rows[0];
-
-    // Mirror quota.js effectivePlan() so the dashboard reflects what the
-    // middleware actually enforces, not just the raw DB value.
-    // Admin accounts: unlimited locally (enterprise), team limits in prod.
     let effectivePlan = row.plan;
-   // Local admins bypass quotas. Reflect that in the dashboard without
-// changing the actual subscription stored in the database.
+
 if (
   row.role === "admin" &&
   process.env.NODE_ENV !== "production"
@@ -166,9 +161,7 @@ router.post("/portal", requireAuth, async (req, res) => {
   }
 });
 
-// POST /api/v2/billing/cancel — schedule cancellation at the end of the current period.
-// Subscription stays active (full Team access) until current_period_end, then the
-// webhook's customer.subscription.updated/deleted handler drops the user to free.
+
 router.post("/cancel", requireAuth, async (req, res) => {
   if (req.auth.type !== "user") {
     return res.status(403).json({ error: "user_login_required" });
@@ -190,9 +183,6 @@ router.post("/cancel", requireAuth, async (req, res) => {
       cancel_at_period_end: true,
     });
 
-    // Update local state immediately rather than waiting on the webhook round-trip,
-    // so the dashboard reflects the change instantly. The webhook will reconfirm this
-    // on its own delivery, which is a harmless no-op duplicate write.
     await db.query(
       `UPDATE users SET cancel_at_period_end = TRUE, updated_at = NOW() WHERE id = $1`,
       [req.auth.id]
@@ -209,9 +199,7 @@ router.post("/cancel", requireAuth, async (req, res) => {
   }
 });
 
-// POST /api/v2/billing/resume — undo a scheduled cancellation, while still inside
-// the paid period. This does NOT create a new subscription or charge anything;
-// it simply un-sets cancel_at_period_end on the existing live subscription.
+
 router.post("/resume", requireAuth, async (req, res) => {
   if (req.auth.type !== "user") {
     return res.status(403).json({ error: "user_login_required" });

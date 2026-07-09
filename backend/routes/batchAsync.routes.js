@@ -15,7 +15,6 @@ function validate(req, res, next) {
 }
 
 // POST /score/batch-async
-
 router.post("/batch-async",
   requireAuth,
   requireRole("analyst"),

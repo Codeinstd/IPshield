@@ -25,7 +25,6 @@ router.get("/", requireAuth, requireRole("readonly"), async (req, res) => {
 });
 
 // GET /threat/clusters/:id/ips
-
 router.get("/:id/ips",
   requireAuth, requireRole("readonly"),
   [param("id").isInt({ min: 1 })],

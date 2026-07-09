@@ -12,7 +12,6 @@ function validate(req, res, next) {
 }
 
 // POST /blacklist/cidr 
-
 router.post("/",
   requireAuth, requireRole("analyst"),
   [
@@ -99,7 +98,6 @@ router.get("/check/:ip",
 );
 
 // DELETE /blacklist/cidr/:id 
-
 router.delete("/:id",
   requireAuth, requireRole("analyst"),
   [param("id").isInt({ min: 1 })],
