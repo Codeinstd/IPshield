@@ -9,7 +9,7 @@
   <link rel="icon" type="image/png" sizes="16x16" href="/favicon.ico/favicon-16x16.png">
   <link rel="stylesheet" href="/fontawesome/css/all.min.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
 :root {
   --accent:   #00d9ff;
@@ -42,9 +42,14 @@
   --text3:   #8fa8bc;
   --surface: rgba(0,0,0,0.04);
 }
-* { box-sizing: border-box; margin: 0; padding: 0; }
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', sans-serif;
+}
 body {
-  background: var(--bg); color: var(--text); font-family: 'JetBrains Mono', monospace;
+  background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif;
   min-height: 100vh; display: flex; flex-direction: column;
 }
 a { text-decoration: none; }
@@ -66,13 +71,13 @@ main {
   padding: 40px 24px; text-align: center;
 }
 .code {
-  font-family: 'Syne', sans-serif; font-weight: 800; font-size: clamp(64px,14vw,140px);
+  font-family: 'Inter', sans-serif; font-weight: 800; font-size: clamp(64px,14vw,140px);
   line-height: 1; color: var(--accent); letter-spacing: -2px;
   text-shadow: 0 0 60px rgba(0,217,255,0.25);
 }
 .bracket { color: var(--critical); }
 h1 {
-  font-family: 'Syne', sans-serif; font-weight: 800; font-size: clamp(20px,3vw,28px);
+  font-family: 'Inter', sans-serif; font-weight: 800; font-size: clamp(20px,3vw,28px);
   margin: 16px 0 12px; color: var(--text);
 }
 p {

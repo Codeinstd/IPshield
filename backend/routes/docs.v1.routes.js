@@ -271,7 +271,7 @@ function buildSwaggerHTML(spec, version, accentColor) {
     color: #c9d8e8;
     background: radial-gradient(circle at top left, rgba(0, 217, 255, .08), transparent 25%), 
     radial-gradient(circle at bottom right, rgba(0, 232, 124, .05), transparent 25%), #050816;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'Inter', sans-serif;
     background: #121212;
 }
     
@@ -339,14 +339,14 @@ function buildSwaggerHTML(spec, version, accentColor) {
     white-space: pre-wrap;
     word-break: break-word;
     word-wrap: break-word;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'Inter', sans-serif;
 }
 
     .swagger-ui section.models h4 {
     align-items: center;
     cursor: pointer;
     display: flex;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'Inter', sans-serif;
     font-size: 16px;
     margin: 0;
     padding: 10px 20px 10px 20px;
@@ -356,20 +356,20 @@ function buildSwaggerHTML(spec, version, accentColor) {
     .swagger-ui table thead tr th {
     color: #c9d8e8;
     border-bottom: 1px solid #1e2d3d;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'Inter', sans-serif;
     }
 
       
     .swagger-ui .info li, .swagger-ui .info p, .swagger-ui .info table {
     color: #aeb4b8;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'Inter', sans-serif;
     font-size: 14px;
     }
 
 
     .swagger-ui .info p {
     color: #aeb4b8;
-    font-family:'JetBrains Mono', monospace ;
+    font-family:'Inter', sans-serif;
     }
 
     .swagger-ui a.nostyle, .swagger-ui a.nostyle:visited {
@@ -381,13 +381,13 @@ function buildSwaggerHTML(spec, version, accentColor) {
 
     .swagger-ui .markdown p, .swagger-ui .markdown pre, .swagger-ui .renderedMarkdown p, .swagger-ui .renderedMarkdown pre {
     word-break: break-word;
-    font-family:'JetBrains Mono', monospace;
+    font-family:'Inter', sans-serif;
     }
 
     .swagger-ui table thead tr td, .swagger-ui table thead tr th {
     border-bottom: 1px solid rgba(59, 65, 81, .2);
     color: #71798d;
-    font-family:'JetBrains Mono', monospace ;
+    font-family:'Inter', sans-serif;
     font-size: 12px;
     font-weight: 700;
     padding: 12px 0;
@@ -396,13 +396,13 @@ function buildSwaggerHTML(spec, version, accentColor) {
 
     .swagger-ui .info li, .swagger-ui .info p, .swagger-ui .info table {
     color: #aeb4b8;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'Inter', sans-serif;
     font-size: 14px;
     }
 
     .swagger-ui .info a {
     color: #02bfe0;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'Inter', sans-serif;
     font-size: 14px;
     transition: all .4s;
     padding: 10px;
@@ -410,7 +410,7 @@ function buildSwaggerHTML(spec, version, accentColor) {
 
     .swagger-ui .opblock-tag small {
     color: #60687b;
-    font-family:'JetBrains Mono', monospace ;
+    font-family:'Inter', sans-serif;
     font-size: 14px;
     font-weight: 400;
     }
@@ -434,14 +434,14 @@ function buildSwaggerHTML(spec, version, accentColor) {
 
     .swagger-ui .opblock .opblock-summary-description {
     color: #aeb4b8;
-    font-family:'JetBrains Mono', monospace ;
+    font-family:'Inter', sans-serif;
     font-size: 13px;
     word-break: break-word;
     }
 
     .swagger-ui .info li, .swagger-ui .info p, .swagger-ui .info table {
     color: #aeb4b8;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'Inter', sans-serif;
     font-size: 14px;
 }
 
@@ -517,7 +517,7 @@ function buildSwaggerHTML(spec, version, accentColor) {
     border: 1px solid #1e2d3d;
     padding: 6px 14px;
     border-radius: 6px;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'Inter', sans-serif;
     }
 
     /* ── Desktop nav */
@@ -866,7 +866,7 @@ function buildSwaggerHTML(spec, version, accentColor) {
     .swagger-ui .opblock.opblock-delete .opblock-summary-method { background:#ff3355; color:#fff; }
     .swagger-ui .scheme-container { background:#171717; box-shadow:none; border-bottom:1px solid #1e2d3d; }
     .swagger-ui input[type=text], .swagger-ui textarea { background:#111820; border:1px solid #1e2d3d; color:#c9d8e8; border-radius:4px; }
-    .swagger-ui .btn.execute { background:${accentColor}; color:#000; border:none; font-weight:700; font-family: 'JetBrains Mono', monospace; }
+    .swagger-ui .btn.execute { background:${accentColor}; color:#000; border:none; font-weight:700; font-family: 'Inter', sans-serif; }
     .swagger-ui .parameter__name { color:#00d9ff; }
     .swagger-ui .response-col_status { color:#00e87c; }
     .swagger-ui .microlight { background:#111820; border-radius:6px; padding:12px; }

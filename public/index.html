@@ -122,7 +122,7 @@
 body {
   background: var(--bg);
   color: var(--text);
-  font-family: 'JetBrains Mono', monospace;
+  font-family: 'Inter', sans-serif;
   min-height: 100vh;
   overflow-x: hidden;
   transition: background .3s, color .3s;
@@ -155,12 +155,12 @@ header {
 .logo-text span { color: var(--accent); }
  
 .nav-right { display: flex; gap: 18px; align-items: center; }
-.nav-link { font-family: 'JetBrains Mono', monospace; font-weight: 400;  gap: 10px;  font-size: 14px; white-space: nowrap; color: var(--text2);  }
+.nav-link { font-family: 'Inter', sans-serif; font-weight: 400;  gap: 10px;  font-size: 14px; white-space: nowrap; color: var(--text2);  }
 .nav-link:hover {color: var(--accent);}
 .btn {
   padding: 9px 20px;
   border-radius: 8px;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: 'Inter', sans-serif;
   font-size: 12px;
   font-weight: 600;
   letter-spacing: 1px;
@@ -429,7 +429,7 @@ footer a:hover { color: var(--accent); }
 .bento-card.span-7 { grid-column: span 7; }
 .bento-card.span-5 { grid-column: span 5; }
 .bento-card.wide-layout { flex-direction: column; align-items: normal; }
-.bento-card.wide-layout .bento-text { flex: 0 0 44%; }
+.bento-card.wide-layout .bento-text { flex: 0 0 40%; }
 .bento-card.wide-layout .bento-visual { flex: 1; min-width: 0; }
 .bento-eyebrow { font-size: 11px; color: var(--accent); letter-spacing: 3px; text-transform: uppercase; margin-bottom: 12px; }
 .bento-heading { font-family: 'Syne', sans-serif; font-size: clamp(17px,2.4vw,21px); font-weight: 800; margin-bottom: 12px; line-height: 1.3; color: var(--text); }
@@ -579,10 +579,8 @@ footer a:hover { color: var(--accent); }
 .trust-method-icon { font-size: 16px; color: var(--accent); flex-shrink: 0; }
 .trust-method-title { font-size: 12px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
 .trust-method-desc { font-size: 11px; color: var(--text2); line-height: 1.6; }
- 
-@media (max-width: 768px) {
-  .trust-grid { grid-template-columns: 1fr; }
-}
+
+
  
 /* Pilot section */
 .pilot-section {
@@ -643,7 +641,7 @@ footer a:hover { color: var(--accent); }
   width: 100%; padding: 11px 14px;
   background: var(--bg2); border: 1px solid var(--border);
   border-radius: 8px; color: var(--text);
-  font-family: 'JetBrains Mono', monospace; font-size: 13px; outline: none;
+  font-family: 'Inter', sans-serif; font-size: 13px; outline: none;
   transition: border-color .2s, background .3s;
 }
 .modal-input:focus { border-color: var(--accent); }
@@ -718,7 +716,7 @@ footer a:hover { color: var(--accent); }
  
 .demo-live-idmeta { flex: 1; min-width: 0; }
 .demo-live-ip {
-  font-family: 'JetBrains Mono', monospace; font-size: 15px; font-weight: 700;
+  font-family: 'Inter', sans-serif; font-size: 15px; font-weight: 700;
   color: var(--text); margin-bottom: 6px; overflow: hidden; text-overflow: ellipsis;
 }
 .demo-live-pill {
@@ -881,14 +879,14 @@ footer a:hover { color: var(--accent); }
       <p>Score suspicious IPs in milliseconds. Reduce analyst guesswork with transparent risk assessments and clear actions: block, monitor, or review.</p>
       
        <!-- demo IP  -->
-      <!-- <div class="hero-cost">
+      <div class="hero-cost">
         <span class="hero-cost-icon">🚩</span>
         <div class="hero-cost-text">
           The most dangerous IPs don't look dangerous.
-          Of <span class="hero-cost-num"> 500K+ IPs</span> scored by IPshield,<span class="hero-cost-num"> 32,000+</span> were
+          Of <span class="hero-cost-num"> 1M+ IPs</span> scored by IPshield,<span class="hero-cost-num"> 58,000+</span> were
           flagged as CRITICAL. Many appeared legitimate enough to pass a manual review.
         </div>
-      </div> -->
+      </div>
       <div class="hero-actions">
         <button onclick="showAccessModal('pilot')" class="btn btn-primary">Request Access →</button>
         <a href="/api/docs" class="btn btn-ghost">View API Docs</a>
@@ -922,11 +920,11 @@ footer a:hover { color: var(--accent); }
 
 <div class="stats-bar">
   <div class="stat-item">
-    <div class="stat-num" id="publicTotal">860k</div>
+    <div class="stat-num" id="publicTotal">1M+</div>
     <div class="stat-label">IPs Scored</div>
   </div>
   <div class="stat-item">
-    <div class="stat-num" id="publicCritical">42k</div>
+    <div class="stat-num" id="publicCritical">58k</div>
     <div class="stat-label">Critical Threats</div>
   </div>
   <div class="stat-item">
@@ -1037,7 +1035,7 @@ footer a:hover { color: var(--accent); }
           <div class="platform-mock">
             <div class="mock-label">LIVE TELEMETRY</div>
             <div class="mock-stats-grid">
-              <div class="mock-stat-card"><div class="mock-stat-val" style="color:var(--accent);" data-countup="12.4" data-suffix="k" data-decimals="1">12.4k</div><div class="mock-stat-label">Requests</div></div>
+              <div class="mock-stat-card"><div class="mock-stat-val" style="color:var(--accent);" data-countup="32.4" data-suffix="k" data-decimals="1">32.4k</div><div class="mock-stat-label">Requests</div></div>
               <div class="mock-stat-card"><div class="mock-stat-val" style="color:var(--low);" data-countup="0.3" data-suffix="%" data-decimals="1">0.3%</div><div class="mock-stat-label">Error Rate</div></div>
               <div class="mock-stat-card"><div class="mock-stat-val" style="color:var(--medium);" data-countup="84" data-suffix="ms" data-decimals="0">84ms</div><div class="mock-stat-label">Avg Latency</div></div>
               <div class="mock-stat-card"><div class="mock-stat-val" style="color:var(--low);" data-countup="99.9" data-suffix="%" data-decimals="1">99.9%</div><div class="mock-stat-label">Uptime</div></div>
@@ -1067,7 +1065,7 @@ footer a:hover { color: var(--accent); }
         <div class="trust-card-detail">97% of threat clusters flagged by IPShield's subnet/ASN correlation were independently confirmed as real coordinated activity, not coincidence.</div>
       </div>
       <div class="trust-card">
-        <div class="trust-card-num accent">500K+</div>
+        <div class="trust-card-num accent">1M+</div>
         <div class="trust-card-label">IPs Scored in Production</div>
         <div class="trust-card-detail">Not a backtest sample, this is the live count from IPShield's own audit log, scored by real users against real traffic.</div>
       </div>
@@ -1078,29 +1076,6 @@ footer a:hover { color: var(--accent); }
       </div>
     </div>
 
-    <!-- <div class="trust-methods">
-      <div class="trust-method">
-        <span class="trust-method-icon">⬡</span>
-        <div>
-          <div class="trust-method-title">Confidence, not just a score</div>
-          <div class="trust-method-desc">Every result ships with a confidence level — HIGH, MEDIUM, or LOW — based on whether geo, WHOIS, and threat feed lookups actually resolved, so a thin-data IP never looks as certain as a well-corroborated one.</div>
-        </div>
-      </div>
-      <div class="trust-method">
-        <span class="trust-method-icon">🔗</span>
-        <div>
-          <div class="trust-method-title">Tamper-evident audit log</div>
-          <div class="trust-method-desc">Every scored IP is appended to an immutable SHA-256 hash chain. Rows can't be edited or deleted after the fact — and the chain is independently verifiable.</div>
-        </div>
-      </div>
-      <div class="trust-method">
-        <span class="trust-method-icon">📄</span>
-        <div>
-          <div class="trust-method-title">Honest about what a scan can't tell you</div>
-          <div class="trust-method-desc">Vulnerability assessment reports state plainly that automated findings aren't a substitute for manual penetration testing — we'd rather under-claim than have you over-trust a result.</div>
-        </div>
-      </div>
-    </div> -->
   </div>
 </section>
 
@@ -1139,15 +1114,15 @@ footer a:hover { color: var(--accent); }
         </select>
       </div>
       <div class="stbtn" style="display:flex;gap:12px;">
-        <button id="accessSubmitBtn" onclick="submitAccessRequest()" style="flex:1;padding:13px;border-radius:8px;border:none;cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;letter-spacing:1px;text-transform:uppercase;background:var(--accent);color:#000;">Submit Request →</button>
-        <button onclick="hideAccessModal()" style="flex:1;padding:13px;border-radius:8px;background:transparent;color:var(--text2);border:1px solid var(--border);font-family:'JetBrains Mono',monospace;font-size:12px;cursor:pointer;">Cancel</button>
+        <button id="accessSubmitBtn" onclick="submitAccessRequest()" style="flex:1;padding:13px;border-radius:8px;border:none;cursor:pointer;font-family:'Inter', sans-serif;font-size:13px;font-weight:600;letter-spacing:1px;text-transform:uppercase;background:var(--accent);color:#000;">Submit Request →</button>
+        <button onclick="hideAccessModal()" style="flex:1;padding:13px;border-radius:8px;background:transparent;color:var(--text2);border:1px solid var(--border);font-family:'Inter', sans-serif;font-size:12px;cursor:pointer;">Cancel</button>
       </div>
     </div>
     <div id="accessSuccessView" style="display:none;text-align:center;padding:8px 0;">
       <div style="font-size:44px;margin-bottom:14px;">✓</div>
       <div id="accessSuccessTitle" style="font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:var(--low);margin-bottom:8px;">Request received!</div>
       <div id="accessSuccessBody" style="font-size:12px;color:var(--text2);line-height:1.7;margin-bottom:24px;"></div>
-      <button onclick="hideAccessModal()" style="width:100%;padding:13px;border-radius:8px;border:none;cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;background:var(--accent);color:#000;">Back to Home →</button>
+      <button onclick="hideAccessModal()" style="width:100%;padding:13px;border-radius:8px;border:none;cursor:pointer;font-family:'Inter', sans-serif;font-size:13px;font-weight:600;background:var(--accent);color:#000;">Back to Home →</button>
     </div>
   </div>
 </div>

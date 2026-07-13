@@ -129,7 +129,7 @@ function buildReportHTML(data, history) {
   body {
     background: var(--bg);
     color: var(--text);
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'Inter', sans-serif;
     font-size: 13px;
     line-height: 1.6;
     -webkit-print-color-adjust: exact;
@@ -203,7 +203,7 @@ function buildReportHTML(data, history) {
     display: inline-block;
     padding: 14px 22px;
     border-radius: 10px;
-    font-family: 'Syne', sans-serif;
+    font-family: 'Inter', sans-serif;
     font-size: 18px;
     font-weight: 800;
     letter-spacing: 1px;
@@ -215,7 +215,7 @@ function buildReportHTML(data, history) {
   /* ── Sections ── */
   .section { margin-bottom: 32px; }
   .section-title {
-    font-family: 'Syne', sans-serif;
+    font-family: 'Inter', sans-serif;
     font-size: 13px;
     font-weight: 800;
     letter-spacing: 2px;
