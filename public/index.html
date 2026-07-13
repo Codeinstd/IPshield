@@ -580,7 +580,10 @@ footer a:hover { color: var(--accent); }
 .trust-method-title { font-size: 12px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
 .trust-method-desc { font-size: 11px; color: var(--text2); line-height: 1.6; }
 
-
+ 
+@media (max-width: 768px) {
+  .trust-grid { grid-template-columns: 1fr; }
+}
  
 /* Pilot section */
 .pilot-section {
@@ -1075,7 +1078,6 @@ footer a:hover { color: var(--accent); }
         <div class="trust-card-detail">Each one logged with the same data sources, score, and reasoning available to you. Nothing is scored and then hidden.</div>
       </div>
     </div>
-
   </div>
 </section>
 
