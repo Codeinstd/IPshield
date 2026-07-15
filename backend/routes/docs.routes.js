@@ -77,7 +77,7 @@ return `<!DOCTYPE html>
     body {
       background: var(--bg);
       color: var(--text);
-      font-family: 'Inter', sans-serif;
+      font-family: 'JetBrains Mono', monospace;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
@@ -190,7 +190,7 @@ return `<!DOCTYPE html>
       padding: 2px 8px; border-radius: 3px;
       color: var(--accent);
       border: 1px solid rgba(0,217,255,0.3);
-      font-family: 'Inter', sans-serif;
+      font-family: 'JetBrains Mono', monospace;
     }
 
     .header-right { display: flex; align-items: center; gap: 12px; }
@@ -198,7 +198,7 @@ return `<!DOCTYPE html>
       font-size: 12px; color: var(--text2); text-decoration: none;
       padding: 6px 14px; border-radius: 6px;
       border: 1px solid var(--border); background: transparent;
-      cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.2s;
+      cursor: pointer; font-family: 'JetBrains Mono', monospace; transition: all 0.2s;
     }
     .header-right a:hover, .header-right button:hover {
       color: var(--accent); border-color: var(--accent);
@@ -211,7 +211,7 @@ return `<!DOCTYPE html>
     border: 1px solid var(--border); background: transparent;
     padding: 6px 14px;
     border-radius: 6px;
-    font-family: 'Inter', sans-serif;
+    font-family: 'JetBrains Mono', monospace;
     }
     
     .layout {
@@ -258,7 +258,7 @@ return `<!DOCTYPE html>
       width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0;
     }
     .sidebar-item .endpoint-name {
-      font-family: 'Inter', sans-serif;
+      font-family: 'JetBrains Mono', monospace;
       font-size: 11px; flex: 1; overflow: hidden;
       text-overflow: ellipsis; white-space: nowrap;
     }
@@ -280,7 +280,7 @@ return `<!DOCTYPE html>
       padding: 4px 12px; border-radius: 20px;
       background: rgba(0,232,124,0.1); color: var(--low);
       border: 1px solid rgba(0,232,124,0.25);
-      margin-bottom: 16px; font-family: 'Inter', sans-serif;
+      margin-bottom: 16px; font-family: 'JetBrains Mono', monospace;
     }
     .hero-badge::before { content: '●'; font-size: 8px; }
 
@@ -295,7 +295,7 @@ return `<!DOCTYPE html>
       display: flex; gap: 24px; flex-wrap: wrap;
     }
     .hero-stat { text-align: center; }
-    .hero-stat .num { font-size: 22px; font-weight: 800; color: var(--accent); font-family: 'Inter', sans-serif; }
+    .hero-stat .num { font-size: 22px; font-weight: 800; color: var(--accent); font-family: 'JetBrains Mono', monospace; }
     .hero-stat .lbl { font-size: 10px; color: var(--text3); letter-spacing: 1px; text-transform: uppercase; }
 
     .auth-box {
@@ -313,7 +313,7 @@ return `<!DOCTYPE html>
       display: inline-block; margin-top: 8px;
       background: var(--bg2); border: 1px solid var(--border);
       border-radius: 6px; padding: 8px 14px;
-      font-family: 'Inter', sans-serif; font-size: 12px;
+      font-family: 'JetBrains Mono', monospace; font-size: 12px;
       color: var(--accent); cursor: pointer; user-select: all;
     }
 
@@ -329,7 +329,7 @@ return `<!DOCTYPE html>
     .rate-table td {
       padding: 8px 12px; color: var(--text2);
       border-bottom: 1px solid var(--border);
-      font-family: 'Inter', sans-serif; font-size: 11px;
+      font-family: 'JetBrains Mono', monospace; font-size: 11px;
     }
     .rate-table tr:last-child td { border-bottom: none; }
 
@@ -368,7 +368,7 @@ return `<!DOCTYPE html>
     .method-badge {
       font-size: 11px; font-weight: 700; letter-spacing: 0.5px;
       padding: 4px 10px; border-radius: 5px;
-      font-family: 'Inter', sans-serif;
+      font-family: 'JetBrains Mono', monospace;
       min-width: 60px; text-align: center; flex-shrink: 0;
     }
     .method-GET    { background: rgba(0,232,124,0.15);  color: var(--get);      border: 1px solid rgba(0,232,124,0.3); }
@@ -377,7 +377,7 @@ return `<!DOCTYPE html>
     .method-DELETE { background: rgba(255,51,85,0.15);  color: var(--delete);   border: 1px solid rgba(255,51,85,0.3); }
 
     .endpoint-path {
-      font-family: 'Inter', sans-serif;
+      font-family: 'JetBrains Mono', monospace;
       font-size: 13px; font-weight: 600; color: var(--text); flex: 1;
     }
     .endpoint-path .path-param { color: var(--accent); }
@@ -449,21 +449,21 @@ return `<!DOCTYPE html>
       vertical-align: top;
     }
     .param-table tr:last-child td { border-bottom: none; }
-    .param-name { font-family: 'Inter', sans-serif; color: var(--accent); font-size: 11px; }
+    .param-name { font-family: 'JetBrains Mono', monospace; color: var(--accent); font-size: 11px; }
     .param-in   { font-size: 10px; color: var(--text3); background: var(--bg2); padding: 1px 5px; border-radius: 3px; }
-    .param-type { font-family: 'Inter', sans-serif; color: var(--medium); font-size: 11px; }
+    .param-type { font-family: 'JetBrains Mono', monospace; color: var(--medium); font-size: 11px; }
     .param-desc { color: var(--text2); font-size: 11px; }
     .param-req  { color: var(--critical); font-size: 10px; font-weight: 700; }
 
     .try-section { margin-top: 16px; }
     .try-form { display: flex; flex-direction: column; gap: 10px; }
     .try-row { display: flex; align-items: center; gap: 10px; }
-    .try-label { font-size: 11px; color: var(--text3); width: 80px; flex-shrink: 0; font-family: 'Inter', sans-serif; }
+    .try-label { font-size: 11px; color: var(--text3); width: 80px; flex-shrink: 0; font-family: 'JetBrains Mono', monospace; }
     .try-input {
       flex: 1; padding: 8px 12px;
       background: var(--bg2); border: 1px solid var(--border);
       border-radius: 6px; color: var(--text);
-      font-family: 'Inter', sans-serif; font-size: 12px;
+      font-family: 'JetBrains Mono', monospace; font-size: 12px;
       outline: none; transition: border-color 0.2s;
     }
     .try-input:focus { border-color: var(--accent); }
@@ -492,15 +492,15 @@ return `<!DOCTYPE html>
       border-bottom: 1px solid var(--border);
     }
     .response-status {
-      font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 700;
+      font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 700;
     }
     .status-2xx { color: var(--low); }
     .status-4xx { color: var(--high); }
     .status-5xx { color: var(--critical); }
-    .response-time { font-size: 11px; color: var(--text3); font-family: 'Inter', sans-serif; }
+    .response-time { font-size: 11px; color: var(--text3); font-family: 'JetBrains Mono', monospace; }
     .response-body {
       padding: 14px;
-      font-family: 'Inter', sans-serif; font-size: 11px;
+      font-family: 'JetBrains Mono', monospace; font-size: 11px;
       color: var(--text2); line-height: 1.7;
       max-height: 320px; overflow-y: auto;
       white-space: pre-wrap; word-break: break-all;
@@ -514,7 +514,7 @@ return `<!DOCTYPE html>
       background: var(--bg2); border: 1px solid var(--border);
     }
     .rc-status {
-      font-family: 'Inter', sans-serif; font-size: 12px;
+      font-family: 'JetBrains Mono', monospace; font-size: 12px;
       font-weight: 700; min-width: 36px;
     }
     .rc-200 { color: var(--low); }
@@ -551,7 +551,7 @@ return `<!DOCTYPE html>
       font-size: 10px; color: var(--text3);
       background: var(--bg3); border: 1px solid var(--border);
       border-radius: 4px; padding: 3px 8px; cursor: pointer;
-      font-family: 'Inter', sans-serif; transition: all 0.2s;
+      font-family: 'JetBrains Mono', monospace; transition: all 0.2s;
     }
     .copy-btn:hover { color: var(--accent); border-color: var(--accent); }
 
@@ -565,7 +565,7 @@ return `<!DOCTYPE html>
     .ver-btn {
       padding: 4px 12px; border-radius: 4px;
       font-size: 11px; font-weight: 700; cursor: pointer;
-      font-family: 'Inter', sans-serif;
+      font-family: 'JetBrains Mono', monospace;
       border: 1px solid var(--border); background: transparent;
       color: var(--text2); transition: all 0.2s;
     }
@@ -973,15 +973,15 @@ return `<!DOCTYPE html>
           <div>
             <div class="auth-title">Authentication</div>
             <div class="auth-desc">
-              All endpoints require the <code style="background:var(--bg3);padding:1px 6px;border-radius:3px;color:var(--accent);font-family:'Inter', sans-serif;font-size:11px;">x-api-key</code> header
-              except <code style="background:var(--bg3);padding:1px 6px;border-radius:3px;font-family:'Inter', sans-serif;font-size:11px;">/health</code> and
-              <code style="background:var(--bg3);padding:1px 6px;border-radius:3px;font-family:'Inter', sans-serif;font-size:11px;">/docs</code>.
+              All endpoints require the <code style="background:var(--bg3);padding:1px 6px;border-radius:3px;color:var(--accent);font-family:'JetBrains Mono', monospace;font-size:11px;">x-api-key</code> header
+              except <code style="background:var(--bg3);padding:1px 6px;border-radius:3px;font-family:'JetBrains Mono', monospace;font-size:11px;">/health</code> and
+              <code style="background:var(--bg3);padding:1px 6px;border-radius:3px;font-family:'JetBrains Mono', monospace;font-size:11px;">/docs</code>.
               Set your key once using the Authorize button or paste it into any Try It request.
               <br><br>
               <strong style="color:var(--high);">Note:</strong> Active Scanning endpoints additionally require a key with the
-              <code style="background:var(--bg3);padding:1px 6px;border-radius:3px;color:var(--high);font-family:'Inter', sans-serif;font-size:11px;">analyst</code> or
-              <code style="background:var(--bg3);padding:1px 6px;border-radius:3px;color:var(--high);font-family:'Inter', sans-serif;font-size:11px;">admin</code> role —
-              <code style="background:var(--bg3);padding:1px 6px;border-radius:3px;font-family:'Inter', sans-serif;font-size:11px;">readonly</code> keys receive 403.
+              <code style="background:var(--bg3);padding:1px 6px;border-radius:3px;color:var(--high);font-family:'JetBrains Mono', monospace;font-size:11px;">analyst</code> or
+              <code style="background:var(--bg3);padding:1px 6px;border-radius:3px;color:var(--high);font-family:'JetBrains Mono', monospace;font-size:11px;">admin</code> role —
+              <code style="background:var(--bg3);padding:1px 6px;border-radius:3px;font-family:'JetBrains Mono', monospace;font-size:11px;">readonly</code> keys receive 403.
             </div>
             <div class="auth-key" onclick="copyApiKey()" title="Click to copy">
               x-api-key: ••••••••••••••••••••••••
@@ -1006,7 +1006,7 @@ return `<!DOCTYPE html>
           </table>
         </div>
         <div style="font-size:11px;color:var(--text3);margin-top:8px;">
-          When rate limited you receive HTTP 429 with <code style="font-family:'Inter', sans-serif;">Retry-After</code> header and countdown in seconds.
+          When rate limited you receive HTTP 429 with <code style="font-family:'JetBrains Mono', monospace;">Retry-After</code> header and countdown in seconds.
         </div>
       </section>
 

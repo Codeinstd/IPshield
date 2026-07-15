@@ -30,7 +30,7 @@
   --surface:rgba(0,0,0,0.04);
 }
 *{box-sizing:border-box;margin:0;padding:0;}
-body{background:var(--bg);color:var(--text);font-family:'Inter', sans-serif;min-height:100vh;transition:background .3s,color .3s;}
+body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono', monospace;min-height:100vh;transition:background .3s,color .3s;}
 a{text-decoration:none;}
 
 /* ── Header ── */
@@ -40,9 +40,9 @@ header{display:flex;align-items:center;justify-content:space-between;padding:16p
 .logo-text{font-family:'Syne',sans-serif;font-weight:800;font-size:20px;color:var(--text);}
 .logo-text span{color:var(--accent);}
 .nav-right{display:flex;gap:18px;align-items:center;}
-.nav-link{font-family:'Inter', sans-serif;font-weight:400;font-size:14px;white-space:nowrap;color:var(--text2);}
+.nav-link{font-family:'JetBrains Mono', monospace;font-weight:400;font-size:14px;white-space:nowrap;color:var(--text2);}
 .nav-link:hover{color:var(--accent);}
-.btn{padding:9px 20px;border-radius:8px;font-family:'Inter', sans-serif;font-size:12px;font-weight:600;letter-spacing:1px;cursor:pointer;border:none;display:inline-flex;align-items:center;transition:all .15s;}
+.btn{padding:9px 20px;border-radius:8px;font-family:'JetBrains Mono', monospace;font-size:12px;font-weight:600;letter-spacing:1px;cursor:pointer;border:none;display:inline-flex;align-items:center;transition:all .15s;}
 .btn-primary{background:var(--accent);color:#000;}
 .btn-primary:hover{background:#0099cc;}
 .btn-ghost{background:transparent;color:var(--text2);border:1px solid var(--border);}
@@ -89,12 +89,12 @@ header{display:flex;align-items:center;justify-content:space-between;padding:16p
 .plan-card:hover{transform:translateY(-3px);}
 .plan-card.featured{border-color:rgba(0,217,255,0.4);background:linear-gradient(180deg,rgba(0,217,255,0.05),var(--bg1) 60%);}
 .plan-badge{position:absolute;top:-11px;left:24px;background:var(--accent);color:#000;font-size:9px;font-weight:700;letter-spacing:1px;padding:4px 10px;border-radius:6px;}
-.plan-name{font-family:'Inter', sans-serif;font-weight:800;font-size:18px;margin-bottom:6px;}
+.plan-name{font-family:'JetBrains Mono', monospace;font-weight:800;font-size:18px;margin-bottom:6px;}
 .plan-desc{font-size:11px;color:var(--text2);line-height:1.6;margin-bottom:20px;min-height:36px;}
 .plan-price{display:flex;align-items:baseline;gap:4px;margin-bottom:4px;}
 .plan-price .num{font-family:'Syne',sans-serif;font-size:36px;font-weight:800;}
 .plan-price .period{font-size:11px;color:var(--text3);}
-.plan-cta{margin:20px 0 22px;width:100%;padding:11px;border-radius:8px;text-align:center;font-size:12px;font-weight:700;letter-spacing:0.5px;cursor:pointer;border:none;font-family:'Inter', sans-serif;}
+.plan-cta{margin:20px 0 22px;width:100%;padding:11px;border-radius:8px;text-align:center;font-size:12px;font-weight:700;letter-spacing:0.5px;cursor:pointer;border:none;font-family:'JetBrains Mono', monospace;}
 .plan-cta.primary{background:var(--accent);color:#000;}
 .plan-cta.primary:hover{background:#0099cc;}
 .plan-cta.ghost{background:transparent;color:var(--text);border:1px solid var(--border);}
@@ -113,7 +113,7 @@ header{display:flex;align-items:center;justify-content:space-between;padding:16p
 /* ── Access modal ── */
 #accessModalOverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:500;align-items:center;justify-content:center;padding:24px;}
 .modal-card{background:var(--bg1);border:1px solid var(--border);border-radius:16px;width:100%;max-width:480px;padding:32px;transition:background .3s;}
-.modal-input{width:100%;padding:11px 14px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Inter', sans-serif;font-size:13px;outline:none;transition:border-color .2s,background .3s;}
+.modal-input{width:100%;padding:11px 14px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'JetBrains Mono', monospace;font-size:13px;outline:none;transition:border-color .2s,background .3s;}
 .modal-input:focus{border-color:var(--accent);}
 .modal-label{display:block;font-size:10px;color:var(--text3);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;}
 
@@ -226,15 +226,15 @@ footer a:hover{color:var(--accent);}
         </select>
       </div>
       <div class="stbtn" style="display:flex;gap:12px;">
-        <button id="accessSubmitBtn" onclick="submitAccessRequest()" style="flex:1;padding:13px;border-radius:8px;border:none;cursor:pointer;font-family:'Inter', sans-serif;font-size:13px;font-weight:600;letter-spacing:1px;text-transform:uppercase;background:var(--accent);color:#000;">Submit Request →</button>
-        <button onclick="hideAccessModal()" style="flex:1;padding:13px;border-radius:8px;background:transparent;color:var(--text2);border:1px solid var(--border);font-family:'Inter', sans-serif;font-size:12px;cursor:pointer;">Cancel</button>
+        <button id="accessSubmitBtn" onclick="submitAccessRequest()" style="flex:1;padding:13px;border-radius:8px;border:none;cursor:pointer;font-family:'JetBrains Mono', monospace;font-size:13px;font-weight:600;letter-spacing:1px;text-transform:uppercase;background:var(--accent);color:#000;">Submit Request →</button>
+        <button onclick="hideAccessModal()" style="flex:1;padding:13px;border-radius:8px;background:transparent;color:var(--text2);border:1px solid var(--border);font-family:'JetBrains Mono', monospace;font-size:12px;cursor:pointer;">Cancel</button>
       </div>
     </div>
     <div id="accessSuccessView" style="display:none;text-align:center;padding:8px 0;">
       <div style="font-size:44px;margin-bottom:14px;">✓</div>
-      <div id="accessSuccessTitle" style="font-family:'Inter', sans-serif;font-size:20px;font-weight:800;color:var(--low);margin-bottom:8px;">Request received!</div>
+      <div id="accessSuccessTitle" style="font-family:'JetBrains Mono', monospace;font-size:20px;font-weight:800;color:var(--low);margin-bottom:8px;">Request received!</div>
       <div id="accessSuccessBody" style="font-size:12px;color:var(--text2);line-height:1.7;margin-bottom:24px;"></div>
-      <button onclick="hideAccessModal()" style="width:100%;padding:13px;border-radius:8px;border:none;cursor:pointer;font-family:'Inter', sans-serif;font-size:13px;font-weight:600;background:var(--accent);color:#000;">Back to Home →</button>
+      <button onclick="hideAccessModal()" style="width:100%;padding:13px;border-radius:8px;border:none;cursor:pointer;font-family:'JetBrains Mono', monospace;font-size:13px;font-weight:600;background:var(--accent);color:#000;">Back to Home →</button>
     </div>
   </div>
 </div>
