@@ -1,12 +1,17 @@
 const db    = require("../store/db");
 const { limitFor } = require("../config/plans");
+const { maybeSendQuotaNotification } = require("../services/quotaNotifier");
+const {
+  sendUsageWarningEmail,
+  sendUsageLimitReachedEmail,
+} = require("../services/email.service");
 
 async function resolveOwner(auth) {
   if (!auth) return null;
 
   if (auth.type === "user") {
     const result = await db.query(
-      `SELECT id, role, plan, subscription_status FROM users WHERE id = $1`,
+      `SELECT id, email, role, plan, subscription_status FROM users WHERE id = $1`,
       [auth.id]
     );
     return result.rows[0] || null;
@@ -14,7 +19,7 @@ async function resolveOwner(auth) {
 
   if (auth.type === "api_key") {
     const result = await db.query(
-      `SELECT u.id, u.role, u.plan, u.subscription_status
+      `SELECT u.id, u.email, u.role, u.plan, u.subscription_status
        FROM api_keys k
        JOIN users u ON u.id = k.user_id
        WHERE k.id = $1`,
@@ -80,18 +85,45 @@ function requireQuota(feature) {
 
       const used = await getUsage(ownerUserId, ownerKeyId, feature);
       if (used >= limit) {
-        return res.status(429).json({
-          error:      "quota_exceeded",
-          message:    `Daily limit for "${feature}" reached (${limit}/day on the ${plan} plan).`,
-          plan,
-          limit,
-          used,
-          upgrade_url: "/pricing",
-        });
-      }
+      await maybeSendQuotaNotification({
+      owner,
+      feature,
+      plan,
+      used,
+      limit,
+    });
+
+      return res.status(429).json({
+        error: "quota_exceeded",
+        message: `Daily limit for "${feature}" reached (${limit}/day on the ${plan} plan).`,
+        plan,
+        limit,
+        used,
+        upgrade_url: "/pricing",
+      });
+    }
 
       await incrementUsage(ownerUserId, ownerKeyId, feature);
-      req.quota = { plan, feature, limit, used: used + 1 };
+
+      const currentUsage = used + 1;
+
+      await maybeSendQuotaNotification({
+        owner,
+        // userId: ownerUserId,
+        // apiKeyId: ownerKeyId,
+        feature,
+        plan,
+        used: currentUsage,
+        limit,
+      });
+
+      req.quota = {
+        plan,
+        feature,
+        limit,
+        used: currentUsage,
+      };
+
       return next();
     } 
     catch (err) {

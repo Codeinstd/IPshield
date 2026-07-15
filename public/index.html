@@ -76,6 +76,53 @@
   transform: rotate(15deg);
 }
 
+/* Score section */
+.scoring-section {
+  background: var(--bg1);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  padding: 72px 24px;
+  transition: background .3s;
+}
+.scoring-inner { max-width: 980px; margin: 0 auto; text-align: center; }
+
+.scoring-steps {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+  margin: 44px 0 32px;
+  text-align: left;
+}
+.scoring-step {
+  position: relative;
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 12px; padding: 24px 20px 20px;
+  transition: border-color .2s, transform .2s, background .3s;
+}
+.scoring-step:hover { border-color: rgba(0,217,255,0.3); transform: translateY(-3px); }
+.scoring-step-num {
+  position: absolute; top: 18px; right: 20px;
+  font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 800;
+  color: var(--text3); letter-spacing: 1px;
+}
+.scoring-step-icon { font-size: 22px; margin-bottom: 12px; display: block; }
+.scoring-step-title { font-size: 14px; font-family:'Syne', sans-serif; font-weight: 700; color: var(--text); margin-bottom: 8px; letter-spacing: 0.3px; padding-right: 24px; }
+.scoring-step-desc { font-size: 12px; color: var(--text2); line-height: 1.75; }
+
+.scoring-footnote {
+  font-size: 11.5px; color: var(--text3); line-height: 1.7;
+  max-width: 620px; margin: 0 auto;
+}
+.scoring-footnote a { color: var(--accent); }
+
+@media (max-width: 900px) {
+  .scoring-steps { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 560px) {
+  .scoring-steps { grid-template-columns: 1fr; }
+  .scoring-section { padding: 52px 20px; }
+}
+
 /* Shared icon styles */
 .theme-toggle .icon-sun,
 .theme-toggle .icon-moon {
@@ -115,6 +162,84 @@
   opacity: 1;
   transform: scale(1);
 }
+
+.app-splash {
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(circle at center,
+        #121826 0%,
+        #090b11 100%);
+
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+
+    z-index:999999;
+
+    transition:
+        opacity .6s ease,
+        visibility .6s ease;
+}
+
+.app-splash.hide{
+    opacity:0;
+    visibility:hidden;
+    pointer-events:none;
+}
+
+.logo{
+    margin-bottom:32px;
+}
+
+.loading-text{
+    margin-top:24px;
+    color:#94A3B8;
+    font-size:15px;
+    letter-spacing:.03em;
+}
+
+lottie-player{
+    width:220px;
+    height:220px;
+}
+
+.demo-live-search {
+  display: flex; gap: 8px;
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg2);
+}
+.demo-live-search input {
+  flex: 1; min-width: 0;
+  padding: 9px 12px;
+  background: var(--bg1); border: 1px solid var(--border);
+  border-radius: 7px; color: var(--text);
+  font-family: 'JetBrains Mono', monospace; font-size: 12px;
+  outline: none; transition: border-color .2s;
+}
+.demo-live-search input:focus { border-color: var(--accent); }
+.demo-live-search input.invalid { border-color: var(--critical); }
+.demo-live-search button {
+  padding: 9px 16px; border-radius: 7px; border: none; cursor: pointer;
+  background: var(--accent); color: #000;
+  font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 700;
+  white-space: nowrap; transition: opacity .15s;
+}
+.demo-live-search button:hover { opacity: .88; }
+.demo-live-search button:disabled { opacity: .5; cursor: not-allowed; }
+.demo-live-input-wrap { position: relative; flex: 1; min-width: 0; }
+.demo-live-input-wrap input { width: 100%; padding-right: 30px; } /* room for the × */
+
+.demo-live-clear {
+  position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
+  width: 20px; height: 20px; padding: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: transparent; border: none; cursor: pointer;
+  color: var(--text3); font-size: 12px; line-height: 1;
+  border-radius: 4px; transition: color .15s, background .15s;
+}
+.demo-live-clear:hover { color: var(--text); background: var(--surfae); }
 
 
 /*  Base reset */
@@ -525,6 +650,19 @@ footer a:hover { color: var(--accent); }
   border-bottom: 1px solid var(--border);
 }
 
+.scoring-section {
+  padding: 72px 24px;
+  border-bottom: 1px solid var(--border);
+}
+
+.scoring-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 6px 16px; border-radius: 20px;
+  border: 1px solid rgba(0, 232, 124, 0.3);
+  background:  rgba(0, 232, 124, 0.06);
+  color: var(--low); font-size: 11px; letter-spacing: 2px;
+  margin-bottom: 20px;
+}
 
 .trust-badge {
   display: inline-flex; align-items: center; gap: 8px;
@@ -621,7 +759,7 @@ footer a:hover { color: var(--accent); }
   padding: 16px; background: var(--bg2); border: 1px solid var(--border);
   border-radius: 8px;
 }
-.pilot-point-num { font-size: 10px; color: var(--low); letter-spacing: 1px; margin-bottom: 6px; }
+.pilot-point-num { font-family:'Syne', sans-serif;font-size: 10px; font-weight: 700; color: var(--low); letter-spacing: 1px; margin-bottom: 6px; }
 .pilot-point-text { font-size: 12px; color: var(--text2); line-height: 1.6; }
 .pilot-point-text strong { color: var(--text); }
  
@@ -900,27 +1038,38 @@ footer a:hover { color: var(--accent); }
       
        <!-- demo card  -->
       <div class="demo-live-card">
-        <div class="demo-live-card-header">
-          <div class="demo-live-label"><span class="demo-live-livedot"></span>LIVE — YOUR DETECTED IP</div>
-          <span class="demo-live-tag">⚠ DEMO ONLY</span>
-        </div>
+  <div class="demo-live-card-header">
+    <div class="demo-live-label"><span class="demo-live-livedot"></span>LIVE — YOUR DETECTED IP</div>
+    <span class="demo-live-tag">⚠ DEMO ONLY</span>
+  </div>
 
-        <div class="demo-live-body" id="liveDemoBody">
-          <div class="demo-live-loading">
-            <div class="demo-live-spinner"></div>
-            <span>Detecting your IP address…</span>
-          </div>
-        </div>
-        <div class="demo-live-footnote">
-          Score and rows marked <strong>SAMPLE</strong> are illustrative only. Your IP is real, but the network type, ASN and score shown are not from a real lookup. <a href="/api/docs">See the real API →</a>
-        </div>
-      </div>
+  <!-- NEW: search bar -->
+  <div class="demo-live-search">
+  <div class="demo-live-input-wrap">
+    <input type="text" id="demoIpInput" placeholder="Try any IP, e.g. 192.168.1.1" maxlength="45" autocomplete="off" spellcheck="false" />
+    <button id="demoIpClear" type="button" class="demo-live-clear" aria-label="Clear" style="display:none;">✕</button>
+  </div>
+  <button id="demoIpBtn" type="button">Check →</button>
+</div>
+
+<!-- Demo Live Card -->
+  <div class="demo-live-body" id="liveDemoBody">
+    <div class="demo-live-loading">
+      <div class="demo-live-spinner"></div>
+      <span>Detecting your IP address…</span>
+    </div>
+  </div>
+  <div class="demo-live-footnote">
+    Score and rows marked <strong>SAMPLE</strong> are illustrative only — network type, ASN and score are not from a real lookup, for any IP. <a href="/api/docs">See the real API →</a>
+  </div>
+</div>
       
       
     </div>
   </div>
 </section>
 
+<!-- Stats -->
 <div class="stats-bar">
   <div class="stat-item">
     <div class="stat-num" id="publicTotal">1M+</div>
@@ -940,6 +1089,8 @@ footer a:hover { color: var(--accent); }
   </div>
 </div>
 
+
+<!-- Platfrom -->
 <section class="platform-section">
   <div class="platform-inner">
     <div class="section-title" style="margin-bottom:48px;">Built for security teams, not just lookups</div>
@@ -1054,10 +1205,63 @@ footer a:hover { color: var(--accent); }
   </div>
 </section>
 
+<!-- How Scoring Works -->
+<section class="scoring-section">
+  <div class="scoring-inner">
+    <div class="scoring-badge">Transparency ~ Pipeline </div>
+    <div class="section-title" style="margin-bottom:10px;">How the score is calculated</div>
+    <div class="trust-sub">Every score is built from measurable signals, not a proprietary black box. Here's the pipeline behind every result.</div>
+
+    <div class="scoring-steps">
+      <div class="scoring-step">
+        <div class="scoring-step-num">01</div>
+        <div class="scoring-step-icon">📡</div>
+        <div class="scoring-step-title">Threat feed correlation</div>
+        <div class="scoring-step-desc">The IP is checked against live threat intelligence feeds such as Feodo Tracker, Spamhaus, Emerging Threats, and AlienVault OTX for known malicious activity.</div>
+      </div>
+
+      <div class="scoring-step">
+        <div class="scoring-step-num">02</div>
+        <div class="scoring-step-icon">🌐</div>
+        <div class="scoring-step-title">Network signal analysis</div>
+        <div class="scoring-step-desc">We identify proxy, Tor, VPN, and datacenter/hosting indicators, since infrastructure type materially changes risk even before any threat-feed hit.</div>
+      </div>
+
+      <div class="scoring-step">
+        <div class="scoring-step-num">03</div>
+        <div class="scoring-step-icon">🕸️</div>
+        <div class="scoring-step-title">Subnet & ASN clustering</div>
+        <div class="scoring-step-desc">IPs are correlated against their subnet and ASN for coordinated campaign patterns, catching threats that look clean in isolation but aren't in context.</div>
+      </div>
+
+      <div class="scoring-step">
+        <div class="scoring-step-num">04</div>
+        <div class="scoring-step-icon">⚖️</div>
+        <div class="scoring-step-title">Weighted scoring (0–100)</div>
+        <div class="scoring-step-desc">Every signal is weighted and combined into a single 0–100 score. The full signal breakdown is always visible, nothing is scored and then hidden.</div>
+      </div>
+
+      <div class="scoring-step">
+        <div class="scoring-step-num">05</div>
+        <div class="scoring-step-icon">🎯</div>
+        <div class="scoring-step-title">Confidence rating</div>
+        <div class="scoring-step-desc">Each score ships with a confidence level, HIGH, MEDIUM, or LOW, so analysts know how much corroborating signal backs the number, not just the number itself.</div>
+      </div>
+
+      <div class="scoring-step">
+        <div class="scoring-step-num">06</div>
+        <div class="scoring-step-icon">🚦</div>
+        <div class="scoring-step-title">Risk tier & action</div>
+        <div class="scoring-step-desc">The final score maps to one of four tiers, CRITICAL, HIGH, MEDIUM, LOW, each with a recommended action: block, challenge, monitor, or allow.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- Trust / Methodology -->
 <section class="trust-section">
   <div class="trust-inner">
-    <div class="trust-badge">◆ Methodology, Not Marketing</div>
+    <div class="trust-badge">Methodology, Not Marketing</div>
     <div class="section-title" style="margin-bottom:6px;">Numbers you can check.</div>
     <div class="trust-sub">No certification claims yet. No black-box scoring. IPShield evaluates measurable security signals and shows exactly how every score is determined.</div>
 
@@ -1146,7 +1350,7 @@ footer a:hover { color: var(--accent); }
 <!-- Pilot Modal -->
 <section class="pilot-section">
   <div class="pilot-inner">
-    <div class="pilot-badge">◆ FOR SOC &amp; SECURITY TEAMS</div>
+    <div class="pilot-badge">FOR SOC &amp; SECURITY TEAMS</div>
     <div class="pilot-title">Not ready to commit? Start a pilot.</div>
     <div class="pilot-sub">No contracts. No migration. Compare your traffic against IPShield alongside your existing tools and discover what others might miss.</div>
  
@@ -1165,7 +1369,7 @@ footer a:hover { color: var(--accent); }
       </div>
     </div>
  
-    <button onclick="showAccessModal('pilot')" class="btn btn-primary" style="padding:13px 32px;font-size:13px;">Request Access →</button>
+    <button onclick="showAccessModal('pilot')" class="btn btn-primary" style="padding:13px 32px;font-size:13px;">Get Free API Key →</button>
   </div>
 </section>
 
@@ -1243,64 +1447,93 @@ footer a:hover { color: var(--accent); }
       feedHits,
     };
   }
- 
+  
   function renderResult(ip) {
-    const p     = illustrativeProfile(ip);
-    const r     = 32;
-    const circ  = 2 * Math.PI * r;
-    const offset = circ - (p.score / 100) * circ;
- 
-    body.innerHTML = `
-      <div class="demo-live-scorerow">
-        <div class="demo-live-ring-wrap">
-          <svg viewBox="0 0 76 76">
-            <circle class="demo-live-ring-bg" cx="38" cy="38" r="${r}"/>
-            <circle class="demo-live-ring-fill" cx="38" cy="38" r="${r}"
-              stroke="${p.color}" stroke-dasharray="${circ}" stroke-dashoffset="${circ}"/>
-          </svg>
-          <div class="demo-live-ring-center">
-            <div class="demo-live-ring-num" style="color:${p.color};">${p.score}</div>
-            <div class="demo-live-ring-max">/100</div>
-          </div>
-        </div>
-        <div class="demo-live-idmeta">
-          <div class="demo-live-ip">${ip}</div>
-          <div class="demo-live-pill" style="background:${p.color}22;color:${p.color};border:1px solid ${p.color}66;">${p.risk}</div>
+  const p     = illustrativeProfile(ip);
+  const r     = 32;
+  const circ  = 2 * Math.PI * r;
+  const offset = circ - (p.score / 100) * circ;
+
+  body.innerHTML = `
+    <div class="demo-live-scorerow">
+      <div class="demo-live-ring-wrap">
+        <svg viewBox="0 0 76 76">
+          <circle class="demo-live-ring-bg" cx="38" cy="38" r="${r}"/>
+          <circle class="demo-live-ring-fill" cx="38" cy="38" r="${r}"
+            stroke="${p.color}" stroke-dasharray="${circ}" stroke-dashoffset="${circ}"/>
+        </svg>
+        <div class="demo-live-ring-center">
+          <div class="demo-live-ring-num" style="color:${p.color};">${p.score}</div>
+          <div class="demo-live-ring-max">/100</div>
         </div>
       </div>
- 
-        <div class="demo-live-signals">
-        <div class="demo-live-signal-row">
-          <span class="demo-live-signal-icon">🎯</span>
-          <span class="demo-live-signal-label">IP Address</span>
-          <span class="demo-live-signal-val" style="color:var(--text);">${ip}</span>
-        </div>
-        <div class="demo-live-signal-row">
-          <span class="demo-live-signal-icon">🌐</span>
-          <span class="demo-live-signal-label">Network type</span>
-          <span class="demo-live-signal-val" style="color:var(--text);">${p.networkType}</span>
-          <span class="demo-live-sample-tag">SAMPLE</span>
-        </div>
-        <div class="demo-live-signal-row">
-          <span class="demo-live-signal-icon">🏢</span>
-          <span class="demo-live-signal-label">ASN</span>
-          <span class="demo-live-signal-val" style="color:var(--text);">${p.asn}</span>
-          <span class="demo-live-sample-tag">SAMPLE</span>
-        </div>
-        <div class="demo-live-signal-row">
-          <span class="demo-live-signal-icon">${p.feedHits ? "⚠" : "✓"}</span>
-          <span class="demo-live-signal-label">Threat feed check</span>
-          <span class="demo-live-signal-val" style="color:${p.feedHits ? "var(--high)" : "var(--low)"};">${p.feedHits ? "1 flag" : "Clean"}</span>
-        </div>
-      </div>`;
- 
-    // Animate the ring fill in on next frame, same as the real dashboard panel
-    requestAnimationFrame(() => {
-      const fill = body.querySelector(".demo-live-ring-fill");
-      if (fill) fill.style.strokeDashoffset = offset;
+      <div class="demo-live-idmeta">
+        <div class="demo-live-ip">${ip}</div>
+        <div class="demo-live-pill" style="background:${p.color}22;color:${p.color};border:1px solid ${p.color}66;">${p.risk}</div>
+      </div>
+    </div>
+
+    <div class="demo-live-signals">
+      <div class="demo-live-signal-row">
+        <span class="demo-live-signal-icon">🎯</span>
+        <span class="demo-live-signal-label">IP Address</span>
+        <span class="demo-live-signal-val" style="color:var(--text);">${ip}</span>
+      </div>
+      <div class="demo-live-signal-row">
+        <span class="demo-live-signal-icon">🏳️</span>
+        <span class="demo-live-signal-label">Country</span>
+        <span class="demo-live-signal-val" style="color:var(--text);" id="sigCountry">Looking up…</span>
+      </div>
+      <div class="demo-live-signal-row">
+        <span class="demo-live-signal-icon">🏢</span>
+        <span class="demo-live-signal-label">Hosting provider</span>
+        <span class="demo-live-signal-val" style="color:var(--text);" id="sigProvider">Looking up…</span>
+      </div>
+      <div class="demo-live-signal-row">
+        <span class="demo-live-signal-icon">🌐</span>
+        <span class="demo-live-signal-label">Network type</span>
+        <span class="demo-live-signal-val" style="color:var(--text);">${p.networkType}</span>
+        <span class="demo-live-sample-tag">SAMPLE</span>
+      </div>
+      <div class="demo-live-signal-row">
+        <span class="demo-live-signal-icon">🏢</span>
+        <span class="demo-live-signal-label">ASN</span>
+        <span class="demo-live-signal-val" style="color:var(--text);">${p.asn}</span>
+        <span class="demo-live-sample-tag">SAMPLE</span>
+      </div>
+      <div class="demo-live-signal-row">
+        <span class="demo-live-signal-icon">${p.feedHits ? "⚠" : "✓"}</span>
+        <span class="demo-live-signal-label">Threat feed check</span>
+        <span class="demo-live-signal-val" style="color:${p.feedHits ? "var(--high)" : "var(--low)"};">${p.feedHits ? "1 flag" : "Clean"}</span>
+      </div>
+    </div>`;
+
+  requestAnimationFrame(() => {
+    const fill = body.querySelector(".demo-live-ring-fill");
+    if (fill) fill.style.strokeDashoffset = offset;
+  });
+
+  // Fire the real lookup after the fake part has painted
+  fetchRealIntel(ip);
+}
+
+// NEW — real geolocation + hosting provider lookup, no API key required
+function fetchRealIntel(ip) {
+  const countryEl  = document.getElementById("sigCountry");
+  const providerEl = document.getElementById("sigProvider");
+
+  fetch(`/api/v1/demo/geo/${encodeURIComponent(ip)}`)
+    .then(res => res.json())
+    .then(data => {
+      if (data.error) throw new Error(data.error);
+      if (countryEl)  countryEl.textContent  = data.flagEmoji ? `${data.flagEmoji} ${data.country || "Unknown"}` : (data.country || "Unknown");
+      if (providerEl) providerEl.textContent = data.provider || "Unknown";
+    })
+    .catch(() => {
+      if (countryEl)  countryEl.textContent  = "Unavailable";
+      if (providerEl) providerEl.textContent = "Unavailable";
     });
-  }
- 
+}
   function renderError() {
     body.innerHTML = `
       <div class="demo-live-error">
@@ -1309,6 +1542,59 @@ footer a:hover { color: var(--accent); }
       </div>`;
   }
  
+  function looksLikeIp(str) {
+    const v4 = /^(\d{1,3}\.){3}\d{1,3}$/;
+    const v6 = /^[0-9a-fA-F:]+$/;
+    if (v4.test(str)) {
+      return str.split(".").every(o => Number(o) <= 255);
+    }
+    return v6.test(str) && str.includes(":");
+  }
+
+  const input = document.getElementById("demoIpInput");
+  const btn   = document.getElementById("demoIpBtn");
+  const clearBtn = document.getElementById("demoIpClear");
+
+  function toggleClearBtn() {
+  clearBtn.style.display = input.value.trim() ? "flex" : "none";
+}
+
+function resetToAutoDetect() {
+  input.value = "";
+  input.classList.remove("invalid");
+  toggleClearBtn();
+  body.innerHTML = `
+    <div class="demo-live-loading">
+      <div class="demo-live-spinner"></div>
+      <span>Detecting your IP address…</span>
+    </div>`;
+  fetch("https://api.ipify.org?format=json")
+    .then(res => res.json())
+    .then(data => { if (data && data.ip) renderResult(data.ip); else renderError(); })
+    .catch(renderError);
+  input.focus();
+}
+
+  function trySearch() {
+    const val = input.value.trim();
+    if (!val) return;
+    if (!looksLikeIp(val)) {
+      input.classList.add("invalid");
+      body.innerHTML = `<div class="demo-live-error">"${val.replace(/[<>]/g, "")}" doesn't look like a valid IP address. Try something like 8.8.8.8.</div>`;
+      return;
+    }
+    input.classList.remove("invalid");
+    renderResult(val);
+  }
+
+  btn?.addEventListener("click", trySearch);
+clearBtn?.addEventListener("click", resetToAutoDetect);
+input?.addEventListener("keydown", e => { if (e.key === "Enter") trySearch(); });
+input?.addEventListener("input", () => {
+  input.classList.remove("invalid");
+  toggleClearBtn();
+});
+  
   fetch("https://api.ipify.org?format=json")
     .then((res) => res.json())
     .then((data) => {
@@ -1511,7 +1797,7 @@ async function submitAccessRequest() {
     });
   }, { threshold: 0.15 });
  
-  document.querySelectorAll(".hero, .stats-bar, .features, .platform-section, .trust-section, .pilot-section, .demo-section, .cta").forEach(el => {
+  document.querySelectorAll(".hero, .stats-bar, .features, .platform-section, .scoring-section, .trust-section, .pilot-section, .demo-section, .cta").forEach(el => {
     el.classList.add("fade-up");
     observer.observe(el);
   });
@@ -1542,6 +1828,8 @@ async function submitAccessRequest() {
     if (hero) setTimeout(() => hero.classList.add("visible"), 80);
     const statsBar = document.querySelector(".stats-bar");
     if (statsBar) setTimeout(() => statsBar.classList.add("visible"), 200);
+    const scoringGrid = document.querySelector(".scoring-steps");
+    if (scoringGrid) { scoringGrid.classList.add("stagger"); observer.observe(scoringGrid); }
   });
 })();
 </script>

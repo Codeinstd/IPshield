@@ -41,6 +41,8 @@ const vulnreportRoutes      = require("./routes/vulnreport.routes");
 const billingRoutes         = require("./routes/billing.routes");
 const billingWebhookRoutes  = require("./routes/billingWebhook.routes");
 const { requireQuota }      = require("./middleware/quota");
+const { initRedis }         = require("./store/redis");
+const demoRoutes            = require("./routes/demo.routes");
 
 
 // v2-only route imports 
@@ -50,6 +52,9 @@ const casesRoutes     = require("./routes/cases.routes");
 // App init 
 const isProd = process.env.NODE_ENV === "production";
 const app    = express();
+
+// demo card 
+app.use('/api/v1/demo', demoRoutes);
 
 // Request logger 
 app.use((req, res, next) => {

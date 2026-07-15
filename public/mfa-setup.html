@@ -275,9 +275,7 @@
 <script>
   // Grab the JWT from localStorage (set during login mfaSetupRequired flow)
   function authHeaders() {
-  const urlToken   = new URLSearchParams(window.location.search).get("token");
   const localToken = localStorage.getItem("token");
-  const token      = urlToken || localToken;
   return token ? { "Authorization": `Bearer ${token}` } : {};
   }
 
@@ -292,6 +290,12 @@
 
   // Load QR on page ready
   async function loadSetup() {
+    const token = localStorage.getItem("token");
+     if (!token) {
+    document.getElementById("errorMsg").textContent = "Session expired — please log in again.";
+    show("errorState");
+    return;
+  }
     try {
       const res  = await fetch("/api/v1/mfa/setup", { headers: authHeaders() });
       const data = await res.json();

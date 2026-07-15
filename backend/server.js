@@ -11,6 +11,7 @@ const { startWatchlistCron } = require("./jobs/watchlistCron");
 const path = require("path");
 const { initRedis } = require("./store/redis");
 
+
 const PORT   = parseInt(process.env.PORT || "8080", 10);
 const server = app.listen(PORT, "0.0.0.0", () => {
   logger.info(`IPShield running on port ${PORT} [${process.env.NODE_ENV || "development"}]`);

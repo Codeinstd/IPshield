@@ -1,6 +1,7 @@
 const nodemailer = require("nodemailer");
 const validator = require("validator");
 
+
 let transporter = null;
 
 /* Escape HTML to prevent injection in email templates */
@@ -216,6 +217,78 @@ This link expires in 7 days.
   });
 }
 
+/* Usage Warning */
+async function sendUsageWarningEmail({
+  email,
+  feature,
+  used,
+  limit,
+  plan,
+}) {
+  const percent = Math.round((used / limit) * 100);
+
+  return sendEmail({
+    to: email,
+    subject: `[IPShield] ${feature} usage at ${percent}%`,
+    text: `
+You've used ${used} of ${limit} ${feature} requests on your ${plan} plan.
+
+Once you reach your daily limit, additional requests will be blocked until your quota resets.
+`.trim(),
+
+    html: buildBrandedEmailHTML({
+      heading: "Usage Warning",
+      accentColor: "#FFCC00",
+      rows: [
+        ["Plan", plan],
+        ["Feature", feature],
+        ["Usage", `${used}/${limit}`],
+        ["Remaining", limit - used],
+      ],
+      bodyHtml: `
+<p style="color:#c9d8e8">
+You've used <strong>${percent}%</strong> of today's allowance.
+</p>
+`,
+    }),
+  });
+}
+
+/* Usage Limit Reached */
+async function sendUsageLimitReachedEmail({
+  email,
+  feature,
+  used,
+  limit,
+  plan,
+}) {
+  return sendEmail({
+    to: email,
+    subject: `[IPShield] Daily ${feature} limit reached`,
+    text: `
+You have reached today's ${feature} limit (${limit} requests).
+
+Your quota will automatically reset tomorrow.
+`.trim(),
+
+    html: buildBrandedEmailHTML({
+      heading: "Daily Limit Reached",
+      accentColor: "#FF3355",
+      rows: [
+        ["Plan", plan],
+        ["Feature", feature],
+        ["Daily Limit", limit],
+      ],
+      bodyHtml: `
+<p style="color:#c9d8e8">
+You've used all available requests for today.
+Additional requests will be unavailable until your daily quota resets.
+</p>
+`,
+    }),
+  });
+}
+
 const ALERT_RISK_COLORS = {
   CRITICAL: "#FF3355",
   HIGH:     "#FF7700",
@@ -278,5 +351,7 @@ module.exports = {
   sendEmail,
   sendInviteEmail,
   sendAlertEmail,
+  sendUsageWarningEmail,
+  sendUsageLimitReachedEmail,
   verifySMTP,
 };

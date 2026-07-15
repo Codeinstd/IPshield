@@ -320,6 +320,11 @@
   let mfaSubmitting = false;
   let backupMode    = false; 
 
+  // Show Overlay
+  function showLoadingScreen() {
+  document.getElementById("loadingScreen").classList.add("show");
+}
+
   // Toggle between TOTP and backup code mode 
   function setBackupMode(enabled) {
     backupMode = enabled;
@@ -423,13 +428,14 @@
 
       if (data.mfaSetupRequired) {
       if (data.token) localStorage.setItem("token", data.token);
-      window.location.href = `/mfa-setup?token=${encodeURIComponent(data.token)}`;
+      window.location.href = "/mfa-setup";
       return;
     }
 
       // Full login success
       if (data.token) localStorage.setItem("token", data.token);
       if (data.user)  localStorage.setItem("user",  JSON.stringify(data.user));
+      showLoadingScreen();
       window.location.href = resolvePostLoginDestination();
 
     } catch {
@@ -493,6 +499,7 @@
         sessionStorage.removeItem("mfa_challenge");
         if (data.token) localStorage.setItem("token", data.token);
         if (data.user)  localStorage.setItem("user",  JSON.stringify(data.user));
+        showLoadingScreen();
         window.location.href = resolvePostLoginDestination();
 
     } catch {

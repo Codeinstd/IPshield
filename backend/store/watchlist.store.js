@@ -14,7 +14,7 @@ async function bootstrap() {
         last_risk       TEXT    DEFAULT 'UNKNOWN',
         last_checked    TIMESTAMPTZ,
         added_at        TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-        alert_on_change BOOLEAN NOT DEFAULT TRUE
+        alert_on_change BOOLEAN NOT NULL DEFAULT TRUE
       )
     `);
 
